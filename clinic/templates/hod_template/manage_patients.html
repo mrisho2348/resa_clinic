@@ -1,0 +1,676 @@
+{% extends 'hod_template/base_template.html' %}
+{% block title %}
+   List of all patients    
+{% endblock title %}
+
+{% block page_title %}
+   List of all patients    
+{% endblock page_title %}
+
+{% block breadcrumb %}
+{% include "hod_template/modal_form.html" %}
+    <a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#registerModal">
+        <i class="fas fa-plus"></i> New patients
+    </a>
+   
+{% endblock breadcrumb %}
+{% block main_content %}
+
+<div class="form-row">
+    <div>
+        {% if messages %}
+            <div class="col-12">
+                {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                        <div class="alert alert-danger">{{ message }}</div>
+                    {% elif message.tags == 'success' %}
+                        <div class="alert alert-primary">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div> 
+    <table class="table table-hover text-nowrap table-bordered table-striped table-sm" id="example">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>Company</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>John Doe</td>
+                <td>35</td>
+                <td>Male</td>
+                <td>SAMOTA</td>
+                <td>123-456-7890</td>
+                <td>johndoe@example.com</td>
+                <td>
+                    <!-- Visit Action -->
+                    <a href="#" data-toggle="modal" data-target="#visitModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#visitModal">
+                            <i class="fas fa-eye text-dark" title="Add Visit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Edit Action -->
+                    <a href="#" data-toggle="modal" data-target="#editModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#editModal">
+                            <i class="fas fa-edit text-dark" title="Edit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Appointment Action -->
+                    <a href="#" data-toggle="modal" data-target="#appointmentModal">
+                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#appointmentModal">
+                            <i class="fas fa-calendar text-dark" title="Appointment"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Open Action -->
+                    <a href="#" data-toggle="modal" data-target="#openModal">
+                        <button type="button" class="btn btn-light border btn-sm">
+                            <i class="fas fa-eye text-dark" title="Open"></i>
+                        </button>
+                    </a>
+                </td>
+                
+            </tr>
+
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>Jane Smith</td>
+                <td>28</td>
+                <td>Female</td>
+                <td>ISOAF</td>
+                <td>098-765-4321</td>
+                <td>janesmith@example.com</td>
+                 <td>
+                    <!-- Visit Action -->
+                    <a href="#" data-toggle="modal" data-target="#visitModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#visitModal">
+                            <i class="fas fa-eye text-dark" title="Add Visit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Edit Action -->
+                    <a href="#" data-toggle="modal" data-target="#editModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#editModal">
+                            <i class="fas fa-edit text-dark" title="Edit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Appointment Action -->
+                    <a href="#" data-toggle="modal" data-target="#appointmentModal">
+                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#appointmentModal">
+                            <i class="fas fa-calendar text-dark" title="Appointment"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Open Action -->
+                    <a href="#" data-toggle="modal" data-target="#openModal">
+                        <button type="button" class="btn btn-light border btn-sm">
+                            <i class="fas fa-eye text-dark" title="Open"></i>
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>John Doe</td>
+                <td>35</td>
+                <td>Male</td>
+                <td>SAMOTA</td>
+                <td>123-456-7890</td>
+                <td>johndoe@example.com</td>
+                <td>
+                    <!-- Visit Action -->
+                    <a href="#" data-toggle="modal" data-target="#visitModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#visitModal">
+                            <i class="fas fa-eye text-dark" title="Add Visit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Edit Action -->
+                    <a href="#" data-toggle="modal" data-target="#editModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#editModal">
+                            <i class="fas fa-edit text-dark" title="Edit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Appointment Action -->
+                    <a href="#" data-toggle="modal" data-target="#appointmentModal">
+                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#appointmentModal">
+                            <i class="fas fa-calendar text-dark" title="Appointment"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Open Action -->
+                    <a href="#" data-toggle="modal" data-target="#openModal">
+                        <button type="button" class="btn btn-light border btn-sm">
+                            <i class="fas fa-eye text-dark" title="Open"></i>
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>Jane Smith</td>
+                <td>28</td>
+                <td>Female</td>
+                <td>ISOAF</td>
+                <td>098-765-4321</td>
+                <td>janesmith@example.com</td>
+                <td>
+                    <!-- Visit Action -->
+                    <a href="#" data-toggle="modal" data-target="#visitModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#visitModal">
+                            <i class="fas fa-eye text-dark" title="Add Visit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Edit Action -->
+                    <a href="#" data-toggle="modal" data-target="#editModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#editModal">
+                            <i class="fas fa-edit text-dark" title="Edit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Appointment Action -->
+                    <a href="#" data-toggle="modal" data-target="#appointmentModal">
+                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#appointmentModal">
+                            <i class="fas fa-calendar text-dark" title="Appointment"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Open Action -->
+                    <a href="#" data-toggle="modal" data-target="#openModal">
+                        <button type="button" class="btn btn-light border btn-sm">
+                            <i class="fas fa-eye text-dark" title="Open"></i>
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            <!-- Add more rows as needed -->
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>Michael Johnson</td>
+                <td>42</td>
+                <td>Male</td>
+                <td>ABC Company</td>
+                <td>555-123-4567</td>
+                <td>michaeljohnson@example.com</td>
+                <td>
+                    <!-- Visit Action -->
+                    <a href="#" data-toggle="modal" data-target="#visitModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#visitModal">
+                            <i class="fas fa-eye text-dark" title="Add Visit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Edit Action -->
+                    <a href="#" data-toggle="modal" data-target="#editModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#editModal">
+                            <i class="fas fa-edit text-dark" title="Edit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Appointment Action -->
+                    <a href="#" data-toggle="modal" data-target="#appointmentModal">
+                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#appointmentModal">
+                            <i class="fas fa-calendar text-dark" title="Appointment"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Open Action -->
+                    <a href="#" data-toggle="modal" data-target="#openModal">
+                        <button type="button" class="btn btn-light border btn-sm">
+                            <i class="fas fa-eye text-dark" title="Open"></i>
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>Alice Brown</td>
+                <td>30</td>
+                <td>Female</td>
+                <td>XYZ Corporation</td>
+                <td>987-654-3210</td>
+                <td>alicebrown@example.com</td>
+                <td>
+                    <!-- Visit Action -->
+                    <a href="#" data-toggle="modal" data-target="#visitModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#visitModal">
+                            <i class="fas fa-eye text-dark" title="Add Visit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Edit Action -->
+                    <a href="#" data-toggle="modal" data-target="#editModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#editModal">
+                            <i class="fas fa-edit text-dark" title="Edit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Appointment Action -->
+                    <a href="#" data-toggle="modal" data-target="#appointmentModal">
+                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#appointmentModal">
+                            <i class="fas fa-calendar text-dark" title="Appointment"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Open Action -->
+                    <a href="#" data-toggle="modal" data-target="#openModal">
+                        <button type="button" class="btn btn-light border btn-sm">
+                            <i class="fas fa-eye text-dark" title="Open"></i>
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>John Doe</td>
+                <td>35</td>
+                <td>Male</td>
+                <td>SAMOTA</td>
+                <td>123-456-7890</td>
+                <td>johndoe@example.com</td>
+                <td>
+                    <!-- Visit Action -->
+                    <a href="#" data-toggle="modal" data-target="#visitModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#visitModal">
+                            <i class="fas fa-eye text-dark" title="Add Visit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Edit Action -->
+                    <a href="#" data-toggle="modal" data-target="#editModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#editModal">
+                            <i class="fas fa-edit text-dark" title="Edit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Appointment Action -->
+                    <a href="#" data-toggle="modal" data-target="#appointmentModal">
+                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#appointmentModal">
+                            <i class="fas fa-calendar text-dark" title="Appointment"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Open Action -->
+                    <a href="#" data-toggle="modal" data-target="#openModal">
+                        <button type="button" class="btn btn-light border btn-sm">
+                            <i class="fas fa-eye text-dark" title="Open"></i>
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>Jane Smith</td>
+                <td>28</td>
+                <td>Female</td>
+                <td>ISOAF</td>
+                <td>098-765-4321</td>
+                <td>janesmith@example.com</td>
+                <td>
+                    <!-- Visit Action -->
+                    <a href="#" data-toggle="modal" data-target="#visitModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#visitModal">
+                            <i class="fas fa-eye text-dark" title="Add Visit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Edit Action -->
+                    <a href="#" data-toggle="modal" data-target="#editModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#editModal">
+                            <i class="fas fa-edit text-dark" title="Edit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Appointment Action -->
+                    <a href="#" data-toggle="modal" data-target="#appointmentModal">
+                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#appointmentModal">
+                            <i class="fas fa-calendar text-dark" title="Appointment"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Open Action -->
+                    <a href="#" data-toggle="modal" data-target="#openModal">
+                        <button type="button" class="btn btn-light border btn-sm">
+                            <i class="fas fa-eye text-dark" title="Open"></i>
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            <!-- Additional Rows -->
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>Michael Johnson</td>
+                <td>42</td>
+                <td>Male</td>
+                <td>ABC Company</td>
+                <td>555-123-4567</td>
+                <td>michaeljohnson@example.com</td>
+                <td>
+                    <!-- Visit Action -->
+                    <a href="#" data-toggle="modal" data-target="#visitModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#visitModal">
+                            <i class="fas fa-eye text-dark" title="Add Visit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Edit Action -->
+                    <a href="#" data-toggle="modal" data-target="#editModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#editModal">
+                            <i class="fas fa-edit text-dark" title="Edit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Appointment Action -->
+                    <a href="#" data-toggle="modal" data-target="#appointmentModal">
+                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#appointmentModal">
+                            <i class="fas fa-calendar text-dark" title="Appointment"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Open Action -->
+                    <a href="#" data-toggle="modal" data-target="#openModal">
+                        <button type="button" class="btn btn-light border btn-sm">
+                            <i class="fas fa-eye text-dark" title="Open"></i>
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>Alice Brown</td>
+                <td>30</td>
+                <td>Female</td>
+                <td>XYZ Corporation</td>
+                <td>987-654-3210</td>
+                <td>alicebrown@example.com</td>
+                <td>
+                    <!-- Visit Action -->
+                    <a href="#" data-toggle="modal" data-target="#visitModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#visitModal">
+                            <i class="fas fa-eye text-dark" title="Add Visit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Edit Action -->
+                    <a href="#" data-toggle="modal" data-target="#editModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#editModal">
+                            <i class="fas fa-edit text-dark" title="Edit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Appointment Action -->
+                    <a href="#" data-toggle="modal" data-target="#appointmentModal">
+                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#appointmentModal">
+                            <i class="fas fa-calendar text-dark" title="Appointment"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Open Action -->
+                    <a href="#" data-toggle="modal" data-target="#openModal">
+                        <button type="button" class="btn btn-light border btn-sm">
+                            <i class="fas fa-eye text-dark" title="Open"></i>
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>Robert White</td>
+                <td>50</td>
+                <td>Male</td>
+                <td>LMN Enterprises</td>
+                <td>111-222-3333</td>
+                <td>robertwhite@example.com</td>
+                <td>
+                    <!-- Visit Action -->
+                    <a href="#" data-toggle="modal" data-target="#visitModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#visitModal">
+                            <i class="fas fa-eye text-dark" title="Add Visit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Edit Action -->
+                    <a href="#" data-toggle="modal" data-target="#editModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#editModal">
+                            <i class="fas fa-edit text-dark" title="Edit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Appointment Action -->
+                    <a href="#" data-toggle="modal" data-target="#appointmentModal">
+                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#appointmentModal">
+                            <i class="fas fa-calendar text-dark" title="Appointment"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Open Action -->
+                    <a href="#" data-toggle="modal" data-target="#openModal">
+                        <button type="button" class="btn btn-light border btn-sm">
+                            <i class="fas fa-eye text-dark" title="Open"></i>
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>Emily Davis</td>
+                <td>25</td>
+                <td>Female</td>
+                <td>PQR Ltd.</td>
+                <td>444-555-6666</td>
+                <td>emilydavis@example.com</td>
+                <td>
+                    <!-- Visit Action -->
+                    <a href="#" data-toggle="modal" data-target="#visitModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#visitModal">
+                            <i class="fas fa-eye text-dark" title="Add Visit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Edit Action -->
+                    <a href="#" data-toggle="modal" data-target="#editModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#editModal">
+                            <i class="fas fa-edit text-dark" title="Edit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Appointment Action -->
+                    <a href="#" data-toggle="modal" data-target="#appointmentModal">
+                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#appointmentModal">
+                            <i class="fas fa-calendar text-dark" title="Appointment"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Open Action -->
+                    <a href="#" data-toggle="modal" data-target="#openModal">
+                        <button type="button" class="btn btn-light border btn-sm">
+                            <i class="fas fa-eye text-dark" title="Open"></i>
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>Christopher Lee</td>
+                <td>40</td>
+                <td>Male</td>
+                <td>DEF Corporation</td>
+                <td>777-888-9999</td>
+                <td>christopherlee@example.com</td>
+                <td>
+                    <!-- Visit Action -->
+                    <a href="#" data-toggle="modal" data-target="#visitModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#visitModal">
+                            <i class="fas fa-eye text-dark" title="Add Visit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Edit Action -->
+                    <a href="#" data-toggle="modal" data-target="#editModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#editModal">
+                            <i class="fas fa-edit text-dark" title="Edit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Appointment Action -->
+                    <a href="#" data-toggle="modal" data-target="#appointmentModal">
+                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#appointmentModal">
+                            <i class="fas fa-calendar text-dark" title="Appointment"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Open Action -->
+                    <a href="#" data-toggle="modal" data-target="#openModal">
+                        <button type="button" class="btn btn-light border btn-sm">
+                            <i class="fas fa-eye text-dark" title="Open"></i>
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>Olivia Green</td>
+                <td>32</td>
+                <td>Female</td>
+                <td>GHI Industries</td>
+                <td>222-333-4444</td>
+                <td>oliviagreen@example.com</td>
+                <td>
+                    <!-- Visit Action -->
+                    <a href="#" data-toggle="modal" data-target="#visitModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#visitModal">
+                            <i class="fas fa-eye text-dark" title="Add Visit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Edit Action -->
+                    <a href="#" data-toggle="modal" data-target="#editModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#editModal">
+                            <i class="fas fa-edit text-dark" title="Edit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Appointment Action -->
+                    <a href="#" data-toggle="modal" data-target="#appointmentModal">
+                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#appointmentModal">
+                            <i class="fas fa-calendar text-dark" title="Appointment"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Open Action -->
+                    <a href="#" data-toggle="modal" data-target="#openModal">
+                        <button type="button" class="btn btn-light border btn-sm">
+                            <i class="fas fa-eye text-dark" title="Open"></i>
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>William Turner</td>
+                <td>45</td>
+                <td>Male</td>
+                <td>JKL Enterprises</td>
+                <td>666-777-8888</td>
+                <td>williamturner@example.com</td>
+                <td>
+                    <!-- Visit Action -->
+                    <a href="#" data-toggle="modal" data-target="#visitModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#visitModal">
+                            <i class="fas fa-eye text-dark" title="Add Visit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Edit Action -->
+                    <a href="#" data-toggle="modal" data-target="#editModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#editModal">
+                            <i class="fas fa-edit text-dark" title="Edit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Appointment Action -->
+                    <a href="#" data-toggle="modal" data-target="#appointmentModal">
+                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#appointmentModal">
+                            <i class="fas fa-calendar text-dark" title="Appointment"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Open Action -->
+                    <a href="#" data-toggle="modal" data-target="#openModal">
+                        <button type="button" class="btn btn-light border btn-sm">
+                            <i class="fas fa-eye text-dark" title="Open"></i>
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>Sophia Adams</td>
+                <td>27</td>
+                <td>Female</td>
+                <td>MNO Ltd.</td>
+                <td>333-444-5555</td>
+                <td>sophiaadams@example.com</td>
+                <td>
+                    <!-- Visit Action -->
+                    <a href="#" data-toggle="modal" data-target="#visitModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#visitModal">
+                            <i class="fas fa-eye text-dark" title="Add Visit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Edit Action -->
+                    <a href="#" data-toggle="modal" data-target="#editModal">
+                        <button type="button" class="btn btn-light border btn-sm"  data-toggle="modal" data-target="#editModal">
+                            <i class="fas fa-edit text-dark" title="Edit"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Appointment Action -->
+                    <a href="#" data-toggle="modal" data-target="#appointmentModal">
+                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#appointmentModal">
+                            <i class="fas fa-calendar text-dark" title="Appointment"></i>
+                        </button>
+                    </a>
+                
+                    <!-- Open Action -->
+                    <a href="#" data-toggle="modal" data-target="#openModal">
+                        <button type="button" class="btn btn-light border btn-sm">
+                            <i class="fas fa-eye text-dark" title="Open"></i>
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            <!-- ... add more rows as needed -->
+        </tbody>
+    </table>
+</div>
+
+   
+
+    <script>
+        function submitForm(checkbox) {
+            checkbox.form.submit();
+        }
+    </script>
+
+{% include 'hod_template/datatable.html' %}
+    
+
+{% endblock main_content %}

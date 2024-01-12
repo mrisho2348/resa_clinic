@@ -1,0 +1,181 @@
+{% extends 'hod_template/base_template.html' %}
+{% block title %}
+   List of all patients    
+{% endblock title %}
+
+{% block page_title %}
+   List of all patients    
+{% endblock page_title %}
+
+{% block breadcrumb %}
+{% include "hod_template/modal_form.html" %}
+ 
+    <a class="btn btn-primary float-right" href="{% url "manage_adjustment" %}">
+        <i class="fas fa-plus"></i> Adjustments
+    </a>
+    <a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#serviceModal">
+        <i class="fas fa-plus"></i> New service
+    </a>
+   
+{% endblock breadcrumb %}
+{% block main_content %}
+
+<div class="form-row">
+    <div>
+        {% if messages %}
+            <div class="col-12">
+                {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                        <div class="alert alert-danger">{{ message }}</div>
+                    {% elif message.tags == 'success' %}
+                        <div class="alert alert-primary">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div> 
+    <table class="table table-hover text-nowrap table-bordered table-striped table-sm" id="example">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Available Stock</th>
+                <th>Actions</th>
+              </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>20% SALICYLIC ACID OINTMENT</td>
+                <td>DRUGS</td>
+                <td>6</td>
+                <td>
+                  <i class="fas fa-edit"></i>
+                  <i class="fas fa-trash"></i>
+                </td>
+              </tr>
+              <tr>
+                <td>ACETAZOLAMIDE (250MG)</td>
+                <td>DRUGS</td>
+                <td>100</td>
+                <td>
+                  <i class="fas fa-edit"></i>
+                  <i class="fas fa-trash"></i>
+                </td>
+              </tr>
+              <tr>
+                <td>ACYCLOVIR</td>
+                <td>DRUGS</td>
+                <td>275</td>
+                <td>
+                  <i class="fas fa-edit"></i>
+                  <i class="fas fa-trash"></i>
+                </td>
+              </tr>
+              <tr>
+                <td>20% SALICYLIC ACID OINTMENT</td>
+                <td>DRUGS</td>
+                <td>6</td>
+                <td>
+                  <i class="fas fa-edit"></i>
+                  <i class="fas fa-trash"></i>
+                </td>
+              </tr>
+              <tr>
+                <td>ACETAZOLAMIDE (250MG)</td>
+                <td>DRUGS</td>
+                <td>100</td>
+                <td>
+                  <i class="fas fa-edit"></i>
+                  <i class="fas fa-trash"></i>
+                </td>
+              </tr>
+              <tr>
+                <td>ACYCLOVIR</td>
+                <td>DRUGS</td>
+                <td>275</td>
+                <td>
+                  <i class="fas fa-edit"></i>
+                  <i class="fas fa-trash"></i>
+                </td>
+              </tr>
+              <tr>
+                <td>ACYCLOVIR CREAM</td>
+                <td>TOPICAL</td>
+                <td>15</td>
+                <td>
+                  <i class="fas fa-edit"></i>
+                  <i class="fas fa-trash"></i>
+                </td>
+              </tr>
+              <tr>
+                <td>ADENOSINE (6MG/2ML)</td>
+                <td>DRUGS</td>
+                <td>100</td>
+                <td>
+                  <i class="fas fa-edit"></i>
+                  <i class="fas fa-trash"></i>
+                </td>
+              </tr>
+              <tr>
+                <td>ADRENALINE (EPINEPHRINE) (1MG/ML)</td>
+                <td>DRUGS</td>
+                <td>120</td>
+                <td>
+                  <i class="fas fa-edit"></i>
+                  <i class="fas fa-trash"></i>
+                </td>
+              </tr>
+              <tr>
+                <td>ALBENDAZOLE</td>
+                <td>DRUGS</td>
+                <td>94</td>
+                <td>
+                  <i class="fas fa-edit"></i>
+                  <i class="fas fa-trash"></i>
+                </td>
+              </tr>
+              <tr>
+                <td>ALCOHOL TEST</td>
+                <td>LABORATORY</td>
+                <td>-</td>
+                <td>
+                  <i class="fas fa-edit"></i>
+                  <i class="fas fa-trash"></i>
+                </td>
+              </tr>
+              <tr>
+                <td>ALLOPURINOL (100MG)</td>
+                <td>DRUGS</td>
+                <td>100</td>
+                <td>
+                  <i class="fas fa-edit"></i>
+                  <i class="fas fa-trash"></i>
+                </td>
+              </tr>
+              <tr>
+                <td>ALU</td>
+                <td>DRUGS</td>
+                <td>32</td>
+                <td>
+                  <i class="fas fa-edit"></i>
+                  <i class="fas fa-trash"></i>
+                </td>
+              </tr>
+            <!-- ... add more rows as needed -->
+        </tbody>
+    </table>
+</div>
+
+   
+
+    <script>
+        function submitForm(checkbox) {
+            checkbox.form.submit();
+        }
+    </script>
+
+{% include 'hod_template/datatable.html' %}
+    
+
+{% endblock main_content %}

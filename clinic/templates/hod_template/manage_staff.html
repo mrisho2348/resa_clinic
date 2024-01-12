@@ -1,0 +1,155 @@
+{% extends 'hod_template/base_template.html' %}
+
+{% block title %}
+   All staff
+{% endblock title %}
+
+{% block page_title %}
+   All staff
+{% endblock page_title %}
+
+{% block breadcrumb %}
+{% include "hod_template/modal_form.html" %}
+<a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#staffModal">
+    <i class="fas fa-plus"></i> New staff
+</a>
+{% endblock breadcrumb %}
+
+{% load static %}
+{% block main_content %}
+        
+        
+<style>
+    /* Custom styles for checkboxes and labels */
+    .form-group {
+        margin-bottom: 10px;
+    }
+
+    .form-check-input {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+    }
+
+    .form-check-label {
+        display: flex;
+        align-items: center;
+        font-size: 16px;
+        padding-left: 6px;
+    }
+
+ 
+
+    .form-check-input~.custom-checkbox {
+        position: relative;
+        cursor: pointer;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .form-check-input~.custom-checkbox::before {
+        content: '';
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #3498db;
+        background-color: #fff;
+        border-radius: 5px;
+        position: relative;
+    }
+
+    .form-check-input:checked~.custom-checkbox::before {
+        background-color: #3498db;
+        border: 2px solid #3498db;
+        color: #fff;
+    }
+
+    .form-check-input:checked~.custom-checkbox::after {
+        content: '\2713';
+        font-size: 14px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #fff;
+    }
+
+    /* Styling the labels */
+    .form-check-label {
+        color: #555;
+        cursor: pointer;
+    }
+
+    /* Hover effect for labels */
+    .form-check-label:hover {
+        text-decoration: underline;
+    }
+
+    .modal-content .modal-header {
+        background-color: #0b51b7;
+        color
+    }
+    
+    .modal-header {
+       
+        display: flex;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        padding: 1rem 1rem;
+        border-bottom: 0 solid #e8ebf3;
+        border-top-left-radius: .3rem;
+        border-top-right-radius: .3rem;
+    }
+</style>
+<div class="">
+    <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
+        <thead>
+            <tr>
+                <th>Number</th>
+                <th>Name</th>
+                <th>Gender</th>
+                <th>Age</th>
+                <th>Email</th>
+                <th>Mobile</th>
+                <th>Joining</th>
+                <th>Position</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="student-table-body">
+            <tr>
+                <td>1</td>
+                <td>John Doe</td>
+                <td>Male</td>
+                <td>30</td>
+                <td>john.doe@example.com</td>
+                <td>(123) 456-7890</td>
+                <td>2022-01-01</td>
+                <td>Manager</td>
+                <td>Active</td>
+                <td>
+                    <button class="btn btn-info">View</button>
+                    <button class="btn btn-warning">Edit</button>
+                    <button class="btn btn-danger">Delete</button>
+                </td>
+            </tr>
+            <!-- Add more rows as needed -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function submitForm(checkbox) {
+        checkbox.form.submit();
+    }
+</script>
+
+{% include 'hod_template/datatable.html' %}
+{% endblock main_content %}

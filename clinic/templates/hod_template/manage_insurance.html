@@ -1,0 +1,71 @@
+{% extends 'hod_template/base_template.html' %}
+
+{% block title %}
+   All Insurance
+{% endblock title %}
+
+{% block page_title %}
+   All Insurance
+{% endblock page_title %}
+
+{% block breadcrumb %}
+{% include "hod_template/modal_form.html" %}
+<a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#insuranceModal">
+    <i class="fas fa-plus"></i> New Insurance
+</a>
+{% endblock breadcrumb %}
+
+{% load static %}
+{% block main_content %}
+
+{% comment %} <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css"> {% endcomment %}
+
+<div class="">
+    <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Code</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="student-table-body">
+             <!-- Sample Data -->
+      <tr>
+        <td>ABC Insurance</td>
+        <td>ABC01</td>
+        <td>(555) 123-4567</td>
+        <td>456 Oak St, Townsville, CA, 90210</td>
+        <td>abc.insurance@example.com</td>
+        <td>
+          <button class="btn btn-info">Edit</button>
+          <button class="btn btn-danger">Delete</button>
+        </td>
+      </tr>
+      <tr>
+        <td>XYZ Insurance</td>
+        <td>XYZ02</td>
+        <td>(555) 987-6543</td>
+        <td>789 Maple Ave, Cityburg, NY, 10001</td>
+        <td>xyz.insurance@example.com</td>
+        <td>
+          <button class="btn btn-info">Edit</button>
+          <button class="btn btn-danger">Delete</button>
+        </td>
+      </tr>
+            
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function submitForm(checkbox) {
+        checkbox.form.submit();
+    }
+</script>
+
+{% include 'hod_template/datatable.html' %}
+{% endblock main_content %}

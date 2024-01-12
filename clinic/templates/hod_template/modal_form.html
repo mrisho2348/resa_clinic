@@ -1,0 +1,1497 @@
+  <!-- The modal -->
+  <di class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="registerModalLabel">REGISTER PATIENT</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- The card -->
+          <div class="card">
+            <div class="card-header">[MRN FORMAT: PAT-0000000]</div>
+            <div class="card-body">
+              <!-- The tabs -->
+              <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <a class="nav-link active" id="personal-tab" data-toggle="tab" href="#personal" role="tab" aria-controls="personal" aria-selected="true">Personal</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <a class="nav-link" id="health-tab" data-toggle="tab" href="#health" role="tab" aria-controls="health" aria-selected="false">Health Condition</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <a class="nav-link" id="family-tab" data-toggle="tab" href="#family" role="tab" aria-controls="family" aria-selected="false">Family History</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <a class="nav-link" id="lifestyle-tab" data-toggle="tab" href="#lifestyle" role="tab" aria-controls="lifestyle" aria-selected="false">Life Style</a>
+                </li>
+              </ul>
+              <!-- The tab content -->
+              <div class="tab-content" id="myTabContent">
+                <!-- Personal tab -->
+                <div class="tab-pane fade show active" id="personal" role="tabpanel" aria-labelledby="personal-tab">
+                  <!-- Personal form -->
+                  <form>
+                    <div class="form-row">
+                      <div class="form-group col-md-4">
+                        <label for="firstName">First Name</label>
+                        <input type="text" class="form-control" id="firstName" placeholder="First Name">
+                      </div>
+                      <div class="form-group col-md-4">
+                        <label for="middleName">Middle Name</label>
+                        <input type="text" class="form-control" id="middleName" placeholder="Middle Name">
+                      </div>
+                      <div class="form-group col-md-4">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" class="form-control" id="lastName" placeholder="Last Name">
+                      </div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group col-md-4">
+                        <label for="gender">Gender</label>
+                        <select id="gender" class="form-control">
+                          <option selected>Select gender</option>
+                          <option>Male</option>
+                          <option>Female</option>
+                          <option>Other</option>
+                        </select>
+                      </div>
+                      <div class="form-group col-md-4">
+                        <label for="age">Age</label>
+                        <input type="number" class="form-control" id="age" placeholder="Age">
+                      </div>
+                      <div class="form-group col-md-4">
+                        <label for="nationality">Nationality</label>
+                        <select id="nationality" class="form-control">
+                          <option selected>Select Country</option>
+                          <option>Tanzania</option>
+                          <option>Kenya</option>
+                          <option>Uganda</option>
+                          <!-- ... add other options as needed -->
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group col-md-3">
+                        <label for="patientType">Patient Type</label>
+                        <select id="patientType" class="form-control">
+                          <option selected>NationalStaff</option>
+                          <option>InternationalStaff</option>
+                          <option>Visitor</option>
+                          <option>Other</option>
+                        </select>
+                      </div>
+                      <div class="form-group col-md-3">
+                        <label for="company">Company</label>
+                        <select id="company" class="form-control">
+                          <option selected>Select Company</option>
+                          <option>SAMOTA</option>
+                          <option>ISOAF</option>
+                          <option>SGA</option>
+                          <!-- ... add other options as needed -->
+                        </select>
+                      </div>
+                      <div class="form-group col-md-3">
+                        <label for="occupation">Occupation</label>
+                        <input type="text" class="form-control" id="occupation" placeholder="Occupation">
+                      </div>
+                      <div class="form-group col-md-3">
+                        <label for="phone">Phone</label>
+                        <input type="tel" class="form-control" id="phone" placeholder="Phone">
+                      </div>
+                    </div>
+
+                    <div class="form-row">
+                      <div class="form-group col-md-4">
+                        <label for="employeeNumber">Employee Number</label>
+                        <input type="text" class="form-control" id="employeeNumber" placeholder="Employee Number">
+                      </div>                    
+                      <div class="form-group col-md-4">
+                        <label for="dateOfFirstEmployment">Date of first employment</label>
+                        <input type="date" class="form-control" id="dateOfFirstEmployment" placeholder="Date of first employment">
+                      </div>
+                      <div class="form-group col-md-4">
+                        <label for="longTimeIllness">Any Longtime Illness?</label>
+                        <input type="text" class="form-control" id="longTimeIllness" placeholder="Any Longtime Illness?">
+                      </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="longmedication">Any Longtime Medication ?</label>
+                            <input type="text" class="form-control" id="longmedication" placeholder="Any Longtime Medication ?">
+                          </div>                   
+                      <div class="form-group col-md-4">
+                        <label for="oshaCertificate">Have OSHA Certificate?</label><br>
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="oshaCertificate" id="oshaCertificateYes" value="yes">
+                          <label class="form-check-label" for="oshaCertificateYes">Yes</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="oshaCertificate" id="oshaCertificateNo" value="no">
+                          <label class="form-check-label" for="oshaCertificateNo">No</label>
+                        </div>
+                      </div>
+                      <div class="form-group col-md-4">
+                        <label for="insurance">Insurance</label>
+                        <select id="insurance" class="form-control">
+                          <option selected>Uninsured</option>
+                          <option>Insured</option>
+                        </select>
+                      </div>
+                    </div>
+                 
+                    <h5>Emergency Contact</h5>
+                    <hr>
+                    <div class="form-row">
+                        <!-- Fields for Health Condition -->
+                        <div class="form-group col-md-3">
+                          <label for="emergencyContactName"> Name</label>
+                          <input type="text" class="form-control" id="emergencyContactName" placeholder="Name">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <label for="emergencyContactRelation"> Relation</label>
+                          <input type="text" class="form-control" id="emergencyContactRelation" placeholder="Relation">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <label for="emergencyContactPhone"> Phone</label>
+                          <input type="tel" class="form-control" id="emergencyContactPhone" placeholder="Phone">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <label for="emergencyContactMobile"> Mobile</label>
+                          <input type="tel" class="form-control" id="emergencyContactMobile" placeholder="Mobile">
+                        </div>
+                        <!-- ... add other health-related fields as needed ... -->
+                      </div>
+                  </form>
+                </div>
+
+                          <!-- Health Condition tab -->
+          <div class="tab-pane fade" id="health" role="tabpanel" aria-labelledby="health-tab">
+            <!-- Health Condition form -->
+            <form>
+                <div class="container">
+                  <!-- Allergies -->
+                  <div class="form-row">
+                    <div class="form-group col-md-4">
+                      <label for="allergies">Diseases</label>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="allergies">Yes/No</label>
+                      </div>
+                      <div class="form-group col-md-4">
+                        <label for="allergies">Notes</label>
+                      </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group col-md-4">
+                      <label for="allergies">Allergies</label>
+                    </div>
+                    <div class="form-group col-md-4">
+                      <input type="checkbox" id="allergies" name="allergies" class="form-check-input">
+                    </div>
+                    <div class="form-group col-md-4">
+                      <textarea id="allergiesNotes" name="allergiesNotes" rows="2" class="form-control"></textarea>
+                    </div>
+                  </div>
+            
+                  <!-- Eye Condition -->
+                  <div class="form-row">
+                    <div class="form-group col-md-4">
+                      <label for="eyeCondition">Eye Condition</label>
+                    </div>
+                    <div class="form-group col-md-4">
+                      <input type="checkbox" id="eyeCondition" name="eyeCondition" class="form-check-input">
+                    </div>
+                    <div class="form-group col-md-4">
+                      <textarea id="eyeConditionNotes" name="eyeConditionNotes" rows="2" class="form-control"></textarea>
+                    </div>
+                  </div>
+            
+                  <!-- Ear, Nose, Throat -->
+                  <div class="form-row">
+                    <div class="form-group col-md-4">
+                      <label for="entConditions">Ear, Nose, Throat</label>
+                    </div>
+                    <div class="form-group col-md-4">
+                      <input type="checkbox" id="entConditions" name="entConditions" class="form-check-input">
+                    </div>
+                    <div class="form-group col-md-4">
+                      <textarea id="entConditionsNotes" name="entConditionsNotes" rows="2" class="form-control"></textarea>
+                    </div>
+                  </div>
+            
+                  <!-- Respiratory Conditions -->
+                  <div class="form-row">
+                    <div class="form-group col-md-4">
+                      <label for="respiratoryConditions">Respiratory Conditions</label>
+                    </div>
+                    <div class="form-group col-md-4">
+                      <input type="checkbox" id="respiratoryConditions" name="respiratoryConditions" class="form-check-input">
+                    </div>
+                    <div class="form-group col-md-4">
+                      <textarea id="respiratoryConditionsNotes" name="respiratoryConditionsNotes" rows="2" class="form-control"></textarea>
+                    </div>
+                  </div>
+            
+                  <!-- Cardiovascular Conditions -->
+                  <div class="form-row">
+                    <div class="form-group col-md-4">
+                      <label for="cardiovascularConditions">Cardiovascular Conditions</label>
+                    </div>
+                    <div class="form-group col-md-4">
+                      <input type="checkbox" id="cardiovascularConditions" name="cardiovascularConditions" class="form-check-input">
+                    </div>
+                    <div class="form-group col-md-4">
+                      <textarea id="cardiovascularConditionsNotes" name="cardiovascularConditionsNotes" rows="2" class="form-control"></textarea>
+                    </div>
+                  </div>
+            
+                  <!-- Urinary Conditions -->
+                  <div class="form-row">
+                    <div class="form-group col-md-4">
+                      <label for="urinaryConditions">Urinary Conditions</label>
+                    </div>
+                    <div class="form-group col-md-4">
+                      <input type="checkbox" id="urinaryConditions" name="urinaryConditions" class="form-check-input">
+                    </div>
+                    <div class="form-group col-md-4">
+                      <textarea id="urinaryConditionsNotes" name="urinaryConditionsNotes" rows="2" class="form-control"></textarea>
+                    </div>
+                  </div>
+            
+                  <!-- Stomach/Bowel Conditions -->
+                  <div class="form-row">
+                    <div class="form-group col-md-4">
+                      <label for="stomachBowelConditions">Stomach/Bowel Conditions</label>
+                    </div>
+                    <div class="form-group col-md-4">
+                      <input type="checkbox" id="stomachBowelConditions" name="stomachBowelConditions" class="form-check-input">
+                    </div>
+                    <div class="form-group col-md-4">
+                      <textarea id="stomachBowelConditionsNotes" name="stomachBowelConditionsNotes" rows="2" class="form-control"></textarea>
+                    </div>
+                  </div>
+            
+                  <!-- Musculoskeletal Conditions -->
+                  <div class="form-row">
+                    <div class="form-group col-md-4">
+                      <label for="musculoskeletalConditions">Musculoskeletal Conditions</label>
+                    </div>
+                    <div class="form-group col-md-4">
+                      <input type="checkbox" id="musculoskeletalConditions" name="musculoskeletalConditions" class="form-check-input">
+                    </div>
+                    <div class="form-group col-md-4">
+                      <textarea id="musculoskeletalConditionsNotes" name="musculoskeletalConditionsNotes" rows="2" class="form-control"></textarea>
+                    </div>
+                  </div>
+            
+                  <!-- Neurological/Psychiatric Conditions -->
+                  <div class="form-row">
+                    <div class="form-group col-md-4">
+                      <label for="neuroPsychiatricConditions">Neurological/Psychiatric Conditions</label>
+                    </div>
+                    <div class="form-group col-md-4">
+                      <input type="checkbox" id="neuroPsychiatricConditions" name="neuroPsychiatricConditions" class="form-check-input">
+                    </div>
+                    <div class="form-group col-md-4">
+                      <textarea id="neuroPsychiatricConditionsNotes" name="neuroPsychiatricConditionsNotes" rows="2" class="form-control"></textarea>
+                    </div>
+                  </div>           
+                  <!-- Repeat the structure for additional conditions -->
+                </div>
+            </form>   
+        </div>
+
+          <!-- Family History tab -->
+          <div class="tab-pane fade" id="family" role="tabpanel" aria-labelledby="family-tab">
+            <!-- Family History form -->
+            <form>
+                <div class="container">
+                  <!-- Allergies -->
+                  <div class="form-row">
+                    <div class="form-group col-md-3">
+                      <label for="allergies">
+                        Disease Name</label>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="allergies">Answer</label>
+                      </div>
+                      <div class="form-group col-md-3">
+                        <label for="allergies">Relationship</label>
+                      </div>
+                      <div class="form-group col-md-3">
+                        <label for="allergies">Comments</label>
+                      </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group col-md-3">
+                      <label for="allergies">Allergies</label>
+                    </div>
+                    <div class="form-group col-md-3">
+                      <input type="checkbox" id="allergies" name="allergies" class="form-check-input">
+                    </div>
+                    <div class="form-group col-md-3">
+                      <input type="text" class="form-control">
+                    </div>
+                    <div class="form-group col-md-3">
+                      <textarea id="allergiesNotes" name="allergiesNotes" rows="2" class="form-control"></textarea>
+                    </div>
+                  </div>
+            
+                  <!-- Eye Condition -->
+                  <div class="form-row">
+                    <div class="form-group col-md-3">
+                      <label for="eyeCondition">Asthma</label>
+                    </div>
+                    <div class="form-group col-md-3">
+                      <input type="checkbox" id="eyeCondition" name="eyeCondition" class="form-check-input">
+                    </div>
+                    <div class="form-group col-md-3">
+                      <input type="text" class="form-control">
+                    </div>
+                    <div class="form-group col-md-3">
+                      <textarea id="eyeConditionNotes" name="eyeConditionNotes" rows="2" class="form-control"></textarea>
+                    </div>
+                  </div>
+            
+                  <!-- Ear, Nose, Throat -->
+                  <div class="form-row">
+                    <div class="form-group col-md-3">
+                      <label for="entConditions">Lung Disease</label>
+                    </div>
+                    <div class="form-group col-md-3">
+                      <input type="checkbox" id="entConditions" name="entConditions" class="form-check-input">
+                    </div>
+                    <div class="form-group col-md-3">
+                      <input type="text" class="form-control">
+                    </div>
+                    <div class="form-group col-md-3">
+                      <textarea id="entConditionsNotes" name="entConditionsNotes" rows="2" class="form-control"></textarea>
+                    </div>
+                  </div>
+            
+                  <!-- Respiratory Conditions -->
+                  <div class="form-row">
+                    <div class="form-group col-md-3">
+                      <label for="respiratoryConditions">Cancer</label>
+                    </div>
+                    <div class="form-group col-md-3">
+                      <input type="checkbox" id="respiratoryConditions" name="respiratoryConditions" class="form-check-input">
+                    </div>
+                    <div class="form-group col-md-3">
+                      <input type="text" class="form-control">
+                    </div>
+                    <div class="form-group col-md-3">
+                      <textarea id="respiratoryConditionsNotes" name="respiratoryConditionsNotes" rows="2" class="form-control"></textarea>
+                    </div>
+                  </div>
+            
+                  <!-- Cardiovascular Conditions -->
+                  <div class="form-row">
+                    <div class="form-group col-md-3">
+                      <label for="cardiovascularConditions">Diabetes</label>
+                    </div>
+                    <div class="form-group col-md-3">
+                      <input type="checkbox" id="cardiovascularConditions" name="cardiovascularConditions" class="form-check-input">
+                    </div>
+                    <div class="form-group col-md-3">
+                      <input type="text" class="form-control">
+                    </div>
+                    <div class="form-group col-md-3">
+                      <textarea id="cardiovascularConditionsNotes" name="cardiovascularConditionsNotes" rows="2" class="form-control"></textarea>
+                    </div>
+                  </div>
+            
+                  <!-- Urinary Conditions -->
+                  <div class="form-row">
+                    <div class="form-group col-md-3">
+                      <label for="urinaryConditions">Hypertension</label>
+                    </div>
+                    <div class="form-group col-md-3">
+                      <input type="checkbox" id="urinaryConditions" name="urinaryConditions" class="form-check-input">
+                    </div>
+                    <div class="form-group col-md-3">
+                      <input type="text" class="form-control">
+                    </div>
+                    <div class="form-group col-md-3">
+                      <textarea id="urinaryConditionsNotes" name="urinaryConditionsNotes" rows="2" class="form-control"></textarea>
+                    </div>
+                  </div>
+            
+                  <!-- Stomach/Bowel Conditions -->
+                  <div class="form-row">
+                    <div class="form-group col-md-3">
+                      <label for="stomachBowelConditions">Heart Disease</label>
+                    </div>
+                    <div class="form-group col-md-3">
+                      <input type="checkbox" id="stomachBowelConditions" name="stomachBowelConditions" class="form-check-input">
+                    </div>
+                    <div class="form-group col-md-3">
+                     <input type="text" class="form-control">
+                    </div>
+                    <div class="form-group col-md-3">
+                      <textarea id="stomachBowelConditionsNotes" name="stomachBowelConditionsNotes" rows="2" class="form-control"></textarea>
+                    </div>
+                  </div>          
+             </div>
+            </form>   
+          </div>
+
+          <!-- Life Style tab -->
+          <div class="tab-pane fade" id="lifestyle" role="tabpanel" aria-labelledby="lifestyle-tab">
+            <form>
+              <div class="container">
+                <!-- Allergies -->
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="allergies">                  
+                        Lifestyle Habit</label>
+                  </div>
+                  <div class="form-group col-md-6">
+                      <label for="allergies">Yes/No</label>
+                    </div>
+                       
+                </div>
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="allergies">Smoking</label>
+                  </div>
+                  <div class="form-group col-md-6">
+                    <input type="checkbox" id="urinaryConditions" name="urinaryConditions" class="form-check-input">
+                  </div>    
+                </div>
+          
+                <!-- Eye Condition -->
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="eyeCondition">Alcohol Consumption</label>
+                  </div>
+                  <div class="form-group col-md-6">
+                    <input type="checkbox" id="urinaryConditions" name="urinaryConditions" class="form-check-input">
+                  </div>    
+                
+                </div>
+          
+                <!-- Ear, Nose, Throat -->
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="entConditions">Weekly Exercise Frequency</label>
+                  </div>                
+                  <div class="form-group col-md-6">
+                    <input type="text" class="form-control">
+                  </div>
+
+                </div>
+          
+                <!-- Respiratory Conditions -->
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="respiratoryConditions">Healthy Diet</label>
+                  </div>
+                  <div class="form-group col-md-6">
+                    <input type="checkbox" id="respiratoryConditions" name="respiratoryConditions" class="form-check-input">
+                  </div>                
+                </div>
+          
+                <!-- Cardiovascular Conditions -->
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="cardiovascularConditions">Stress Management</label>
+                  </div>
+                  <div class="form-group col-md-6">
+                    <input type="checkbox" id="cardiovascularConditions" name="cardiovascularConditions" class="form-check-input">
+                  </div>               
+                </div>
+          
+                <!-- Urinary Conditions -->
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="urinaryConditions">Sufficient Sleep</label>
+                  </div>
+                  <div class="form-group col-md-6">
+                    <input type="checkbox" id="urinaryConditions" name="urinaryConditions" class="form-check-input">
+                  </div>                 
+                 
+                </div>
+          
+                        
+           </div>
+          </form>   
+          </div>
+                <!-- Health Condition tab -->
+              </div>
+              <div class="form-group pt-2 float-end">
+                <div class="row">
+                  <div class="col-md-8">
+
+                  </div>
+                  <div class="col-md-4">
+                    <button type="submit" class="btn btn-md btn-primary">Save and Continue <i class="mdi mdi-forward"></i></button>
+                  </div>
+                </div>
+            </div>
+            </div>
+          
+          </div>   
+        </div>
+      </div>
+    </div>    
+  </di>   
+
+  <!-- Visit Modal Form -->
+<div class="modal fade" id="visitModal" tabindex="-1" role="dialog" aria-labelledby="visitModalLabel" aria-hidden="true">
+    <!-- ... Your visit modal content goes here ... -->
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+                <h5 class="modal-title">NEW VISIT</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">                
+                    <form>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="visitType">Visit Type</label>
+                                <select id="visitType" class="form-control">
+                                    <option value="Normal">Normal</option>
+                                    <option value="FollowUp">FollowUp</option>
+                                    <option value="Referral">Referral</option>
+                                    <option value="Emergency">Emergency</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="service">Service</label>
+                                <select id="service" class="form-control">
+                                    <option value="Normal">Normal</option>
+                                    <option value="FollowUp">FollowUp</option>
+                                    <option value="Referral">Referral</option>
+                                    <option value="Emergency">Emergency</option>
+                                </select>
+                            </div>
+                        </div>
+                    
+                        <div class="form-group row">
+                            <div class="offset-md-6 col-md-6 text-right">
+                                <button type="submit" class="btn btn-primary">Save and Continue</button>
+                            </div>
+                        </div>
+                    </form>
+               </div>
+            </div>
+            {% comment %} <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save</button>
+            </div> {% endcomment %}
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal Form -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <!-- ... Your edit modal content goes here ... -->
+  
+</div>
+
+<!-- Appointment Modal Form -->
+<div class="modal fade" id="appointmentModal" tabindex="-1" role="dialog" aria-labelledby="appointmentModalLabel" aria-hidden="true">
+    <!-- ... Your appointment modal content goes here ... -->
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+                <h5 class="modal-title">ADD APPOINTMENT FOR SHAFOUR</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">                
+                    <form>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="doctor">Doctor</label>
+                                <select id="doctor" class="form-control">
+                                    <option value="">Select doctor</option>
+                                    <option value="Mrisho">Mrisho</option>
+                                    <option value="Ismail">Ismail</option>
+                                    <option value="Jumanne">Jumanne</option>
+                                    <option value="Gwanta">Gwanta</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="appointmentDate">Appointment Date</label>
+                                <input type="date" class="form-control" id="appointmentDate">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="startTime">Start Time</label>
+                                <input type="time" class="form-control" id="startTime">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="endTime">End Time</label>
+                                <input type="time" class="form-control" id="endTime">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                                <label for="description">Description</label>
+                                <textarea id="description" name="description" rows="2" class="form-control"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="offset-md-6 col-md-6 text-right">
+                                <button type="submit" class="btn btn-primary">Save and Continue</button>
+                            </div>
+                        </div>
+                    </form>
+                    
+               </div>
+            </div>
+            {% comment %} <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save</button>
+            </div> {% endcomment %}
+        </div>
+    </div>
+</div>
+
+<!-- Button trigger modal -->
+
+<!-- Summary Modal -->
+<div class="modal fade" id="summaryModal" tabindex="-1" role="dialog" aria-labelledby="summaryModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="summaryModalLabel">Consultatio Summary</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Add your modal content here -->
+        <div class="container">
+          <form action="" method="post">        
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="chief-complaint">Chief complaint:</label>
+                  <input type="text" class="form-control" id="chief-complaint" value="">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="history">History of presenting illness:</label>
+                  <textarea class="form-control" id="history" rows="3"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="plan">Physical Examination:</label>
+                  <input type="text" class="form-control" id="plan">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="history-allergy">Allergy to medications:</label>
+                  <textarea class="form-control" id="history-allergy" rows="3"></textarea>
+                </div>
+              </div>           
+           
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="provisional-diagnosis">Provisional Diagnosis:</label>
+                  <input type="text" class="form-control" id="provisional-diagnosis">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="final-diagnosis">Final Diagnosis:</label>
+                  <input type="text" class="form-control" id="final-diagnosis" value="">
+                </div>
+              </div>              
+            </div>
+            <div class="row">            
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="plan">Plan:</label>
+                  <input type="text" class="form-control" id="plan" value="">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="offset-md-6 col-md-6 text-right">
+                <button type="submit" class="btn btn-primary">Save and Continue</button>
+              </div>
+            </div>
+          </form>
+          
+        </div>
+      </div>     
+    </div>
+  </div>
+</div>
+
+
+<!-- Vitals Modal -->
+<div class="modal fade" id="ordersModal" tabindex="-1" role="dialog" aria-labelledby="ordersModal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="vitalsModalLabel">Add Vitals</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <form>
+                  <div class="row mb-4">
+                      <div class="col-md-4">
+                          <label for="temperature">Temperature:</label>
+                          <input type="text" id="temperature" name="temperature" value="36.20" class="form-control">
+                      </div>
+                      <div class="col-md-4">
+                          <label for="pulseRate">Pulse Rate:</label>
+                          <input type="text" id="pulseRate" name="pulseRate" value="78" class="form-control">
+                      </div>
+                      <div class="col-md-4">
+                          <label for="spo2">SPO2:</label>
+                          <input type="text" id="spo2" name="spo2" value="" class="form-control">
+                      </div>
+                  </div>
+
+                  <div class="row mb-4">
+                      <div class="col-md-4">
+                          <label for="bloodPressure">Blood Pressure:</label>
+                          <input type="text" id="bloodPressure" name="bloodPressure" value="132/82" class="form-control">
+                      </div>
+                      <div class="col-md-4">
+                          <label for="weight">Weight:</label>
+                          <input type="text" id="weight" name="weight" value="75.00" class="form-control">
+                      </div>
+                      <div class="col-md-4">
+                          <label for="height">Height:</label>
+                          <input type="text" id="height" name="height" value="187.00" class="form-control">
+                      </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="offset-md-6 col-md-6 text-right">
+                      <button type="submit" class="btn btn-primary">Save and Continue</button>
+                    </div>
+                  </div>
+              </form>
+          </div>
+      </div>
+  </div>
+</div>
+
+
+<!-- Your modal (sample structure) -->
+<!-- Button trigger modal -->
+
+
+<!-- Modal -->
+<div class="modal fade" id="insuranceModal" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header ">
+            <h5 class="modal-title">Add Insurance Company</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+      <div class="modal-body">
+        <div class="container-fluid">          
+              <form>
+                <div class=" row">                  
+                  <div class="form-group col-sm-6">
+                    <label for="Name" class="col-sm-1-12 form-check-label">Name</label>
+                    <input type="text" class="form-control" name="Name" id="Name" placeholder="">
+                  </div>
+                  <div class="form-group col-sm-6">
+                    <label for="Phone" class="col-sm-1-12 col-form-label">Phone</label>
+                    <input type="tel" class="form-control" name="Phone" id="Phone" placeholder="">
+                  </div>
+                </div>                
+                <div class=" row">                  
+                  <div class="form-group col-sm-6">
+                    <label for="Short_name" class="col-sm-1-12 col-form-label">Short name</label>
+                    <input type="text" class="form-control" name="Short_name" id="Short_name" placeholder="">
+                  </div>
+                  <div class="form-group col-sm-6">
+                    <label for="Email" class="col-sm-1-12 col-form-label">Email</label>
+                    <input type="email" class="form-control" name="Email" id="Email" placeholder="" required>
+                  </div>
+                </div>                
+                <div class=" row">                  
+                  <div class="form-group col-sm-6">
+                    <label for="Address" class="col-sm-1-12 col-form-label">Address</label>
+                    <input type="text" class="form-control" name="Address" id="Address" placeholder="">
+                  </div>
+                
+                </div>                
+                <div class="form-group row">
+                  <div class="offset-md-6 col-md-6 text-right">
+                    <button type="submit" class="btn btn-primary">Save and Continue</button>
+                  </div>
+                </div>
+              </form>
+          
+        </div>
+      </div>   
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="diseaseModal" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header ">
+            <h5 class="modal-title">Add Disease</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+      <div class="modal-body">
+        <div class="container-fluid">          
+              <form>
+                <div class=" row">                  
+                  <div class="form-group col-sm-6">
+                    <label for="Disease" class="col-sm-1-12 col-form-label">Disease</label>
+                    <input type="text" class="form-control" name="Disease" id="Disease" placeholder="">
+                  </div>
+                  <div class="form-group col-sm-6">
+                    <label for="Code" class="col-sm-1-12 col-form-label">Code</label>
+                    <input type="text" class="form-control" name="Code" id="Code" placeholder="">
+                  </div>
+                </div>              
+                 <div class="form-group row">
+                  <div class="offset-md-6 col-md-6 text-right">
+                    <button type="submit" class="btn btn-primary">Save and Continue</button>
+                  </div>
+                </div>
+              </form>
+          
+        </div>
+      </div>   
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="companyModal" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header ">
+            <h5 class="modal-title">Add company</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+      <div class="modal-body">
+        <div class="container-fluid">          
+              <form>
+                <div class=" row">                  
+                  <div class="form-group col-sm-4">
+                    <label for="Disease" class="col-sm-1-12 col-form-label">Name</label>
+                    <input type="text" class="form-control" name="Disease" id="Disease" placeholder="">
+                  </div>
+                  <div class="form-group col-sm-4">
+                    <label for="Code" class="col-sm-1-12 col-form-label">Code</label>
+                    <input type="text" class="form-control" name="Code" id="Code" placeholder="">
+                  </div>
+                  <div class="form-group col-sm-4">
+                    <label for="Category" class="col-sm-1-12 col-form-label">Category</label>
+                    <input type="text" class="form-control" name="Category" id="Category" placeholder="">
+                  </div>
+                </div>              
+                 <div class="form-group row">
+                  <div class="offset-md-6 col-md-6 text-right">
+                    <button type="submit" class="btn btn-primary">Save and Continue</button>
+                  </div>
+                </div>
+              </form>
+          
+        </div>
+      </div>   
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="pathodologyModal" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header ">
+            <h5 class="modal-title">Add New record</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+      <div class="modal-body">
+        <div class="container-fluid">          
+              <form>
+                <div class=" row">                  
+                  <div class="form-group col-sm-5">
+                    <label for="Name" class="col-sm-1-12 col-form-label">Name</label>
+                    <input type="text" class="form-control" name="Name" id="Name" placeholder="">
+                  </div>
+                  <div class="form-group col-sm-6">
+                    <label for="Description" class="col-sm-1-12 col-form-label">Description</label>
+                    <input type="text" class="form-control" name="Description" id="Description" placeholder="">
+                  </div>
+                 
+                </div>              
+                 <div class="form-group row">
+                  <div class="offset-md-6 col-md-6 text-right">
+                    <button type="submit" class="btn btn-primary">Save and Continue</button>
+                  </div>
+                </div>
+              </form>
+          
+        </div>
+      </div>   
+    </div>
+  </div>
+</div>
+
+  <!-- Modal -->
+  <div class="modal" id="prescriptionmodal" tabindex="-1" role="dialog" aria-labelledby="prescription-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="prescription-modal-label">Request Prescriptions</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Form -->
+                <table class="table table-striped mt-3" id="prescription-table">
+                  <thead>
+                      <tr>
+                          <th scope="col">Drug</th>
+                          <th scope="col">Dose</th>
+                          <th scope="col">Frequency</th>
+                          <th scope="col">Duration</th>
+                          <th scope="col">Quantity</th>
+                          <th scope="col"></th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      <!-- Empty by default -->
+                  </tbody>
+              </table>
+                <div class="row">
+                  <div class="col-md-12">
+                    <form id="prescription-form">
+             
+                      <div class="form-row added-field"  id="dynamic-fields" style="display: none;">
+                          <div class="col-3">
+                              <label for="drug">Drug</label>
+                              <input type="text" class="form-control" id="drug" placeholder="Search Drug">
+                          </div>
+                          <div class="col-3">
+                              <label for="dose">Dose</label>
+                              <input type="number" class="form-control" id="dose" min="0">
+                          </div>
+                          <div class="col-3">
+                              <label for="frequency">Frequency</label>
+                              <input type="number" class="form-control" id="frequency" min="0">
+                          </div>
+                          <div class="col-3">
+                              <label for="duration">Duration</label>
+                              <input type="number" class="form-control" id="duration" min="0">
+                          </div>
+                          <div class="col-3">
+                              <label for="quantity">Quantity</label>
+                              <input type="number" class="form-control" id="quantity" min="0">
+                          </div>
+                      </div>
+                      <div class="form-row mt-3">
+                          <div class="col-12">
+                              <button type="button" class="btn btn-primary" id="add-item">+ Add Item</button>
+                              <button type="button" class="btn btn-danger" id="delete-item">- delete</button>
+                          </div>
+                      </div>
+                      <!-- Table -->
+                     
+                  </form>
+                  </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="save-continue">Save and Continue</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+  document.getElementById('add-item').addEventListener('click', function () {
+    // Clone the template fields
+    var templateFields = document.getElementById('dynamic-fields');
+    var clonedFields = templateFields.cloneNode(true);
+
+    // Reset values of cloned fields
+    clonedFields.querySelectorAll('input').forEach(function (input) {
+      input.value = '';
+    });
+
+    // Append the cloned fields to the table
+    document.getElementById('prescription-table').querySelector('tbody').appendChild(clonedFields);
+
+    // Display the added fields
+    clonedFields.style.display = 'flex';
+  });
+
+  document.getElementById('delete-item').addEventListener('click', function () {
+    // Get all added fields
+    var addedFields = document.querySelectorAll('.added-field');
+
+    // Remove the last added field
+    if (addedFields.length > 1) {
+      addedFields[addedFields.length - 1].remove();
+    }
+  });
+</script>
+
+
+<div class="modal" id="services-modal" tabindex="-1" role="dialog" aria-labelledby="services-modal-label" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="services-modal-label">Request Services</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <div class="row">
+                  <div class="col-md-7">
+                    <h>Request Services</h>
+                    <div class="card">
+                      <div class="card-header">
+                        <div class="card-title">
+                     
+                        </div>
+                      </div>
+                      <div class="card-body">
+                       
+                        <div class="form-group">
+                            <!-- Service selection dropdown -->
+                            <select class="form-control" id="service">
+                                <option selected disabled>Select a service</option>
+                                <option value="consultation">CONSULTATION</option>
+                                <option value="blood-test">BLOOD TEST</option>
+                                <option value="x-ray">X-RAY</option>
+                            </select>
+                        </div>
+                        <!-- Table to display selected services -->
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Service</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+                            <tbody id="services">
+                                <tr>
+                                  <td>consultation</td>
+                                  <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                    <style>
+                      .service-summary-container {
+                        margin-top: 20px;
+                    }
+                    
+                    .summary-heading {
+                        color: #333; /* Adjust the color as needed */
+                        font-size: 24px;
+                        margin-bottom: 15px;
+                    }
+                    
+                    .summary-card {
+                        border: 1px solid #ccc; /* Border color */
+                        border-radius: 10px; /* Border radius for rounded corners */
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Box shadow for a subtle lift */
+                    }
+                    
+                    .summary-text {
+                        font-size: 18px;
+                        margin-bottom: 20px;
+                        color: #0056b3;
+                    }
+                    
+                    .btn-primary {
+                        background-color: #007bff; /* Primary button color */
+                        color: #fff; /* Button text color */
+                        border: none; /* Remove button border */
+                        padding: 10px 20px; /* Adjust padding as needed */
+                        font-size: 16px;
+                        cursor: pointer;
+                        transition: background-color 0.3s ease; /* Smooth transition on hover */
+                    }
+                    
+                    .btn-primary:hover {
+                        background-color: #0056b3; /* Darker color on hover */
+                    }
+                    
+                    </style>
+                    <div class="col-md-5">
+                      <div class="service-summary-container">
+                          <h4 class="summary-heading">Service Summary</h4>
+                          <div class="card summary-card">
+                              <div class="card-header">
+                                  <div class="card-title">
+                                      <!-- Additional title or content if needed -->
+                                  </div>
+                              </div>
+                              <div class="card-body">
+                                  <div class="summary">
+                                      <!-- Summary section with added style -->
+                                      <p id="service-summary" class="summary-text">Services: 0 Count: 0.00</p>
+                                      <button class="btn btn-primary" id="save">Save and Continue</button>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                  
+              </div>
+          </div>
+       
+      </div>
+  </div>
+</div>
+
+<style>
+  /* Custom styles for the modal */
+  #staffModal .modal-dialog {
+      max-width: 800px; /* Set the maximum width as needed */
+      width: 90%; /* Adjust the width percentage as needed */
+  }
+
+  #staffModal .modal-content {
+      width: 100%;
+  }
+
+  #staffModal .modal-body {
+      padding: 20px;
+  }
+
+  #staffModal .modal-header {
+      background-color: #3498db; /* Change the background color as needed */
+      color: #fff;
+      border-bottom: 1px solid #ddd;
+  }
+
+  #staffModal .modal-title {
+      font-size: 1.5rem;
+  }
+
+  #staffModal .close {
+      color: #fff;
+      font-size: 1.5rem;
+  }
+
+  #staffModal .close:hover {
+      color: #f00; /* Change the close button color on hover as needed */
+  }
+
+  #staffModal .btn-primary {
+      background-color: #3498db; /* Change the button color as needed */
+      border-color: #3498db;
+  }
+
+  #staffModal .btn-primary:hover {
+      background-color: #217dbb; /* Change the button color on hover as needed */
+      border-color: #217dbb;
+  }
+</style>
+
+<div class="modal fade" id="staffModal" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header ">
+            <h5 class="modal-title">Add user</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+      <div class="modal-body">
+        <div class="container-fluid">          
+          <form>
+            <!-- Personal Information -->
+            <div class="row">
+                <div class="form-group col-sm-4">
+                    <label for="firstName" class="col-form-label">First Name</label>
+                    <input type="text" class="form-control" name="firstName" id="firstName" placeholder="">
+                </div>
+                <div class="form-group col-sm-4">
+                    <label for="middleName" class="col-form-label">Middle Name</label>
+                    <input type="text" class="form-control" name="middleName" id="middleName" placeholder="">
+                </div>
+                <div class="form-group col-sm-4">
+                    <label for="lastName" class="col-form-label">Last Name</label>
+                    <input type="text" class="form-control" name="lastName" id="lastName" placeholder="">
+                </div>
+            </div>
+        
+            <!-- Additional Personal Information -->
+            <div class="row">
+                <div class="form-group col-sm-4">
+                    <label for="gender" class="col-form-label">Gender</label>
+                    <select class="form-control" name="gender" id="gender" placeholder="">
+                        <option value=""></option>
+                        <option value=""></option>
+                        <option value=""></option>
+                    </select>
+                </div>
+                <div class="form-group col-sm-4">
+                    <label for="dob" class="col-form-label">Date of Birth</label>
+                    <select class="form-control" name="dob" id="dob" placeholder="">
+                        <option value=""></option>
+                        <option value=""></option>
+                        <option value=""></option>
+                    </select>
+                </div>
+                <div class="form-group col-sm-4">
+                    <label for="phone" class="col-form-label">Phone</label>
+                    <input type="text" class="form-control" name="phone" id="phone" placeholder="">
+                </div>
+            </div>
+        
+            <!-- Professional Information -->
+            <div class="row">
+                <div class="form-group col-sm-4">
+                    <label for="profession" class="col-form-label">Employee Profession</label>
+                    <select class="form-control" name="profession" id="profession" placeholder="">
+                        <option value=""></option>
+                        <option value=""></option>
+                        <option value=""></option>
+                    </select>
+                </div>
+                <div class="form-group col-sm-4">
+                    <label for="joiningDate" class="col-form-label">Joining Date</label>
+                    <input type="date" class="form-control" name="joiningDate" id="joiningDate" placeholder="">
+                </div>
+                <div class="form-group col-sm-4">
+                    <label for="maritalStatus" class="col-form-label">Marital Status</label>
+                    <select class="form-control" name="maritalStatus" id="maritalStatus" placeholder="">
+                        <option value=""></option>
+                        <option value=""></option>
+                        <option value=""></option>
+                    </select>
+                </div>
+            </div>
+        
+            <!-- Login Details -->
+            <h4  class="mt-4">Login Details</h4>
+            <div class="row">
+                <div class="form-group col-sm-4">
+                    <label for="email" class="col-form-label">Email</label>
+                    <input type="email" class="form-control" name="email" id="email" placeholder="">
+                </div>
+                <div class="form-group col-sm-4">
+                    <label for="password" class="col-form-label">Password</label>
+                    <input type="password" class="form-control" name="password" id="password" placeholder="">
+                </div>
+                <div class="form-group col-sm-4">
+                    <label for="confirmPassword" class="col-form-label">Confirm Password</label>
+                    <input type="password" class="form-control" name="confirmPassword" id="confirmPassword" placeholder="">
+                </div>
+            </div>
+        
+            <!-- Role Information -->
+            <h4 class="mt-4">Role</h4>
+              <div class="container">
+                <div class="row">
+                  <div class="form-group col-sm-4">                   
+                      <input type="checkbox" class="form-check-input" name="adminRole" id="adminRole">
+                      <label for="adminRole" class="form-check-label">Administrator</label>
+                  </div>
+                  <div class="form-group col-sm-4">                   
+                      <input type="checkbox" class="form-check-input" name="doctorRole" id="doctorRole">
+                      <label for="doctorRole" class="form-check-label">Doctor</label>
+                  </div>
+                  <div class="form-group col-sm-4">                    
+                      <input type="checkbox" class="form-check-input" name="nurseRole" id="nurseRole">
+                      <label for="nurseRole" class="form-check-label">Nurse</label>
+                  </div>
+              </div>
+              <div class="row">
+                  <div class="form-group col-sm-4">                    
+                      <input type="checkbox" class="form-check-input" name="physiotherapistRole" id="physiotherapistRole">
+                      <label for="physiotherapistRole" class="form-check-label">Physiotherapist</label>
+                  </div>
+                  <div class="form-group col-sm-4">                    
+                      <input type="checkbox" class="form-check-input" name="labTechnicianRole" id="labTechnicianRole">
+                      <label for="labTechnicianRole" class="form-check-label">Lab Technician</label>
+                  </div>
+                  <div class="form-group col-sm-4">                    
+                      <input type="checkbox" class="form-check-input" name="pharmacistRole" id="pharmacistRole">
+                      <label for="pharmacistRole" class="form-check-label">Pharmacist</label>
+                  </div>
+              </div>
+              <div class="row">
+                <div class="form-group col-sm-4">                   
+                    <input type="checkbox" class="form-check-input" name="receptionistRole" id="receptionistRole">
+                    <label for="receptionistRole" class="form-check-label">Receptionist</label>
+                </div>
+            </div>
+        
+              </div>
+          
+            <!-- Submit Button -->
+            <div class="form-group row">
+                <div class="offset-md-6 col-md-6 text-right">
+                    <button type="submit" class="btn btn-primary">Save and Continue</button>
+                </div>
+            </div>
+        </form>
+        
+          
+      </div>
+      </div>   
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Custom styles for the modal */
+ .modal-dialog {
+      max-width: 800px; /* Set the maximum width as needed */
+      width: 90%; /* Adjust the width percentage as needed */
+  }
+
+ .modal-content {
+      width: 100%;
+  }
+
+ .modal-body {
+      padding: 20px;
+  }
+
+ .modal-header {
+      background-color: #3498db; /* Change the background color as needed */
+      color: #fff;
+      border-bottom: 1px solid #ddd;
+  }
+
+ .modal-title {
+      font-size: 1.5rem;
+  }
+
+ .close {
+      color: #fff;
+      font-size: 1.5rem;
+  }
+
+ .close:hover {
+      color: #f00; /* Change the close button color on hover as needed */
+  }
+
+ .btn-primary {
+      background-color: #3498db; /* Change the button color as needed */
+      border-color: #3498db;
+  }
+
+ .btn-primary:hover {
+      background-color: #217dbb; /* Change the button color on hover as needed */
+      border-color: #217dbb;
+  }
+</style>
+<div class="modal fade" id="serviceModal" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header ">
+            <h5 class="modal-title">Add new service</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+      <div class="modal-body">
+        <div class="container-fluid">          
+          <form>
+            <!-- Personal Information -->
+            <div class="row">
+              <div class="form-group col-sm-6">
+                <label for="type" class="col-form-label">Type</label>
+                <select class="form-control" name="type" id="type">
+                  <option value="not-tracked">Not Tracked</option>
+                  <option value="tracked">Tracked</option>
+                  <option value="consultation">Consultation</option>
+                  <option value="investigation">Investigation</option>
+                  <option value="procedures">Procedures</option>
+                </select>
+              </div>
+              <div class="form-group col-sm-6">
+                <label for="department" class="col-form-label">Department</label>
+                <select class="form-control" name="department" id="department">
+                  <option value="general">General</option>
+                  <option value="inhaler">Inhaler</option>
+                  <option value="laboratory">Laboratory</option>
+                </select>
+              </div>
+            </div>
+          
+            <!-- Additional Personal Information -->
+            <div class="row">
+              <div class="form-group col-sm-6">
+                <label for="name" class="col-form-label">Name</label>
+                <input type="text" class="form-control" name="name" id="name" placeholder="">
+              </div>
+              <div class="form-group col-sm-6">
+                <label for="description" class="col-form-label">Description</label>
+                <textarea id="description" name="description" rows="2" class="form-control"></textarea>
+              </div>
+            </div>
+          
+            <!-- Submit Button -->
+            <div class="form-group row">
+              <div class="offset-md-6 col-md-6 text-right">
+                <button type="submit" class="btn btn-primary">Save and Continue</button>
+              </div>
+            </div>
+          </form>
+          
+        
+          
+      </div>
+      </div>   
+    </div>
+  </div>
+</div>
+
+<script>
+  $('#exampleModal').on('show.bs.modal', event => {
+    var button = $(event.relatedTarget);
+    var modal = $(this);
+    // Use above variables to manipulate the DOM
+    
+  });
+</script>
+<script>
+    $('#exampleModal').on('show.bs.modal', event => {
+        var button = $(event.relatedTarget);
+        var modal = $(this);
+        // Use above variables to manipulate the DOM
+        
+    });
+</script>
