@@ -51,7 +51,7 @@
                     <div class="form-row">
                       <div class="form-group col-md-4">
                         <label for="gender">Gender</label>
-                        <select id="gender" class="form-control">
+                        <select id="gender"  class="form-control select2bs4" style="width: 100%;" >
                           <option selected>Select gender</option>
                           <option>Male</option>
                           <option>Female</option>
@@ -64,7 +64,7 @@
                       </div>
                       <div class="form-group col-md-4">
                         <label for="nationality">Nationality</label>
-                        <select id="nationality" class="form-control">
+                        <select id="nationality" class="form-control select2bs4" style="width: 100%;"  >
                           <option selected>Select Country</option>
                           <option>Tanzania</option>
                           <option>Kenya</option>
@@ -76,7 +76,7 @@
                     <div class="form-row">
                       <div class="form-group col-md-3">
                         <label for="patientType">Patient Type</label>
-                        <select id="patientType" class="form-control">
+                        <select id="patientType" class="form-control select2bs4" style="width: 100%;"  >
                           <option selected>NationalStaff</option>
                           <option>InternationalStaff</option>
                           <option>Visitor</option>
@@ -85,7 +85,7 @@
                       </div>
                       <div class="form-group col-md-3">
                         <label for="company">Company</label>
-                        <select id="company" class="form-control">
+                        <select id="company" class="form-control select2bs4" style="width: 100%;"  >
                           <option selected>Select Company</option>
                           <option>SAMOTA</option>
                           <option>ISOAF</option>
@@ -135,7 +135,7 @@
                       </div>
                       <div class="form-group col-md-4">
                         <label for="insurance">Insurance</label>
-                        <select id="insurance" class="form-control">
+                        <select id="insurance" class="form-control select2bs4" style="width: 100%;"  >
                           <option selected>Uninsured</option>
                           <option>Insured</option>
                         </select>
@@ -540,6 +540,12 @@
     </div>    
   </di>   
 
+
+
+
+
+
+
   <!-- Visit Modal Form -->
 <div class="modal fade" id="visitModal" tabindex="-1" role="dialog" aria-labelledby="visitModalLabel" aria-hidden="true">
     <!-- ... Your visit modal content goes here ... -->
@@ -557,7 +563,7 @@
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <label for="visitType">Visit Type</label>
-                                <select id="visitType" class="form-control">
+                                <select id="visitType" class="form-control select2bs4" style="width: 100%;"  >
                                     <option value="Normal">Normal</option>
                                     <option value="FollowUp">FollowUp</option>
                                     <option value="Referral">Referral</option>
@@ -566,7 +572,7 @@
                             </div>
                             <div class="form-group col-md-6">
                                 <label for="service">Service</label>
-                                <select id="service" class="form-control">
+                                <select id="service" class="form-control select2bs4" style="width: 100%;"  >
                                     <option value="Normal">Normal</option>
                                     <option value="FollowUp">FollowUp</option>
                                     <option value="Referral">Referral</option>
@@ -614,7 +620,7 @@
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <label for="doctor">Doctor</label>
-                                <select id="doctor" class="form-control">
+                                <select id="doctor" class="form-control select2bs4" style="width: 100%;"  >
                                     <option value="">Select doctor</option>
                                     <option value="Mrisho">Mrisho</option>
                                     <option value="Ismail">Ismail</option>
@@ -1090,7 +1096,7 @@
                        
                         <div class="form-group">
                             <!-- Service selection dropdown -->
-                            <select class="form-control" id="service">
+                            <select class="form-control select2bs4" style="width: 100%;"   id="service">
                                 <option selected disabled>Select a service</option>
                                 <option value="consultation">CONSULTATION</option>
                                 <option value="blood-test">BLOOD TEST</option>
@@ -1236,8 +1242,9 @@
           </div>
       <div class="modal-body">
         <div class="container-fluid">          
-          <form>
+          <form id="staffForm" method="post">
             <!-- Personal Information -->
+            {% csrf_token %}
             <div class="row">
                 <div class="form-group col-sm-4">
                     <label for="firstName" class="col-form-label">First Name</label>
@@ -1248,56 +1255,70 @@
                     <input type="text" class="form-control" name="middleName" id="middleName" placeholder="">
                 </div>
                 <div class="form-group col-sm-4">
-                    <label for="lastName" class="col-form-label">Last Name</label>
-                    <input type="text" class="form-control" name="lastName" id="lastName" placeholder="">
+                    <label for="lastname" class="col-form-label">Last Name</label>
+                    <input type="text" class="form-control" name="lastname" id="lastname" placeholder="">
                 </div>
             </div>
         
             <!-- Additional Personal Information -->
             <div class="row">
                 <div class="form-group col-sm-4">
-                    <label for="gender" class="col-form-label">Gender</label>
-                    <select class="form-control" name="gender" id="gender" placeholder="">
-                        <option value=""></option>
-                        <option value=""></option>
-                        <option value=""></option>
-                    </select>
+                  <label for="gender" class="col-form-label">Gender</label>
+                  <select class="form-control select2bs4" style="width: 100%;"  name="gender" id="gender" placeholder="">
+                      <option value="">Select Gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="non-binary">Non-Binary</option>
+                      <option value="prefer-not-to-say">Prefer Not to Say</option>
+                  </select>                  
                 </div>
                 <div class="form-group col-sm-4">
-                    <label for="dob" class="col-form-label">Date of Birth</label>
-                    <select class="form-control" name="dob" id="dob" placeholder="">
-                        <option value=""></option>
-                        <option value=""></option>
-                        <option value=""></option>
-                    </select>
+                    <label for="dob" class="col-form-label">Date of Birth</label>                   
+                    <input type="date" class="form-control" name="dob" id="dob" placeholder="">
                 </div>
                 <div class="form-group col-sm-4">
                     <label for="phone" class="col-form-label">Phone</label>
-                    <input type="text" class="form-control" name="phone" id="phone" placeholder="">
+                    <input type="tel" class="form-control" name="phone" id="phone" placeholder="">
                 </div>
             </div>
         
             <!-- Professional Information -->
             <div class="row">
-                <div class="form-group col-sm-4">
-                    <label for="profession" class="col-form-label">Employee Profession</label>
-                    <select class="form-control" name="profession" id="profession" placeholder="">
-                        <option value=""></option>
-                        <option value=""></option>
-                        <option value=""></option>
-                    </select>
-                </div>
+              <div class="form-group col-sm-4">
+                <label for="profession" class="col-form-label">Employee Profession</label>
+                <select class="form-control select2bs4" style="width: 100%;" name="profession" id="profession">
+                    <option value="">Select Profession</option>
+                    <option value="doctor">Doctor</option>
+                    <option value="nurse">Nurse</option>
+                    <option value="pharmacist">Pharmacist</option>
+                    <option value="developer">Developer</option>
+                    <option value="designer">Designer</option>
+                    <option value="manager">Manager</option>
+                    <option value="radiologist">Radiologist</option>
+                    <option value="lab_technician">Lab Technician</option>
+                    <option value="receptionist">Receptionist</option>
+                    <option value="physiotherapist">Physiotherapist</option>
+                    <option value="accountant">Accountant</option>
+                    <option value="security_guard">Security Guard</option>
+                    <option value="chef">Chef</option>
+                    <option value="cleaner">Cleaner</option>
+                    <!-- Add more options as needed -->
+                </select>
+            </div>
+            
                 <div class="form-group col-sm-4">
                     <label for="joiningDate" class="col-form-label">Joining Date</label>
                     <input type="date" class="form-control" name="joiningDate" id="joiningDate" placeholder="">
                 </div>
                 <div class="form-group col-sm-4">
-                    <label for="maritalStatus" class="col-form-label">Marital Status</label>
-                    <select class="form-control" name="maritalStatus" id="maritalStatus" placeholder="">
-                        <option value=""></option>
-                        <option value=""></option>
-                        <option value=""></option>
-                    </select>
+                  <label for="maritalStatus" class="col-form-label">Marital Status</label>
+                  <select class="form-control select2bs4" style="width: 100%;"   name="maritalStatus" id="maritalStatus" placeholder="">
+                      <option value="">Select Marital Status</option>
+                      <option value="single">Single</option>
+                      <option value="married">Married</option>
+                      <option value="divorced">Divorced</option>
+                      <option value="widowed">Widowed</option>
+                  </select>
                 </div>
             </div>
         
@@ -1320,44 +1341,68 @@
         
             <!-- Role Information -->
             <h4 class="mt-4">Role</h4>
-              <div class="container">
+            <div class="container">
                 <div class="row">
-                  <div class="form-group col-sm-4">                   
-                      <input type="checkbox" class="form-check-input" name="adminRole" id="adminRole">
-                      <label for="adminRole" class="form-check-label">Administrator</label>
-                  </div>
-                  <div class="form-group col-sm-4">                   
-                      <input type="checkbox" class="form-check-input" name="doctorRole" id="doctorRole">
-                      <label for="doctorRole" class="form-check-label">Doctor</label>
-                  </div>
-                  <div class="form-group col-sm-4">                    
-                      <input type="checkbox" class="form-check-input" name="nurseRole" id="nurseRole">
-                      <label for="nurseRole" class="form-check-label">Nurse</label>
-                  </div>
-              </div>
-              <div class="row">
-                  <div class="form-group col-sm-4">                    
-                      <input type="checkbox" class="form-check-input" name="physiotherapistRole" id="physiotherapistRole">
-                      <label for="physiotherapistRole" class="form-check-label">Physiotherapist</label>
-                  </div>
-                  <div class="form-group col-sm-4">                    
-                      <input type="checkbox" class="form-check-input" name="labTechnicianRole" id="labTechnicianRole">
-                      <label for="labTechnicianRole" class="form-check-label">Lab Technician</label>
-                  </div>
-                  <div class="form-group col-sm-4">                    
-                      <input type="checkbox" class="form-check-input" name="pharmacistRole" id="pharmacistRole">
-                      <label for="pharmacistRole" class="form-check-label">Pharmacist</label>
-                  </div>
-              </div>
-              <div class="row">
-                <div class="form-group col-sm-4">                   
-                    <input type="checkbox" class="form-check-input" name="receptionistRole" id="receptionistRole">
-                    <label for="receptionistRole" class="form-check-label">Receptionist</label>
+                    <div class="form-group col-sm-12">
+                        <label for="userRole" class="col-form-label">Select Role</label>
+                        <select class="form-control select2bs4" style="width: 100%;" name="userRole" id="userRole">
+                            <option value="">Select Role</option>
+                            <option value="admin">Administrator</option>
+                            <option value="doctor">Doctor</option>
+                            <option value="nurse">Nurse</option>
+                            <option value="physiotherapist">Physiotherapist</option>
+                            <option value="labTechnician">Lab Technician</option>
+                            <option value="pharmacist">Pharmacist</option>
+                            <option value="receptionist">Receptionist</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-        
-              </div>
-          
+            <div id="messageContainer" class="text-center mt-2"></div>
+            <script>
+              $(document).ready(function () {
+                  // Handle form submission
+                  $('#staffForm').submit(function (e) {
+                      e.preventDefault();
+      
+                      // Check if passwords match
+                      var password = $('#password').val();
+                      var confirmPassword = $('#confirmPassword').val();
+      
+                      if (password !== confirmPassword) {
+                          // Passwords do not match, display an error message
+                          $('#messageContainer').html('<div class="alert alert-danger" role="alert">Passwords do not match</div>');
+                          return;
+                      }
+      
+                      // Serialize the form data
+                      var formData = $(this).serialize();
+      
+                      // Send AJAX request to the server
+                      $.ajax({
+                        url: '/save_staff_view/',
+                        method: 'POST',
+                        data: formData,
+                        success: function (response, status, xhr) {
+                            if (xhr.status === 200) {
+                                // Handle success
+                                $('#messageContainer').html('<div class="alert alert-success" role="alert">' + response.message + '</div>');
+                                 // Clear the form fields
+                                 $('#staffForm')[0].reset();
+                            } else {
+                                // Handle other status codes (e.g., 400 for client errors)
+                                $('#messageContainer').html('<div class="alert alert-danger" role="alert">' + response.error + '</div>');
+                            }
+                        },
+                        error: function (error) {
+                            // Handle the AJAX error
+                            $('#messageContainer').html('<div class="alert alert-danger" role="alert">Error saving data</div>');
+                            console.error('Error saving data:', error);
+                        }
+                    });
+                  });
+              });
+          </script>
             <!-- Submit Button -->
             <div class="form-group row">
                 <div class="offset-md-6 col-md-6 text-right">

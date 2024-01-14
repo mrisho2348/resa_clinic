@@ -28,19 +28,18 @@
           <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
               <!-- Home Section -->
               <li class="nav-item">
-                  {% url 'home' as admin_home %}
-                  <a href="{% url "home" %}" class="nav-link {% if request.path == admin_home %} active {% endif %}">
+                  {% url 'dashboard' as admin_home %}
+                  <a href="{% url "dashboard" %}" class="nav-link {% if request.path == admin_home %} active {% endif %}">
                       <i class="nav-icon fas fa-th"></i>
                       <p>HOME</p>
                   </a>
               </li> 
 
               <!-- Clinic Section -->
-              <li class="nav-header">Clinic</li>
               <li class="nav-item has-treeview">
                   <a href="#" class="nav-link">
                       <i class="nav-icon fas fa-hospital"></i>
-                      <p> <i class="fas fa-angle-left right"></i></p>
+                      <p>Clinic <i class="fas fa-angle-left right"></i></p>
                   </a>
                   <ul class="nav nav-treeview">
                       <!-- Dashboard Link -->

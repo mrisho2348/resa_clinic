@@ -62,8 +62,7 @@ class AdminHOD(models.Model):
 
 class Staffs(models.Model):
     id = models.AutoField(primary_key=True)
-    admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='staff')
-    address = models.TextField()
+    admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='staff')   
     middle_name = models.TextField(blank=True)
     gender = models.TextField(max_length=7, blank=True)
     date_of_birth = models.DateField(blank=True, default='2000-01-01')
