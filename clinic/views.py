@@ -15,7 +15,10 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.mail import send_mail
 from clinic.emailBackEnd import EmailBackend
 from django.core.exceptions import ObjectDoesNotExist
+from clinic.forms import ImportStaffForm
 from clinic.models import ContactDetails, CustomUser, Staffs
+from clinic.resources import StaffResources
+from tablib import Dataset
 # Create your views here.
 def index(request):
     return render(request,"index.html")
@@ -319,7 +322,7 @@ def edit_staff_save(request):
             middle_name = request.POST.get('middleName')
             lastname = request.POST.get('lastname')            
             gender = request.POST.get('gender')
-            dob = request.POST.get('dob')
+            dob = request.POST.get('date_of_birth')
             phone = request.POST.get('phone')
             profession = request.POST.get('profession')            
             marital_status = request.POST.get('maritalStatus')
@@ -343,7 +346,7 @@ def edit_staff_save(request):
 
             # Assuming the URL name for the next editing form is "qualification_form"
             messages.success(request, "Staff details updated successfully.")
-            return redirect("qualification_form", staff_id=staff_id)
+            return redirect("manage_staff")
         except Exception as e:
             messages.error(request, f"Error updating staff details: {str(e)}")
 
@@ -352,3 +355,50 @@ def edit_staff_save(request):
 
 
 
+def single_staff_detail(request, staff_id):
+    staff = get_object_or_404(Staffs, id=staff_id)
+    # Fetch additional staff-related data  
+    context = {
+        'staff': staff,
+     
+    }
+
+    return render(request, "hod_template/staff_details.html", context)
+
+def import_staff(request):
+    if request.method == 'POST':
+        form = ImportStaffForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                staff_resource = StaffResources()
+                new_staffs = request.FILES['staff_file']
+                
+                # Use tablib to load the imported data
+                dataset = Dataset()
+                imported_data = dataset.load(new_staffs.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+
+                for data in imported_data:
+                   
+                    user = CustomUser.objects.create_user(username=data[2],
+                                                          password=data[2], 
+                                                          email=data[2], 
+                                                          first_name=data[0],
+                                                          last_name=data[1],
+                                                          user_type=2)
+                    user.staff.middle_name =data[3],
+                    user.staff.date_of_birth = data[5]
+                    user.staff.gender = data[4],           
+                    user.staff.phone_number = data[8]            
+                    user.staff.marital_status = data[6]
+                    user.staff.profession = data[7]
+                    user.staff.role =data[9]
+                    user.save()
+
+                messages.success(request, 'Staff data imported successfully!')
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportStaffForm()
+
+    return render(request, 'hod_template/import_staff.html', {'form': form})

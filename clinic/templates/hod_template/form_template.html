@@ -2,7 +2,7 @@
     {% csrf_token %}
     <div class="card-body">
      
-        {% for field in forms %}
+        {% for field in form %}
         <div class="form-group">
             {{field.errors}}
             {{field.label_tag}}

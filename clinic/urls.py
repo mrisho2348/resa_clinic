@@ -1,11 +1,12 @@
 
 from django.urls import include, path
 
-from . import views
+from . import views,delete
 
 urlpatterns = [
         path('',views.index, name="home"),
         path('resa/dashboard',views.dashboard, name="dashboard"),
+        path('resa/ImportExcel',views.import_staff, name="import_staff"),
         path('login', views.ShowLogin, name='login'), 
         path('logout_user', views.logout_user, name='logout_user'),  # Move this line here
         path('contact/', views.ContactFormView.as_view(), name='contact_form'),
@@ -19,6 +20,9 @@ urlpatterns = [
         path('resa/all-patients',views.manage_patient, name="manage_patient"),
         path('resa/consultation-queue',views.manage_consultation, name="manage_consultation"),
         path('resa/new-consultation',views.add_consultation, name="add_consultation"),
+        path('staff_detail/<int:staff_id>/', views.single_staff_detail, name='single_staff_detail'),
+        path('edit_staff/<str:staff_id>', views.edit_staff, name='edit_staff'),  
+        path('edit_staff_save', views.edit_staff_save, name='edit_staff_save'), 
         path('resa/new-request',views.add_request, name="add_request"),
         path('resa/manage-company',views.manage_company, name="manage_company"),
         path('resa/manage-disease',views.manage_disease, name="manage_disease"),
@@ -41,4 +45,5 @@ urlpatterns = [
         path('resa/individual-visit',views.individual_visit, name="individual_visit"),
         path('resa/product-summary',views.product_summary, name="product_summary"),
         path('resa/manage-pathodology',views.manage_pathodology, name="manage_pathodology"),
+        path('delete_staff/<int:staff_id>/', delete.delete_staff, name='delete_staff'),
 ]
