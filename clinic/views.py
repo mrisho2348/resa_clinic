@@ -16,7 +16,7 @@ from django.core.mail import send_mail
 from clinic.emailBackEnd import EmailBackend
 from django.core.exceptions import ObjectDoesNotExist
 from clinic.forms import ImportStaffForm
-from clinic.models import ContactDetails, CustomUser, Staffs
+from clinic.models import Company, ContactDetails, CustomUser, DiseaseRecode, InsuranceCompany, PathodologyRecord, Staffs
 from clinic.resources import StaffResources
 from tablib import Dataset
 # Create your views here.
@@ -141,11 +141,13 @@ def add_request(request):
 
 @login_required
 def manage_company(request):
-    return render(request,"hod_template/manage_company.html")
+    companies=Company.objects.all() 
+    return render(request,"hod_template/manage_company.html",{"companies":companies})
 
 @login_required
 def manage_disease(request):
-    return render(request,"hod_template/manage_disease.html")
+    disease_records=DiseaseRecode.objects.all() 
+    return render(request,"hod_template/manage_disease.html",{"disease_records":disease_records})
 
 @login_required
 def manage_staff(request):     
@@ -154,7 +156,8 @@ def manage_staff(request):
 
 @login_required
 def manage_insurance(request):
-    return render(request,"hod_template/manage_insurance.html")
+    insurance_companies=InsuranceCompany.objects.all() 
+    return render(request,"hod_template/manage_insurance.html",{"insurance_companies":insurance_companies})
 
 @login_required
 def resa_report(request):
@@ -212,7 +215,8 @@ def product_summary(request):
 
 @login_required
 def manage_pathodology(request):
-    return render(request,"hod_template/manage_pathodology.html")
+    pathodology_records=PathodologyRecord.objects.all() 
+    return render(request,"hod_template/manage_pathodology.html",{"pathodology_records":pathodology_records})
 
 
 logger = logging.getLogger(__name__)
@@ -298,7 +302,7 @@ def edit_staff(request, staff_id):
     staff = get_object_or_404(Staffs, id=staff_id)  
     # If staff exists, proceed with the rest of the view
     request.session['staff_id'] = staff_id
-    return render(request, "hod_template/edit_staff.html", {"id": staff_id, "username": staff.admin.username, "staff": staff})   
+    return render(request, "update/edit_staff.html", {"id": staff_id, "username": staff.admin.username, "staff": staff})   
 
 
 def edit_staff_save(request):
@@ -402,3 +406,88 @@ def import_staff(request):
         form = ImportStaffForm()
 
     return render(request, 'hod_template/import_staff.html', {'form': form})
+
+@csrf_exempt
+@login_required
+def add_disease(request):
+    try:
+        if request.method == 'POST':
+            disease_name = request.POST.get('Disease')
+            code = request.POST.get('Code')
+
+            # Save data to the model
+            DiseaseRecode.objects.create(disease_name=disease_name, code=code)
+
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid request method'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+ 
+@csrf_exempt
+@login_required    
+def add_insurance_company(request):
+    try:
+        if request.method == 'POST':
+            name = request.POST.get('Name')
+            phone = request.POST.get('Phone')
+            short_name = request.POST.get('Short_name')
+            email = request.POST.get('Email')
+            address = request.POST.get('Address')
+
+            # Save data to the model
+            InsuranceCompany.objects.create(
+                name=name,
+                phone=phone,
+                short_name=short_name,
+                email=email,
+                address=address
+            )
+
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid request method'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})    
+ 
+@csrf_exempt
+@login_required      
+def add_company(request):
+    try:
+        if request.method == 'POST':
+            name = request.POST.get('Name')
+            code = request.POST.get('Code')
+            category = request.POST.get('Category')
+
+            # Save data to the model
+            Company.objects.create(
+                name=name,
+                code=code,
+                category=category
+            )
+
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid request method'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+ 
+@csrf_exempt
+@login_required      
+def add_pathodology_record(request):
+    try:
+        if request.method == 'POST':
+            name = request.POST.get('Name')
+            description = request.POST.get('Description')
+
+            # Save data to the model
+            PathodologyRecord.objects.create(
+                name=name,
+                description=description
+            )
+
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid request method'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})    

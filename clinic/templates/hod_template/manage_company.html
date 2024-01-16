@@ -13,6 +13,10 @@
 <a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#companyModal">
     <i class="fas fa-plus"></i> New company
 </a>
+<!-- Add Import Staff link and modal trigger -->
+<a class="btn btn-success float-right mr-2" href="{% url 'import_companies' %}">
+  <i class="fas fa-file-import"></i> Import company
+</a>
 {% endblock breadcrumb %}
 
 {% load static %}
@@ -22,50 +26,28 @@
 
 <div class="">
     <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
-        <thead>
+      <thead>
+        <tr>
+            <th>name</th>
+            <th>Code</th>
+            <th>category</th>        
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="insurance-company-table-body">
+        {% for company in companies %}
             <tr>
-                <th>Name</th>
-                <th>Code</th>
-                <th>Category</th>
-                <th>Actions</th>
+                <td>{{ company.name }}</td>
+                <td>{{ company.code }}</td>
+                <td>{{ company.category }}</td>              
+                <td>
+                  <a href="{% url 'edit_company' company.id %}" class="btn btn-info">Edit</a>
+                  <a href="{% url 'delete_company' company.id %}" class="btn btn-danger">Delete</a>
+   
+                </td>
             </tr>
-        </thead>
-        <tbody id="student-table-body">
-             <!-- Sample Data -->
-             <tr>
-                <td>ABC Insurance</td>
-                <td>ABC001</td>
-                <td>Health</td>
-                <td>
-                  <button class="btn btn-info">View Details</button>
-                  <button class="btn btn-warning">Edit</button>
-                  <button class="btn btn-danger">Delete</button>
-                </td>
-              </tr>
-              <tr>
-                <td>XYZ Insurance</td>
-                <td>XYZ002</td>
-                <td>Life</td>
-                <td>
-                  <button class="btn btn-info">View Details</button>
-                  <button class="btn btn-warning">Edit</button>
-                  <button class="btn btn-danger">Delete</button>
-                </td>
-              </tr>
-              <tr>
-                <td>PQR Insurance</td>
-                <td>PQR003</td>
-                <td>Auto</td>
-                <td>
-                  <button class="btn btn-info">View Details</button>
-                  <button class="btn btn-warning">Edit</button>
-                  <button class="btn btn-danger">Delete</button>
-                </td>
-              </tr>
-              <!-- Add more rows as needed -->
-              
-            
-        </tbody>
+        {% endfor %}
+    </tbody>
     </table>
 </div>
 

@@ -13,7 +13,9 @@ Pathology
     <a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#pathodologyModal">
         <i class="fas fa-plus"></i>Add
     </a>
-   
+    <a class="btn btn-success float-right mr-2" href="{% url 'import_pathology_records' %}">
+        <i class="fas fa-file-import"></i> Import 
+      </a>
     {% load static %}
 {% endblock breadcrumb %}
 {% block main_content %}
@@ -22,58 +24,22 @@ Pathology
         <thead>
             <tr>
                 <th>Name</th>
-                <th>Description</th> 
+                <th>Description</th>
+                <th>Actions</th>
             </tr>
         </thead>
-        <tbody id="student-table-body">
-            <tr>
-                <td>Endocrinology : diabetes...</td>
-                <td>Endocrinology : diabetes...</td>
-            </tr>
-            <tr>
-                <td>Malaria (must be confirmed by Rapid Test)</td>
-                <td>Malaria (must be confirmed by Rapid Test)</td>
-            </tr>
-            <tr>
-                <td>Dental</td>
-                <td>Dental</td>
-            </tr>
-            <tr>
-                <td>Musculoskeletal (Except Rheumatology, Trauma, Wound, Laceration...)</td>
-                <td>Musculoskeletal (Except Rheumatology, Trauma, Wound, Laceration...)</td>
-            </tr>
-            <tr>
-                <td>Haematology</td>
-                <td>Haematology</td>
-            </tr>
-            <tr>
-                <td>Proctology</td>
-                <td>Proctology</td>
-            </tr>
-            <tr>
-                <td>Parasitology</td>
-                <td>Parasitology</td>
-            </tr>
-            <tr>
-                <td>Ear - Nose - Throat (ENT)</td>
-                <td>Ear - Nose - Throat (ENT)</td>
-            </tr>
-            <tr>
-                <td>Acute Viral Illness</td>
-                <td>Acute Viral Illness</td>
-            </tr>
-            <tr>
-                <td>Cardiology & Vascular (Including Hypertension)</td>
-                <td>Cardiology & Vascular (Including Hypertension)</td>
-            </tr>
-            <tr>
-                <td>Referral (to nearest referral hospital without doctor medical assistance)</td>
-                <td>Referral (to nearest referral hospital without doctor medical assistance)</td>
-            </tr>
-            <tr>
-                <td>Dermatology</td>
-                <td>Dermatology Over Stock NA</td>
-            </tr>                
+        <tbody id="pathology-record-table-body">
+            {% for pathodology in pathodology_records %}
+                <tr>
+                    <td>{{ pathodology.name }}</td>
+                    <td>{{ pathodology.description }}</td>
+                    <td>
+                        <a href="{% url 'edit_pathodology' pathodology.id %}" class="btn btn-info">Edit</a>
+                        <a href="{% url 'delete_pathodology' pathodology.id %}" class="btn btn-danger">Delete</a>
+
+                      </td>
+                </tr>
+            {% endfor %}
         </tbody>
     </table>
 </div>

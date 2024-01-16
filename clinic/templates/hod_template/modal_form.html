@@ -600,7 +600,52 @@
 <!-- Edit Modal Form -->
 <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
     <!-- ... Your edit modal content goes here ... -->
-  
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+      <div class="modal-header">
+              <h5 class="modal-title">Edit modal</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+          </div>
+          <div class="modal-body">
+              <div class="container-fluid">                
+                  <form>
+                      <div class="form-row">
+                          <div class="form-group col-md-6">
+                              <label for="visitType">Visit Type</label>
+                              <select id="visitType" class="form-control select2bs4" style="width: 100%;"  >
+                                  <option value="Normal">Normal</option>
+                                  <option value="FollowUp">FollowUp</option>
+                                  <option value="Referral">Referral</option>
+                                  <option value="Emergency">Emergency</option>
+                              </select>
+                          </div>
+                          <div class="form-group col-md-6">
+                              <label for="service">Service</label>
+                              <select id="service" class="form-control select2bs4" style="width: 100%;"  >
+                                  <option value="Normal">Normal</option>
+                                  <option value="FollowUp">FollowUp</option>
+                                  <option value="Referral">Referral</option>
+                                  <option value="Emergency">Emergency</option>
+                              </select>
+                          </div>
+                      </div>
+                  
+                      <div class="form-group row">
+                          <div class="offset-md-6 col-md-6 text-right">
+                              <button type="submit" class="btn btn-primary">Save and Continue</button>
+                          </div>
+                      </div>
+                  </form>
+             </div>
+          </div>
+          {% comment %} <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary">Save</button>
+          </div> {% endcomment %}
+      </div>
+  </div>
 </div>
 
 <!-- Appointment Modal Form -->
@@ -818,7 +863,8 @@
           </div>
       <div class="modal-body">
         <div class="container-fluid">          
-              <form>
+              <form id="insuranceForm" method="post">
+                {% csrf_token %}
                 <div class=" row">                  
                   <div class="form-group col-sm-6">
                     <label for="Name" class="col-sm-1-12 form-check-label">Name</label>
@@ -848,11 +894,40 @@
                 </div>                
                 <div class="form-group row">
                   <div class="offset-md-6 col-md-6 text-right">
-                    <button type="submit" class="btn btn-primary">Save and Continue</button>
+                    <button type="button" class="btn btn-primary"  id="saveInsurance">Save and Continue</button>
                   </div>
                 </div>
               </form>
-          
+
+              <script>
+                  $(document).ready(function () {
+                      $('#saveInsurance').click(function () {
+                          // Capture form data
+                          var formData = $('#insuranceForm').serialize();
+              
+                          // Send AJAX request
+                          $.ajax({
+                              url: '/add_insurance_company/',  // Update with your actual URL
+                              type: 'POST',
+                              data: formData,
+                              success: function (response) {
+                                  if (response.success) {
+                                      // Handle success (e.g., close the modal)
+                                      $('#insuranceModal').modal('hide');
+                                  } else {
+                                      // Handle error
+                                      console.error('Failed to save insurance company:', response.error);
+                                  }
+                              },
+                              error: function () {
+                                  console.error('AJAX request failed');
+                              }
+                          });
+                      });
+                  });
+              </script>
+              ``
+              
         </div>
       </div>   
     </div>
@@ -871,7 +946,8 @@
           </div>
       <div class="modal-body">
         <div class="container-fluid">          
-              <form>
+              <form method="post" id="diseaseForm">
+                {% csrf_token %}
                 <div class=" row">                  
                   <div class="form-group col-sm-6">
                     <label for="Disease" class="col-sm-1-12 col-form-label">Disease</label>
@@ -884,11 +960,39 @@
                 </div>              
                  <div class="form-group row">
                   <div class="offset-md-6 col-md-6 text-right">
-                    <button type="submit" class="btn btn-primary">Save and Continue</button>
+                    <button type="button" class="btn btn-primary" id="saveDisease">Save and Continue</button>
                   </div>
                 </div>
               </form>
-          
+              <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+              <script>
+                  $(document).ready(function () {
+                      $('#saveDisease').click(function () {
+                          // Capture form data
+                          var formData = $('#diseaseForm').serialize();
+              
+                          // Send AJAX request
+                          $.ajax({
+                              url: '/add_disease/',  // Update with your actual URL
+                              type: 'POST',
+                              data: formData,
+                              success: function (response) {
+                                  if (response.success) {
+                                      // Handle success (e.g., close the modal)
+                                      $('#diseaseModal').modal('hide');
+                                  } else {
+                                      // Handle error
+                                      console.error('Failed to save disease:', response.error);
+                                  }
+                              },
+                              error: function () {
+                                  console.error('AJAX request failed');
+                              }
+                          });
+                      });
+                  });
+              </script>
+              
         </div>
       </div>   
     </div>
@@ -907,11 +1011,11 @@
           </div>
       <div class="modal-body">
         <div class="container-fluid">          
-              <form>
+              <form id="companyForm" method="post">
                 <div class=" row">                  
                   <div class="form-group col-sm-4">
-                    <label for="Disease" class="col-sm-1-12 col-form-label">Name</label>
-                    <input type="text" class="form-control" name="Disease" id="Disease" placeholder="">
+                    <label for="Name" class="col-sm-1-12 col-form-label">Name</label>
+                    <input type="text" class="form-control" name="Name" id="Name" placeholder="">
                   </div>
                   <div class="form-group col-sm-4">
                     <label for="Code" class="col-sm-1-12 col-form-label">Code</label>
@@ -924,11 +1028,37 @@
                 </div>              
                  <div class="form-group row">
                   <div class="offset-md-6 col-md-6 text-right">
-                    <button type="submit" class="btn btn-primary">Save and Continue</button>
+                    <button type="button" class="btn btn-primary" id="saveCompany">Save and Continue</button>
                   </div>
                 </div>
               </form>
-          
+              <script>
+                $(document).ready(function () {
+                    $('#saveCompany').click(function () {
+                        // Capture form data
+                        var formData = $('#companyForm').serialize();
+            
+                        // Send AJAX request
+                        $.ajax({
+                            url: '/add_company/',  // Update with your actual URL
+                            type: 'POST',
+                            data: formData,
+                            success: function (response) {
+                                if (response.success) {
+                                    // Handle success (e.g., close the modal)
+                                    $('#companyModal').modal('hide');
+                                } else {
+                                    // Handle error
+                                    console.error('Failed to save company:', response.error);
+                                }
+                            },
+                            error: function () {
+                                console.error('AJAX request failed');
+                            }
+                        });
+                    });
+                });
+            </script>
         </div>
       </div>   
     </div>
@@ -946,7 +1076,8 @@
           </div>
       <div class="modal-body">
         <div class="container-fluid">          
-              <form>
+              <form method="post" id="pathodologyForm">
+                {% csrf_token %}
                 <div class=" row">                  
                   <div class="form-group col-sm-5">
                     <label for="Name" class="col-sm-1-12 col-form-label">Name</label>
@@ -960,11 +1091,37 @@
                 </div>              
                  <div class="form-group row">
                   <div class="offset-md-6 col-md-6 text-right">
-                    <button type="submit" class="btn btn-primary">Save and Continue</button>
+                    <button type="button" class="btn btn-primary" id="saveRecord">Save and Continue</button>
                   </div>
                 </div>
               </form>
-          
+              <script>
+                $(document).ready(function () {
+                    $('#saveRecord').click(function () {
+                        // Capture form data
+                        var formData = $('#pathodologyForm').serialize();
+            
+                        // Send AJAX request
+                        $.ajax({
+                            url: '/add_pathodology_record/',  // Update with your actual URL
+                            type: 'POST',
+                            data: formData,
+                            success: function (response) {
+                                if (response.success) {
+                                    // Handle success (e.g., close the modal)
+                                    $('#pathodologyModal').modal('hide');
+                                } else {
+                                    // Handle error
+                                    console.error('Failed to save pathology record:', response.error);
+                                }
+                            },
+                            error: function () {
+                                console.error('AJAX request failed');
+                            }
+                        });
+                    });
+                });
+            </script>
         </div>
       </div>   
     </div>
