@@ -15,6 +15,7 @@ urlpatterns = [
         path('logout_user', views.logout_user, name='logout_user'),  # Move this line here
         path('contact/', views.ContactFormView.as_view(), name='contact_form'),
         path('GetUserDetails', views.GetUserDetails, name='GetUserDetails'),
+        path('add_patient/', views.add_patient, name='add_patient'),
         path('dologin', views.DoLogin, name='DoLogin'),
         path('accounts/', include('django.contrib.auth.urls')),  
         path('resa/portfolio/details',views.portfolio_details, name="portfolio_details"),

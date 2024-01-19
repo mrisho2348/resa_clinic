@@ -143,73 +143,141 @@ class ContactDetails(models.Model):
     def __str__(self):
         return self.name
     
-# class Patient(models.Model):
-    # mrn_format = models.CharField(max_length=20)  # Assuming MRN format is a string
+class Patient(models.Model):
+    mrn_format = models.CharField(max_length=20)  # Assuming MRN format is a string
+    # Personal Information
+    first_name = models.CharField(max_length=50)
+    middle_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    gender = models.CharField(max_length=10)
+    age = models.PositiveIntegerField()
+    nationality = models.CharField(max_length=50)
+    patient_type = models.CharField(max_length=20)
+    company = models.CharField(max_length=50)
+    occupation = models.CharField(max_length=50)
+    phone = models.CharField(max_length=15)
+    employee_number = models.CharField(max_length=20)
+    date_of_first_employment = models.DateField()
+    long_time_illness = models.TextField()
+    long_time_medication = models.TextField()
+    osha_certificate = models.BooleanField(default=False)
+    osha_date = models.DateField(null=True, blank=True)
+    insurance = models.CharField(max_length=20, choices=[('Uninsured', 'Uninsured'), ('Insured', 'Insured')])
+    insurance_name = models.CharField(max_length=50, null=True, blank=True)
+    insurance_number = models.IntegerField(null=True, blank=True)
 
-    # # Personal Information
-    # first_name = models.CharField(max_length=50)
-    # middle_name = models.CharField(max_length=50)
-    # last_name = models.CharField(max_length=50)
-    # gender = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')])
-    # age = models.PositiveIntegerField()
-    # nationality = models.CharField(max_length=50)
-    # patient_type = models.CharField(max_length=20)
-    # company = models.CharField(max_length=50)
-    # occupation = models.CharField(max_length=50)
-    # phone = models.CharField(max_length=15)
-    # employee_number = models.CharField(max_length=20)
-    # date_of_first_employment = models.DateField()
-    # long_time_illness = models.TextField()
-    # long_time_medication = models.TextField()
-    # osha_certificate = models.BooleanField()
-    # insurance = models.CharField(max_length=20, choices=[('Uninsured', 'Uninsured'), ('Insured', 'Insured')])
+    # Emergency Contact
+    emergency_contact_name = models.CharField(max_length=50)
+    emergency_contact_relation = models.CharField(max_length=50)
+    emergency_contact_phone = models.CharField(max_length=15)
+    emergency_contact_mobile = models.CharField(max_length=15)
 
-    # # Emergency Contact
-    # emergency_contact_name = models.CharField(max_length=50)
-    # emergency_contact_relation = models.CharField(max_length=50)
-    # emergency_contact_phone = models.CharField(max_length=15)
-    # emergency_contact_mobile = models.CharField(max_length=15)
+    # Health Condition
+    allergies =  models.BooleanField(default=False)
+    allergies_notes = models.TextField()
+    eye_condition =  models.BooleanField(default=False)
+    eye_condition_notes = models.TextField()
+    ent_conditions = models.BooleanField(default=False)
+    ent_conditions_notes = models.TextField()
+    respiratory_conditions = models.BooleanField(default=False)
+    respiratory_conditions_notes = models.TextField()
+    cardiovascular_conditions = models.BooleanField(default=False)
+    cardiovascular_conditions_notes = models.TextField()
+    urinary_conditions = models.BooleanField(default=False)
+    urinary_conditions_notes = models.TextField()
+    stomach_bowel_conditions = models.BooleanField(default=False)
+    stomach_bowel_conditions_notes = models.TextField()
+    musculoskeletal_conditions = models.BooleanField(default=False)
+    musculoskeletal_conditions_notes = models.TextField()
+    neuro_psychiatric_conditions = models.BooleanField(default=False)
+    neuro_psychiatric_conditions_notes = models.TextField()
 
-    # # Health Condition
-    # allergies = models.BooleanField()
-    # allergies_notes = models.TextField()
-    # eye_condition = models.BooleanField()
-    # eye_condition_notes = models.TextField()
-    # ent_conditions = models.BooleanField()
-    # ent_conditions_notes = models.TextField()
-    # respiratory_conditions = models.BooleanField()
-    # respiratory_conditions_notes = models.TextField()
-    # cardiovascular_conditions = models.BooleanField()
-    # cardiovascular_conditions_notes = models.TextField()
-    # urinary_conditions = models.BooleanField()
-    # urinary_conditions_notes = models.TextField()
-    # stomach_bowel_conditions = models.BooleanField()
-    # stomach_bowel_conditions_notes = models.TextField()
-    # musculoskeletal_conditions = models.BooleanField()
-    # musculoskeletal_conditions_notes = models.TextField()
-    # neuro_psychiatric_conditions = models.BooleanField()
-    # neuro_psychiatric_conditions_notes = models.TextField()
+ # Family History
+    family_allergies = models.BooleanField(default=False)
+    family_allergies_relationship = models.CharField(max_length=50, blank=True)
+    family_allergies_comments = models.TextField(blank=True)
 
-    # # Family History
-    # family_allergies = models.BooleanField()
-    # family_allergies_relationship = models.CharField(max_length=50)
-    # family_allergies_comments = models.TextField()
-    # family_eye_condition = models.BooleanField()
-    # family_eye_condition_relationship = models.CharField(max_length=50)
-    # family_eye_condition_comments = models.TextField()
-    # # Repeat the structure for additional family history conditions
+    family_asthma_condition = models.BooleanField(default=False)
+    family_asthma_condition_relationship = models.CharField(max_length=50, blank=True)
+    family_asthma_condition_comments = models.TextField(blank=True)
 
-    # # Life Style
-    # smoking = models.BooleanField()
-    # alcohol_consumption = models.BooleanField()
-    # weekly_exercise_frequency = models.CharField(max_length=50)
-    # healthy_diet = models.BooleanField()
-    # stress_management = models.BooleanField()
-    # sufficient_sleep = models.BooleanField()
+    family_lungdisease_conditions = models.BooleanField(default=False)
+    family_lungdisease_conditions_relationship = models.CharField(max_length=50, blank=True)
+    family_lungdisease_conditions_comments = models.TextField(blank=True)
 
-    # def __str__(self):
-    #     return f"{self.first_name} {self.last_name}"
+    family_diabetes_conditions = models.BooleanField(default=False)
+    family_diabetes_conditions_relationship = models.CharField(max_length=50, blank=True)
+    family_diabetes_conditions_comments = models.TextField(blank=True)
+
+    family_cancer_conditions = models.BooleanField(default=False)
+    family_cancer_conditions_relationship = models.CharField(max_length=50, blank=True)
+    family_cancer_conditions_comments = models.TextField(blank=True)
+
+    family_hypertension_conditions = models.BooleanField(default=False)
+    family_hypertension_conditions_relationship = models.CharField(max_length=50, blank=True)
+    family_hypertension_conditions_comments = models.TextField(blank=True)
+
+    family_heart_disease_conditions = models.BooleanField(default=False)
+    family_heart_disease_conditions_relationship = models.CharField(max_length=50, blank=True)
+    family_heart_disease_conditions_comments = models.TextField(blank=True)
+
+    # Life Style
+    smoking =  models.BooleanField(default=False)
+    alcohol_consumption =  models.BooleanField(default=False)
+    weekly_exercise_frequency = models.CharField(max_length=50, null=True, blank=True)
+    healthy_diet =  models.BooleanField(default=False)
+    stress_management =  models.BooleanField(default=False)
+    sufficient_sleep = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
     
+    
+
+class Appointment(models.Model):
+    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    appointment_date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    description = models.TextField()
+
+    def __str__(self):
+        return f"Appointment with {self.doctor.name} for {self.patient.name} on {self.appointment_date} from {self.start_time} to {self.end_time}"
+
+
+class MedicalRecordConsultation(models.Model):
+    # Relationship with Patient
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    # Complaints Section
+    chief_complaint = models.CharField(max_length=255)
+    history_illness = models.TextField()
+    physical_examination = models.TextField()
+    # Allergy to Medications
+    allergy_medications = models.TextField()
+    # Diagnosis Section
+    provisional_diagnosis = models.TextField()
+    final_diagnosis = models.TextField()
+    # Pathology, Plan, and Injury
+    pathology = models.ForeignKey(PathodologyRecord, on_delete=models.CASCADE)
+    plan = models.TextField()
+    # Fatality, Injury Description, and Disposition
+    injury = models.CharField(max_length=200)
+    fatality = models.CharField(max_length=200)
+    injury_description = models.TextField()
+    # Disposition Section
+    disposition =  models.CharField(max_length=200)
+    destination = models.CharField(max_length=255)
+    disposition_description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+    def __str__(self):
+        return f"{self.patient.name}'s Medical Record"  
+    
+      
     
 @receiver(post_save, sender=CustomUser)
 def create_user_profile(sender, instance, created, **kwargs):

@@ -16,9 +16,10 @@ from django.core.mail import send_mail
 from clinic.emailBackEnd import EmailBackend
 from django.core.exceptions import ObjectDoesNotExist
 from clinic.forms import ImportStaffForm
-from clinic.models import Company, ContactDetails, CustomUser, DiseaseRecode, InsuranceCompany, PathodologyRecord, Staffs
+from clinic.models import Company, ContactDetails, CustomUser, DiseaseRecode, InsuranceCompany, PathodologyRecord, Patient, Staffs
 from clinic.resources import StaffResources
 from tablib import Dataset
+from django.views.decorators.http import require_POST
 # Create your views here.
 def index(request):
     return render(request,"index.html")
@@ -491,3 +492,207 @@ def add_pathodology_record(request):
             return JsonResponse({'success': False, 'error': 'Invalid request method'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})    
+    
+
+@csrf_exempt
+@login_required
+def add_patient(request):
+    if request.method == 'POST':
+        try:
+            # Extracting data from the POST request
+            mrn_format = request.POST.get('mrn_format')
+            first_name = request.POST.get('first_name')
+            middle_name = request.POST.get('middle_name')
+            last_name = request.POST.get('last_name')
+            gender = request.POST.get('gender')
+            age = request.POST.get('age')
+            nationality = request.POST.get('nationality')
+            patient_type = request.POST.get('patient_type')
+
+            # Continue extracting other fields in a similar way
+            company = request.POST.get('company')
+            occupation = request.POST.get('occupation')
+            phone = request.POST.get('phone')
+            employee_number = request.POST.get('employee_number')
+            date_of_first_employment = request.POST.get('date_of_first_employment')
+            print(date_of_first_employment)
+            long_time_illness = request.POST.get('long_time_illness')
+            long_time_medication = request.POST.get('long_time_medication')
+            osha_certificate = request.POST.get('osha_certificate') == 'true'
+            osha_date = request.POST.get('osha_date')
+            print(osha_date)
+            insurance = request.POST.get('insurance')
+            insurance_name = request.POST.get('insurance_name')
+            insurance_number = request.POST.get('insurance_number')
+
+            # Extract Emergency Contact fields
+            emergency_contact_name = request.POST.get('emergency_contact_name')
+            emergency_contact_relation = request.POST.get('emergency_contact_relation')
+            emergency_contact_phone = request.POST.get('emergency_contact_phone')
+            emergency_contact_mobile = request.POST.get('emergency_contact_mobile')
+
+            # Extract Health Condition fields
+            allergies = request.POST.get('allergies')
+            allergies_notes = request.POST.get('allergies_notes')
+            eye_condition = request.POST.get('eye_condition', '')
+            eye_condition_notes = request.POST.get('eye_condition_notes')
+            ent_conditions = request.POST.get('ent_conditions')
+            ent_conditions_notes = request.POST.get('ent_conditions_notes')
+            respiratory_conditions = request.POST.get('respiratory_conditions')
+            respiratory_conditions_notes = request.POST.get('respiratory_conditions_notes')
+            cardiovascular_conditions = request.POST.get('cardiovascular_conditions')
+            cardiovascular_conditions_notes = request.POST.get('cardiovascular_conditions_notes')
+            urinary_conditions = request.POST.get('urinary_conditions')
+            urinary_conditions_notes = request.POST.get('urinary_conditions_notes')
+            stomach_bowel_conditions = request.POST.get('stomach_bowel_conditions')
+            stomach_bowel_conditions_notes = request.POST.get('stomach_bowel_conditions_notes')
+            musculoskeletal_conditions = request.POST.get('musculoskeletal_conditions')
+            musculoskeletal_conditions_notes = request.POST.get('musculoskeletal_conditions_notes')
+            neuro_psychiatric_conditions = request.POST.get('neuro_psychiatric_conditions')
+            neuro_psychiatric_conditions_notes = request.POST.get('neuro_psychiatric_conditions_notes')
+            # Continue extracting other health condition fields in a similar way
+
+            # Extract Family History fields
+            family_allergies = request.POST.get('family_allergies')
+            family_allergies_relationship = request.POST.get('family_allergies_relationship')
+            family_allergies_comments = request.POST.get('family_allergies_comments')
+
+            family_asthma_condition = request.POST.get('family_asthma_condition')
+            family_asthma_condition_relationship = request.POST.get('family_asthma_condition_relationship')
+            family_asthma_condition_comments = request.POST.get('family_asthma_condition_comments')
+
+            family_lungdisease_conditions = request.POST.get('family_lungdisease_conditions')
+            family_lungdisease_conditions_relationship = request.POST.get('family_lungdisease_conditions_relationship')
+            family_lungdisease_conditions_comments = request.POST.get('family_lungdisease_conditions_comments')
+
+            family_diabetes_conditions = request.POST.get('family_diabetes_conditions')
+            family_diabetes_conditions_relationship = request.POST.get('family_diabetes_conditions_relationship')
+            family_diabetes_conditions_comments = request.POST.get('family_diabetes_conditions_comments')
+
+            family_cancer_conditions = request.POST.get('family_cancer_conditions')
+            family_cancer_conditions_relationship = request.POST.get('family_cancer_conditions_relationship')
+            family_cancer_conditions_comments = request.POST.get('family_cancer_conditions_comments')
+
+            family_hypertension_conditions = request.POST.get('family_hypertension_conditions')
+            family_hypertension_conditions_relationship = request.POST.get('family_hypertension_conditions_relationship')
+            family_hypertension_conditions_comments = request.POST.get('family_hypertension_conditions_comments')
+
+            family_heart_disease_conditions = request.POST.get('family_heart_disease_conditions')
+            family_heart_disease_conditions_relationship = request.POST.get('family_heart_disease_conditions_relationship')
+            family_heart_disease_conditions_comments = request.POST.get('family_heart_disease_conditions_comments')
+
+            # Continue extracting other family history fields in a similar way
+
+            # Extract Lifestyle fields
+            smoking = request.POST.get('smoking')
+            alcohol_consumption = request.POST.get('alcohol_consumption')
+            weekly_exercise_frequency = request.POST.get('weekly_exercise_frequency')
+            healthy_diet = request.POST.get('healthy_diet')
+            stress_management = request.POST.get('stress_management')
+            sufficient_sleep = request.POST.get('sufficient_sleep')
+
+
+            # Create a new patient instance with the extracted data
+            new_patient = Patient(
+                mrn_format=mrn_format,
+                first_name=first_name,
+                middle_name=middle_name,
+                last_name=last_name,
+                gender=gender,
+                age=age,
+                nationality=nationality,
+                patient_type=patient_type,
+                # Assign other fields similarly
+            )
+            # Continue assigning other fields similarly for the new_patient instance
+            new_patient.company = company
+            new_patient.occupation = occupation
+            new_patient.phone = phone
+            new_patient.employee_number = employee_number
+            new_patient.date_of_first_employment = date_of_first_employment
+            new_patient.long_time_illness = long_time_illness
+            new_patient.long_time_medication = long_time_medication
+            new_patient.osha_certificate = osha_certificate
+            new_patient.osha_date = osha_date
+            new_patient.insurance = insurance
+            new_patient.insurance_name = insurance_name
+            new_patient.insurance_number = insurance_number
+
+            # Continue assigning Emergency Contact fields
+            new_patient.emergency_contact_name = emergency_contact_name
+            new_patient.emergency_contact_relation = emergency_contact_relation
+            new_patient.emergency_contact_phone = emergency_contact_phone
+            new_patient.emergency_contact_mobile = emergency_contact_mobile
+
+            # Continue assigning Health Condition fields
+            new_patient.allergies = allergies
+            new_patient.allergies_notes = allergies_notes
+            new_patient.eye_condition = eye_condition
+            new_patient.eye_condition_notes = eye_condition_notes
+            new_patient.ent_conditions = ent_conditions
+            new_patient.ent_conditions_notes = ent_conditions_notes
+            new_patient.respiratory_conditions = respiratory_conditions
+            new_patient.respiratory_conditions_notes = respiratory_conditions_notes
+            new_patient.cardiovascular_conditions = cardiovascular_conditions
+            new_patient.cardiovascular_conditions_notes = cardiovascular_conditions_notes
+            new_patient.urinary_conditions = urinary_conditions
+            new_patient.urinary_conditions_notes = urinary_conditions_notes
+            new_patient.stomach_bowel_conditions = stomach_bowel_conditions
+            new_patient.stomach_bowel_conditions_notes = stomach_bowel_conditions_notes
+            new_patient.musculoskeletal_conditions = musculoskeletal_conditions
+            new_patient.musculoskeletal_conditions_notes = musculoskeletal_conditions_notes
+            new_patient.neuro_psychiatric_conditions = neuro_psychiatric_conditions
+            new_patient.neuro_psychiatric_conditions_notes = neuro_psychiatric_conditions_notes
+
+            # Continue assigning Family History fields
+            new_patient.family_allergies = family_allergies
+            new_patient.family_allergies_relationship = family_allergies_relationship
+            new_patient.family_allergies_comments = family_allergies_comments
+
+            new_patient.family_asthma_condition = family_asthma_condition
+            new_patient.family_asthma_condition_relationship = family_asthma_condition_relationship
+            new_patient.family_asthma_condition_comments = family_asthma_condition_comments
+
+            new_patient.family_lungdisease_conditions = family_lungdisease_conditions
+            new_patient.family_lungdisease_conditions_relationship = family_lungdisease_conditions_relationship
+            new_patient.family_lungdisease_conditions_comments = family_lungdisease_conditions_comments
+
+            new_patient.family_diabetes_conditions = family_diabetes_conditions
+            new_patient.family_diabetes_conditions_relationship = family_diabetes_conditions_relationship
+            new_patient.family_diabetes_conditions_comments = family_diabetes_conditions_comments
+
+            new_patient.family_cancer_conditions = family_cancer_conditions
+            new_patient.family_cancer_conditions_relationship = family_cancer_conditions_relationship
+            new_patient.family_cancer_conditions_comments = family_cancer_conditions_comments
+
+            new_patient.family_hypertension_conditions = family_hypertension_conditions
+            new_patient.family_hypertension_conditions_relationship = family_hypertension_conditions_relationship
+            new_patient.family_hypertension_conditions_comments = family_hypertension_conditions_comments
+
+            new_patient.family_heart_disease_conditions = family_heart_disease_conditions
+            new_patient.family_heart_disease_conditions_relationship = family_heart_disease_conditions_relationship
+            new_patient.family_heart_disease_conditions_comments = family_heart_disease_conditions_comments
+
+            # Continue assigning Lifestyle fields
+            new_patient.smoking = smoking
+            new_patient.alcohol_consumption = alcohol_consumption
+            new_patient.weekly_exercise_frequency = weekly_exercise_frequency
+            new_patient.healthy_diet = healthy_diet
+            new_patient.stress_management = stress_management
+            new_patient.sufficient_sleep = sufficient_sleep       
+
+
+            # Save the new patient instance to the database
+            new_patient.save()
+            
+            logger.info(f'Data saved successfully: {new_patient.__dict__}')
+            # Redirect to a success page or any other page as needed
+            return JsonResponse({'message': 'Data saved successfully'}, status=200)
+
+        except Exception as e:
+            # Handle exceptions, you can log the error or redirect to an error page
+            logger.error(f'Error saving data: {str(e)}')
+            logger.error(f'Fields causing the error: {request.POST}')
+            return JsonResponse({'error': str(e)}, status=400)
+    return JsonResponse({'error': 'Invalid request method'}, status=405)    
+      

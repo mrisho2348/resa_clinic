@@ -1,5 +1,5 @@
   <!-- The modal -->
-  <di class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
+  <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -33,42 +33,42 @@
                 <!-- Personal tab -->
                 <div class="tab-pane fade show active" id="personal" role="tabpanel" aria-labelledby="personal-tab">
                   <!-- Personal form -->
-                  <form>
+          <form id="patientForm" method="POST">
                     <div class="form-row">
                       <div class="form-group col-md-4">
                         <label for="firstName">First Name</label>
-                        <input type="text" class="form-control" id="firstName" placeholder="First Name">
+                        <input type="text" class="form-control" id="firstName" placeholder="First Name" name="first_name">
                       </div>
                       <div class="form-group col-md-4">
                         <label for="middleName">Middle Name</label>
-                        <input type="text" class="form-control" id="middleName" placeholder="Middle Name">
+                        <input type="text" class="form-control" id="middleName" placeholder="Middle Name" name="middle_name">
                       </div>
                       <div class="form-group col-md-4">
                         <label for="lastName">Last Name</label>
-                        <input type="text" class="form-control" id="lastName" placeholder="Last Name">
+                        <input type="text" class="form-control" id="lastName" placeholder="Last Name" name="last_name">
                       </div>
                     </div>
                     <div class="form-row">
                       <div class="form-group col-md-4">
                         <label for="gender">Gender</label>
-                        <select id="gender"  class="form-control select2bs4" style="width: 100%;" >
+                        <select id="gender"  class="form-control select2bs4" style="width: 100%;" name="gender">
                           <option selected>Select gender</option>
-                          <option>Male</option>
-                          <option>Female</option>
-                          <option>Other</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
                         </select>
                       </div>
                       <div class="form-group col-md-4">
                         <label for="age">Age</label>
-                        <input type="number" class="form-control" id="age" placeholder="Age">
+                        <input type="number" class="form-control" id="age" placeholder="Age" name="age">
                       </div>
                       <div class="form-group col-md-4">
                         <label for="nationality">Nationality</label>
-                        <select id="nationality" class="form-control select2bs4" style="width: 100%;"  >
+                        <select id="nationality" class="form-control select2bs4" style="width: 100%;" name="nationality" >
                           <option selected>Select Country</option>
-                          <option>Tanzania</option>
-                          <option>Kenya</option>
-                          <option>Uganda</option>
+                          <option value="Tanzania">Tanzania</option>
+                          <option value="Kenya">Kenya</option>
+                          <option value="Uganda">Uganda</option>
                           <!-- ... add other options as needed -->
                         </select>
                       </div>
@@ -76,70 +76,116 @@
                     <div class="form-row">
                       <div class="form-group col-md-3">
                         <label for="patientType">Patient Type</label>
-                        <select id="patientType" class="form-control select2bs4" style="width: 100%;"  >
+                        <select id="patientType" class="form-control select2bs4" style="width: 100%;" name="patient_type" >
                           <option selected>NationalStaff</option>
-                          <option>InternationalStaff</option>
-                          <option>Visitor</option>
-                          <option>Other</option>
+                          <option value="InternationalStaff">InternationalStaff</option>
+                          <option value="Visitor">Visitor</option>
+                          <option value="Other">Other</option>
                         </select>
                       </div>
                       <div class="form-group col-md-3">
                         <label for="company">Company</label>
-                        <select id="company" class="form-control select2bs4" style="width: 100%;"  >
+                        <select id="company" class="form-control select2bs4" style="width: 100%;" name="company" >
                           <option selected>Select Company</option>
-                          <option>SAMOTA</option>
-                          <option>ISOAF</option>
-                          <option>SGA</option>
+                          <option value="SAMOTA">SAMOTA</option>
+                          <option value="ISOAF">ISOAF</option>
+                          <option value="SGA">SGA</option>
                           <!-- ... add other options as needed -->
                         </select>
                       </div>
                       <div class="form-group col-md-3">
                         <label for="occupation">Occupation</label>
-                        <input type="text" class="form-control" id="occupation" placeholder="Occupation">
+                        <input type="text" class="form-control" id="occupation" placeholder="Occupation" name="occupation">
                       </div>
                       <div class="form-group col-md-3">
                         <label for="phone">Phone</label>
-                        <input type="tel" class="form-control" id="phone" placeholder="Phone">
+                        <input type="tel" class="form-control" id="phone" placeholder="Phone" name="phone">
                       </div>
                     </div>
 
                     <div class="form-row">
                       <div class="form-group col-md-4">
                         <label for="employeeNumber">Employee Number</label>
-                        <input type="text" class="form-control" id="employeeNumber" placeholder="Employee Number">
+                        <input type="text" class="form-control" id="employeeNumber" placeholder="Employee Number" name="employee_number">
                       </div>                    
                       <div class="form-group col-md-4">
                         <label for="dateOfFirstEmployment">Date of first employment</label>
-                        <input type="date" class="form-control" id="dateOfFirstEmployment" placeholder="Date of first employment">
+                        <input type="date" class="form-control" id="dateOfFirstEmployment" placeholder="Date of first employment" name="date_of_first_employment">
                       </div>
                       <div class="form-group col-md-4">
                         <label for="longTimeIllness">Any Longtime Illness?</label>
-                        <input type="text" class="form-control" id="longTimeIllness" placeholder="Any Longtime Illness?">
+                        <input type="text" class="form-control" id="longTimeIllness" placeholder="Any Longtime Illness?" name="long_time_illness">
                       </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group col-md-4">
                             <label for="longmedication">Any Longtime Medication ?</label>
-                            <input type="text" class="form-control" id="longmedication" placeholder="Any Longtime Medication ?">
+                            <input type="text" class="form-control" id="longmedication" placeholder="Any Longtime Medication ?" name="long_time_medication">
                           </div>                   
-                      <div class="form-group col-md-4">
-                        <label for="oshaCertificate">Have OSHA Certificate?</label><br>
-                        <div class="form-check form-check-inline">
-                          <input class="form-check-input" type="radio" name="oshaCertificate" id="oshaCertificateYes" value="yes">
-                          <label class="form-check-label" for="oshaCertificateYes">Yes</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                          <input class="form-check-input" type="radio" name="oshaCertificate" id="oshaCertificateNo" value="no">
-                          <label class="form-check-label" for="oshaCertificateNo">No</label>
-                        </div>
-                      </div>
-                      <div class="form-group col-md-4">
-                        <label for="insurance">Insurance</label>
-                        <select id="insurance" class="form-control select2bs4" style="width: 100%;"  >
-                          <option selected>Uninsured</option>
-                          <option>Insured</option>
-                        </select>
-                      </div>
+                          <div class="form-group col-md-4">
+                            <label for="oshaCertificate">Have OSHA Certificate?</label><br>
+                            <div class="form-check form-check-inline">
+                              <input class="form-check-input" type="radio" name="osha_certificate" id="oshaCertificateYes" onclick="toggleOshaFields(true)" >
+                              <label class="form-check-label" for="oshaCertificateYes">Yes</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                              <input class="form-check-input" type="radio" name="osha_certificate" id="oshaCertificateNo"  onclick="toggleOshaFields(false)">
+                              <label class="form-check-label" for="oshaCertificateNo">No</label>
+                            </div>
+                          </div>
+                          <input type="hidden" name="osha_certificate" id="oshaCertificateInput" value="false">
+                          <div class="form-group col-md-4" style="display: none;" id="oshaFieldsContainer">
+                            <label for="OshaDate">Date of OSHA Certification</label>
+                            <input type="date" class="form-control" id="OshaDate" name="osha_date">
+                          </div>
+                          
+                          <div class="form-group col-md-4">
+                            <label for="insurance">Insurance</label>
+                            <select id="insurance" class="form-control select2bs4" style="width: 100%;" onchange="toggleInsuranceFields()" name="insurance">
+                              <option selected value="Uninsured">Uninsured</option>
+                              <option value="Insured">Insured</option>
+                            </select>
+                          </div>
+                          
+                          <div class="form-group col-md-4" style="display: none;" id="insuranceFieldsContainer">
+                            <label for="insurancename">Insurance name</label>
+                            <select id="insurancename" class="form-control select2bs4" style="width: 100%;" name="insurance_name">
+                              <option selected value="dbn">dbn</option>
+                              <option value="dbc">dbc</option>
+                            </select>
+                          </div>
+                          
+                          <div class="form-group col-md-4" style="display: none;" id="insuranceNumberContainer">
+                            <label for="insurancenumber">Insurance number</label>
+                            <input type="number" class="form-control" id="insurancenumber" name="insurance_number">
+                          </div>
+                        
+
+                          <script>
+                            function toggleOshaFields(isOshaCertificate) {
+                                const oshaFieldsContainer = document.getElementById('oshaFieldsContainer');
+                                oshaFieldsContainer.style.display = isOshaCertificate ? 'block' : 'none';
+                        
+                                // Update the value of the hidden input field
+                                const oshaCertificateInput = document.getElementById('oshaCertificateInput');
+                                oshaCertificateInput.value = isOshaCertificate ? 'true' : 'false';
+                            }
+                        
+                            function toggleInsuranceFields() {
+                                const insuranceFieldsContainer = document.getElementById('insuranceFieldsContainer');
+                                const insuranceNumberContainer = document.getElementById('insuranceNumberContainer');
+                                const selectedOption = document.getElementById('insurance').value;
+                        
+                                if (selectedOption === 'Insured') {
+                                    insuranceFieldsContainer.style.display = 'block';
+                                    insuranceNumberContainer.style.display = 'block';
+                                } else {
+                                    insuranceFieldsContainer.style.display = 'none';
+                                    insuranceNumberContainer.style.display = 'none';
+                                }
+                            }
+                        </script>
+                        
                     </div>
                  
                     <h5>Emergency Contact</h5>
@@ -148,378 +194,373 @@
                         <!-- Fields for Health Condition -->
                         <div class="form-group col-md-3">
                           <label for="emergencyContactName"> Name</label>
-                          <input type="text" class="form-control" id="emergencyContactName" placeholder="Name">
+                          <input type="text" class="form-control" id="emergency_contact_name" placeholder="Name" name="emergency_contact_name">
                         </div>
                         <div class="form-group col-md-3">
                           <label for="emergencyContactRelation"> Relation</label>
-                          <input type="text" class="form-control" id="emergencyContactRelation" placeholder="Relation">
+                          <input type="text" class="form-control" id="emergency_contact_relation" placeholder="Relation" name="emergency_contact_relation">
                         </div>
                         <div class="form-group col-md-3">
                           <label for="emergencyContactPhone"> Phone</label>
-                          <input type="tel" class="form-control" id="emergencyContactPhone" placeholder="Phone">
+                          <input type="tel" class="form-control" id="emergency_contact_phone" placeholder="Phone" name="emergency_contact_phone">
                         </div>
                         <div class="form-group col-md-3">
                           <label for="emergencyContactMobile"> Mobile</label>
-                          <input type="tel" class="form-control" id="emergencyContactMobile" placeholder="Mobile">
+                          <input type="tel" class="form-control" id="emergency_contact_mobile" placeholder="Mobile" name="emergency_contact_mobile">
                         </div>
                         <!-- ... add other health-related fields as needed ... -->
                       </div>
-                  </form>
+                 
                 </div>
 
                           <!-- Health Condition tab -->
-          <div class="tab-pane fade" id="health" role="tabpanel" aria-labelledby="health-tab">
-            <!-- Health Condition form -->
-            <form>
-                <div class="container">
-                  <!-- Allergies -->
-                  <div class="form-row">
-                    <div class="form-group col-md-4">
-                      <label for="allergies">Diseases</label>
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label for="allergies">Yes/No</label>
+              <div class="tab-pane fade" id="health" role="tabpanel" aria-labelledby="health-tab">
+                <!-- Health Condition form -->
+              
+                    <div class="container">
+                      <!-- Allergies -->
+                      <div class="form-row">
+                        <div class="form-group col-md-4">
+                          <label for="allergies">Diseases</label>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="allergies">Yes/No</label>
+                          </div>
+                          <div class="form-group col-md-4">
+                            <label for="allergies">Notes</label>
+                          </div>
                       </div>
-                      <div class="form-group col-md-4">
-                        <label for="allergies">Notes</label>
+                      <div class="form-row">
+                        <div class="form-group col-md-4">
+                          <label for="allergies">Allergies</label>
+                        </div>
+                        <div class="form-group col-md-4">
+                          <input type="checkbox" id="allergies" name="allergies" class="form-check-input">
+                        </div>
+                        <div class="form-group col-md-4">
+                          <textarea id="allergiesNotes" name="allergies_notes" rows="2" class="form-control"></textarea>
+                        </div>
                       </div>
-                  </div>
-                  <div class="form-row">
-                    <div class="form-group col-md-4">
-                      <label for="allergies">Allergies</label>
-                    </div>
-                    <div class="form-group col-md-4">
-                      <input type="checkbox" id="allergies" name="allergies" class="form-check-input">
-                    </div>
-                    <div class="form-group col-md-4">
-                      <textarea id="allergiesNotes" name="allergiesNotes" rows="2" class="form-control"></textarea>
-                    </div>
-                  </div>
-            
-                  <!-- Eye Condition -->
-                  <div class="form-row">
-                    <div class="form-group col-md-4">
-                      <label for="eyeCondition">Eye Condition</label>
-                    </div>
-                    <div class="form-group col-md-4">
-                      <input type="checkbox" id="eyeCondition" name="eyeCondition" class="form-check-input">
-                    </div>
-                    <div class="form-group col-md-4">
-                      <textarea id="eyeConditionNotes" name="eyeConditionNotes" rows="2" class="form-control"></textarea>
-                    </div>
-                  </div>
-            
-                  <!-- Ear, Nose, Throat -->
-                  <div class="form-row">
-                    <div class="form-group col-md-4">
-                      <label for="entConditions">Ear, Nose, Throat</label>
-                    </div>
-                    <div class="form-group col-md-4">
-                      <input type="checkbox" id="entConditions" name="entConditions" class="form-check-input">
-                    </div>
-                    <div class="form-group col-md-4">
-                      <textarea id="entConditionsNotes" name="entConditionsNotes" rows="2" class="form-control"></textarea>
-                    </div>
-                  </div>
-            
-                  <!-- Respiratory Conditions -->
-                  <div class="form-row">
-                    <div class="form-group col-md-4">
-                      <label for="respiratoryConditions">Respiratory Conditions</label>
-                    </div>
-                    <div class="form-group col-md-4">
-                      <input type="checkbox" id="respiratoryConditions" name="respiratoryConditions" class="form-check-input">
-                    </div>
-                    <div class="form-group col-md-4">
-                      <textarea id="respiratoryConditionsNotes" name="respiratoryConditionsNotes" rows="2" class="form-control"></textarea>
-                    </div>
-                  </div>
-            
-                  <!-- Cardiovascular Conditions -->
-                  <div class="form-row">
-                    <div class="form-group col-md-4">
-                      <label for="cardiovascularConditions">Cardiovascular Conditions</label>
-                    </div>
-                    <div class="form-group col-md-4">
-                      <input type="checkbox" id="cardiovascularConditions" name="cardiovascularConditions" class="form-check-input">
-                    </div>
-                    <div class="form-group col-md-4">
-                      <textarea id="cardiovascularConditionsNotes" name="cardiovascularConditionsNotes" rows="2" class="form-control"></textarea>
-                    </div>
-                  </div>
-            
-                  <!-- Urinary Conditions -->
-                  <div class="form-row">
-                    <div class="form-group col-md-4">
-                      <label for="urinaryConditions">Urinary Conditions</label>
-                    </div>
-                    <div class="form-group col-md-4">
-                      <input type="checkbox" id="urinaryConditions" name="urinaryConditions" class="form-check-input">
-                    </div>
-                    <div class="form-group col-md-4">
-                      <textarea id="urinaryConditionsNotes" name="urinaryConditionsNotes" rows="2" class="form-control"></textarea>
-                    </div>
-                  </div>
-            
-                  <!-- Stomach/Bowel Conditions -->
-                  <div class="form-row">
-                    <div class="form-group col-md-4">
-                      <label for="stomachBowelConditions">Stomach/Bowel Conditions</label>
-                    </div>
-                    <div class="form-group col-md-4">
-                      <input type="checkbox" id="stomachBowelConditions" name="stomachBowelConditions" class="form-check-input">
-                    </div>
-                    <div class="form-group col-md-4">
-                      <textarea id="stomachBowelConditionsNotes" name="stomachBowelConditionsNotes" rows="2" class="form-control"></textarea>
-                    </div>
-                  </div>
-            
-                  <!-- Musculoskeletal Conditions -->
-                  <div class="form-row">
-                    <div class="form-group col-md-4">
-                      <label for="musculoskeletalConditions">Musculoskeletal Conditions</label>
-                    </div>
-                    <div class="form-group col-md-4">
-                      <input type="checkbox" id="musculoskeletalConditions" name="musculoskeletalConditions" class="form-check-input">
-                    </div>
-                    <div class="form-group col-md-4">
-                      <textarea id="musculoskeletalConditionsNotes" name="musculoskeletalConditionsNotes" rows="2" class="form-control"></textarea>
-                    </div>
-                  </div>
-            
-                  <!-- Neurological/Psychiatric Conditions -->
-                  <div class="form-row">
-                    <div class="form-group col-md-4">
-                      <label for="neuroPsychiatricConditions">Neurological/Psychiatric Conditions</label>
-                    </div>
-                    <div class="form-group col-md-4">
-                      <input type="checkbox" id="neuroPsychiatricConditions" name="neuroPsychiatricConditions" class="form-check-input">
-                    </div>
-                    <div class="form-group col-md-4">
-                      <textarea id="neuroPsychiatricConditionsNotes" name="neuroPsychiatricConditionsNotes" rows="2" class="form-control"></textarea>
-                    </div>
-                  </div>           
-                  <!-- Repeat the structure for additional conditions -->
-                </div>
-            </form>   
-        </div>
+                
+                      <!-- Eye Condition -->
+                      <div class="form-row">
+                        <div class="form-group col-md-4">
+                          <label for="eyeCondition">Eye Condition</label>
+                        </div>
+                        <div class="form-group col-md-4">
+                          <input type="checkbox" id="eyeCondition" name="eye_condition" class="form-check-input">
+                        </div>
+                        <div class="form-group col-md-4">
+                          <textarea id="eyeConditionNotes" name="eye_condition_notes" rows="2" class="form-control"></textarea>
+                        </div>
+                      </div>
+                
+                      <!-- Ear, Nose, Throat -->
+                      <div class="form-row">
+                        <div class="form-group col-md-4">
+                          <label for="entConditions">Ear, Nose, Throat</label>
+                        </div>
+                        <div class="form-group col-md-4">
+                          <input type="checkbox" id="entConditions" name="ent_conditions" class="form-check-input">
+                        </div>
+                        <div class="form-group col-md-4">
+                          <textarea id="entConditionsNotes" name="ent_conditions_notes" rows="2" class="form-control"></textarea>
+                        </div>
+                      </div>
+                
+                      <!-- Respiratory Conditions -->
+                      <div class="form-row">
+                        <div class="form-group col-md-4">
+                          <label for="respiratoryConditions">Respiratory Conditions</label>
+                        </div>
+                        <div class="form-group col-md-4">
+                          <input type="checkbox" id="respiratoryConditions" name="respiratory_conditions" class="form-check-input">
+                        </div>
+                        <div class="form-group col-md-4">
+                          <textarea id="respiratoryConditionsNotes" name="respiratory_conditions_notes" rows="2" class="form-control"></textarea>
+                        </div>
+                      </div>
+                
+                      <!-- Cardiovascular Conditions -->
+                      <div class="form-row">
+                        <div class="form-group col-md-4">
+                          <label for="cardiovascularConditions">Cardiovascular Conditions</label>
+                        </div>
+                        <div class="form-group col-md-4">
+                          <input type="checkbox" id="cardiovascularConditions" name="cardiovascular_conditions" class="form-check-input">
+                        </div>
+                        <div class="form-group col-md-4">
+                          <textarea id="cardiovascularConditionsNotes" name="cardiovascular_conditions_notes" rows="2" class="form-control"></textarea>
+                        </div>
+                      </div>
+                
+                      <!-- Urinary Conditions -->
+                      <div class="form-row">
+                        <div class="form-group col-md-4">
+                          <label for="urinaryConditions">Urinary Conditions</label>
+                        </div>
+                        <div class="form-group col-md-4">
+                          <input type="checkbox" id="urinaryConditions" name="urinary_conditions" class="form-check-input">
+                        </div>
+                        <div class="form-group col-md-4">
+                          <textarea id="urinaryConditionsNotes" name="urinary_conditions_notes" rows="2" class="form-control"></textarea>
+                        </div>
+                      </div>
+                
+                      <!-- Stomach/Bowel Conditions -->
+                      <div class="form-row">
+                        <div class="form-group col-md-4">
+                          <label for="stomachBowelConditions">Stomach/Bowel Conditions</label>
+                        </div>
+                        <div class="form-group col-md-4">
+                          <input type="checkbox" id="stomachBowelConditions" name="stomach_bowel_conditions" class="form-check-input">
+                        </div>
+                        <div class="form-group col-md-4">
+                          <textarea id="stomachBowelConditionsNotes" name="stomach_bowel_conditions_notes" rows="2" class="form-control"></textarea>
+                        </div>
+                      </div>
+                
+                      <!-- Musculoskeletal Conditions -->
+                      <div class="form-row">
+                        <div class="form-group col-md-4">
+                          <label for="musculoskeletalConditions">Musculoskeletal Conditions</label>
+                        </div>
+                        <div class="form-group col-md-4">
+                          <input type="checkbox" id="musculoskeletalConditions" name="musculoskeletal_conditions" class="form-check-input">
+                        </div>
+                        <div class="form-group col-md-4">
+                          <textarea id="musculoskeletalConditionsNotes" name="musculoskeletal_conditions_notes" rows="2" class="form-control"></textarea>
+                        </div>
+                      </div>
+                
+                      <!-- Neurological/Psychiatric Conditions -->
+                      <div class="form-row">
+                        <div class="form-group col-md-4">
+                          <label for="neuroPsychiatricConditions">Neurological/Psychiatric Conditions</label>
+                        </div>
+                        <div class="form-group col-md-4">
+                          <input type="checkbox" id="neuroPsychiatricConditions" name="neuro_psychiatric_conditions" class="form-check-input">
+                        </div>
+                        <div class="form-group col-md-4">
+                          <textarea id="neuroPsychiatricConditionsNotes" name="neuro_psychiatric_conditions_notes" rows="2" class="form-control"></textarea>
+                        </div>
+                      </div>           
+                      <!-- Repeat the structure for additional conditions -->
+                    </div>           
+              </div>
 
           <!-- Family History tab -->
-          <div class="tab-pane fade" id="family" role="tabpanel" aria-labelledby="family-tab">
-            <!-- Family History form -->
-            <form>
-                <div class="container">
-                  <!-- Allergies -->
-                  <div class="form-row">
-                    <div class="form-group col-md-3">
-                      <label for="allergies">
-                        Disease Name</label>
-                    </div>
-                    <div class="form-group col-md-3">
-                        <label for="allergies">Answer</label>
+              <div class="tab-pane fade" id="family" role="tabpanel" aria-labelledby="family-tab">
+                <!-- Family History form -->
+              
+                    <div class="container">
+                      <!-- Allergies -->
+                      <div class="form-row">
+                        <div class="form-group col-md-3">
+                          <label for="allergies">
+                            Disease Name</label>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="allergies">Answer</label>
+                          </div>
+                          <div class="form-group col-md-3">
+                            <label for="allergies">Relationship</label>
+                          </div>
+                          <div class="form-group col-md-3">
+                            <label for="allergies">Comments</label>
+                          </div>
                       </div>
-                      <div class="form-group col-md-3">
-                        <label for="allergies">Relationship</label>
+                      <div class="form-row">
+                        <div class="form-group col-md-3">
+                          <label for="allergies">Allergies</label>
+                        </div>
+                        <div class="form-group col-md-3">
+                          <input type="checkbox" id="allergies" name="family_allergies" class="form-check-input">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <input type="text" class="form-control" name="family_allergies_relationship">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <textarea id="allergiesNotes" name="family_allergies_comments" rows="2" class="form-control" ></textarea>
+                        </div>
                       </div>
-                      <div class="form-group col-md-3">
-                        <label for="allergies">Comments</label>
+                
+                      <!-- Eye Condition -->
+                      <div class="form-row">
+                        <div class="form-group col-md-3">
+                          <label for="eyeCondition">Asthma</label>
+                        </div>
+                        <div class="form-group col-md-3">
+                          <input type="checkbox" id="eyeCondition" name="family_asthma_condition" class="form-check-input">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <input type="text" class="form-control" name="family_asthma_condition_relationship">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <textarea id="eyeConditionNotes" name="family_asthma_condition_comments" rows="2" class="form-control"></textarea>
+                        </div>
                       </div>
-                  </div>
-                  <div class="form-row">
-                    <div class="form-group col-md-3">
-                      <label for="allergies">Allergies</label>
-                    </div>
-                    <div class="form-group col-md-3">
-                      <input type="checkbox" id="allergies" name="allergies" class="form-check-input">
-                    </div>
-                    <div class="form-group col-md-3">
-                      <input type="text" class="form-control">
-                    </div>
-                    <div class="form-group col-md-3">
-                      <textarea id="allergiesNotes" name="allergiesNotes" rows="2" class="form-control"></textarea>
-                    </div>
-                  </div>
-            
-                  <!-- Eye Condition -->
-                  <div class="form-row">
-                    <div class="form-group col-md-3">
-                      <label for="eyeCondition">Asthma</label>
-                    </div>
-                    <div class="form-group col-md-3">
-                      <input type="checkbox" id="eyeCondition" name="eyeCondition" class="form-check-input">
-                    </div>
-                    <div class="form-group col-md-3">
-                      <input type="text" class="form-control">
-                    </div>
-                    <div class="form-group col-md-3">
-                      <textarea id="eyeConditionNotes" name="eyeConditionNotes" rows="2" class="form-control"></textarea>
-                    </div>
-                  </div>
-            
-                  <!-- Ear, Nose, Throat -->
-                  <div class="form-row">
-                    <div class="form-group col-md-3">
-                      <label for="entConditions">Lung Disease</label>
-                    </div>
-                    <div class="form-group col-md-3">
-                      <input type="checkbox" id="entConditions" name="entConditions" class="form-check-input">
-                    </div>
-                    <div class="form-group col-md-3">
-                      <input type="text" class="form-control">
-                    </div>
-                    <div class="form-group col-md-3">
-                      <textarea id="entConditionsNotes" name="entConditionsNotes" rows="2" class="form-control"></textarea>
-                    </div>
-                  </div>
-            
-                  <!-- Respiratory Conditions -->
-                  <div class="form-row">
-                    <div class="form-group col-md-3">
-                      <label for="respiratoryConditions">Cancer</label>
-                    </div>
-                    <div class="form-group col-md-3">
-                      <input type="checkbox" id="respiratoryConditions" name="respiratoryConditions" class="form-check-input">
-                    </div>
-                    <div class="form-group col-md-3">
-                      <input type="text" class="form-control">
-                    </div>
-                    <div class="form-group col-md-3">
-                      <textarea id="respiratoryConditionsNotes" name="respiratoryConditionsNotes" rows="2" class="form-control"></textarea>
-                    </div>
-                  </div>
-            
-                  <!-- Cardiovascular Conditions -->
-                  <div class="form-row">
-                    <div class="form-group col-md-3">
-                      <label for="cardiovascularConditions">Diabetes</label>
-                    </div>
-                    <div class="form-group col-md-3">
-                      <input type="checkbox" id="cardiovascularConditions" name="cardiovascularConditions" class="form-check-input">
-                    </div>
-                    <div class="form-group col-md-3">
-                      <input type="text" class="form-control">
-                    </div>
-                    <div class="form-group col-md-3">
-                      <textarea id="cardiovascularConditionsNotes" name="cardiovascularConditionsNotes" rows="2" class="form-control"></textarea>
-                    </div>
-                  </div>
-            
-                  <!-- Urinary Conditions -->
-                  <div class="form-row">
-                    <div class="form-group col-md-3">
-                      <label for="urinaryConditions">Hypertension</label>
-                    </div>
-                    <div class="form-group col-md-3">
-                      <input type="checkbox" id="urinaryConditions" name="urinaryConditions" class="form-check-input">
-                    </div>
-                    <div class="form-group col-md-3">
-                      <input type="text" class="form-control">
-                    </div>
-                    <div class="form-group col-md-3">
-                      <textarea id="urinaryConditionsNotes" name="urinaryConditionsNotes" rows="2" class="form-control"></textarea>
-                    </div>
-                  </div>
-            
-                  <!-- Stomach/Bowel Conditions -->
-                  <div class="form-row">
-                    <div class="form-group col-md-3">
-                      <label for="stomachBowelConditions">Heart Disease</label>
-                    </div>
-                    <div class="form-group col-md-3">
-                      <input type="checkbox" id="stomachBowelConditions" name="stomachBowelConditions" class="form-check-input">
-                    </div>
-                    <div class="form-group col-md-3">
-                     <input type="text" class="form-control">
-                    </div>
-                    <div class="form-group col-md-3">
-                      <textarea id="stomachBowelConditionsNotes" name="stomachBowelConditionsNotes" rows="2" class="form-control"></textarea>
-                    </div>
-                  </div>          
-             </div>
-            </form>   
-          </div>
+                
+                      <!-- Ear, Nose, Throat -->
+                      <div class="form-row">
+                        <div class="form-group col-md-3">
+                          <label for="entConditions">Lung Disease</label>
+                        </div>
+                        <div class="form-group col-md-3">
+                          <input type="checkbox" id="family_lungdisease_conditions" name="family_lungdisease_conditions" class="form-check-input">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <input type="text" class="form-control" name="family_lungdisease_conditions_relationship">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <textarea id="family_lungdisease_conditions_comments" name="family_lungdisease_conditions_comments" rows="2" class="form-control"></textarea>
+                        </div>
+                      </div>
+                
+                      <!-- Respiratory Conditions -->
+                      <div class="form-row">
+                        <div class="form-group col-md-3">
+                          <label for="respiratoryConditions">Cancer</label>
+                        </div>
+                        <div class="form-group col-md-3">
+                          <input type="checkbox" id="respiratoryConditions" name="family_cancer_conditions" class="form-check-input">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <input type="text" class="form-control" name="family_cancer_conditions_relationship">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <textarea id="respiratoryConditionsNotes" name="family_cancer_conditions_comments" rows="2" class="form-control"></textarea>
+                        </div>
+                      </div>
+                
+                      <!-- Cardiovascular Conditions -->
+                      <div class="form-row">
+                        <div class="form-group col-md-3">
+                          <label for="cardiovascularConditions">Diabetes</label>
+                        </div>
+                        <div class="form-group col-md-3">
+                          <input type="checkbox" id="cardiovascularConditions" name="family_diabetes_conditions" class="form-check-input">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <input type="text" class="form-control" name="family_diabetes_conditions_relationship">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <textarea id="cardiovascularConditionsNotes" name="family_diabetes_conditions_comments" rows="2" class="form-control"></textarea>
+                        </div>
+                      </div>
+                
+                      <!-- Urinary Conditions -->
+                      <div class="form-row">
+                        <div class="form-group col-md-3">
+                          <label for="urinaryConditions">Hypertension</label>
+                        </div>
+                        <div class="form-group col-md-3">
+                          <input type="checkbox" id="urinaryConditions" name="family_hypertension_conditions" class="form-check-input" >
+                        </div>
+                        <div class="form-group col-md-3">
+                          <input type="text" class="form-control" name="family_hypertension_conditions_relationship">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <textarea id="urinaryConditionsNotes" name="family_hypertension_conditions_comments" rows="2" class="form-control"></textarea>
+                        </div>
+                      </div>
+                
+                      <!-- Stomach/Bowel Conditions -->
+                      <div class="form-row">
+                        <div class="form-group col-md-3">
+                          <label for="stomachBowelConditions">Heart Disease</label>
+                        </div>
+                        <div class="form-group col-md-3">
+                          <input type="checkbox" id="stomachBowelConditions" name="family_heart_disease_conditions" class="form-check-input">
+                        </div>
+                        <div class="form-group col-md-3">
+                        <input type="text" class="form-control" name="family_heart_disease_conditions_relationship">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <textarea id="stomachBowelConditionsNotes" name="family_heart_disease_conditions_comments" rows="2" class="form-control"></textarea>
+                        </div>
+                      </div>          
+                </div>        
+              </div>
 
           <!-- Life Style tab -->
-          <div class="tab-pane fade" id="lifestyle" role="tabpanel" aria-labelledby="lifestyle-tab">
-            <form>
-              <div class="container">
-                <!-- Allergies -->
-                <div class="form-row">
-                  <div class="form-group col-md-6">
-                    <label for="allergies">                  
-                        Lifestyle Habit</label>
-                  </div>
-                  <div class="form-group col-md-6">
-                      <label for="allergies">Yes/No</label>
+              <div class="tab-pane fade" id="lifestyle" role="tabpanel" aria-labelledby="lifestyle-tab">        
+                  <div class="container">
+                    <!-- Allergies -->
+                    <div class="form-row">
+                      <div class="form-group col-md-6">
+                        <label for="allergies">                  
+                            Lifestyle Habit</label>
+                      </div>
+                      <div class="form-group col-md-6">
+                          <label for="allergies">Yes/No</label>
+                        </div>
+                          
                     </div>
-                       
-                </div>
-                <div class="form-row">
-                  <div class="form-group col-md-6">
-                    <label for="allergies">Smoking</label>
-                  </div>
-                  <div class="form-group col-md-6">
-                    <input type="checkbox" id="urinaryConditions" name="urinaryConditions" class="form-check-input">
-                  </div>    
-                </div>
-          
-                <!-- Eye Condition -->
-                <div class="form-row">
-                  <div class="form-group col-md-6">
-                    <label for="eyeCondition">Alcohol Consumption</label>
-                  </div>
-                  <div class="form-group col-md-6">
-                    <input type="checkbox" id="urinaryConditions" name="urinaryConditions" class="form-check-input">
-                  </div>    
-                
-                </div>
-          
-                <!-- Ear, Nose, Throat -->
-                <div class="form-row">
-                  <div class="form-group col-md-6">
-                    <label for="entConditions">Weekly Exercise Frequency</label>
-                  </div>                
-                  <div class="form-group col-md-6">
-                    <input type="text" class="form-control">
-                  </div>
+                    <div class="form-row">
+                      <div class="form-group col-md-6">
+                        <label for="smoking">Smoking</label>
+                      </div>
+                      <div class="form-group col-md-6">
+                        <input type="checkbox" id="smoking" name="smoking" class="form-check-input">
+                      </div>    
+                    </div>
+              
+                    <!-- Eye Condition -->
+                    <div class="form-row">
+                      <div class="form-group col-md-6">
+                        <label for="alcohol_consumption">Alcohol Consumption</label>
+                      </div>
+                      <div class="form-group col-md-6">
+                        <input type="checkbox" id="alcohol_consumption" name="alcohol_consumption" class="form-check-input">
+                      </div>    
+                    
+                    </div>
+              
+                    <!-- Ear, Nose, Throat -->
+                    <div class="form-row">
+                      <div class="form-group col-md-6">
+                        <label for="weekly_exercise_frequency">Weekly Exercise Frequency</label>
+                      </div>                
+                      <div class="form-group col-md-6">
+                        <input type="text" class="form-control" name="weekly_exercise_frequency" id="weekly_exercise_frequency">
+                      </div>
 
-                </div>
+                    </div>
+              
+                    <!-- Respiratory Conditions -->
+                    <div class="form-row">
+                      <div class="form-group col-md-6">
+                        <label for="healthy_diet">Healthy Diet</label>
+                      </div>
+                      <div class="form-group col-md-6">
+                        <input type="checkbox" id="healthy_diet" name="healthy_diet" class="form-check-input">
+                      </div>                
+                    </div>
+              
+                    <!-- Cardiovascular Conditions -->
+                    <div class="form-row">
+                      <div class="form-group col-md-6">
+                        <label for="stress_management">Stress Management</label>
+                      </div>
+                      <div class="form-group col-md-6">
+                        <input type="checkbox" id="stress_management" name="stress_management" class="form-check-input">
+                      </div>               
+                    </div>
+              
+                    <!-- Urinary Conditions -->
+                    <div class="form-row">
+                      <div class="form-group col-md-6">
+                        <label for="sufficient_sleep">Sufficient Sleep</label>
+                      </div>
+                      <div class="form-group col-md-6">
+                        <input type="checkbox" id="sufficient_sleep" name="sufficient_sleep" class="form-check-input">
+                    </div>                
+                </div>         
+              
+              </div>
           
-                <!-- Respiratory Conditions -->
-                <div class="form-row">
-                  <div class="form-group col-md-6">
-                    <label for="respiratoryConditions">Healthy Diet</label>
-                  </div>
-                  <div class="form-group col-md-6">
-                    <input type="checkbox" id="respiratoryConditions" name="respiratoryConditions" class="form-check-input">
-                  </div>                
-                </div>
-          
-                <!-- Cardiovascular Conditions -->
-                <div class="form-row">
-                  <div class="form-group col-md-6">
-                    <label for="cardiovascularConditions">Stress Management</label>
-                  </div>
-                  <div class="form-group col-md-6">
-                    <input type="checkbox" id="cardiovascularConditions" name="cardiovascularConditions" class="form-check-input">
-                  </div>               
-                </div>
-          
-                <!-- Urinary Conditions -->
-                <div class="form-row">
-                  <div class="form-group col-md-6">
-                    <label for="urinaryConditions">Sufficient Sleep</label>
-                  </div>
-                  <div class="form-group col-md-6">
-                    <input type="checkbox" id="urinaryConditions" name="urinaryConditions" class="form-check-input">
-                  </div>                 
-                 
-                </div>
-          
-                        
-           </div>
-          </form>   
-          </div>
+              </div>
                 <!-- Health Condition tab -->
               </div>
               <div class="form-group pt-2 float-end">
@@ -533,12 +574,48 @@
                 </div>
             </div>
             </div>
-          
+   </form>
+          <div id="messageContainer" class="text-center mt-2"></div>
+          <script>
+            $(document).ready(function () {
+                // Handle form submission
+                $('#patientForm').submit(function (e) {
+                    e.preventDefault();    
+             
+    
+                    // Serialize the form data
+                    var formData = $(this).serialize();
+    
+                    // Send AJAX request to the server
+                    $.ajax({
+                      url: '/add_patient/',
+                      method: 'POST',
+                      data: formData,
+                      success: function (response, status, xhr) {
+                          if (xhr.status === 200) {
+                              // Handle success
+                              $('#messageContainer').html('<div class="alert alert-success" role="alert">' + response.message + '</div>');
+                               // Clear the form fields
+                               $('#patientForm')[0].reset();
+                          } else {
+                              // Handle other status codes (e.g., 400 for client errors)
+                              $('#messageContainer').html('<div class="alert alert-danger" role="alert">' + response.error + '</div>');
+                          }
+                      },
+                      error: function (error) {
+                          // Handle the AJAX error
+                          $('#messageContainer').html('<div class="alert alert-danger" role="alert">Error saving data</div>');
+                          console.error('Error saving data:', error);
+                      }
+                  });
+                });
+            });
+        </script>
           </div>   
         </div>
       </div>
     </div>    
-  </di>   
+  </div>   
 
 
 
