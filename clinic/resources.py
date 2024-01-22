@@ -1,5 +1,5 @@
 from import_export import resources
-from .models import Company, DiseaseRecode, InsuranceCompany, PathodologyRecord, Staffs
+from .models import Company, DiseaseRecode, InsuranceCompany, PathodologyRecord, Patients, Staffs
 
 class StaffResources(resources.ModelResource):
     class Meta:
@@ -19,3 +19,8 @@ class CompanyResource(resources.ModelResource):
 class PathologyRecordResource(resources.ModelResource):
     class Meta:
         model = PathodologyRecord        
+# Create a resource for importing/exporting Patients data
+# Create a resource for importing/exporting Patients data
+class PatientsResource(resources.ModelResource):
+    class Meta:
+        model = Patients 

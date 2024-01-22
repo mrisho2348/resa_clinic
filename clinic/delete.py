@@ -1,7 +1,7 @@
 
 
 from django.shortcuts import redirect, render,get_object_or_404
-from .models import Company, DiseaseRecode, InsuranceCompany, PathodologyRecord, Staffs
+from .models import Company, DiseaseRecode, InsuranceCompany, PathodologyRecord, Patients, Staffs
 from django.contrib import messages
 
 def delete_staff(request, staff_id):
@@ -16,6 +16,19 @@ def delete_staff(request, staff_id):
         return redirect('manage_staff')  # Replace 'staff_list' with your actual list view name
 
     return render(request, 'delete/delete_staff_confirm.html', {'staff': staff})
+
+def delete_patient(request, patient_id):
+    # Retrieve the staff object or return a 404 if not found
+    patient = get_object_or_404(Patients, id=patient_id)
+
+    if request.method == 'POST':
+        # Perform the deletion
+        patient.delete()
+        # Redirect to a success page or a list view
+        messages.success(request, 'patient deleted successfully.')
+        return redirect('manage_patient')  # Replace 'manage_patient' with your actual list view name
+
+    return render(request, 'delete/delete_patient_confirm.html', {'patient': patient})
 
 def delete_insurance(request, insurance_id):
     insurance = get_object_or_404(InsuranceCompany, pk=insurance_id)

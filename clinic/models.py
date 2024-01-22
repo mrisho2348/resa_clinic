@@ -3,6 +3,8 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import BaseUserManager
 from django.db.models.signals import post_save,pre_save,post_delete
 from django.dispatch import receiver
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 
 # Create your models here.
 class CustomUserManager(BaseUserManager):
@@ -130,7 +132,7 @@ class DiseaseRecode(models.Model):
     def __str__(self):
         return self.name
   
-class ContactDetails(models.Model):
+class ContactDetails(models.Model):    
     name = models.CharField(max_length=255)
     email = models.EmailField()
     phone = models.CharField(max_length=15)
@@ -143,114 +145,117 @@ class ContactDetails(models.Model):
     def __str__(self):
         return self.name
     
-class Patient(models.Model):
-    mrn_format = models.CharField(max_length=20)  # Assuming MRN format is a string
-    # Personal Information
-    first_name = models.CharField(max_length=50)
-    middle_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    gender = models.CharField(max_length=10)
-    age = models.PositiveIntegerField()
-    nationality = models.CharField(max_length=50)
-    patient_type = models.CharField(max_length=20)
-    company = models.CharField(max_length=50)
-    occupation = models.CharField(max_length=50)
+
+
+
+class Patients(models.Model):
+    # Auto-incremented primary key (ID)
+    # The unique constraint for MRN is maintained separately
+    mrn = models.CharField(max_length=20, unique=True, editable=False)
+    fullname = models.CharField(max_length=255)
+    email = models.EmailField()
+    dob = models.DateField()
+    gender = models.CharField(max_length=255)
     phone = models.CharField(max_length=15)
-    employee_number = models.CharField(max_length=20)
-    date_of_first_employment = models.DateField()
-    long_time_illness = models.TextField()
-    long_time_medication = models.TextField()
-    osha_certificate = models.BooleanField(default=False)
-    osha_date = models.DateField(null=True, blank=True)
-    insurance = models.CharField(max_length=20, choices=[('Uninsured', 'Uninsured'), ('Insured', 'Insured')])
-    insurance_name = models.CharField(max_length=50, null=True, blank=True)
-    insurance_number = models.IntegerField(null=True, blank=True)
+    address = models.TextField()
+    nationality = models.CharField(max_length=255)
+    company = models.CharField(max_length=255)
+    marital_status = models.CharField(max_length=255)
+    patient_type = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
 
-    # Emergency Contact
-    emergency_contact_name = models.CharField(max_length=50)
-    emergency_contact_relation = models.CharField(max_length=50)
-    emergency_contact_phone = models.CharField(max_length=15)
-    emergency_contact_mobile = models.CharField(max_length=15)
+    def save(self, *args, **kwargs):
+        # Generate MRN only if it's not provided
+        if not self.mrn:
+            self.mrn = generate_mrn()
 
-    # Health Condition
-    allergies =  models.BooleanField(default=False)
-    allergies_notes = models.TextField()
-    eye_condition =  models.BooleanField(default=False)
-    eye_condition_notes = models.TextField()
-    ent_conditions = models.BooleanField(default=False)
-    ent_conditions_notes = models.TextField()
-    respiratory_conditions = models.BooleanField(default=False)
-    respiratory_conditions_notes = models.TextField()
-    cardiovascular_conditions = models.BooleanField(default=False)
-    cardiovascular_conditions_notes = models.TextField()
-    urinary_conditions = models.BooleanField(default=False)
-    urinary_conditions_notes = models.TextField()
-    stomach_bowel_conditions = models.BooleanField(default=False)
-    stomach_bowel_conditions_notes = models.TextField()
-    musculoskeletal_conditions = models.BooleanField(default=False)
-    musculoskeletal_conditions_notes = models.TextField()
-    neuro_psychiatric_conditions = models.BooleanField(default=False)
-    neuro_psychiatric_conditions_notes = models.TextField()
+        super().save(*args, **kwargs)
 
- # Family History
-    family_allergies = models.BooleanField(default=False)
-    family_allergies_relationship = models.CharField(max_length=50, blank=True)
-    family_allergies_comments = models.TextField(blank=True)
+    def __str__(self):
+        return self.fullname
 
-    family_asthma_condition = models.BooleanField(default=False)
-    family_asthma_condition_relationship = models.CharField(max_length=50, blank=True)
-    family_asthma_condition_comments = models.TextField(blank=True)
+def generate_mrn():
+    # Retrieve the last patient's MRN from the database
+    last_patient = Patients.objects.last()
 
-    family_lungdisease_conditions = models.BooleanField(default=False)
-    family_lungdisease_conditions_relationship = models.CharField(max_length=50, blank=True)
-    family_lungdisease_conditions_comments = models.TextField(blank=True)
+    # Extract the numeric part from the last MRN, or start from 0 if there are no patients yet
+    last_mrn_number = int(last_patient.mrn.split('-')[-1]) if last_patient else 0
 
-    family_diabetes_conditions = models.BooleanField(default=False)
-    family_diabetes_conditions_relationship = models.CharField(max_length=50, blank=True)
-    family_diabetes_conditions_comments = models.TextField(blank=True)
+    # Increment the numeric part for the new patient
+    new_mrn_number = last_mrn_number + 1
 
-    family_cancer_conditions = models.BooleanField(default=False)
-    family_cancer_conditions_relationship = models.CharField(max_length=50, blank=True)
-    family_cancer_conditions_comments = models.TextField(blank=True)
+    # Format the MRN with leading zeros and concatenate with the prefix "PAT-"
+    new_mrn = f"PAT-{new_mrn_number:05d}"
 
-    family_hypertension_conditions = models.BooleanField(default=False)
-    family_hypertension_conditions_relationship = models.CharField(max_length=50, blank=True)
-    family_hypertension_conditions_comments = models.TextField(blank=True)
+    return new_mrn
+    
+    
+class Payment(models.Model):
+    PAYMENT_TYPES = [
+        ('Cash', 'Cash'),
+        ('Credit Card', 'Credit Card'),
+        ('Insurance', 'Insurance'),
+        # Add more payment types as needed
+    ]
 
-    family_heart_disease_conditions = models.BooleanField(default=False)
-    family_heart_disease_conditions_relationship = models.CharField(max_length=50, blank=True)
-    family_heart_disease_conditions_comments = models.TextField(blank=True)
+    payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPES)
+    patient_id = models.ForeignKey(Patients, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    date_paid = models.DateField()
+    insurance_id = models.ForeignKey(InsuranceCompany, on_delete=models.SET_NULL, blank=True, null=True)
 
-    # Life Style
-    smoking =  models.BooleanField(default=False)
-    alcohol_consumption =  models.BooleanField(default=False)
-    weekly_exercise_frequency = models.CharField(max_length=50, null=True, blank=True)
-    healthy_diet =  models.BooleanField(default=False)
-    stress_management =  models.BooleanField(default=False)
-    sufficient_sleep = models.BooleanField(default=False)
+    def __str__(self):
+        return f"Payment of {self.amount} {self.payment_type} for {self.patient_id}"
+
+class Procedure(models.Model):
+    patient_id = models.ForeignKey(Patients, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    duration_time = models.CharField(max_length=50)
+    equipments_used = models.CharField(max_length=255)
+    cost = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"Procedure: {self.name} for {self.patient_id}"
+class Consultation(models.Model):
+    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
+    appointment_date = models.DateField()
+    start_time = models.TimeField(blank=True, null=True)
+    end_time = models.TimeField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    STATUS_CHOICES = [
+    (0, 'Pending'),
+    (1, 'Completed'),
+    (2, 'Canceled'),
+    (3, 'Rescheduled'),
+    (4, 'No-show'),
+    (5, 'In Progress'),
+    (6, 'Confirmed'),
+    (7, 'Arrived'),
+    # Add more status options as needed
+]
+    status = models.IntegerField(choices=STATUS_CHOICES, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
-    
-    
-
-class Appointment(models.Model):
-    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE)
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    appointment_date = models.DateField()
-    start_time = models.TimeField()
-    end_time = models.TimeField()
-    description = models.TextField()
-
-    def __str__(self):
         return f"Appointment with {self.doctor.name} for {self.patient.name} on {self.appointment_date} from {self.start_time} to {self.end_time}"
 
-
+class Notification(models.Model):
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)    
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
 class MedicalRecordConsultation(models.Model):
     # Relationship with Patient
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
     # Complaints Section
     chief_complaint = models.CharField(max_length=255)
     history_illness = models.TextField()

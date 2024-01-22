@@ -24,6 +24,7 @@ urlpatterns = [
         path('resa/page/404',views.page_404, name="page_404"),        
         path('resa/new-consultation',views.add_consultation, name="add_consultation"),
         path('staff_detail/<int:staff_id>/', views.single_staff_detail, name='single_staff_detail'),
+        path('view-patient/<int:patient_id>/', views.view_patient, name='view_patient'),
         path('edit_staff/<str:staff_id>', views.edit_staff, name='edit_staff'),  
         path('edit_staff_save', views.edit_staff_save, name='edit_staff_save'), 
         path('resa/new-request',views.add_request, name="add_request"),
@@ -44,7 +45,7 @@ urlpatterns = [
         path('resa/individual-visit',views.individual_visit, name="individual_visit"),
         path('resa/product-summary',views.product_summary, name="product_summary"),
         
-        path('delete_staff/<int:staff_id>/', delete.delete_staff, name='delete_staff'),
+       
         
         # manage urls 
         path('resa/all-patients',views.manage_patient, name="manage_patient"),
@@ -56,11 +57,15 @@ urlpatterns = [
         path('resa/manage-service',views.manage_service, name="manage_service"),
         path('resa/manage-adjustment',views.manage_adjustment, name="manage_adjustment"),
         path('resa/manage-pathodology',views.manage_pathodology, name="manage_pathodology"),
-        
+        path('resa/appointments/', views.appointment_list_view, name='appointment_list'),
+        path('notifications/', views.notification_view, name='notification_view'),
+        path('confirm_meeting/<int:appointment_id>/', views.confirm_meeting, name='confirm_meeting'),
+        path('edit_meeting/<int:appointment_id>/', views.edit_meeting, name='edit_meeting'),
         # imports urls 
         path('resa/ImportExcel_disease',imports.import_disease_recode, name="import_disease_recode"),
         path('import-insurance-companies/', imports.import_insurance_companies, name='import_insurance_companies'),
         path('import-companies/', imports.import_companies, name='import_companies'),
+        path('import-patients/', imports.import_patient_records, name='import_patient_records'),
         path('import-pathology-records/', imports.import_pathology_records, name='import_pathology_records'),
         
         # edit urls 
@@ -68,10 +73,14 @@ urlpatterns = [
         path('insurance-records/<int:insurance_id>/edit/', editView.edit_insurance, name='edit_insurance'),
         path('pathodology/<int:pathodology_id>/edit/', editView.edit_pathodology, name='edit_pathodology'),
         path('company/<int:company_id>/edit/', editView.edit_company, name='edit_company'), 
+        path('Patient/<int:patient_id>/edit/', editView.edit_patient, name='edit_patient'), 
+        path('Patient/<int:patient_id>/add/', views.appointment_view, name='appointment_view'), 
         
         # delete urls 
         path('disease-records/<int:disease_id>/delete/', delete.delete_disease_record, name='delete_disease_record'),        
         path('insurance-records/<int:insurance_id>/delete/', delete.delete_insurance, name='delete_insurance'),        
         path('pathodology/<int:pathodology_id>/delete/', delete.delete_pathodology, name='delete_pathodology'),
         path('company/<int:company_id>/delete/', delete.delete_company, name='delete_company'),
+        path('delete_staff/<int:staff_id>/', delete.delete_staff, name='delete_staff'),
+        path('delete-patient/<int:patient_id>/', delete.delete_patient, name='delete_patient'),
 ]

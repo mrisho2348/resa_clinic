@@ -1,288 +1,157 @@
 {% extends 'hod_template/base_template.html' %}
+
 {% block title %}
-  Add consultation
+Add Consultation
 {% endblock title %}
+{% block breadcrumb %}
+{% endblock breadcrumb %}
 {% block main_content %}
-  {% load static %}
+    {% load static %}             
+             
+        
+                <!-- Main content -->
+              
+                    <div class="container-fluid">
+                        <div class="row">
+                            <!-- left column -->
+                            <div class="col-md-12">
+                                <!-- general form elements -->
+                                <div class="card card-primary">
+                                    <div class="card-header">
+                                        <h3 class="card-title">Add Consultation</h3>
+                                    </div>
+                                  <di class="card-body">
+                                      <div class="row mb-3">
+                                        <div class="col-md-4">
+                                          <!-- Display patient information -->
+                                          <strong>PATIENT NAME:</strong> {{ patient.fullname }}<br>
+                                          <strong>AGE:</strong>   <script>
+                                            var dob = new Date("{{ patient.dob|date:'Y-m-d' }}");
+                                            var now = new Date();
+                                            var ageMilliseconds = now - dob;
+                                            var ageSeconds = ageMilliseconds / 1000;
+                                            var ageYears = Math.floor(ageSeconds / (365.25 * 24 * 60 * 60));
+                                            document.write(ageYears + ' years');
+                                        </script><br>
+                                          <strong>SEX:</strong> {{ patient.gender }}
+                                        </div>
+                          
+                                        <div class="col-md-4 offset-md-4 text-right">
+                                          <!-- Display additional patient information -->
+                                          <strong>FILE NO:</strong> {{ patient.mrn }}<br>
+                                          <strong>DATE:</strong> {{ patient.created_at|date:"m/d/Y" }}
+                                        </div>
+                                      </div>
+                          
+                                      <!-- Consultation form -->
+                                      <form id="consultationForm" method="post"  action="{% url 'appointment_view' patient.id %}">
+                                        {% csrf_token %}
+                                        <div class="row">
+                                          <div class="col-md-6">
+                                            <!-- Doctor selection dropdown -->
+                                            <label for="doctor">Doctor:</label>
+                                            <select class="form-control select2bs4" style="width: 100%;" name="doctor" required>
+                                              <option value="">Select Doctor</option>
+                                              {% for doctor in doctors %}
+                                                <option value="{{ doctor.id }}">{{ doctor.admin.first_name }} {{ doctor.middle_name }} {{ doctor.admin.last_name }} </option>
+                                              {% endfor %}
+                                            </select>
+                                          </div>
+                          
+                                          <div class="col-md-6">
+                                            <!-- Description input -->
+                                            <label for="description">Description:</label>
+                                            <textarea id="description" name="description" rows="2" class="form-control"></textarea>
+                                          </div>
+                          
+                                          <div class="col-md-6">
+                                            <!-- Date of consultation input -->
+                                            <label for="date_of_consultation">Date of Consultation:</label>
+                                            <input type="date" id="date_of_consultation" name="date_of_consultation" class="form-control">
+                                          </div>
+                                        </div>
+                          
+                                        <!-- Time inputs for start and end times -->
+                                        <div class="row">
+                                          <div class="col-md-6">
+                                            <label for="start_time">Start Time:</label>
+                                            <input type="time" class="form-control" name="start_time" id="start_time">
+                                          </div>
+                                          <div class="col-md-6">
+                                            <label for="end_time">End Time:</label>
+                                            <input type="time" class="form-control" name="end_time" id="end_time">
+                                          </div>
+                                        </div>
+                          
+                                </div>
 
-  <section class="content">
-    <div class="container-fluid">
-      <div class="row">
-        <!-- left column -->
-        <div class="col-md-12">
-          <!-- general form elements -->
-          <div class="card card-primary">
-            <h2 class="card-header">Add consultation </h2>
-            <div class="card-body">
-              <form action="/submit_form" method="post">
-                <!-- Patient Information -->
-                <div class="row mb-3">
-                  <div class="col-md-4">
-                    PATIENT NAME: JOHN DOE<br />
-                    AGE: 45<br />
-                    SEX: M
-                  </div>
-  
-                  <div class="col-md-4 offset-md-4 text-right">
-                    FILE NO: PT123456<br />
-                    DATE: 01/01/2023
-                  </div>
-                </div>
-  
-                <!-- Complaints Section -->
-                <div class="row mb-3">
-                  <!-- Chief Complaint -->
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label for="chiefComplaint">Chief complaint:</label>
-                      <input
-                        type="text"
-                        name="chief_complaint"
-                        id="chiefComplaint"
-                        class="form-control"
-                      />
+                                <div class="card-footer">
+                                  <div class="form-row">
+                                      <div>
+                                          {% if messages %}
+                                              <div class="col-12">
+                                                  {% for message in messages %}
+                                                      {% if message.tags == 'error' %}
+                                                          <div class="alert alert-danger">{{ message }}</div>
+                                                      {% elif message.tags == 'success' %}
+                                                          <div class="alert alert-primary">{{ message }}</div>
+                                                      {% endif %}
+                                                  {% endfor %}
+                                              </div>
+                                          {% endif %}
+                                      </div>
+                                  </div>
+                                  <div class="form-row">
+                                      <div class="col-md-12">
+                                          <button type="submit" class="btn btn-success btn-block">Create an Appointment</button>
+                                      </div>
+                                  </div>
+                              </div>
+                                <!--/.col (right) -->
+                            </div>
+                        </div>
                     </div>
-                  </div>
-  
-                  <!-- History of Presenting Illness -->
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label for="historyIllness"
-                        >History of presenting illness:</label
-                      >
-                      <textarea
-                        name="history_illness"
-                        id="historyIllness"
-                        class="form-control"
-                      ></textarea>
-                    </div>
-                  </div>
-  
-                  <!-- Physical Examination -->
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label for="physicalExamination"
-                        >Physical Examination:</label
-                      >
-                      <textarea
-                        name="physical_examination"
-                        id="physicalExamination"
-                        class="form-control"
-                      ></textarea>
-                    </div>
-                  </div>
-                </div>
-  
-                <!-- ... (Continue similar structure for other fields) -->
-                <!-- Allergy to Medications -->
-                <div class="row mb-3">
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label for="allergyMedications"
-                        >Allergy to medications:</label
-                      >
-                      <textarea
-                        name="allergy_medications"
-                        id="allergyMedications"
-                        class="form-control"
-                      ></textarea>
-                    </div>
-                  </div>
-  
-                  <!-- Provisional Diagnosis -->
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label for="provisionalDiagnosis"
-                        >Provisional Diagnosis:</label
-                      >
-                      <textarea
-                        name="provisional_diagnosis"
-                        id="provisionalDiagnosis"
-                        class="form-control"
-                      ></textarea>
-                    </div>
-                  </div>
-  
-                  <!-- Final Diagnosis -->
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label for="finalDiagnosis">Final Diagnosis:</label>
-                      <textarea
-                        name="final_diagnosis"
-                        id="finalDiagnosis"
-                        class="form-control"
-                      ></textarea>
-                    </div>
-                  </div>
-                </div>
-  
-                <!-- Pathology, Plan, and Injury -->
-                <div class="row mb-3">
-                  <!-- Pathology -->
-               <!-- Pathology -->
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="pathology">Pathology:</label>
-                    <select name="pathology" id="pathology"  class="form-control select2bs4" style="width: 100%;" >
-                      <option value="hematology">Hematology</option>
-                      <option value="clinical_chemistry">Clinical Chemistry</option>
-                      <option value="microbiology">Microbiology</option>
-                      <option value="cytology">Cytology</option>
-                      <option value="histopathology">Histopathology</option>
-                      <option value="immunology">Immunology</option>
-                      <option value="molecular_biology">Molecular Biology</option>
-                      <option value="genetics">Genetics</option>
-                      <option value="clinical_pathology">Clinical Pathology</option>
-                      <option value="toxicology">Toxicology</option>
-                    </select>
-                  </div>
-                </div>
+            
+                <!-- /.content -->
+     
+    
+ 
+
+                              
+                  <script>
+                    // Function to validate that the appointment date is greater than or equal to the current date
+                    function validateDate() {
+                        var currentDate = new Date();
+                        var appointmentDate = new Date(document.getElementById('date_of_consultation').value);
+
+                        if (appointmentDate < currentDate) {
+                            alert('Appointment date must be greater than or equal to the current date.');
+                            return false;
+                        }
+                        return true;
+                    }
+
+                    // Function to validate that end time is greater than start time
+                    function validateTime() {
+                        var startTime = document.getElementById('start_time').value;
+                        var endTime = document.getElementById('end_time').value;
+
+                        if (startTime >= endTime) {
+                            alert('End time must be greater than start time.');
+                            return false;
+                        }
+                        return true;
+                    }
+
+                    // Attach the validation functions to the form submission
+                    document.querySelector('form').addEventListener('submit', function (event) {
+                        if (!validateDate() || !validateTime()) {
+                            event.preventDefault();
+                        }
+                    });
+                  </script>
 
   
-                  <!-- Plan -->
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="plan">Plan:</label>
-                      <textarea
-                        name="plan"
-                        id="plan"
-                        class="form-control"
-                      ></textarea>
-                    </div>
-                  </div>
-  
-                 
-                </div>
-  
-                <!-- Fatality, Injury Description, and Disposition -->
-                <div class="row mb-3">
-                   <!-- Injury -->
-                   <div class="col-md-4">
-                    <div class="form-group">
-                      <label for="injury">Injury:</label>
-                      <select name="injury" id="injury" class="form-control select2bs4" style="width: 100%;" >
-                        <option value="No">No</option>
-                        <option value="Yes">Yes</option>
-                      </select>
-                    </div>
-                  </div>
-                  <!-- Fatality -->
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label for="fatality">Fatality:</label>
-                      <select name="fatality" id="fatality"  class="form-control select2bs4" style="width: 100%;" >
-                       <option value="Minor">Minor</option>
-                       <option value="Moderate">Moderate</option>
-                       <option value="Serious">Serious</option>
-                       <option value="Major">Major</option>
-                       <option value="Catastrophic">Catastrophic</option>
-                      </select>
-                    </div>
-                  </div>
-  
-                  <!-- Injury Description -->
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label for="injuryDescription">Injury Description:</label>
-                      <textarea
-                        name="injury_description"
-                        id="injuryDescription"
-                        class="form-control"
-                      ></textarea>
-                    </div>
-                  </div> 
-                 </div>
-                <div class="row mb-3">
-                   <!-- Disposition -->
-                   <div class="col-md-4">
-                    <div class="form-group">
-                      <label for="Disposition">Disposition:</label>
-                      <select name="Disposition" id="Disposition"  class="form-control select2bs4" style="width: 100%;" >
-                       <option value="Discharge">Discharge</option>
-                       <option value="Referred">Referred</option>
-                       <option value="Dead">Dead</option>
-                      </select>
-                    </div>
-                  </div>
-                  <!-- Fatality -->
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label for="Destination">Destination:</label>
-                      <input type="text" name="Destination" id="Destination" class="form-control">
-                    </div>
-                  </div>
-  
-                  <!-- Injury Description -->
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label for="DispositionDescription">Disposition  Description:</label>
-                      <textarea
-                        name="Disposition_description"
-                        id="DispositionDescription"
-                        class="form-control"
-                      ></textarea>
-                    </div>
-                  </div>
-  
-                 
-                </div>
-           
-                <!-- Submit Button -->
-                <div class="form-group row">
-                  <div class="col-md-12 text-right">
-                    <button type="submit" class="btn btn-primary">Save</button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script>
-    $(document).ready(function () {
-      // Get references to the education level and subjects select elements
-      var educationLevelSelect = $('#school_segment');
-      var subjectsSelect = $('#subjects');
-
-      // Listen for changes in the education level select
-      educationLevelSelect.on('change', function () {
-        var selectedEducationLevel = educationLevelSelect.val();
-
-        // Make an AJAX request to fetch subjects based on the selected education level
-        $.ajax({
-          url: 'get_subjects_by_education_level', // Replace with the actual URL for your backend view
-          data: {
-            'education_level_id': selectedEducationLevel
-          },
-          dataType: 'json',
-          success: function (data) {
-            // Clear the subjects select
-            subjectsSelect.empty();
-
-            // Add a default option
-            subjectsSelect.append($('<option>', {
-              value: '',
-              text: 'Select Subjects'
-            }));
-
-            // Populate the subjects select with retrieved data
-            $.each(data, function (index, item) {
-              subjectsSelect.append($('<option>', {
-                value: item.id,
-                text: item.subject_name
-              }));
-            });
-          },
-          error: function (xhr, status, error) {
-            // Handle any errors here
-            console.error(error);
-          }
-        });
-      });
-    });
-  </script>
+                
 {% endblock main_content %}

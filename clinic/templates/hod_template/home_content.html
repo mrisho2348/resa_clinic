@@ -27,7 +27,7 @@ ADMIN HOME
                 <!-- Small box for patients -->
                 <div class="small-box bg-success">
                     <div class="inner">
-                        <h3>596</h3>
+                        <h3>{{ total_patients }}</h3>
                         <p>ALL PATIENTS</p>
                     </div>
                     <div class="icon">
@@ -208,32 +208,34 @@ ADMIN HOME
                     <table id='patientsTable' class='table table-striped table-bordered'>
                         <thead>
                         <tr>
+                            <th>MRN</th>
                             <th>Name</th>
                             <th>Age</th>
-                            <th>Gender</th>
-                            <th>Company</th>
+                            <th>Gender</th>                          
                             <th>Phone</th>
                             <th>Email</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr>
-                            <td>John Doe</td>
-                            <td>35</td>
-                            <td>Male</td>
-                            <td>SAMOTA</td>
-                            <td>123-456-7890</td>
-                            <td>johndoe@example.com</td>
-                        </tr>
-                        <tr>
-                            <td>Jane Smith</td>
-                            <td>28</td>
-                            <td>Female</td>
-                            <td>ISOAF</td>
-                            <td>098-765-4321</td>
-                            <td>janesmith@example.com</td>
-                        </tr>
-                        <!-- ... add more rows as needed -->
+                            {% for patient in recently_added_patients %}
+                                <tr>                                   
+                                    <td>{{ patient.mrn }}</td>
+                                    <td>{{ patient.fullname }}</td>
+                                    <td>      <script>
+                                        var dob = new Date("{{ patient.dob|date:'Y-m-d' }}");
+                                        var now = new Date();
+                                        var ageMilliseconds = now - dob;
+                                        var ageSeconds = ageMilliseconds / 1000;
+                                        var ageYears = Math.floor(ageSeconds / (365.25 * 24 * 60 * 60));
+                                        document.write(ageYears + ' years');
+                                    </script>
+                                </td>                                                            
+                                <td>{{ patient.gender }}</td>                                 
+                                <td>{{ patient.phone }}</td>
+                                <td>{{ patient.email }}</td>                  
+                                    
+                                </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>

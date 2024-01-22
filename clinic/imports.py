@@ -1,12 +1,13 @@
 # views.py
+import logging
 from django.shortcuts import render
 from django.contrib import messages
-
-from clinic.models import Company, DiseaseRecode, InsuranceCompany, PathodologyRecord
-from .resources import CompanyResource, DiseaseRecodeResource, InsuranceCompanyResource, PathologyRecordResource
-from .forms import ImportCompanyForm, ImportDiseaseForm, ImportInsuranceCompanyForm, ImportPathologyRecordForm
+from django.db import IntegrityError
+from clinic.models import Company, DiseaseRecode, InsuranceCompany, PathodologyRecord, Patients
+from .resources import CompanyResource, DiseaseRecodeResource, InsuranceCompanyResource, PathologyRecordResource, PatientsResource
+from .forms import ImportCompanyForm, ImportDiseaseForm, ImportInsuranceCompanyForm, ImportPathologyRecordForm, ImportPatientsForm
 from tablib import Dataset
-
+logger = logging.getLogger(__name__)
 def import_disease_recode(request):
     if request.method == 'POST':
         form = ImportDiseaseForm(request.POST, request.FILES)
@@ -95,6 +96,7 @@ def import_companies(request):
 
                 messages.success(request, 'Companies data imported successfully!')
             except Exception as e:
+                logger.error(f"Error adding patient: {str(e)}")
                 messages.error(request, f'An error occurred: {e}')
 
     else:
@@ -132,3 +134,58 @@ def import_pathology_records(request):
         form = ImportPathologyRecordForm()
 
     return render(request, 'hod_template/import_pathology_records.html', {'form': form})
+
+def import_patient_records(request):
+    if request.method == 'POST':
+        form = ImportPatientsForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = PatientsResource()
+                new_records = request.FILES['patient_records_file']
+
+                # Use tablib to load the imported data
+                dataset = resource.export()
+                imported_data = dataset.load(new_records.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+                
+                for data in imported_data:
+                    try:
+                        patient_record = Patients.objects.create(
+                            email=data[1],
+                            fullname=data[0],                     
+                            dob=data[2],                     
+                            gender=data[3],                     
+                            phone=data[4],                     
+                            address=data[5],                     
+                            nationality=data[6],                     
+                            company=data[7],                     
+                            marital_status=data[8],                     
+                            patient_type=data[9],                     
+                        )
+                    except IntegrityError:
+                        messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
+                        continue
+
+                    messages.success(request, 'Pathology records data imported successfully!')
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportPatientsForm()
+
+    return render(request, 'hod_template/import_patients.html', {'form': form})
+
+
+def generate_mrn():
+    # Retrieve the last patient's MRN from the database
+    last_patient = Patients.objects.last()
+
+    # Extract the numeric part from the last MRN, or start from 0 if there are no patients yet
+    last_mrn_number = int(last_patient.mrn.split('-')[-1]) if last_patient else 0
+
+    # Increment the numeric part for the new patient
+    new_mrn_number = last_mrn_number + 1
+
+    # Format the MRN with leading zeros and concatenate with the prefix "PAT-"
+    new_mrn = f"PAT-{new_mrn_number:05d}"
+
+    return new_mrn

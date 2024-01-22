@@ -1,4 +1,5 @@
 import logging
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import logout,login
 from django.http import HttpResponse,HttpResponseRedirect
@@ -16,16 +17,25 @@ from django.core.mail import send_mail
 from clinic.emailBackEnd import EmailBackend
 from django.core.exceptions import ObjectDoesNotExist
 from clinic.forms import ImportStaffForm
-from clinic.models import Company, ContactDetails, CustomUser, DiseaseRecode, InsuranceCompany, PathodologyRecord, Patient, Staffs
+from clinic.models import Company, Consultation, ContactDetails, CustomUser, DiseaseRecode, InsuranceCompany, Notification, PathodologyRecord, Patients, Staffs
 from clinic.resources import StaffResources
 from tablib import Dataset
 from django.views.decorators.http import require_POST
+from django.contrib.contenttypes.models import ContentType
 # Create your views here.
 def index(request):
     return render(request,"index.html")
 
 def dashboard(request):
-    return render(request,"hod_template/home_content.html")
+    total_patients = Patients.objects.count()
+    recently_added_patients = Patients.objects.order_by('-created_at')[:6]
+    context = {
+        'total_patients': total_patients,
+        'recently_added_patients': recently_added_patients,
+        # 'gender_based_monthly_counts': gender_based_monthly_counts,
+    }
+    return render(request,"hod_template/home_content.html",context)
+
 def contact(request):
     return render(request,"contact.html")
 def blog_single(request):
@@ -126,7 +136,8 @@ def portfolio_details(request):
 
 @login_required
 def manage_patient(request):
-    return render(request,"hod_template/manage_patients.html")
+    patient_records=Patients.objects.all() 
+    return render(request,"hod_template/manage_patients.html", {"patient_records":patient_records})
 
 @login_required
 def manage_consultation(request):
@@ -370,6 +381,134 @@ def single_staff_detail(request, staff_id):
 
     return render(request, "hod_template/staff_details.html", context)
 
+def view_patient(request, patient_id):
+    patient = get_object_or_404(Patients, id=patient_id)
+    # Fetch additional staff-related data  
+    context = {
+        'patient': patient,
+     
+    }
+
+    return render(request, "hod_template/patients_detail.html", context)
+
+def appointment_view(request, patient_id):
+    try:
+        if request.method == 'POST':
+            # Extract data from the request
+            doctor_id = request.POST.get('doctor')
+            date_of_consultation = request.POST.get('date_of_consultation')
+            start_time = request.POST.get('start_time')
+            end_time = request.POST.get('end_time')
+            description = request.POST.get('description')
+
+            # Create a Consultation instance
+            doctor = get_object_or_404(Staffs, id=doctor_id)
+            patient = get_object_or_404(Patients, id=patient_id)
+            consultation = Consultation(
+                doctor=doctor,
+                patient=patient,
+                appointment_date=date_of_consultation,
+                start_time=start_time,
+                end_time=end_time,
+                description=description
+            )
+            consultation.save()
+
+            # Create a notification for the patient
+            notification_message = f"New appointment scheduled with Dr. { doctor.admin.first_name } { doctor.middle_name } { doctor.admin.last_name } on {date_of_consultation} from {start_time} to {end_time}."
+            Notification.objects.create(
+                content_type=ContentType.objects.get_for_model(Patients),
+                object_id=patient.id,
+                message=notification_message
+            )
+
+            messages.success(request, "Appointment created successfully.")
+            return redirect('appointment_view', patient_id=patient_id)
+
+        # If the request is not a POST, handle the GET request
+        patient = get_object_or_404(Patients, id=patient_id)
+        doctors = Staffs.objects.filter(role='doctor')
+
+        context = {
+            'patient': patient,
+            'doctors': doctors,
+        }
+
+        return render(request, "hod_template/add_consultation.html", context)
+
+    except IntegrityError as e:
+        # Handle integrity error (e.g., duplicate entry)
+        messages.error(request, f"Error creating appointment: {str(e)}")
+        return redirect('appointment_view', patient_id=patient_id)
+    except Exception as e:
+        # Handle other exceptions
+        messages.error(request, f"An unexpected error occurred: {str(e)}")
+        return redirect('appointment_view', patient_id=patient_id)
+    
+def notification_view(request):
+    notifications = Notification.objects.filter(is_read=False)
+    
+    # Mark notifications as read when the user accesses them
+    for notification in notifications:
+        notification.is_read = True
+        notification.save()
+    
+    context = {'notifications': notifications}
+    return render(request, 'hod_template/manage_notification.html', context)
+
+def confirm_meeting(request, appointment_id):
+    try:
+        # Retrieve the appointment
+        appointment = get_object_or_404(Consultation, id=appointment_id)
+
+        if request.method == 'POST':
+            # Get the selected status from the form
+            selected_status = int(request.POST.get('status'))
+
+            # Check if the appointment is not already confirmed
+            if not appointment.status:
+                # Perform the confirmation action (e.g., set status to selected status)
+                appointment.status = selected_status
+                appointment.save()
+
+                # Add a success message
+                messages.success(request, f"Meeting with {appointment.patient.fullname} confirmed.")
+            else:
+                messages.warning(request, f"Meeting with {appointment.patient.fullname} is already confirmed.")
+        else:
+            messages.warning(request, "Invalid request method for confirming meeting.")
+
+    except IntegrityError as e:
+        # Handle IntegrityError (e.g., database constraint violation)
+        messages.error(request, f"Error confirming meeting: {str(e)}")
+
+    return redirect('appointment_list')  # Adjust the URL name based on your actual URL structure
+
+def edit_meeting(request, appointment_id):
+    try:
+        if request.method == 'POST':
+            start_time = request.POST.get('start_time')
+            end_time = request.POST.get('end_time')
+
+            appointment = get_object_or_404(Consultation, id=appointment_id)
+
+            # Perform the edit action (e.g., update start time and end time)
+            appointment.start_time = start_time
+            appointment.end_time = end_time
+            appointment.save()
+
+            messages.success(request, f"Meeting time for {appointment.patient.fullname} edited successfully.")
+    except Exception as e:
+        messages.error(request, f"Error editing meeting time: {str(e)}")
+
+    return redirect('appointment_list')
+
+def appointment_list_view(request):
+    appointments = Consultation.objects.all()
+    unread_notification_count = Notification.objects.filter(is_read=False).count()
+    context = {'appointments': appointments, 'unread_notification_count': unread_notification_count}
+    return render(request, 'hod_template/manage_appointment.html', context)
+
 def import_staff(request):
     if request.method == 'POST':
         form = ImportStaffForm(request.POST, request.FILES)
@@ -495,204 +634,65 @@ def add_pathodology_record(request):
     
 
 @csrf_exempt
-@login_required
 def add_patient(request):
-    if request.method == 'POST':
-        try:
-            # Extracting data from the POST request
-            mrn_format = request.POST.get('mrn_format')
-            first_name = request.POST.get('first_name')
-            middle_name = request.POST.get('middle_name')
-            last_name = request.POST.get('last_name')
+    try:
+        if request.method == 'POST':
+            # Extract data from the request
+            fullname = request.POST.get('fullname')
+            email = request.POST.get('email')
+            dob = request.POST.get('dob')
             gender = request.POST.get('gender')
-            age = request.POST.get('age')
-            nationality = request.POST.get('nationality')
+            phone = request.POST.get('phone')
+            address = request.POST.get('Address')
+            nationality = request.POST.get('profession')
+            company = request.POST.get('company')
+            marital_status = request.POST.get('maritalStatus')
             patient_type = request.POST.get('patient_type')
 
-            # Continue extracting other fields in a similar way
-            company = request.POST.get('company')
-            occupation = request.POST.get('occupation')
-            phone = request.POST.get('phone')
-            employee_number = request.POST.get('employee_number')
-            date_of_first_employment = request.POST.get('date_of_first_employment')
-            print(date_of_first_employment)
-            long_time_illness = request.POST.get('long_time_illness')
-            long_time_medication = request.POST.get('long_time_medication')
-            osha_certificate = request.POST.get('osha_certificate') == 'true'
-            osha_date = request.POST.get('osha_date')
-            print(osha_date)
-            insurance = request.POST.get('insurance')
-            insurance_name = request.POST.get('insurance_name')
-            insurance_number = request.POST.get('insurance_number')
+            # Generate the medical record number (mrn)
+            # You can use your own logic to generate a unique mrn
+            mrn = generate_mrn()
 
-            # Extract Emergency Contact fields
-            emergency_contact_name = request.POST.get('emergency_contact_name')
-            emergency_contact_relation = request.POST.get('emergency_contact_relation')
-            emergency_contact_phone = request.POST.get('emergency_contact_phone')
-            emergency_contact_mobile = request.POST.get('emergency_contact_mobile')
-
-            # Extract Health Condition fields
-            allergies = request.POST.get('allergies')
-            allergies_notes = request.POST.get('allergies_notes')
-            eye_condition = request.POST.get('eye_condition', '')
-            eye_condition_notes = request.POST.get('eye_condition_notes')
-            ent_conditions = request.POST.get('ent_conditions')
-            ent_conditions_notes = request.POST.get('ent_conditions_notes')
-            respiratory_conditions = request.POST.get('respiratory_conditions')
-            respiratory_conditions_notes = request.POST.get('respiratory_conditions_notes')
-            cardiovascular_conditions = request.POST.get('cardiovascular_conditions')
-            cardiovascular_conditions_notes = request.POST.get('cardiovascular_conditions_notes')
-            urinary_conditions = request.POST.get('urinary_conditions')
-            urinary_conditions_notes = request.POST.get('urinary_conditions_notes')
-            stomach_bowel_conditions = request.POST.get('stomach_bowel_conditions')
-            stomach_bowel_conditions_notes = request.POST.get('stomach_bowel_conditions_notes')
-            musculoskeletal_conditions = request.POST.get('musculoskeletal_conditions')
-            musculoskeletal_conditions_notes = request.POST.get('musculoskeletal_conditions_notes')
-            neuro_psychiatric_conditions = request.POST.get('neuro_psychiatric_conditions')
-            neuro_psychiatric_conditions_notes = request.POST.get('neuro_psychiatric_conditions_notes')
-            # Continue extracting other health condition fields in a similar way
-
-            # Extract Family History fields
-            family_allergies = request.POST.get('family_allergies')
-            family_allergies_relationship = request.POST.get('family_allergies_relationship')
-            family_allergies_comments = request.POST.get('family_allergies_comments')
-
-            family_asthma_condition = request.POST.get('family_asthma_condition')
-            family_asthma_condition_relationship = request.POST.get('family_asthma_condition_relationship')
-            family_asthma_condition_comments = request.POST.get('family_asthma_condition_comments')
-
-            family_lungdisease_conditions = request.POST.get('family_lungdisease_conditions')
-            family_lungdisease_conditions_relationship = request.POST.get('family_lungdisease_conditions_relationship')
-            family_lungdisease_conditions_comments = request.POST.get('family_lungdisease_conditions_comments')
-
-            family_diabetes_conditions = request.POST.get('family_diabetes_conditions')
-            family_diabetes_conditions_relationship = request.POST.get('family_diabetes_conditions_relationship')
-            family_diabetes_conditions_comments = request.POST.get('family_diabetes_conditions_comments')
-
-            family_cancer_conditions = request.POST.get('family_cancer_conditions')
-            family_cancer_conditions_relationship = request.POST.get('family_cancer_conditions_relationship')
-            family_cancer_conditions_comments = request.POST.get('family_cancer_conditions_comments')
-
-            family_hypertension_conditions = request.POST.get('family_hypertension_conditions')
-            family_hypertension_conditions_relationship = request.POST.get('family_hypertension_conditions_relationship')
-            family_hypertension_conditions_comments = request.POST.get('family_hypertension_conditions_comments')
-
-            family_heart_disease_conditions = request.POST.get('family_heart_disease_conditions')
-            family_heart_disease_conditions_relationship = request.POST.get('family_heart_disease_conditions_relationship')
-            family_heart_disease_conditions_comments = request.POST.get('family_heart_disease_conditions_comments')
-
-            # Continue extracting other family history fields in a similar way
-
-            # Extract Lifestyle fields
-            smoking = request.POST.get('smoking')
-            alcohol_consumption = request.POST.get('alcohol_consumption')
-            weekly_exercise_frequency = request.POST.get('weekly_exercise_frequency')
-            healthy_diet = request.POST.get('healthy_diet')
-            stress_management = request.POST.get('stress_management')
-            sufficient_sleep = request.POST.get('sufficient_sleep')
-
-
-            # Create a new patient instance with the extracted data
-            new_patient = Patient(
-                mrn_format=mrn_format,
-                first_name=first_name,
-                middle_name=middle_name,
-                last_name=last_name,
+            # Create an instance of the Patient model
+            patient_instance = Patients(
+                mrn=mrn,
+                fullname=fullname,
+                email=email,
+                dob=dob,
                 gender=gender,
-                age=age,
+                phone=phone,
+                address=address,
                 nationality=nationality,
-                patient_type=patient_type,
-                # Assign other fields similarly
+                company=company,
+                marital_status=marital_status,
+                patient_type=patient_type
             )
-            # Continue assigning other fields similarly for the new_patient instance
-            new_patient.company = company
-            new_patient.occupation = occupation
-            new_patient.phone = phone
-            new_patient.employee_number = employee_number
-            new_patient.date_of_first_employment = date_of_first_employment
-            new_patient.long_time_illness = long_time_illness
-            new_patient.long_time_medication = long_time_medication
-            new_patient.osha_certificate = osha_certificate
-            new_patient.osha_date = osha_date
-            new_patient.insurance = insurance
-            new_patient.insurance_name = insurance_name
-            new_patient.insurance_number = insurance_number
 
-            # Continue assigning Emergency Contact fields
-            new_patient.emergency_contact_name = emergency_contact_name
-            new_patient.emergency_contact_relation = emergency_contact_relation
-            new_patient.emergency_contact_phone = emergency_contact_phone
-            new_patient.emergency_contact_mobile = emergency_contact_mobile
+            # Save the instance to the database
+            patient_instance.save()
 
-            # Continue assigning Health Condition fields
-            new_patient.allergies = allergies
-            new_patient.allergies_notes = allergies_notes
-            new_patient.eye_condition = eye_condition
-            new_patient.eye_condition_notes = eye_condition_notes
-            new_patient.ent_conditions = ent_conditions
-            new_patient.ent_conditions_notes = ent_conditions_notes
-            new_patient.respiratory_conditions = respiratory_conditions
-            new_patient.respiratory_conditions_notes = respiratory_conditions_notes
-            new_patient.cardiovascular_conditions = cardiovascular_conditions
-            new_patient.cardiovascular_conditions_notes = cardiovascular_conditions_notes
-            new_patient.urinary_conditions = urinary_conditions
-            new_patient.urinary_conditions_notes = urinary_conditions_notes
-            new_patient.stomach_bowel_conditions = stomach_bowel_conditions
-            new_patient.stomach_bowel_conditions_notes = stomach_bowel_conditions_notes
-            new_patient.musculoskeletal_conditions = musculoskeletal_conditions
-            new_patient.musculoskeletal_conditions_notes = musculoskeletal_conditions_notes
-            new_patient.neuro_psychiatric_conditions = neuro_psychiatric_conditions
-            new_patient.neuro_psychiatric_conditions_notes = neuro_psychiatric_conditions_notes
+            # Return a JsonResponse with a success message
+            return JsonResponse({'message': 'Patient added successfully'}, status=200)
 
-            # Continue assigning Family History fields
-            new_patient.family_allergies = family_allergies
-            new_patient.family_allergies_relationship = family_allergies_relationship
-            new_patient.family_allergies_comments = family_allergies_comments
+    except Exception as e:
+        # Log or print the error for tracking
+        logger.error(f"Error adding patient: {str(e)}")
 
-            new_patient.family_asthma_condition = family_asthma_condition
-            new_patient.family_asthma_condition_relationship = family_asthma_condition_relationship
-            new_patient.family_asthma_condition_comments = family_asthma_condition_comments
+    # Return an error response if there's an exception or if the request method is not POST
+    return JsonResponse({'error': 'Failed to add patient'}, status=500)
 
-            new_patient.family_lungdisease_conditions = family_lungdisease_conditions
-            new_patient.family_lungdisease_conditions_relationship = family_lungdisease_conditions_relationship
-            new_patient.family_lungdisease_conditions_comments = family_lungdisease_conditions_comments
+def generate_mrn():
+    # Retrieve the last patient's MRN from the database
+    last_patient = Patients.objects.last()
 
-            new_patient.family_diabetes_conditions = family_diabetes_conditions
-            new_patient.family_diabetes_conditions_relationship = family_diabetes_conditions_relationship
-            new_patient.family_diabetes_conditions_comments = family_diabetes_conditions_comments
+    # Extract the numeric part from the last MRN, or start from 0 if there are no patients yet
+    last_mrn_number = int(last_patient.mrn.split('-')[-1]) if last_patient else 0
 
-            new_patient.family_cancer_conditions = family_cancer_conditions
-            new_patient.family_cancer_conditions_relationship = family_cancer_conditions_relationship
-            new_patient.family_cancer_conditions_comments = family_cancer_conditions_comments
+    # Increment the numeric part for the new patient
+    new_mrn_number = last_mrn_number + 1
 
-            new_patient.family_hypertension_conditions = family_hypertension_conditions
-            new_patient.family_hypertension_conditions_relationship = family_hypertension_conditions_relationship
-            new_patient.family_hypertension_conditions_comments = family_hypertension_conditions_comments
+    # Format the MRN with leading zeros and concatenate with the prefix "PAT-"
+    new_mrn = f"PAT-{new_mrn_number:05d}"
 
-            new_patient.family_heart_disease_conditions = family_heart_disease_conditions
-            new_patient.family_heart_disease_conditions_relationship = family_heart_disease_conditions_relationship
-            new_patient.family_heart_disease_conditions_comments = family_heart_disease_conditions_comments
-
-            # Continue assigning Lifestyle fields
-            new_patient.smoking = smoking
-            new_patient.alcohol_consumption = alcohol_consumption
-            new_patient.weekly_exercise_frequency = weekly_exercise_frequency
-            new_patient.healthy_diet = healthy_diet
-            new_patient.stress_management = stress_management
-            new_patient.sufficient_sleep = sufficient_sleep       
-
-
-            # Save the new patient instance to the database
-            new_patient.save()
-            
-            logger.info(f'Data saved successfully: {new_patient.__dict__}')
-            # Redirect to a success page or any other page as needed
-            return JsonResponse({'message': 'Data saved successfully'}, status=200)
-
-        except Exception as e:
-            # Handle exceptions, you can log the error or redirect to an error page
-            logger.error(f'Error saving data: {str(e)}')
-            logger.error(f'Fields causing the error: {request.POST}')
-            return JsonResponse({'error': str(e)}, status=400)
-    return JsonResponse({'error': 'Invalid request method'}, status=405)    
+    return new_mrn
       

@@ -57,7 +57,14 @@
                           </a>
                       </li>
                       <li class="nav-item">
-                          <a href="{% url "manage_consultation" %}" class="nav-link">
+                          <a href="#" class="nav-link">
+                              <i class="nav-icon fas fa-stethoscope"></i>
+                              <p>Visit</p>
+                          </a>
+                      </li>
+                      <li class="nav-item">
+                        {% url 'appointment_list' as appointment_list %}
+                          <a href="{% url "appointment_list" %}" class="nav-link{% if request.path == appointment_list %} active {% endif %}">
                               <i class="nav-icon fas fa-stethoscope"></i>
                               <p>Consultations</p>
                           </a>
