@@ -1,0 +1,57 @@
+{% extends 'hod_template/base_template.html' %}
+
+{% block title %}
+medicine inventory
+{% endblock title %}
+
+{% block page_title %}
+medicine inventory
+{% endblock page_title %}
+
+{% block breadcrumb %}
+    {% if low_quantity_medicines.count > 0 %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>{{ low_quantity_medicines.count }} medicines below 100 quantity!</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endif %}
+{% endblock breadcrumb %}
+{% load static %}
+{% block main_content %}
+
+
+<script>
+  $(".alert").alert();
+</script>
+{% comment %} <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css"> {% endcomment %}
+
+<div class="">
+    <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
+        <thead>
+            <tr>
+                <th>Medicine Name</th>
+                <th>Quantity</th>
+                <th>Purchase Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inventory in medicine_inventories %}
+                <tr>
+                    <td>{{ inventory.medicine.name }}</td>
+                    <td>{{ inventory.quantity }}</td>
+                    <td>{{ inventory.purchase_date }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function submitForm(checkbox) {
+        checkbox.form.submit();
+    }
+</script>
+
+{% include 'hod_template/datatable.html' %}
+{% endblock main_content %}

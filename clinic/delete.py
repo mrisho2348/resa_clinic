@@ -1,8 +1,11 @@
 
 
+from django.http import JsonResponse
 from django.shortcuts import redirect, render,get_object_or_404
-from .models import Company, DiseaseRecode, InsuranceCompany, PathodologyRecord, Patients, Staffs
+from .models import Company, DiseaseRecode, InsuranceCompany, Medicine, PathodologyRecord, Patients, Staffs
 from django.contrib import messages
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 
 def delete_staff(request, staff_id):
     # Retrieve the staff object or return a 404 if not found
@@ -30,6 +33,21 @@ def delete_patient(request, patient_id):
 
     return render(request, 'delete/delete_patient_confirm.html', {'patient': patient})
 
+@csrf_exempt
+@require_POST
+def delete_medicine(request, medicine_id):
+    # Get the medicine object or return 404 if not found
+    medicine = get_object_or_404(Medicine, id=medicine_id)
+
+    try:
+        # Delete the medicine
+        medicine.delete()
+        message = f"Medicine '{medicine.name}' deleted successfully."
+        return JsonResponse({'success': True, 'message': message})
+    except Exception as e:
+        # Handle any exception or error during deletion
+        return JsonResponse({'success': False, 'message': str(e)})
+    
 def delete_insurance(request, insurance_id):
     insurance = get_object_or_404(InsuranceCompany, pk=insurance_id)
 

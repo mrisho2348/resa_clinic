@@ -29,6 +29,7 @@ urlpatterns = [
         path('edit_staff_save', views.edit_staff_save, name='edit_staff_save'), 
         path('resa/new-request',views.add_request, name="add_request"),
         path('resa/update-staff-status',views.update_staff_status, name="update_staff_status"),
+        path('add_inventory/',views.add_inventory, name="add_inventory"),
         path('save_staff_view/',views.save_staff_view, name="save_staff_view"),
         
         # reports urls 
@@ -48,6 +49,7 @@ urlpatterns = [
        
         
         # manage urls 
+        path('medicine_inventory/', views.medicine_inventory_list, name='medicine_inventory'),
         path('resa/all-patients',views.manage_patient, name="manage_patient"),
         path('resa/consultation-queue',views.manage_consultation, name="manage_consultation"),
         path('resa/manage-company',views.manage_company, name="manage_company"),
@@ -61,12 +63,16 @@ urlpatterns = [
         path('notifications/', views.notification_view, name='notification_view'),
         path('confirm_meeting/<int:appointment_id>/', views.confirm_meeting, name='confirm_meeting'),
         path('edit_meeting/<int:appointment_id>/', views.edit_meeting, name='edit_meeting'),
+        path('resa/medicine-list/', views.medicine_list, name='medicine_list'),
+        path('resa/medicine-expired-list/', views.medicine_expired_list, name='medicine_expired_list'),
+        path('add_medicine/', views.add_medicine, name='add_medicine'),
         # imports urls 
         path('resa/ImportExcel_disease',imports.import_disease_recode, name="import_disease_recode"),
         path('import-insurance-companies/', imports.import_insurance_companies, name='import_insurance_companies'),
         path('import-companies/', imports.import_companies, name='import_companies'),
         path('import-patients/', imports.import_patient_records, name='import_patient_records'),
         path('import-pathology-records/', imports.import_pathology_records, name='import_pathology_records'),
+        path('import-medicine-records/', imports.import_medicine_records, name='import_medicine_records'),
         
         # edit urls 
         path('disease-records/<int:disease_id>/edit/', editView.edit_disease_record, name='edit_disease_record'),
@@ -75,7 +81,8 @@ urlpatterns = [
         path('company/<int:company_id>/edit/', editView.edit_company, name='edit_company'), 
         path('Patient/<int:patient_id>/edit/', editView.edit_patient, name='edit_patient'), 
         path('Patient/<int:patient_id>/add/', views.appointment_view, name='appointment_view'), 
-        
+        path('edit_medicine/<int:medicine_id>/', editView.edit_medicine, name='edit_medicine'),
+        path('delete_medicine/<int:medicine_id>/', delete.delete_medicine, name='delete_medicine'),
         # delete urls 
         path('disease-records/<int:disease_id>/delete/', delete.delete_disease_record, name='delete_disease_record'),        
         path('insurance-records/<int:insurance_id>/delete/', delete.delete_insurance, name='delete_insurance'),        

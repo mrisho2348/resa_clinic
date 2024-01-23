@@ -135,6 +135,170 @@
 
 
 
+<!-- Modal -->
+<div class="modal fade" id="addMedicineModal" tabindex="-1" role="dialog" aria-labelledby="addMedicineModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addMedicineModalLabel">Add Medicine</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Bootstrap-styled form -->
+        <form method="post"  id="medicineForm">
+          {% csrf_token %}
+      
+          <!-- Medicine Name -->
+          <div class="form-row">
+              <div class="form-group col-md-4">
+                  <label for="medicineName">Medicine Name</label>
+                  <input type="text" class="form-control" id="medicineName" name="name" required>
+              </div>
+      
+              <!-- Medicine Type -->
+              <div class="form-group col-md-4">
+                  <label for="medicineType">Medicine Type</label>
+                  <select  class="form-control select2bs4" style="width: 100%;" id="medicineType" name="medicine_type" required>
+                      <option value="Tablet">Tablet</option>
+                      <option value="Capsule">Capsule</option>
+                      <option value="Injection">Injection</option>
+                      <option value="Ointment">Ointment</option>
+                      <option value="Drops">Drops</option>
+                      <option value="Inhaler">Inhaler</option>
+                      <option value="Patch">Patch</option>
+                      <option value="Liquid">Liquid</option>
+                      <option value="Cream">Cream</option>
+                      <option value="Gel">Gel</option>
+                      <option value="Suppository">Suppository</option>
+                      <option value="Powder">Powder</option>
+                      <option value="Suspension">Suspension</option>
+                      <option value="Lozenge">Lozenge</option>                     
+                      <!-- Add more options as needed -->
+                  </select>
+              </div>
+      
+              <!-- Side Effect -->
+              <div class="form-group col-md-4">
+                  <label for="sideEffect">Side Effect</label>
+                  <textarea class="form-control" id="sideEffect" name="side_effect"></textarea>
+              </div>
+          </div>
+      
+          <!-- Dosage -->
+          <div class="form-row">
+              <div class="form-group col-md-4">
+                  <label for="dosage">Dosage</label>
+                  <input type="text" class="form-control" id="dosage" name="dosage" required>
+              </div>
+      
+              <!-- Storage Condition -->
+              <div class="form-group col-md-4">
+                  <label for="storageCondition">Storage Condition</label>
+                  <input type="text" class="form-control" id="storageCondition" name="storage_condition" required>
+              </div>
+      
+              <!-- Manufacturer -->
+              <div class="form-group col-md-4">
+                  <label for="manufacturer">Manufacturer</label>
+                  <input type="text" class="form-control" id="manufacturer" name="manufacturer" required>
+              </div>
+          </div>
+      
+          <!-- Description -->
+          <div class="form-group">
+              <label for="description">Description</label>
+              <textarea class="form-control" id="description" name="description"></textarea>
+          </div>
+      
+          <!-- Expiration Date -->
+          <div class="form-row">
+              <div class="form-group col-md-4">
+                  <label for="expirationDate">Expiration Date</label>
+                  <input type="date" class="form-control" id="expirationDate" name="expiration_date" required>
+              </div>
+      
+              <!-- Unit Price -->
+              <div class="form-group col-md-4">
+                  <label for="unitPrice">Unit Price</label>
+                  <input type="text" class="form-control" id="unitPrice" name="unit_price" required>
+              </div>
+          </div>
+          <div id="messageContainer" class="text-center mt-2"></div>
+          <div id="expirationDateError" class="text-center mt-2"></div>
+            
+          <div class="form-group pt-2 float-end">
+              <div class="row">
+                  <div class="col-md-8"></div>
+                  <div class="col-md-4">
+                      <button type="submit" class="btn btn-md btn-primary">Save and Continue <i class="mdi mdi-forward"></i></button>
+                  </div>
+              </div>
+          </div>
+      </form>
+      <script>
+         // Handle form submission
+         function validateForm(event) {
+          // Get the selected expiration date
+          var expirationDate = document.getElementById('expirationDate').value;
+  
+          // Compare the expiration date with the current date
+          var currentDate = new Date().toISOString().split('T')[0];
+  
+          if (expirationDate <= currentDate) {
+              // Display error message
+              document.getElementById('expirationDateError').innerText = 'Medicine is expired!';
+              // Prevent form submission
+              event.preventDefault();
+          } else {
+              // Clear previous error message
+              document.getElementById('expirationDateError').innerText = '';
+          }
+      }
+ 
+      </script>
+      <script>
+
+      $(document).ready(function () {
+         
+          $('#medicineForm').submit(function (e) {
+              e.preventDefault();
+  
+              // Serialize the form data
+              var formData = $(this).serialize();
+  
+              // Send AJAX request to the server
+              $.ajax({
+                  url: '/add_medicine/',
+                  method: 'POST',
+                  data: formData,
+                  success: function (response) {
+                      // Handle success
+                      $('#messageContainer').html('<div class="alert alert-success" role="alert">' + response.message + '</div>');
+                      // Clear the form fields
+                      $('#medicineForm')[0].reset();
+                  },
+                  error: function (xhr, status, error) {
+                      // Handle other status codes (e.g., 400 for client errors)
+                      var errorMessage = 'Error saving data';
+                      if (xhr.responseJSON && xhr.responseJSON.message) {
+                          errorMessage = xhr.responseJSON.message;
+                      }
+                      $('#messageContainer').html('<div class="alert alert-danger" role="alert">' + errorMessage + '</div>');
+                      console.error('Error saving data:', error);
+                  }
+              });
+          });
+      });
+  </script>
+  
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 
 

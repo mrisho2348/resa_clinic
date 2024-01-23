@@ -1,3 +1,5 @@
+from datetime import date, datetime
+from django.utils import timezone
 import logging
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render
@@ -17,7 +19,7 @@ from django.core.mail import send_mail
 from clinic.emailBackEnd import EmailBackend
 from django.core.exceptions import ObjectDoesNotExist
 from clinic.forms import ImportStaffForm
-from clinic.models import Company, Consultation, ContactDetails, CustomUser, DiseaseRecode, InsuranceCompany, Notification, PathodologyRecord, Patients, Staffs
+from clinic.models import Company, Consultation, ContactDetails, CustomUser, DiseaseRecode, InsuranceCompany, Medicine, MedicineInventory, Notification, NotificationMedicine, PathodologyRecord, Patients, Staffs
 from clinic.resources import StaffResources
 from tablib import Dataset
 from django.views.decorators.http import require_POST
@@ -502,6 +504,137 @@ def edit_meeting(request, appointment_id):
         messages.error(request, f"Error editing meeting time: {str(e)}")
 
     return redirect('appointment_list')
+
+@login_required
+def medicine_list(request):
+    # Retrieve medicines and check for expired ones
+    medicines = Medicine.objects.all()
+    expired_medicines = medicines.filter(expiration_date__lt=timezone.now())
+
+    # Create notifications for expired medicines
+    for medicine in expired_medicines:
+        message = f"The medicine '{medicine.name}' has expired."
+        NotificationMedicine.objects.create(user=request.user, message=message)
+
+    # Get unread notifications
+    unread_notifications = NotificationMedicine.objects.filter(user=request.user, is_read=False)
+
+    # Render the template with medicine data and notifications
+    return render(request, 'hod_template/manage_medicine.html', {'medicines': medicines, 'unread_notifications': unread_notifications})
+
+@csrf_exempt
+@login_required
+def add_medicine(request):
+    if request.method == 'POST':
+        try:
+            # Retrieve data from the form
+            name = request.POST['name']
+            medicine_type = request.POST['medicine_type']
+            side_effect = request.POST.get('side_effect', '')
+            dosage = request.POST['dosage']
+            storage_condition = request.POST['storage_condition']
+            manufacturer = request.POST['manufacturer']
+            description = request.POST.get('description', '')
+            expiration_date = request.POST['expiration_date']
+            unit_price = request.POST['unit_price']
+
+            # Validate expiration date
+            if expiration_date <= str(date.today()):                
+                return JsonResponse({'error': 'The expiration date cannot be in the past'}, status=500)
+
+            # Save the data to the Medicine model
+            medicine = Medicine.objects.create(
+                name=name,
+                medicine_type=medicine_type,
+                side_effect=side_effect,
+                dosage=dosage,
+                storage_condition=storage_condition,
+                manufacturer=manufacturer,
+                description=description,
+                expiration_date=expiration_date,
+                unit_price=unit_price
+            )
+
+           
+            return JsonResponse({'message': 'Medicine added successfully'}, status=200)
+
+        except Exception as e:            
+            logger.error(f"Error adding Medicine: {str(e)}")
+            return JsonResponse({'error': 'Failed to add Medicine'}, status=500)
+
+    return JsonResponse({'error': 'Failed to add Medicine'}, status=500)
+
+@require_POST
+def add_inventory(request):
+    if request.method == 'POST':
+        try:
+            # Retrieve data from the POST request
+            medicine_id = request.POST.get('medicine_id')
+            quantity = request.POST.get('quantity')
+            purchase_date = request.POST.get('purchase_date')
+
+            # Perform basic validation
+            if not medicine_id or not quantity or not purchase_date:
+                # Handle validation error, redirect or display an error message
+                return redirect('error_page')  # Adjust the URL as needed
+
+            # Convert the quantity to an integer
+            quantity = int(quantity)
+
+            # Convert the purchase date to a datetime object
+            purchase_date = datetime.strptime(purchase_date, '%Y-%m-%d').date()
+
+            # Get the medicine object
+            medicine_inventory = MedicineInventory.objects.create(
+                medicine_id=medicine_id,
+                quantity=quantity,
+                purchase_date=purchase_date
+            )
+
+            # Perform additional processing if needed
+
+            # Redirect to a success page or the medicine details page
+            return redirect('medicine_inventory')  # Adjust the URL as needed
+
+        except ValueError:
+            # Handle invalid data types, redirect or display an error message
+            return redirect('medicine_list')  # Adjust the URL as needed
+
+    else:
+        # Handle non-POST requests, redirect or display an error message
+        return redirect('medicine_list')  # Adjust the URL as needed
+    
+def medicine_inventory_list(request):
+    # Retrieve all medicine inventories
+    medicine_inventories = MedicineInventory.objects.all()
+
+    # Retrieve medicines with quantity below 100
+    low_quantity_medicines = MedicineInventory.objects.filter(quantity__lt=100)
+
+    # Pass the context variables to the template
+    context = {
+        'medicine_inventories': medicine_inventories,
+        'low_quantity_medicines': low_quantity_medicines,
+    }
+
+    return render(request, 'hod_template/manage_medical_inventory.html', context)
+
+def medicine_expired_list(request):
+    # Get all medicines
+    all_medicines = Medicine.objects.all()
+
+    # Filter medicines with less than or equal to 10 days remaining for expiration
+    medicines = []
+    for medicine in all_medicines:
+        days_remaining = (medicine.expiration_date - timezone.now().date()).days
+        if days_remaining <= 10:
+            medicines.append({
+                'name': medicine.name,
+                'expiration_date': medicine.expiration_date,
+                'days_remaining': days_remaining,
+            })
+
+    return render(request, 'hod_template/manage_medicine_expired.html', {'medicines': medicines})
 
 def appointment_list_view(request):
     appointments = Consultation.objects.all()

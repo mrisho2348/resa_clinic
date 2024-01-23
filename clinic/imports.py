@@ -3,9 +3,9 @@ import logging
 from django.shortcuts import render
 from django.contrib import messages
 from django.db import IntegrityError
-from clinic.models import Company, DiseaseRecode, InsuranceCompany, PathodologyRecord, Patients
-from .resources import CompanyResource, DiseaseRecodeResource, InsuranceCompanyResource, PathologyRecordResource, PatientsResource
-from .forms import ImportCompanyForm, ImportDiseaseForm, ImportInsuranceCompanyForm, ImportPathologyRecordForm, ImportPatientsForm
+from clinic.models import Company, DiseaseRecode, InsuranceCompany, Medicine, PathodologyRecord, Patients
+from .resources import CompanyResource, DiseaseRecodeResource, InsuranceCompanyResource, MedicineResource, PathologyRecordResource, PatientsResource
+from .forms import ImportCompanyForm, ImportDiseaseForm, ImportInsuranceCompanyForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientsForm
 from tablib import Dataset
 logger = logging.getLogger(__name__)
 def import_disease_recode(request):
@@ -173,6 +173,45 @@ def import_patient_records(request):
         form = ImportPatientsForm()
 
     return render(request, 'hod_template/import_patients.html', {'form': form})
+
+def import_medicine_records(request):
+    if request.method == 'POST':
+        form = ImportMedicineForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = MedicineResource()
+                new_records = request.FILES['medicine_records_file']
+
+                # Use tablib to load the imported data
+                dataset = resource.export()
+                imported_data = dataset.load(new_records.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+                
+                for data in imported_data:
+                    try:
+                        medicine_record = Medicine.objects.create(
+                            name=data[0],
+                            medicine_type=data[1],                     
+                            side_effect=data[2],                     
+                            dosage=data[3],                     
+                            storage_condition=data[4],                     
+                            manufacturer=data[5],                     
+                            description=data[6],                     
+                            expiration_date=data[7],                     
+                            unit_price=data[8],                    
+                                        
+                        )
+                    except IntegrityError:
+                        messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
+                        continue
+
+                    messages.success(request, 'Medicine records data imported successfully!')
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportMedicineForm()
+
+    return render(request, 'hod_template/import_medicine_records.html', {'form': form})
 
 
 def generate_mrn():

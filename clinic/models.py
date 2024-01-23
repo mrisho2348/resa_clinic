@@ -5,6 +5,7 @@ from django.db.models.signals import post_save,pre_save,post_delete
 from django.dispatch import receiver
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
+from django.utils import timezone
 
 # Create your models here.
 class CustomUserManager(BaseUserManager):
@@ -235,7 +236,7 @@ class Consultation(models.Model):
     (5, 'In Progress'),
     (6, 'Confirmed'),
     (7, 'Arrived'),
-    # Add more status options as needed
+   
 ]
     status = models.IntegerField(choices=STATUS_CHOICES, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -253,6 +254,85 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)    
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
+   
+class NotificationMedicine(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    message = models.TextField()
+    created_at = models.DateTimeField(default=timezone.now)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.message}"   
+
+MEDICINE_TYPES = [
+    ('Tablet', 'Tablet'),
+    ('Capsule', 'Capsule'),
+    ('Syrup', 'Syrup'),
+    ('Injection', 'Injection'),
+    ('Ointment', 'Ointment'),
+    ('Drops', 'Drops'),
+    ('Inhaler', 'Inhaler'),
+    ('Patch', 'Patch'),
+    ('Liquid', 'Liquid'),
+    ('Cream', 'Cream'),
+    ('Gel', 'Gel'),
+    ('Suppository', 'Suppository'),
+    ('Powder', 'Powder'),
+    ('Lotion', 'Lotion'),
+    ('Suspension', 'Suspension'),
+    ('Lozenge', 'Lozenge'),
+    # Add more medicine types as needed
+]
+
+class Medicine(models.Model):
+    name = models.CharField(max_length=100)
+    medicine_type = models.CharField(max_length=20, choices=MEDICINE_TYPES)
+    side_effect = models.TextField(blank=True, null=True)
+    dosage = models.CharField(max_length=50)
+    storage_condition = models.CharField(max_length=100)
+    manufacturer = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+    expiration_date = models.DateField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    transactions = models.ManyToManyField('Transaction', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+    def __str__(self):
+        return self.name    
+    
+class Transaction(models.Model):
+    date = models.DateField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    # Medicines associated with this transaction through the MedicineTransaction model
+    medicines = models.ManyToManyField(Medicine, through='MedicineTransaction')
+    # Additional fields for Transaction
+    payment_method = models.CharField(max_length=20, choices=[('Cash', 'Cash'), ('Credit Card', 'Credit Card')])
+    is_successful = models.BooleanField(default=False)
+    transaction_status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Completed', 'Completed')])
+    def __str__(self):
+        return f"Transaction #{self.id} on {self.date} for {self.amount} ({'Successful' if self.is_successful else 'Pending'})"
+    
+class MedicineInventory(models.Model):
+    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    purchase_date = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+    
+    def __str__(self):
+        return f"{self.medicine.medicine_name} - Quantity: {self.quantity}" 
+    
+
+class MedicineTransaction(models.Model):
+    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
+    transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    total_cost = models.DecimalField(max_digits=10, decimal_places=2)  
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()     
 class MedicalRecordConsultation(models.Model):
     # Relationship with Patient
     patient = models.ForeignKey(Patients, on_delete=models.CASCADE)

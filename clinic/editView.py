@@ -1,7 +1,15 @@
+import logging
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Company, DiseaseRecode, InsuranceCompany, PathodologyRecord, Patients
+from .models import Company, DiseaseRecode, InsuranceCompany, PathodologyRecord, Patients, Medicine
 from django.contrib import messages
+from django.views.decorators.http import require_POST
+from django.db import transaction
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 
+# Define a logger
+logger = logging.getLogger(__name__)
 def edit_insurance(request, insurance_id):
     insurance = get_object_or_404(InsuranceCompany, pk=insurance_id)
 
@@ -72,6 +80,54 @@ def edit_patient(request, patient_id):
             messages.error(request, f'An error occurred: {e}')
 
     return render(request, 'update/edit_patient.html', {'patient': patient})
+
+
+
+def edit_medicine(request, medicine_id):
+    try:
+        # Check if the request method is POST
+        if request.method != 'POST':
+            return JsonResponse({'message': 'Invalid request method'}, status=400)
+
+        # Get the medicine instance to be edited
+        medicine = get_object_or_404(Medicine, id=medicine_id)
+
+        # Extract the data from the request
+        name = request.POST.get('name')
+        medicine_type = request.POST.get('medicine_type')
+        side_effect = request.POST.get('side_effect')
+        dosage = request.POST.get('dosage')
+        storage_condition = request.POST.get('storage_condition')
+        manufacturer = request.POST.get('manufacturer')
+        description = request.POST.get('description')
+        expiration_date = request.POST.get('expiration_date')
+        unit_price = request.POST.get('unit_price')
+
+        # Perform the update within a transaction
+        with transaction.atomic():
+            # Update the medicine instance
+            medicine.name = name
+            medicine.medicine_type = medicine_type
+            medicine.side_effect = side_effect
+            medicine.dosage = dosage
+            medicine.storage_condition = storage_condition
+            medicine.manufacturer = manufacturer
+            medicine.description = description
+            medicine.expiration_date = expiration_date
+            medicine.unit_price = unit_price
+
+            # Save the changes
+            medicine.save()
+
+        # Log a success message
+        messages.success(request, 'Medicine details updated successfully!')
+        return redirect('medicine_list') 
+    except Exception as e:
+        # Log an error message
+        logger.error(f'Error updating medicine details. Medicine ID: {medicine_id}, Error: {str(e)}')
+        # Handle exceptions and return an error response
+        return JsonResponse({'message': 'Error updating medicine details', 'error': str(e)}, status=500)
+    
 
 def edit_disease_record(request, disease_id):
     disease = get_object_or_404(DiseaseRecode, pk=disease_id)
