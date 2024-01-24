@@ -2,7 +2,7 @@
 
 from django.http import JsonResponse
 from django.shortcuts import redirect, render,get_object_or_404
-from .models import Company, DiseaseRecode, InsuranceCompany, Medicine, PathodologyRecord, Patients, Staffs
+from .models import Company, DiseaseRecode, InsuranceCompany, Medicine, PathodologyRecord, Patients, Procedure, Staffs
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -63,6 +63,27 @@ def delete_insurance(request, insurance_id):
             messages.error(request, f'An error occurred: {e}')
 
     return render(request, 'delete/delete_insurance_confirmation.html', {'insurance': insurance})
+
+
+
+@csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
+def delete_procedure(request):
+    if request.method == 'POST':
+        try:
+            procedure_id = request.POST.get('procedure_id')
+
+            # Delete procedure record
+            procedure_record = Procedure.objects.get(id=procedure_id)
+            procedure_record.delete()
+
+            return JsonResponse({'success': True, 'message': f'Procedure record for {procedure_record.name} deleted successfully.'})
+        except Procedure.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid procedure ID.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
 
 def delete_disease_record(request, disease_id):
     record = get_object_or_404(DiseaseRecode, pk=disease_id)

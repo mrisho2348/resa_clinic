@@ -211,12 +211,15 @@ class Payment(models.Model):
         return f"Payment of {self.amount} {self.payment_type} for {self.patient_id}"
 
 class Procedure(models.Model):
-    patient_id = models.ForeignKey(Patients, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     description = models.TextField()
     duration_time = models.CharField(max_length=50)
     equipments_used = models.CharField(max_length=255)
     cost = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
 
     def __str__(self):
         return f"Procedure: {self.name} for {self.patient_id}"
@@ -259,8 +262,9 @@ class NotificationMedicine(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     message = models.TextField()
     created_at = models.DateTimeField(default=timezone.now)
-    is_read = models.BooleanField(default=False)
-
+    is_read = models.BooleanField(default=False)    
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
     def __str__(self):
         return f"{self.user.username} - {self.message}"   
 
@@ -310,6 +314,9 @@ class Transaction(models.Model):
     payment_method = models.CharField(max_length=20, choices=[('Cash', 'Cash'), ('Credit Card', 'Credit Card')])
     is_successful = models.BooleanField(default=False)
     transaction_status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Completed', 'Completed')])
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
     def __str__(self):
         return f"Transaction #{self.id} on {self.date} for {self.amount} ({'Successful' if self.is_successful else 'Pending'})"
     

@@ -19,11 +19,14 @@ from django.core.mail import send_mail
 from clinic.emailBackEnd import EmailBackend
 from django.core.exceptions import ObjectDoesNotExist
 from clinic.forms import ImportStaffForm
-from clinic.models import Company, Consultation, ContactDetails, CustomUser, DiseaseRecode, InsuranceCompany, Medicine, MedicineInventory, Notification, NotificationMedicine, PathodologyRecord, Patients, Staffs
+from clinic.models import Company, Consultation, ContactDetails, CustomUser, DiseaseRecode, InsuranceCompany, Medicine, MedicineInventory, Notification, NotificationMedicine, PathodologyRecord, Patients, Procedure, Staffs
 from clinic.resources import StaffResources
 from tablib import Dataset
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import OuterRef, Subquery
+from .models import Procedure, Patients
+
 # Create your views here.
 def index(request):
     return render(request,"index.html")
@@ -635,6 +638,100 @@ def medicine_expired_list(request):
             })
 
     return render(request, 'hod_template/manage_medicine_expired.html', {'medicines': medicines})
+
+def patient_procedure_view(request):
+    template_name = 'hod_template/manage_procedure.html'
+    
+    # Query to retrieve the latest procedure record for each patient
+    procedures = Procedure.objects.filter(
+        patient=OuterRef('id')
+    ).order_by('-created_at')[:1]
+
+    # Query to retrieve patients with their corresponding procedure (excluding patients without procedures)
+    patients_with_procedures = Patients.objects.annotate(
+        procedure_name=Subquery(procedures.values('name')[:1]),
+        procedure_description=Subquery(procedures.values('description')[:1]),
+        procedure_duration=Subquery(procedures.values('duration_time')[:1]),
+        procedure_equipments=Subquery(procedures.values('equipments_used')[:1]),
+        procedure_cost=Subquery(procedures.values('cost')[:1])
+    ).filter(procedure_name__isnull=False)
+    
+    patients = Patients.objects.all()
+    # Retrieve the data
+    data = patients_with_procedures.values(
+        'id', 'mrn', 'procedure_name', 'procedure_description',
+        'procedure_duration', 'procedure_equipments', 'procedure_cost'
+    )
+
+    return render(request, template_name, {'data': data,'patients':patients})
+
+
+
+def patient_procedure_history_view(request, mrn):
+    patient = get_object_or_404(Patients, mrn=mrn)
+    
+    # Retrieve all procedures for the specific patient
+    procedures = Procedure.objects.filter(patient=patient)
+    
+    context = {
+        'patient': patient,
+        'procedures': procedures,
+    }
+
+    return render(request, 'hod_template/manage_patient_procedure.html', context)
+
+
+@csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
+def save_procedure(request):
+    if request.method == 'POST':
+        try:
+            mrn = request.POST.get('mrn')
+            name = request.POST.get('name')
+            start_time_str = request.POST.get('start_time')
+            end_time_str = request.POST.get('end_time')
+            description = request.POST.get('description')
+            equipments_used = request.POST.get('equipments_used')
+            cost = request.POST.get('cost')
+
+            # Validate start and end times
+            start_time = datetime.strptime(start_time_str, '%H:%M').time()
+            end_time = datetime.strptime(end_time_str, '%H:%M').time()
+
+            if start_time >= end_time:
+                return JsonResponse({'success': False, 'message': 'Start time must be greater than end time.'})
+
+            # Calculate duration in hours
+            duration = (datetime.combine(datetime.today(), end_time) - datetime.combine(datetime.today(), start_time)).seconds / 3600
+
+            # Save procedure record
+            procedure_record = Procedure.objects.create(
+                patient=Patients.objects.get(mrn=mrn),
+                name=name,
+                description=description,
+                duration_time=duration,
+                equipments_used=equipments_used,
+                cost=cost
+            )
+
+            return JsonResponse({'success': True, 'message': f'Procedure record for {procedure_record.name} saved successfully.'})
+        except Patients.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid patient ID.'})
+        except IntegrityError:
+            return JsonResponse({'success': False, 'message': 'Duplicate entry. Procedure record not saved.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+
+def generate_billing(request, procedure_id):
+    procedure = get_object_or_404(Procedure, id=procedure_id)
+
+    context = {
+        'procedure': procedure,
+    }
+
+    return render(request, 'hod_template/billing_template.html', context)
 
 def appointment_list_view(request):
     appointments = Consultation.objects.all()

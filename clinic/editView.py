@@ -1,7 +1,8 @@
+from datetime import datetime
 import logging
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Company, DiseaseRecode, InsuranceCompany, PathodologyRecord, Patients, Medicine
+from .models import Company, DiseaseRecode, InsuranceCompany, PathodologyRecord, Patients, Medicine, Procedure
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db import transaction
@@ -39,6 +40,46 @@ def edit_insurance(request, insurance_id):
             messages.error(request, f'An error occurred: {e}')
 
     return render(request, 'update/edit_insurance.html', {'insurance': insurance})
+
+
+@csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
+def edit_procedure(request):
+    if request.method == 'POST':
+        try:
+            procedure_id = request.POST.get('procedure_id')
+            name = request.POST.get('name')
+            start_time_str = request.POST.get('start_time')
+            end_time_str = request.POST.get('end_time')
+            description = request.POST.get('description')
+            equipments_used = request.POST.get('equipments_used')
+            cost = request.POST.get('cost')
+
+            # Validate start and end times
+            start_time = datetime.strptime(start_time_str, '%H:%M').time()
+            end_time = datetime.strptime(end_time_str, '%H:%M').time()
+
+            if start_time >= end_time:
+                return JsonResponse({'success': False, 'message': 'Start time must be greater than end time.'})
+
+            # Calculate duration in hours
+            duration = (datetime.combine(datetime.today(), end_time) - datetime.combine(datetime.today(), start_time)).seconds / 3600
+
+            # Update procedure record
+            procedure_record = Procedure.objects.get(id=procedure_id)
+            procedure_record.name = name          
+            procedure_record.description = description
+            procedure_record.equipments_used = equipments_used
+            procedure_record.cost = cost
+            procedure_record.duration_time = duration
+            procedure_record.save()
+
+            return JsonResponse({'success': True, 'message': f'Procedure record for {procedure_record.name} updated successfully.'})
+        except Procedure.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid procedure ID.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 
 def edit_patient(request, patient_id):

@@ -1,11 +1,11 @@
 # views.py
 import logging
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.db import IntegrityError
-from clinic.models import Company, DiseaseRecode, InsuranceCompany, Medicine, PathodologyRecord, Patients
-from .resources import CompanyResource, DiseaseRecodeResource, InsuranceCompanyResource, MedicineResource, PathologyRecordResource, PatientsResource
-from .forms import ImportCompanyForm, ImportDiseaseForm, ImportInsuranceCompanyForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientsForm
+from clinic.models import Company, DiseaseRecode, InsuranceCompany, Medicine, PathodologyRecord, Patients, Procedure
+from .resources import CompanyResource, DiseaseRecodeResource, InsuranceCompanyResource, MedicineResource, PathologyRecordResource, PatientsResource, ProcedureResource
+from .forms import ImportCompanyForm, ImportDiseaseForm, ImportInsuranceCompanyForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientsForm, ImportProcedureForm
 from tablib import Dataset
 logger = logging.getLogger(__name__)
 def import_disease_recode(request):
@@ -28,7 +28,7 @@ def import_disease_recode(request):
                     )
                     disease_recode.save()
 
-                messages.success(request, 'Disease Recode data imported successfully!')
+                return redirect('manage_disease') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
         else:
@@ -62,7 +62,7 @@ def import_insurance_companies(request):
                     )
                      insurance_recode.save()
 
-                messages.success(request, 'Insurance companies data imported successfully!')
+                return redirect('manage_insurance') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -94,9 +94,9 @@ def import_companies(request):
                     )
                       company_recode.save()
 
-                messages.success(request, 'Companies data imported successfully!')
+                return redirect('manage_company') 
             except Exception as e:
-                logger.error(f"Error adding patient: {str(e)}")
+                logger.error(f"Error adding company: {str(e)}")
                 messages.error(request, f'An error occurred: {e}')
 
     else:
@@ -126,7 +126,7 @@ def import_pathology_records(request):
                     )
                      pathodology_recode.save()
 
-                messages.success(request, 'Pathology records data imported successfully!')
+                return redirect('manage_pathodology') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -165,7 +165,7 @@ def import_patient_records(request):
                         messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
                         continue
 
-                    messages.success(request, 'Pathology records data imported successfully!')
+                    return redirect('manage_patient') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -173,6 +173,42 @@ def import_patient_records(request):
         form = ImportPatientsForm()
 
     return render(request, 'hod_template/import_patients.html', {'form': form})
+
+
+def import_procedure_records(request):
+    if request.method == 'POST':
+        form = ImportProcedureForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = ProcedureResource()
+                new_records = request.FILES['procedure_records_file']
+
+                # Use tablib to load the imported data
+                dataset = resource.export()
+                imported_data = dataset.load(new_records.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+                
+                for data in imported_data:
+                    try:
+                        procedure_record = Procedure.objects.create(
+                            patient=Patients.objects.get(mrn=data[0]),
+                            name=data[1],                     
+                            description=data[2],                     
+                            duration_time=data[3],                     
+                            equipments_used=data[4],                     
+                            cost=data[5],                     
+                          )
+                    except IntegrityError:
+                        messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
+                        continue
+
+                    return redirect('patient_procedure_view') 
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportProcedureForm()
+
+    return render(request, 'hod_template/import_procedure.html', {'form': form})
 
 def import_medicine_records(request):
     if request.method == 'POST':
@@ -204,7 +240,7 @@ def import_medicine_records(request):
                         messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
                         continue
 
-                    messages.success(request, 'Medicine records data imported successfully!')
+                    return redirect('medicine_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 

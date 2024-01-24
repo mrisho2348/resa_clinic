@@ -44,8 +44,8 @@
                   <ul class="nav nav-treeview">
                       <!-- Dashboard Link -->
                       <li class="nav-item">
-                          <a href="{% url "medicine_list" %}" class="nav-link">
-                              <i class="nav-icon fas fa-tachometer-alt"></i>
+                          <a href="{% url "medicine_list" %}" class="nav-link">                           
+                            <i class="nav-icon fas fa-pills"></i>
                               <p>Medicine</p>
                           </a>
                       </li>
@@ -58,14 +58,29 @@
                       </li>
                       <li class="nav-item">
                           <a href="#" class="nav-link">
-                              <i class="nav-icon fas fa-stethoscope"></i>
+                            <i class="nav-icon fas fa-tachometer-alt"></i>
                               <p>Visit</p>
                           </a>
                       </li>
                       <li class="nav-item">
+                        {% url 'medicine_inventory' as medicine_inventory %}
+                          <a href="{% url "medicine_inventory" %}" class="nav-link{% if request.path == medicine_inventory %} active {% endif %}">
+                            <i class="nav-icon fas fa-pills"></i>
+                              <p>Medical Inventoory</p>
+                          </a>
+                      </li>
+                      <li class="nav-item">
+                        {% url 'patient_procedure_view' as patient_procedure_view %}
+                          <a href="{% url "patient_procedure_view" %}" class="nav-link{% if request.path == patient_procedure_view %} active {% endif %}">
+                            <i class="nav-icon fas fa-hospital"></i>
+                              <p>Medical Procedure</p>
+                          </a>
+                      </li>
+                 
+                      <li class="nav-item">
                         {% url 'appointment_list' as appointment_list %}
                           <a href="{% url "appointment_list" %}" class="nav-link{% if request.path == appointment_list %} active {% endif %}">
-                              <i class="nav-icon fas fa-stethoscope"></i>
+                            <i class="nav-icon fas fa-calendar"></i>
                               <p>Consultations</p>
                           </a>
                       </li>
