@@ -49,6 +49,7 @@ urlpatterns = [
        
         
         # manage urls 
+        path('resa/manage-referral/', views.manage_referral, name='manage_referral'),
         path('resa/patient-procedure-view/', views.patient_procedure_view, name='patient_procedure_view'),
         path('resa/medicine-inventory/', views.medicine_inventory_list, name='medicine_inventory'),
         path('resa/all-patients',views.manage_patient, name="manage_patient"),
@@ -69,6 +70,8 @@ urlpatterns = [
         path('resa/medicine-expired-list/', views.medicine_expired_list, name='medicine_expired_list'),
         path('add_medicine/', views.add_medicine, name='add_medicine'),
         path('save_procedure/', views.save_procedure, name='save_procedure'),
+        path('save_referral/', views.save_referral, name='save_referral'),
+        path('change_referral_status/', views.change_referral_status, name='change_referral_status'),
         # imports urls 
         path('resa/ImportExcel_disease',imports.import_disease_recode, name="import_disease_recode"),
         path('import-insurance-companies/', imports.import_insurance_companies, name='import_insurance_companies'),
@@ -77,6 +80,7 @@ urlpatterns = [
         path('import-pathology-records/', imports.import_pathology_records, name='import_pathology_records'),
         path('import-medicine-records/', imports.import_medicine_records, name='import_medicine_records'),
         path('import-procedure-records/', imports.import_procedure_records, name='import_procedure_records'),
+        path('import-referral-records/', imports.import_referral_records, name='import_referral_records'),
         
         # edit urls 
         path('disease-records/<int:disease_id>/edit/', editView.edit_disease_record, name='edit_disease_record'),
@@ -85,6 +89,7 @@ urlpatterns = [
         path('company/<int:company_id>/edit/', editView.edit_company, name='edit_company'), 
         path('Patient/<int:patient_id>/edit/', editView.edit_patient, name='edit_patient'),
         path('edit_procedure/', editView.edit_procedure, name='edit_procedure'), 
+        path('edit_referral/', editView.edit_referral, name='edit_referral'), 
         path('Patient/<int:patient_id>/add/', views.appointment_view, name='appointment_view'), 
         path('patient-procedure-history/<str:mrn>/view/', views.patient_procedure_history_view, name='patient_procedure_history_view_mrn'), 
         path('edit_medicine/<int:medicine_id>/', editView.edit_medicine, name='edit_medicine'),
@@ -98,4 +103,5 @@ urlpatterns = [
         path('delete_staff/<int:staff_id>/', delete.delete_staff, name='delete_staff'),
         path('delete-patient/<int:patient_id>/', delete.delete_patient, name='delete_patient'),
         path('delete_procedure/', delete.delete_procedure, name='delete_procedure'),
+        path('delete_referral/', delete.delete_referral, name='delete_referral'),
 ]

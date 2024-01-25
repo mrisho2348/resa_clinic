@@ -2,7 +2,7 @@ from datetime import datetime
 import logging
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Company, DiseaseRecode, InsuranceCompany, PathodologyRecord, Patients, Medicine, Procedure
+from .models import Company, DiseaseRecode, InsuranceCompany, PathodologyRecord, Patients, Medicine, Procedure, Referral
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db import transaction
@@ -76,6 +76,35 @@ def edit_procedure(request):
             return JsonResponse({'success': True, 'message': f'Procedure record for {procedure_record.name} updated successfully.'})
         except Procedure.DoesNotExist:
             return JsonResponse({'success': False, 'message': 'Invalid procedure ID.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+
+@csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
+def edit_referral(request):
+    if request.method == 'POST':
+        try:
+            mrn = request.POST.get('mrn')            
+            referral_id = request.POST.get('referral_id')            
+            source_location = request.POST.get('source_location')
+            destination_location = request.POST.get('destination_location')
+            reason = request.POST.get('reason')
+            notes = request.POST.get('notes')           
+
+            # Update procedure record
+            referral_record = Referral.objects.get(id=referral_id)
+            referral_record.patient = Patients.objects.get(mrn=mrn)        
+            referral_record.source_location = source_location
+            referral_record.destination_location = destination_location
+            referral_record.reason = reason           
+            referral_record.notes = notes           
+            referral_record.save()
+
+            return JsonResponse({'success': True, 'message': f'Referral record for {referral_record} updated successfully.'})
+        except Referral.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid Referral ID.'})
         except Exception as e:
             return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
 

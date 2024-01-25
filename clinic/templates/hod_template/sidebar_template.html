@@ -76,6 +76,13 @@
                               <p>Medical Procedure</p>
                           </a>
                       </li>
+                      <li class="nav-item">
+                        {% url 'manage_referral' as manage_referral %}
+                        <a href="{% url 'manage_referral' %}" class="nav-link{% if request.path == manage_referral %} active {% endif %}">
+                            <i class="nav-icon fas fa-handshake"></i>
+                            <p>Referral</p>
+                        </a>
+                    </li>
                  
                       <li class="nav-item">
                         {% url 'appointment_list' as appointment_list %}

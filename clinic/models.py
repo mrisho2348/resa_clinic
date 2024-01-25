@@ -257,6 +257,48 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)    
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
+    
+class Referral(models.Model):
+    # Patient who is being referred
+    patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
+    # Information about the referral
+    source_location  = models.CharField(max_length=255, help_text='Source location of the patient')
+    destination_location = models.CharField(max_length=255, help_text='Destination location for MedEvac')
+    reason = models.TextField()
+    # Additional details
+    referral_date = models.DateField(auto_now_add=True, help_text='Date when the referral was made')
+    # Status of the referral (e.g., pending, accepted, rejected)
+    REFERRAL_STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+    )
+    status = models.CharField(max_length=20, choices=REFERRAL_STATUS_CHOICES, default='pending')
+    # Additional fields as needed
+    notes = models.TextField(blank=True, null=True, help_text='Additional notes about the referral')
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+    def __str__(self):
+        return f"Referral for {self.patient} to {self.destination_location} at {self.source_location} on {self.referral_date}"   
+    
+    def get_status_class(self):
+        if self.status == 'pending':
+            return 'text-warning'
+        elif self.status == 'accepted':
+            return 'text-success'
+        elif self.status == 'rejected':
+            return 'text-danger'
+        return ''
+
+    def get_status_color(self):
+        if self.status == 'pending':
+            return 'warning'
+        elif self.status == 'accepted':
+            return 'success'
+        elif self.status == 'rejected':
+            return 'danger'
+        return '' 
    
 class NotificationMedicine(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)

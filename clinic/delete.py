@@ -2,7 +2,7 @@
 
 from django.http import JsonResponse
 from django.shortcuts import redirect, render,get_object_or_404
-from .models import Company, DiseaseRecode, InsuranceCompany, Medicine, PathodologyRecord, Patients, Procedure, Staffs
+from .models import Company, DiseaseRecode, InsuranceCompany, Medicine, PathodologyRecord, Patients, Procedure, Referral, Staffs
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -79,6 +79,24 @@ def delete_procedure(request):
             return JsonResponse({'success': True, 'message': f'Procedure record for {procedure_record.name} deleted successfully.'})
         except Procedure.DoesNotExist:
             return JsonResponse({'success': False, 'message': 'Invalid procedure ID.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+@csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
+def delete_referral(request):
+    if request.method == 'POST':
+        try:
+            referral_id = request.POST.get('referral_id')
+
+            # Delete procedure record
+            referral_record = Referral.objects.get(id=referral_id)
+            referral_record.delete()
+
+            return JsonResponse({'success': True, 'message': f'Referral record for {referral_record} deleted successfully.'})
+        except Procedure.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid Referral ID.'})
         except Exception as e:
             return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
 

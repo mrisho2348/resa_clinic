@@ -25,7 +25,7 @@ from tablib import Dataset
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import OuterRef, Subquery
-from .models import Procedure, Patients
+from .models import Procedure, Patients, Referral
 
 # Create your views here.
 def index(request):
@@ -722,6 +722,63 @@ def save_procedure(request):
             return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
 
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+
+@csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
+def save_referral(request):
+    if request.method == 'POST':
+        try:
+            mrn = request.POST.get('mrn')            
+            source_location = request.POST.get('source_location')
+            destination_location = request.POST.get('destination_location')
+            reason = request.POST.get('reason')
+            notes = request.POST.get('notes')       
+
+
+            # Save procedure record
+            referral_record = Referral.objects.create(
+                patient=Patients.objects.get(mrn=mrn),
+                source_location=source_location,
+                destination_location=destination_location,
+                reason=reason,
+                notes=notes,
+       
+            )
+
+            return JsonResponse({'success': True, 'message': f'Referral record for {referral_record} saved successfully.'})
+        except Patients.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid patient ID.'})
+        except IntegrityError:
+            return JsonResponse({'success': False, 'message': 'Duplicate entry. Referral record not saved.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+@csrf_exempt
+def change_referral_status(request):
+    if request.method == 'POST':
+        try:
+            referral_id = request.POST.get('referralId')
+            new_status = request.POST.get('newStatus')
+            print(new_status)
+            # Update referral record with new status
+            referral_record = Referral.objects.get(id=referral_id)
+            referral_record.status = new_status
+            referral_record.save()
+
+            return JsonResponse({'success': True, 'message': f'Status for {referral_record} changed successfully.'})
+        except Referral.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid Referral ID.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+def manage_referral(request):
+    referrals = Referral.objects.all()
+    patients = Patients.objects.all()
+    return render(request, 'hod_template/manage_referral.html', {'referrals': referrals,'patients':patients})
 
 
 def generate_billing(request, procedure_id):

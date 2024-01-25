@@ -3,9 +3,9 @@ import logging
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.db import IntegrityError
-from clinic.models import Company, DiseaseRecode, InsuranceCompany, Medicine, PathodologyRecord, Patients, Procedure
-from .resources import CompanyResource, DiseaseRecodeResource, InsuranceCompanyResource, MedicineResource, PathologyRecordResource, PatientsResource, ProcedureResource
-from .forms import ImportCompanyForm, ImportDiseaseForm, ImportInsuranceCompanyForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientsForm, ImportProcedureForm
+from clinic.models import Company, DiseaseRecode, InsuranceCompany, Medicine, PathodologyRecord, Patients, Procedure, Referral
+from .resources import CompanyResource, DiseaseRecodeResource, InsuranceCompanyResource, MedicineResource, PathologyRecordResource, PatientsResource, ProcedureResource, ReferralResource
+from .forms import ImportCompanyForm, ImportDiseaseForm, ImportInsuranceCompanyForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientsForm, ImportProcedureForm, ImportReferralForm
 from tablib import Dataset
 logger = logging.getLogger(__name__)
 def import_disease_recode(request):
@@ -165,7 +165,7 @@ def import_patient_records(request):
                         messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
                         continue
 
-                    return redirect('manage_patient') 
+                return redirect('manage_patient') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -173,6 +173,41 @@ def import_patient_records(request):
         form = ImportPatientsForm()
 
     return render(request, 'hod_template/import_patients.html', {'form': form})
+
+def import_referral_records(request):
+    if request.method == 'POST':
+        form = ImportReferralForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = ReferralResource()
+                new_records = request.FILES['referral_records_file']
+
+                # Use tablib to load the imported data
+                dataset = resource.export()
+                imported_data = dataset.load(new_records.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+                
+                for data in imported_data:
+                    try:
+                        referral_record =Referral.objects.create(
+                            patient=Patients.objects.get(mrn=data[0]),
+                            source_location=data[1],                     
+                            destination_location=data[2],                     
+                            reason=data[3],                     
+                            notes=data[4],                     
+                                           
+                        )
+                    except IntegrityError:
+                        messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
+                        continue
+
+                return redirect('manage_referral') 
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportReferralForm()
+
+    return render(request, 'hod_template/import_referral.html', {'form': form})
 
 
 def import_procedure_records(request):
@@ -201,7 +236,7 @@ def import_procedure_records(request):
                         messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
                         continue
 
-                    return redirect('patient_procedure_view') 
+                return redirect('patient_procedure_view') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -240,7 +275,7 @@ def import_medicine_records(request):
                         messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
                         continue
 
-                    return redirect('medicine_list') 
+                return redirect('medicine_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
