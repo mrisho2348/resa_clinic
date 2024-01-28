@@ -1,0 +1,194 @@
+{% extends 'hod_template/base_template.html' %}
+
+{% block title %}
+Diagnostic Tests
+{% endblock title %}
+
+{% block page_title %}
+Diagnostic Tests
+{% endblock page_title %}
+
+{% block breadcrumb %}
+{% include "hod_template/modal_form.html" %}  
+    <a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#enterDiagnosticTestModal">
+        <i class="fas fa-plus"></i> New diagnostic test
+    </a>    
+{% endblock breadcrumb %}
+{% load static %}
+{% block main_content %}
+
+
+<script>
+  $(".alert").alert();
+</script>
+{% comment %} <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css"> {% endcomment %}
+
+<div class="">
+    <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
+        <thead>
+            <tr>
+                <th>Test ID</th>
+                <th>Patient</th>
+                <th>Test Type</th>
+                <th>Test Date</th>
+                <th>Result</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for test in diagnostic_tests  %}
+                <tr>
+                    <td>{{ test.test_id }}</td>
+                    <td>{{ test.patient.fullname }}</td>
+                    <td>{{ test.test_type }}</td>
+                    <td>{{ test.test_date }}</td>
+                    <td>{{ test.result }}</td>
+                    <td>                      
+                        <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#editDiagnosticTestModal{{ test.id }}"  data-toggle="tooltip" title="Edit">
+                            <i class="fa fa-edit text-white"></i>
+                        </button>
+                          <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteDiagnosticTestModal{{ test.id }}"  data-toggle="tooltip" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>                        
+                    </td>
+
+
+
+
+
+                </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function submitForm(checkbox) {
+        checkbox.form.submit();
+    }
+</script>
+
+<!-- Bootstrap Modal for Entering DiagnosticTest -->
+<div class="modal fade" id="enterDiagnosticTestModal" tabindex="-1" role="dialog" aria-labelledby="enterDiagnosticTestModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="enterDiagnosticTestModalLabel">Enter Diagnostic Test</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Form for entering DiagnosticTest details -->
+                <form method="post" action="{% url 'save_diagnostic_test' %}">
+                    {% csrf_token %}
+
+                    <!-- Patient selection -->
+                    <div class="form-group">
+                        <label for="patient">Patient:</label>
+                        <select class="form-control select2bs4" style="width: 100%;" id="patient" name="patient" required>
+                            {% for patient in patients %}
+                                <option value="{{ patient.id }}">{{ patient.fullname }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Test type -->
+                    <div class="form-group">
+                        <label for="test_type">Test Type:</label>
+                        <input type="text" class="form-control" id="test_type" name="test_type" required>
+                    </div>
+
+                    <!-- Test date -->
+                    <div class="form-group">
+                        <label for="test_date">Test Date:</label>
+                        <input type="date" class="form-control" id="test_date" name="test_date" required>
+                    </div>
+
+                    <!-- Result -->
+                    <div class="form-group">
+                        <label for="result">Result:</label>
+                        <textarea class="form-control" id="result" name="result" rows="3"></textarea>
+                    </div>
+
+                    <!-- Diseases/Pathology selection -->
+                    <div class="form-group">
+                        <label for="disease_or_pathology">Disease or Pathology:</label>
+                        <select class="form-control" id="disease_or_pathology" name="disease_or_pathology" required>
+                            <option value="disease">Disease</option>
+                            <option value="pathology">Pathology</option>
+                            <option value="health_issue">other health issue</option>
+                        </select>
+                    </div>
+
+                    <!-- Diseases selection -->
+                    <div class="form-group" id="diseases_selection">
+                        <label for="diseases">Diseases:</label>
+                        <select class="form-control select2bs4" style="width: 100%;" id="diseases" name="diseases[]">
+                            {% for disease in diseases %}
+                                <option value="{{ disease.id }}">{{ disease.disease_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Pathology selection -->
+                    <div class="form-group" id="pathology_selection" style="display: none;">
+                        <label for="pathology">Pathology:</label>
+                        <select class="form-control select2bs4" style="width: 100%;" id="pathology" name="pathology">
+                            {% for pathology in pathologies %}
+                                <option value="{{ pathology.id }}">{{ pathology.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Health issues -->
+                    <div class="form-group" id="other_health_issues"  style="display: none;">
+                        <label for="health_issues">Health Issues:</label>
+                        <select class="form-control select2bs4" style="width: 100%;" id="health_issues" name="health_issues[]">
+                            {% for health_issue in health_issues %}
+                                <option value="{{ health_issue.id }}">{{ health_issue.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Save button -->
+                    <button type="submit" class="btn btn-primary">Save Diagnostic Test</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+         // Toggle diseases/pathology selection based on the chosen option
+    document.getElementById('disease_or_pathology').addEventListener('change', function () {
+        var diseasesSelection = document.getElementById('diseases_selection');
+        var pathologySelection = document.getElementById('pathology_selection');
+        var other_health_issuesSelection = document.getElementById('other_health_issues');
+
+        if (this.value === 'disease') {
+            diseasesSelection.style.display = 'block';
+            pathologySelection.style.display = 'none';
+            other_health_issuesSelection.style.display = 'none';
+        } 
+        else if (this.value === 'pathology') {
+            diseasesSelection.style.display = 'none';
+            pathologySelection.style.display = 'block';
+            other_health_issuesSelection.style.display = 'none';
+        }
+        else if (this.value === 'health_issue') {
+            diseasesSelection.style.display = 'none';
+            pathologySelection.style.display = 'none';
+            other_health_issuesSelection.style.display = 'block';
+        }
+    });
+   
+    });
+</script>
+
+{% include 'hod_template/datatable.html' %}
+{% endblock main_content %}

@@ -116,6 +116,7 @@ class Service(models.Model):
         
 class PathodologyRecord(models.Model):
     name = models.CharField(max_length=255)
+    related_diseases = models.ManyToManyField('DiseaseRecode', blank=True)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -126,6 +127,7 @@ class PathodologyRecord(models.Model):
     
 class DiseaseRecode(models.Model):
     disease_name = models.CharField(max_length=255)
+    related_pathology_records = models.ManyToManyField(PathodologyRecord, blank=True)
     code = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -202,13 +204,12 @@ class Payment(models.Model):
     ]
 
     payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPES)
-    patient_id = models.ForeignKey(Patients, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date_paid = models.DateField()
-    insurance_id = models.ForeignKey(InsuranceCompany, on_delete=models.SET_NULL, blank=True, null=True)
-
+    insurance = models.ForeignKey(InsuranceCompany, on_delete=models.SET_NULL, blank=True, null=True)
     def __str__(self):
-        return f"Payment of {self.amount} {self.payment_type} for {self.patient_id}"
+        return f"Payment of {self.amount} {self.payment_type} for {self.patient}"
 
 class Procedure(models.Model):
     patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
@@ -222,7 +223,54 @@ class Procedure(models.Model):
     objects = models.Manager()
 
     def __str__(self):
-        return f"Procedure: {self.name} for {self.patient_id}"
+        return f"Procedure: {self.name} for {self.patient}"
+    
+class ConsultationFee(models.Model):
+    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
+    fee_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    consultation_date = models.DateField()
+
+    def __str__(self):
+        return f"Consultation fee of {self.fee_amount} for {self.doctor.name} by {self.patient.fullname} on {self.consultation_date}"
+    
+    
+class DiagnosticTest(models.Model):
+    # Unique identifier for DiagnosticTest
+    test_id = models.CharField(max_length=12, unique=True, editable=False)
+    patient = models.ForeignKey('Patients', on_delete=models.CASCADE, related_name='diagnostic_tests')
+    test_type = models.CharField(max_length=255)
+    test_date = models.DateField()
+    result = models.TextField(blank=True, null=True)
+    # Additional Fields for Diseases
+    diseases = models.ManyToManyField(DiseaseRecode)
+    health_issues = models.ManyToManyField('HealthIssue')
+    pathology_record = models.ForeignKey(PathodologyRecord, on_delete=models.SET_NULL, blank=True, null=True)
+    def save(self, *args, **kwargs):
+        # Generate a unique identifier based on count of existing records
+        if not self.test_id:
+            self.test_id = generate_test_id()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.test_type} for {self.patient.fullname} on {self.test_date}"
+
+def generate_test_id():
+    # Retrieve the last diagnostic test from the database
+    last_test = DiagnosticTest.objects.last()
+
+    # Extract the numeric part from the last TID, or start from 0 if there are no tests yet
+    last_test_number = int(last_test.test_id.split('-')[-1]) if last_test else 0
+
+    # Increment the numeric part for the new test
+    new_test_number = last_test_number + 1
+
+    # Format the TID with leading zeros and concatenate with the prefix "TID-"
+    new_test_id = f"TID-{new_test_number:05d}"
+
+    return new_test_id
+      
+        
 class Consultation(models.Model):
     doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE)
     patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
@@ -231,22 +279,34 @@ class Consultation(models.Model):
     end_time = models.TimeField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     STATUS_CHOICES = [
-    (0, 'Pending'),
-    (1, 'Completed'),
-    (2, 'Canceled'),
-    (3, 'Rescheduled'),
-    (4, 'No-show'),
-    (5, 'In Progress'),
-    (6, 'Confirmed'),
-    (7, 'Arrived'),
-   
-]
+        (0, 'Pending'),
+        (1, 'Completed'),
+        (2, 'Canceled'),
+        (3, 'Rescheduled'),
+        (4, 'No-show'),
+        (5, 'In Progress'),
+        (6, 'Confirmed'),
+        (7, 'Arrived'),
+    ]
     status = models.IntegerField(choices=STATUS_CHOICES, default=0)
+    cost = models.ForeignKey(ConsultationFee, on_delete=models.SET_NULL, blank=True, null=True)
+    pathodology_record = models.ForeignKey(PathodologyRecord, on_delete=models.SET_NULL, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    objects = models.Manager()
+    objects = models.Manager()    
+    
     def __str__(self):
         return f"Appointment with {self.doctor.name} for {self.patient.name} on {self.appointment_date} from {self.start_time} to {self.end_time}"
+    
+    def save(self, *args, **kwargs):
+        # Set a default pathodology record if none is provided
+        if not self.pathodology_record:
+            default_pathodology = PathodologyRecord.objects.get_or_create(name="Default Pathodology")[0]
+            self.pathodology_record = default_pathodology
+
+        super().save(*args, **kwargs)
+
+    
 
 class Notification(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
@@ -362,17 +422,53 @@ class Transaction(models.Model):
     def __str__(self):
         return f"Transaction #{self.id} on {self.date} for {self.amount} ({'Successful' if self.is_successful else 'Pending'})"
     
+    
+    
 class MedicineInventory(models.Model):
-    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
+    medicine = models.ForeignKey('Medicine', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     purchase_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
-    
+
     def __str__(self):
-        return f"{self.medicine.medicine_name} - Quantity: {self.quantity}" 
+        return f"{self.medicine.name} - Quantity: {self.quantity}"
+
+    @classmethod
+    def update_or_create_inventory(cls, medicine_id, quantity, purchase_date):
+        existing_record = cls.objects.filter(medicine_id=medicine_id).first()
+
+        if existing_record:
+            # Update the existing record's quantity
+            existing_record.quantity += quantity
+            existing_record.save()
+        else:
+            # Create a new record
+            cls.objects.create(
+                medicine_id=medicine_id,
+                quantity=quantity,
+                purchase_date=purchase_date
+            )
     
+class MedicationPayment(models.Model):
+    patient = models.ForeignKey(Patients, on_delete=models.CASCADE, null=True, blank=True)
+    non_registered_patient_name = models.CharField(max_length=255, null=True, blank=True)
+    non_registered_patient_email = models.EmailField(null=True, blank=True)
+    non_registered_patient_phone = models.CharField(max_length=15, null=True, blank=True)
+    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_date = models.DateField()
+
+    def __str__(self):
+        patient_info = self.patient.fullname if self.patient else f"Non-Registered: {self.non_registered_patient_name}"
+        return f"Payment of {self.amount} for {self.quantity} {self.medicine.name}(s) by {patient_info} on {self.payment_date}"
+
+    
+    
+
+
 
 class MedicineTransaction(models.Model):
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
@@ -382,6 +478,22 @@ class MedicineTransaction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()     
+    
+class PatientDisease(models.Model):
+    patient = models.ForeignKey(Patients, on_delete=models.CASCADE, related_name='diseases')
+    disease_record = models.ForeignKey(DiseaseRecode, on_delete=models.CASCADE)    
+    # Additional fields related to the patient's diagnosis
+    diagnosis_date = models.DateField()
+    severity = models.CharField(max_length=50)
+    treatment_plan = models.TextField(blank=True, null=True)
+    # Add more fields as needed    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+    def __str__(self):
+        return f"{self.patient.fullname} - {self.disease_record.disease_name} ({self.diagnosis_date})"
+    
 class MedicalRecordConsultation(models.Model):
     # Relationship with Patient
     patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
@@ -411,6 +523,21 @@ class MedicalRecordConsultation(models.Model):
     def __str__(self):
         return f"{self.patient.name}'s Medical Record"  
     
+   
+class HealthIssue(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    is_disease = models.BooleanField(default=True)
+    
+    # Additional fields
+    severity = models.CharField(max_length=50, blank=True, null=True)
+    treatment_plan = models.TextField(blank=True, null=True)
+    onset_date = models.DateField(blank=True, null=True)
+    resolution_date = models.DateField(blank=True, null=True)
+    # Add more fields as needed
+    
+    def __str__(self):
+        return self.name
       
     
 @receiver(post_save, sender=CustomUser)

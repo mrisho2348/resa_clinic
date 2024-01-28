@@ -1,14 +1,15 @@
 from datetime import datetime
 import logging
-from django.http import JsonResponse
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Company, DiseaseRecode, InsuranceCompany, PathodologyRecord, Patients, Medicine, Procedure, Referral
+from .models import Company, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, Patients, Medicine, Procedure, Referral
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-
+from django.db import transaction
+from django.db.models import F
 # Define a logger
 logger = logging.getLogger(__name__)
 def edit_insurance(request, insurance_id):
@@ -271,3 +272,78 @@ def edit_pathodology(request, pathodology_id):
             messages.error(request, f'An error occurred: {e}')
 
     return render(request, 'update/edit_pathodology.html', {'pathodology': pathodology})
+
+
+@require_POST
+def edit_inventory(request, inventory_id):
+    # Retrieve the MedicineInventory object
+    inventory = get_object_or_404(MedicineInventory, pk=inventory_id)
+
+    # Retrieve form data from request.POST
+    medicine_id = request.POST.get('medicine_id')
+    quantity = request.POST.get('quantity')
+    purchase_date = request.POST.get('purchase_date')
+
+    # Validate form data (add more validation as needed)
+    if not medicine_id or not quantity or not purchase_date:
+        # Handle validation error, redirect or display an error message
+        return redirect('medicine_inventory')  # Adjust the URL as needed
+
+    try:
+        # Convert the quantity to an integer
+        quantity = int(quantity)
+
+        # Convert the purchase date to a datetime object
+        purchase_date = datetime.strptime(purchase_date, '%Y-%m-%d').date()
+
+        # Update the existing MedicineInventory record
+        inventory.medicine_id = medicine_id
+        inventory.quantity = quantity
+        inventory.purchase_date = purchase_date
+        inventory.save()
+
+        # Redirect to a success page or the medicine inventory page
+        return redirect('medicine_inventory')  # Adjust the URL as needed
+
+    except ValueError:
+        # Handle invalid data types, redirect or display an error message
+        return redirect('medicine_inventory')  # Adjust the URL as needed
+    
+    
+
+@require_POST
+def edit_medication_payment(request, payment_id):
+    try:
+        # Retrieve the MedicationPayment object
+        medication_payment = get_object_or_404(MedicationPayment, pk=payment_id)
+
+        # Store the previous quantity for later adjustment
+        previous_quantity_sold = medication_payment.quantity
+
+        # Update MedicationPayment object based on the form data
+        quantity = int(request.POST.get('edit_quantity'))
+        amount = float(request.POST.get('edit_amount'))
+        medicine_id = int(request.POST.get('medicine_id'))
+
+        # Validate form data
+        if quantity <= 0 or amount < 0 or not Medicine.objects.filter(pk=medicine_id).exists():
+            return HttpResponseBadRequest("Invalid form data.")
+
+        with transaction.atomic():
+            # Update MedicationPayment object
+            medication_payment.quantity = quantity
+            medication_payment.amount = amount
+            medication_payment.medicine_id = medicine_id
+            medication_payment.save()
+
+            # Adjust MedicineInventory
+            MedicineInventory.objects.filter(medicine=medication_payment.medicine).update(
+                quantity=F('quantity') + (previous_quantity_sold - quantity)
+            )
+
+        # Redirect to the medication history page or another appropriate page
+        return redirect('patient_medicationpayment_history_view_mrn', mrn=medication_payment.patient.mrn)
+
+    except (ValueError, TypeError, MedicationPayment.DoesNotExist):
+        return HttpResponseBadRequest("Invalid data types or MedicationPayment not found.")
+

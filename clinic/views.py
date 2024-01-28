@@ -1,10 +1,12 @@
 from datetime import date, datetime
+import json
 from django.utils import timezone
 import logging
+from django.db import models
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import logout,login
-from django.http import HttpResponse,HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseBadRequest,HttpResponseRedirect
 from django.template import loader
 from django.shortcuts import render
 from django.urls import reverse
@@ -25,7 +27,7 @@ from tablib import Dataset
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import OuterRef, Subquery
-from .models import Procedure, Patients, Referral
+from .models import DiagnosticTest, HealthIssue, MedicationPayment, Procedure, Patients, Referral
 
 # Create your views here.
 def index(request):
@@ -587,19 +589,15 @@ def add_inventory(request):
             # Convert the purchase date to a datetime object
             purchase_date = datetime.strptime(purchase_date, '%Y-%m-%d').date()
 
-            # Get the medicine object
-            medicine_inventory = MedicineInventory.objects.create(
-                medicine_id=medicine_id,
-                quantity=quantity,
-                purchase_date=purchase_date
-            )
+            # Call the helper method to update or create the inventory
+            MedicineInventory.update_or_create_inventory(medicine_id, quantity, purchase_date)
 
             # Perform additional processing if needed
 
             # Redirect to a success page or the medicine details page
             return redirect('medicine_inventory')  # Adjust the URL as needed
 
-        except ValueError:
+        except (ValueError, TypeError):
             # Handle invalid data types, redirect or display an error message
             return redirect('medicine_list')  # Adjust the URL as needed
 
@@ -613,11 +611,13 @@ def medicine_inventory_list(request):
 
     # Retrieve medicines with quantity below 100
     low_quantity_medicines = MedicineInventory.objects.filter(quantity__lt=100)
-
+    current_date = timezone.now().date()
+    non_expired_medicines = Medicine.objects.filter(expiration_date__gte=current_date)
     # Pass the context variables to the template
     context = {
         'medicine_inventories': medicine_inventories,
         'low_quantity_medicines': low_quantity_medicines,
+        'non_expired_medicines': non_expired_medicines,
     }
 
     return render(request, 'hod_template/manage_medical_inventory.html', context)
@@ -983,3 +983,185 @@ def generate_mrn():
 
     return new_mrn
       
+      
+@csrf_exempt
+def add_medication_payment(request):
+    if request.method == 'POST':
+        try:
+            # Extract data from the POST request
+            patient_mrn = request.POST.get('mrn')
+            non_registered_patient_name = request.POST.get('non_registered_patient_name')
+            non_registered_patient_email = request.POST.get('non_registered_patient_email')
+            non_registered_patient_phone = request.POST.get('non_registered_patient_phone')
+            medicine_id = request.POST.get('medicine')
+            quantity = int(request.POST.get('quantity'))
+            amount = request.POST.get('amount')
+            payment_date = request.POST.get('payment_date')
+
+            # Retrieve patient and medicine instances
+            patient = Patients.objects.get(mrn=patient_mrn) if patient_mrn else None
+            medicine = Medicine.objects.get(id=medicine_id)
+
+            # Create MedicationPayment instance
+            medication_payment = MedicationPayment(
+                patient=patient,
+                non_registered_patient_name=non_registered_patient_name,
+                non_registered_patient_email=non_registered_patient_email,
+                non_registered_patient_phone=non_registered_patient_phone,
+                medicine=medicine,
+                quantity=quantity,
+                amount=amount,
+                payment_date=payment_date,
+            )
+            medication_payment.save()          
+
+            return JsonResponse({'success': True, 'message': f'MedicationPayment record for {medication_payment} saved successfully.'})
+        except Patients.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid patient ID.'})
+        except IntegrityError:
+            return JsonResponse({'success': False, 'message': 'Duplicate entry. Referral record not saved.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+     
+
+@require_POST
+@csrf_exempt
+def delete_medication_payment(request, payment_id):
+    try:
+        # Retrieve the MedicationPayment instance
+        medication_payment = MedicationPayment.objects.get(pk=payment_id)
+
+        # Get the related MedicineInventory entry
+        inventory_entry = medication_payment.medicine.medicineinventory
+
+        # Update the inventory to reverse the impact of the MedicationPayment
+        inventory_entry.quantity += medication_payment.quantity
+        inventory_entry.amount -= medication_payment.amount
+
+        # Save the updated inventory entry
+        inventory_entry.save()
+
+        # Delete the MedicationPayment
+        medication_payment.delete()
+
+        return JsonResponse({'message': 'Medication Payment deleted successfully'})
+    except MedicationPayment.DoesNotExist:
+        return JsonResponse({'error': 'Medication Payment not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
+
+def medication_payments_view(request):
+    # Subquery to retrieve the latest medication payment record for each registered patient
+    latest_medication_payment = MedicationPayment.objects.filter(
+        patient=OuterRef('id')
+    ).order_by('-payment_date')[:1]
+
+    # Query to retrieve medication payments for registered patients
+    unique_patients_medication = Patients.objects.annotate(
+        quantity=Subquery(latest_medication_payment.values('quantity')[:1]),
+        amount=Subquery(latest_medication_payment.values('amount')[:1]),
+        payment_date=Subquery(latest_medication_payment.values('payment_date')[:1]),
+        medicine=Subquery(latest_medication_payment.values('medicine__name')[:1]),
+    ).filter(quantity__isnull=False)
+
+    # Additional filtering for medicines with enough quantity and not expired
+    current_date = timezone.now().date()
+    medicines_with_inventory = MedicineInventory.objects.filter(
+        quantity__gt=100,
+        medicine__expiration_date__gt=current_date
+    ).values('medicine')
+    
+    medicines = Medicine.objects.filter(id__in=medicines_with_inventory)
+
+    # Retrieve the data
+    data = unique_patients_medication.values(
+        'id', 'mrn', 'medicine',
+        'quantity', 'amount','payment_date'       
+    )
+    patients = Patients.objects.all()
+    context = {
+        'data': data,
+        'medicines': medicines,
+        'patients': patients,
+    }
+
+    return render(request, 'hod_template/manage_medication_payment.html', context)
+
+def patient_medicationpayment_history_view(request, mrn):
+    # Retrieve medication payment history for the patient with the given MRN
+    medication_history = MedicationPayment.objects.filter(patient__mrn=mrn)
+    
+        # Additional filtering for medicines with enough quantity and not expired
+    current_date = timezone.now().date()
+    medicines_with_inventory = MedicineInventory.objects.filter(
+        quantity__gt=100,
+        medicine__expiration_date__gt=current_date
+    ).values('medicine')
+    
+    medicines = Medicine.objects.filter(id__in=medicines_with_inventory)
+    context = {'medication_history': medication_history, 'mrn': mrn,'medicines':medicines}
+    return render(request, 'hod_template/manage_patient_medicationpayment_history.html', context)
+
+
+def diagnostic_tests_view(request):
+    # Retrieve all diagnostic tests from the database
+    diagnostic_tests = DiagnosticTest.objects.all()
+
+    # Retrieve patients, diseases, health issues, and pathologies
+    patients = Patients.objects.all()
+    diseases = DiseaseRecode.objects.all()
+    health_issues = HealthIssue.objects.all()
+    pathologies = PathodologyRecord.objects.all()
+
+    context = {
+        'diagnostic_tests': diagnostic_tests,
+        'patients': patients,
+        'diseases': diseases,
+        'health_issues': health_issues,
+        'pathologies': pathologies,
+    }
+
+    return render(request, 'hod_template/manage_diagnostic_tests.html', context)
+
+
+def save_diagnostic_test(request):
+    if request.method == 'POST':
+        try:
+            # Retrieve form data from POST request
+            patient_id = request.POST.get('patient_id')
+            test_type = request.POST.get('test_type')
+            test_date = request.POST.get('test_date')
+            result = request.POST.get('result')
+            diseases_ids = request.POST.getlist('diseases')
+            health_issues_ids = request.POST.getlist('health_issues')
+            pathology_id = request.POST.get('pathology_id')
+
+            # Convert test_date to a valid date object (you may need to adjust the format)
+            test_date = datetime.datetime.strptime(test_date, '%Y-%m-%d').date()
+
+            # Create a new DiagnosticTest object
+            diagnostic_test = DiagnosticTest(
+                patient_id=Patients.objects.filter(id=patient_id),
+                test_type=test_type,
+                test_date=test_date,
+                result=result,
+                pathology_record_id=pathology_id
+            )
+
+            diagnostic_test.save()
+
+            # Add diseases and health issues to the many-to-many fields
+            diagnostic_test.diseases.set(diseases_ids)
+            diagnostic_test.health_issues.set(health_issues_ids)
+
+            # Redirect to a success page or another appropriate URL
+            return redirect('success_page')  # Adjust the URL as needed
+
+        except Exception as e:
+            return HttpResponseBadRequest(f"Error: {str(e)}")
+
+    return HttpResponseBadRequest("Invalid request method")

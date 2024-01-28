@@ -1,11 +1,13 @@
 
 
-from django.http import JsonResponse
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render,get_object_or_404
-from .models import Company, DiseaseRecode, InsuranceCompany, Medicine, PathodologyRecord, Patients, Procedure, Referral, Staffs
+from .models import Company, DiseaseRecode, InsuranceCompany, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, Patients, Procedure, Referral, Staffs
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from django.db import transaction
+from django.db.models import F
 
 def delete_staff(request, staff_id):
     # Retrieve the staff object or return a 404 if not found
@@ -149,3 +151,40 @@ def delete_pathodology(request, pathodology_id):
             messages.error(request, f'An error occurred: {e}')
 
     return render(request, 'delete/pathodology_delete_confirmation.html', {'pathodology': pathodology})
+
+
+    
+@require_POST
+def delete_inventory(request, inventory_id):
+    # Get the MedicineInventory object
+    inventory = get_object_or_404(MedicineInventory, pk=inventory_id)
+
+    # Perform deletion
+    inventory.delete()
+
+    # Redirect to the medicine inventory page
+    return redirect('medicine_inventory') 
+   
+@require_POST
+def delete_medication_payment(request, payment_id):
+    try:
+        # Get the MedicationPayment object
+        medication_payment = get_object_or_404(MedicationPayment, pk=payment_id)
+
+        # Store the quantity being deleted for later adjustment
+        deleted_quantity = medication_payment.quantity
+
+        with transaction.atomic():
+            # Perform deletion
+            medication_payment.delete()
+
+            # Adjust MedicineInventory
+            MedicineInventory.objects.filter(medicine=medication_payment.medicine).update(
+                quantity=F('quantity') + deleted_quantity
+            )
+
+        # Redirect to the MedicationPayment
+        return redirect('medicine_inventory')
+
+    except MedicationPayment.DoesNotExist:
+        return HttpResponseBadRequest("MedicationPayment not found.")

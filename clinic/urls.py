@@ -45,10 +45,13 @@ urlpatterns = [
         path('resa/reports-orders',views.reports_orders, name="reports_orders"),
         path('resa/individual-visit',views.individual_visit, name="individual_visit"),
         path('resa/product-summary',views.product_summary, name="product_summary"),
+        path('resa/save-diagnostic_test',views.save_diagnostic_test, name="save_diagnostic_test"),
         
        
         
         # manage urls 
+        path('resa/medication-payments-view/', views.medication_payments_view, name='medication_payments_view'),
+        path('patient/medicationpayment/history/<str:mrn>/', views.patient_medicationpayment_history_view, name='patient_medicationpayment_history_view_mrn'),
         path('resa/manage-referral/', views.manage_referral, name='manage_referral'),
         path('resa/patient-procedure-view/', views.patient_procedure_view, name='patient_procedure_view'),
         path('resa/medicine-inventory/', views.medicine_inventory_list, name='medicine_inventory'),
@@ -56,6 +59,7 @@ urlpatterns = [
         path('resa/consultation-queue',views.manage_consultation, name="manage_consultation"),
         path('resa/manage-company',views.manage_company, name="manage_company"),
         path('resa/manage-disease',views.manage_disease, name="manage_disease"),
+        path('diagnostic_tests/', views.diagnostic_tests_view, name='diagnostic_tests'),
         path('resa/manage-staff',views.manage_staff, name="manage_staff"),
         path('resa/manage-insurance',views.manage_insurance, name="manage_insurance"),
         path('resa/manage-service',views.manage_service, name="manage_service"),
@@ -71,7 +75,9 @@ urlpatterns = [
         path('add_medicine/', views.add_medicine, name='add_medicine'),
         path('save_procedure/', views.save_procedure, name='save_procedure'),
         path('save_referral/', views.save_referral, name='save_referral'),
+        path('add_medication_payment/', views.add_medication_payment, name='add_medication_payment'),
         path('change_referral_status/', views.change_referral_status, name='change_referral_status'),
+        
         # imports urls 
         path('resa/ImportExcel_disease',imports.import_disease_recode, name="import_disease_recode"),
         path('import-insurance-companies/', imports.import_insurance_companies, name='import_insurance_companies'),
@@ -92,10 +98,14 @@ urlpatterns = [
         path('edit_referral/', editView.edit_referral, name='edit_referral'), 
         path('Patient/<int:patient_id>/add/', views.appointment_view, name='appointment_view'), 
         path('patient-procedure-history/<str:mrn>/view/', views.patient_procedure_history_view, name='patient_procedure_history_view_mrn'), 
-        path('edit_medicine/<int:medicine_id>/', editView.edit_medicine, name='edit_medicine'),
-        path('delete_medicine/<int:medicine_id>/', delete.delete_medicine, name='delete_medicine'),
+        path('edit_medicine/<int:medicine_id>/', editView.edit_medicine, name='edit_medicine'),        
+        path('edit_inventory/<int:inventory_id>/', editView.edit_inventory, name='edit_inventory'),
+        path('edit_medication_payment/<int:payment_id>/', editView.edit_medication_payment, name='edit_medication_payment'),
+        
         
         # delete urls 
+        path('delete-medication-payment/<int:payment_id>/', delete.delete_medication_payment, name='delete_medication_payment'),
+        path('delete_medicine/<int:medicine_id>/', delete.delete_medicine, name='delete_medicine'),
         path('disease-records/<int:disease_id>/delete/', delete.delete_disease_record, name='delete_disease_record'),        
         path('insurance-records/<int:insurance_id>/delete/', delete.delete_insurance, name='delete_insurance'),        
         path('pathodology/<int:pathodology_id>/delete/', delete.delete_pathodology, name='delete_pathodology'),
@@ -103,5 +113,7 @@ urlpatterns = [
         path('delete_staff/<int:staff_id>/', delete.delete_staff, name='delete_staff'),
         path('delete-patient/<int:patient_id>/', delete.delete_patient, name='delete_patient'),
         path('delete_procedure/', delete.delete_procedure, name='delete_procedure'),
+        path('delete_inventory/<int:inventory_id>/', delete.delete_inventory, name='delete_inventory'),
         path('delete_referral/', delete.delete_referral, name='delete_referral'),
+        path('delete_medication_payment/<int:payment_id>/', delete.delete_medication_payment, name='delete_medication_payment'),
 ]

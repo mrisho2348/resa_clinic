@@ -77,6 +77,21 @@
                           </a>
                       </li>
                       <li class="nav-item">
+                        {% url 'medication_payments_view' as medication_payments_url %}
+                        <a href="{{ medication_payments_url }}" class="nav-link{% if request.path == medication_payments_url %} active {% endif %}">
+                            <i class="nav-icon fas fa-prescription-bottle-alt"></i>
+                            <p>Medication Records</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        {% url 'diagnostic_tests' as diagnostic_tests_url %}
+                        <a href="{{ diagnostic_tests_url }}" class="nav-link{% if request.path == diagnostic_tests_url %} active {% endif %}">
+                            <i class="nav-icon fas fa-flask"></i>
+                            <p>Health Insights</p>
+                        </a>
+                    </li>
+                    
+                      <li class="nav-item">
                         {% url 'manage_referral' as manage_referral %}
                         <a href="{% url 'manage_referral' %}" class="nav-link{% if request.path == manage_referral %} active {% endif %}">
                             <i class="nav-icon fas fa-handshake"></i>

@@ -18,8 +18,8 @@
   <i class="fas fa-file-import"></i> Import medicine
 </a>
 {% endblock breadcrumb %}
-{% block breadcrumbs %}
-{% if unread_notifications %}
+{% comment %} {% block breadcrumbs %} {% endcomment %}
+{% comment %} {% if unread_notifications %}
     <div class="alert alert-danger" role="alert">
         <i class="fas fa-exclamation-triangle" data-bs-toggle="tooltip" data-bs-placement="top" title="Notifications"></i>
         <strong>{{ unread_notifications.count }}</strong> medicine(s) have expired.
@@ -32,7 +32,7 @@
         });
     </script>
 {% endif %}
-{% endblock breadcrumbs %}
+{% endblock breadcrumbs %} {% endcomment %}
 
 {% load static %}
 {% block main_content %}

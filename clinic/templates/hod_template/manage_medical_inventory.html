@@ -9,6 +9,7 @@ medicine inventory
 {% endblock page_title %}
 
 {% block breadcrumb %}
+{% include "hod_template/modal_form.html" %}
     {% if low_quantity_medicines.count > 0 %}
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
             <i class="fas fa-exclamation-triangle"></i>
@@ -16,6 +17,9 @@ medicine inventory
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     {% endif %}
+    <a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#addInventoryModal">
+        <i class="fas fa-plus"></i> New inventory
+    </a>    
 {% endblock breadcrumb %}
 {% load static %}
 {% block main_content %}
@@ -33,6 +37,7 @@ medicine inventory
                 <th>Medicine Name</th>
                 <th>Quantity</th>
                 <th>Purchase Date</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -41,7 +46,95 @@ medicine inventory
                     <td>{{ inventory.medicine.name }}</td>
                     <td>{{ inventory.quantity }}</td>
                     <td>{{ inventory.purchase_date }}</td>
+                    <td>                      
+                        <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#editInventoryModal{{ inventory.id }}"  data-toggle="tooltip" title="Edit">
+                            <i class="fa fa-edit text-white"></i>
+                        </button>
+                          <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteInventoryModal{{ inventory.id }}"  data-toggle="tooltip" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>                        
+                    </td>
+
+                    <!-- Bootstrap Modal Form for Editing Medicine Inventory -->
+<div class="modal fade" id="editInventoryModal{{ inventory.id }}" tabindex="-1" role="dialog" aria-labelledby="editInventoryModalLabel{{ inventory.id }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editInventoryModalLabel{{ inventory.id }}">Edit Inventory</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Bootstrap-styled form -->
+                <form method="post" action="{% url 'edit_inventory' inventory.id %}">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="medicine">Medicine:</label>
+                        <select class="form-control select2bs4" style="width: 100%;" id="medicine_id" name="medicine_id">
+                            {% for medicine in non_expired_medicines %}
+                                <option value="{{ medicine.id }}" {% if medicine.id == inventory.medicine.id %} selected {% endif %}>
+                                    {{ medicine.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity">Quantity</label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" value="{{ inventory.quantity }}" required>
+                    </div>
+
+                    <!-- Purchase Date -->
+                    <div class="form-group">
+                        <label for="purchaseDate">Purchase Date</label>
+                        <input type="date" class="form-control" id="purchaseDate" name="purchase_date" value="{{ inventory.purchase_date|date:'Y-m-d' }}" required>
+                    </div>
+                    <div class="form-group pt-2 float-end">
+                        <div class="row">
+                            <div class="col-md-8"></div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-md btn-primary">Save Changes <i class="mdi mdi-forward"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- Bootstrap Modal for Deleting Medicine Inventory -->
+<div class="modal fade" id="deleteInventoryModal{{ inventory.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteInventoryModalLabel{{ inventory.id }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteInventoryModalLabel{{ inventory.id }}">Confirm Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this inventory record?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+
+                <!-- Form for deletion -->
+                <form method="post" action="{% url 'delete_inventory' inventory.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
                 </tr>
+
             {% endfor %}
         </tbody>
     </table>
@@ -53,5 +146,54 @@ medicine inventory
     }
 </script>
 
+
+  <!-- Bootstrap Modal Form for Adding Medicine Inventory -->
+  <div class="modal fade" id="addInventoryModal" tabindex="-1" role="dialog" aria-labelledby="addInventoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" id="addInventoryModalLabel">Add Inventory</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        </div>
+        <div class="modal-body">
+        <!-- Bootstrap-styled form -->
+        <form method="post" action="{% url 'add_inventory' %}">
+             {% csrf_token %}
+
+             <div class="form-group">
+                <label for="medicine">Medicine:</label>
+                <select class="form-control select2bs4" style="width: 100%;" id="medicine_id" name="medicine_id" >
+                    {% for medicine in non_expired_medicines %}
+                        <option value="{{ medicine.id }}">
+                            {{ medicine.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+            <label for="quantity">Quantity</label>
+            <input type="number" class="form-control" id="quantity" name="quantity" required>
+            </div>
+
+            <!-- Purchase Date -->
+            <div class="form-group">
+            <label for="purchaseDate">Purchase Date</label>
+            <input type="date" class="form-control" id="purchaseDate" name="purchase_date" required>
+            </div>
+            <div class="form-group pt-2 float-end">
+                <div class="row">
+                    <div class="col-md-8"></div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-md btn-primary">Save and Continue <i class="mdi mdi-forward"></i></button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        </div>
+    </div>
+    </div>
+</div>
 {% include 'hod_template/datatable.html' %}
 {% endblock main_content %}
