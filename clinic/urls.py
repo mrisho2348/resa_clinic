@@ -89,6 +89,7 @@ urlpatterns = [
         path('import-referral-records/', imports.import_referral_records, name='import_referral_records'),
         
         # edit urls 
+        path('diagnostic-test/<int:test_id>/edit/', editView.edit_diagnostic_test, name='edit_diagnostic_test'),
         path('disease-records/<int:disease_id>/edit/', editView.edit_disease_record, name='edit_disease_record'),
         path('insurance-records/<int:insurance_id>/edit/', editView.edit_insurance, name='edit_insurance'),
         path('pathodology/<int:pathodology_id>/edit/', editView.edit_pathodology, name='edit_pathodology'),
@@ -105,6 +106,7 @@ urlpatterns = [
         
         # delete urls 
         path('delete-medication-payment/<int:payment_id>/', delete.delete_medication_payment, name='delete_medication_payment'),
+        path('delete-diagnostic/test/<int:test_id>/', delete.delete_diagnostic_test, name='delete_diagnostic_test'),
         path('delete_medicine/<int:medicine_id>/', delete.delete_medicine, name='delete_medicine'),
         path('disease-records/<int:disease_id>/delete/', delete.delete_disease_record, name='delete_disease_record'),        
         path('insurance-records/<int:insurance_id>/delete/', delete.delete_insurance, name='delete_insurance'),        

@@ -2,7 +2,7 @@ from datetime import datetime
 import logging
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Company, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, Patients, Medicine, Procedure, Referral
+from .models import Company, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, Patients, Medicine, Procedure, Referral
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db import transaction
@@ -346,4 +346,55 @@ def edit_medication_payment(request, payment_id):
 
     except (ValueError, TypeError, MedicationPayment.DoesNotExist):
         return HttpResponseBadRequest("Invalid data types or MedicationPayment not found.")
+    
+
+def edit_diagnostic_test(request, test_id):
+    if request.method == 'POST':
+        try:
+            # Retrieve form data from POST request
+            patient_id = request.POST.get('patient')
+            test_type = request.POST.get('test_type')
+            test_date = request.POST.get('test_date')
+            result = request.POST.get('result')          
+            disease_or_pathology = request.POST.get('disease_or_pathology') 
+            pathology_id = None
+            diseases_ids = None
+            health_issues_ids = None
+            if disease_or_pathology == 'pathology':
+                pathology_id = request.POST.get('pathology_id')
+                
+            if disease_or_pathology == 'disease':
+                diseases_ids = request.POST.getlist('diseases[]')
+                
+            if disease_or_pathology == 'health_issue':
+                health_issues_ids = request.POST.getlist('health_issues')
+            # Retrieve the existing DiagnosticTest object
+            diagnostic_test = get_object_or_404(DiagnosticTest, id=test_id)
+
+            # Update the DiagnosticTest object with the new data
+            patient = Patients.objects.get(id=patient_id)
+            diagnostic_test.patient = patient
+            diagnostic_test.test_type = test_type
+            diagnostic_test.test_date = test_date
+            diagnostic_test.result = result
+            diagnostic_test.pathology_record = pathology_id
+
+            # Save the changes to the DiagnosticTest object
+            diagnostic_test.save()
+
+            # Update diseases and health issues in the many-to-many fields
+            if diseases_ids is not None:
+                diagnostic_test.diseases.set(diseases_ids)
+                
+            if health_issues_ids is not None:
+               diagnostic_test.health_issues.set(health_issues_ids)
+
+            # Redirect to the diagnostic tests page or another appropriate URL
+            return redirect('diagnostic_tests')  # Adjust the URL as needed
+
+        except Exception as e:
+            print(f"ERROR: {str(e)}")
+            return HttpResponseBadRequest(f"Error: {str(e)}")
+
+    return HttpResponseBadRequest("Invalid request method")    
 

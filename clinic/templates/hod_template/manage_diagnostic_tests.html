@@ -49,10 +49,225 @@ Diagnostic Tests
                         </button>
                           <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteDiagnosticTestModal{{ test.id }}"  data-toggle="tooltip" title="Delete">
                             <i class="fas fa-trash"></i>
-                        </button>                        
+                        </button>  
+                        <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#viewDiagnosticTestModal{{ test.id }}" data-toggle="tooltip" title="View Details">
+                            <i class="fas fa-eye"></i>
+                         </button>                      
                     </td>
 
+<!-- Detail View Modal -->
+<div class="modal fade" id="viewDiagnosticTestModal{{ test.id }}" tabindex="-1" role="dialog" aria-labelledby="viewDiagnosticTestModalLabel{{ test.id }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+       <div class="modal-content">
+          <div class="modal-header">
+             <h5 class="modal-title" id="viewDiagnosticTestModalLabel{{ test.id }}">Diagnostic Test Details</h5>
+             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+             </button>
+          </div>
+          <div class="modal-body">
+                <style>
+                    
+                </style>
+             <!-- Basic Information -->
+             <div class="card">
+                <div class="card-body">
+                   <p class="card-text"><strong>Test ID:</strong> {{ test.test_id }}</p>
+                   <p class="card-text"><strong>Patient:</strong> {{ test.patient.fullname }}</p>
+                   <p class="card-text"><strong>Test Type:</strong> {{ test.test_type }}</p>
+                   <p class="card-text"><strong>Test Date:</strong> {{ test.test_date }}</p>
+                   <p class="card-text"><strong>Result:</strong> {{ test.result }}</p>
+                </div>
+             </div>
+ 
+             <!-- Associated Diseases -->
+             {% if test.diseases.all %}
+                <div class="card mt-3">
+                   <div class="card-body">
+                      <h5 class="card-title">Associated Diseases</h5>
+                      <ul class="list-group list-group-flush">
+                         {% for disease in test.diseases.all %}
+                            <li class="list-group-item">{{ disease.disease_name }}</li>
+                         {% endfor %}
+                      </ul>
+                   </div>
+                </div>
+             {% endif %}
+ 
+             <!-- Associated Pathology -->
+             {% if test.pathology_record %}
+                <div class="card mt-3">
+                   <div class="card-body">
+                      <h5 class="card-title">Associated Pathology</h5>
+                      <p class="card-text">{{ test.pathology_record.name }}</p>
+                   </div>
+                </div>
+             {% endif %}
+ 
+             <!-- Associated Health Issues -->
+             {% if test.health_issues.all %}
+                <div class="card mt-3">
+                   <div class="card-body">
+                      <h5 class="card-title">Associated Health Issues</h5>
+                      <ul class="list-group list-group-flush">
+                         {% for health_issue in test.health_issues.all %}
+                            <li class="list-group-item">{{ health_issue.name }}</li>
+                         {% endfor %}
+                      </ul>
+                   </div>
+                </div>
+             {% endif %}
+ 
+             <!-- Close button -->
+             <button type="button" class="btn btn-secondary mt-3" data-dismiss="modal">Close</button>
+          </div>
+       </div>
+    </div>
+ </div>
+ 
 
+<!-- Delete Diagnostic Test Modal -->
+<div class="modal fade" id="deleteDiagnosticTestModal{{ test.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteDiagnosticTestModalLabel{{ test.id }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteDiagnosticTestModalLabel{{ test.id }}">Delete Diagnostic Test</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the diagnostic test for {{ test.patient.fullname }}?</p>
+            </div>
+            <div class="modal-footer">
+                <form method="post" action="{% url 'delete_diagnostic_test' test.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>  
+         
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+                            <!-- Edit Diagnostic Test Modal -->
+<div class="modal fade" id="editDiagnosticTestModal{{ test.id }}" tabindex="-1" role="dialog" aria-labelledby="editDiagnosticTestModalLabel{{ test.id }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editDiagnosticTestModalLabel{{ test.id }}">Edit Diagnostic Test</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Form for editing DiagnosticTest details -->
+                <form method="post" action="{% url 'edit_diagnostic_test' test.id %}">
+                    {% csrf_token %}
+
+                    <!-- Patient selection -->
+                    <div class="form-group">
+                        <label for="patient">Patient:</label>
+                        <select class="form-control select2bs4" style="width: 100%;" id="patient" name="patient" required>
+                            {% for patient in patients %}
+                                <option value="{{ patient.id }}" {% if patient.id == test.patient.id %} selected {% endif %}>{{ patient.fullname }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Test type -->
+                    <div class="form-group">
+                        <label for="test_type">Test Type:</label>
+                        <input type="text" class="form-control" id="test_type" name="test_type" value="{{ test.test_type }}" required>
+                    </div>
+
+                    <!-- Test date -->
+                    <div class="form-group">
+                        <label for="test_date">Test Date:</label>
+                        <input type="date" class="form-control" id="test_date" name="test_date" value="{{ test.test_date|date:'Y-m-d' }}" required>
+                    </div>
+
+                    <!-- Result -->
+                    <div class="form-group">
+                        <label for="result">Result:</label>
+                        <textarea class="form-control" id="result" name="result" rows="3">{{ test.result }}</textarea>
+                    </div>
+
+                    <!-- Diseases/Pathology selection -->
+                    <div class="form-group">
+                        <label for="disease_or_pathology">Disease or Pathology:</label>
+                        <select class="form-control select2bs4" style="width: 100%;" id="disease_or_pathology" name="disease_or_pathology" required>
+                            <option value="disease" {% if test.diseases.all %} selected {% endif %}>Disease</option>
+                            <option value="pathology" {% if test.pathology_record %} selected {% endif %}>Pathology</option>
+                            <option value="health_issue" {% if test.health_issues.all %} selected {% endif %}>Other Health Issue</option>
+                        </select>
+                    </div>
+
+                    <!-- Diseases selection -->
+                    <div class="form-group" id="diseases_selection" {% if not test.diseases.all %} style="display: none;" {% endif %}>
+                        <label for="diseases">Diseases:</label>
+                        <select class="form-control select2bs4" style="width: 100%;" id="diseases" name="diseases[]" multiple>
+                            {% for disease in diseases %}
+                                <option value="{{ disease.id }}" {% if disease in test.diseases.all %} selected {% endif %}>{{ disease.disease_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Pathology selection -->
+                    <div class="form-group" id="pathology_selection" {% if not test.pathology_record %} style="display: none;" {% endif %}>
+                        <label for="pathology">Pathology:</label>
+                        <select class="form-control select2bs4" style="width: 100%;" id="pathology" name="pathology">
+                            {% for pathology in pathologies %}
+                                <option value="{{ pathology.id }}" {% if pathology == test.pathology_record %} selected {% endif %}>{{ pathology.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Health issues -->
+                    <div class="form-group" id="other_health_issues" {% if not test.health_issues.all %} style="display: none;" {% endif %}>
+                        <label for="health_issues">Health Issues:</label>
+                        <select class="form-control select2bs4" style="width: 100%;" id="health_issues" name="health_issues[]" multiple>
+                            {% for health_issue in health_issues %}
+                                <option value="{{ health_issue.id }}" {% if health_issue in test.health_issues.all %} selected {% endif %}>{{ health_issue.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Save button -->
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Toggle diseases/pathology selection based on the chosen option
+        document.getElementById('disease_or_pathology').addEventListener('change', function () {
+            var diseasesSelection = document.getElementById('diseases_selection');
+            var pathologySelection = document.getElementById('pathology_selection');
+            var other_health_issuesSelection = document.getElementById('other_health_issues');
+
+            if (this.value === 'disease') {
+                diseasesSelection.style.display = 'block';
+                pathologySelection.style.display = 'none';
+                other_health_issuesSelection.style.display = 'none';
+            } else if (this.value === 'pathology') {
+                diseasesSelection.style.display = 'none';
+                pathologySelection.style.display = 'block';
+                other_health_issuesSelection.style.display = 'none';
+            } else if (this.value === 'health_issue') {
+                diseasesSelection.style.display = 'none';
+                pathologySelection.style.display = 'none';
+                other_health_issuesSelection.style.display = 'block';
+            }
+        });
+    });
+</script>
 
 
 
@@ -114,7 +329,7 @@ Diagnostic Tests
 
                     <!-- Diseases/Pathology selection -->
                     <div class="form-group">
-                        <label for="disease_or_pathology">Disease or Pathology:</label>
+                        <label for="disease_or_pathology">Disease or Pathology or other health issue:</label>
                         <select class="form-control" id="disease_or_pathology" name="disease_or_pathology" required>
                             <option value="disease">Disease</option>
                             <option value="pathology">Pathology</option>
@@ -125,7 +340,7 @@ Diagnostic Tests
                     <!-- Diseases selection -->
                     <div class="form-group" id="diseases_selection">
                         <label for="diseases">Diseases:</label>
-                        <select class="form-control select2bs4" style="width: 100%;" id="diseases" name="diseases[]">
+                        <select class="form-control select2bs4" style="width: 100%;" id="diseases" name="diseases[]" multiple>
                             {% for disease in diseases %}
                                 <option value="{{ disease.id }}">{{ disease.disease_name }}</option>
                             {% endfor %}

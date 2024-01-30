@@ -270,7 +270,29 @@ def generate_test_id():
 
     return new_test_id
       
-        
+class Sample(models.Model):
+    sample_id = models.CharField(max_length=12, unique=True, editable=False)
+    lab_test = models.ForeignKey(DiagnosticTest, on_delete=models.CASCADE, related_name='samples')
+    collection_date = models.DateField()
+    processing_date = models.DateField(null=True, blank=True)
+    analysis_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=[('collected', 'Collected'), ('processing', 'Processing'), ('analyzed', 'Analyzed')])
+
+    def save(self, *args, **kwargs):
+        # Generate a unique identifier based on count of existing records
+        if not self.sample_id:
+            self.sample_id = generate_sample_id()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Sample {self.sample_id} - {self.lab_test.test_type} - {self.status}"
+
+def generate_sample_id():
+    last_sample = Sample.objects.last()
+    last_sample_number = int(last_sample.sample_id.split('-')[-1]) if last_sample else 0
+    new_sample_number = last_sample_number + 1
+    return f"SMP-{new_sample_number:05d}"    
+    
 class Consultation(models.Model):
     doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE)
     patient = models.ForeignKey(Patients, on_delete=models.CASCADE)

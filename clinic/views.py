@@ -1132,20 +1132,31 @@ def save_diagnostic_test(request):
     if request.method == 'POST':
         try:
             # Retrieve form data from POST request
-            patient_id = request.POST.get('patient_id')
+            patient_id = request.POST.get('patient')
             test_type = request.POST.get('test_type')
             test_date = request.POST.get('test_date')
             result = request.POST.get('result')
-            diseases_ids = request.POST.getlist('diseases')
-            health_issues_ids = request.POST.getlist('health_issues')
-            pathology_id = request.POST.get('pathology_id')
-
+            disease_or_pathology = request.POST.get('disease_or_pathology')   
+              
+            patient_id = request.POST.get('patient')
+            
+            pathology_id = None
+            diseases_ids = None
+            health_issues_ids = None
+            if disease_or_pathology == 'pathology':
+                pathology_id = request.POST.get('pathology_id')
+                
+            if disease_or_pathology == 'disease':
+                diseases_ids = request.POST.getlist('diseases[]')                
+            if disease_or_pathology == 'health_issue':
+                health_issues_ids = request.POST.getlist('health_issues')
             # Convert test_date to a valid date object (you may need to adjust the format)
-            test_date = datetime.datetime.strptime(test_date, '%Y-%m-%d').date()
-
+            # test_date = datetime.datetime.strptime(test_date, '%Y-%m-%d').date()
+            test_id = generate_test_id()
             # Create a new DiagnosticTest object
             diagnostic_test = DiagnosticTest(
-                patient_id=Patients.objects.filter(id=patient_id),
+                test_id=test_id,
+                patient_id=patient_id,
                 test_type=test_type,
                 test_date=test_date,
                 result=result,
@@ -1155,13 +1166,34 @@ def save_diagnostic_test(request):
             diagnostic_test.save()
 
             # Add diseases and health issues to the many-to-many fields
-            diagnostic_test.diseases.set(diseases_ids)
-            diagnostic_test.health_issues.set(health_issues_ids)
+            if diseases_ids is not None:
+                diagnostic_test.diseases.set(diseases_ids)
+                
+            if health_issues_ids is not None:
+               diagnostic_test.health_issues.set(health_issues_ids)
 
             # Redirect to a success page or another appropriate URL
-            return redirect('success_page')  # Adjust the URL as needed
+            return redirect('diagnostic_tests')  # Adjust the URL as needed
 
         except Exception as e:
+            print(f"ERROR: {str(e)}")
             return HttpResponseBadRequest(f"Error: {str(e)}")
 
     return HttpResponseBadRequest("Invalid request method")
+
+def generate_test_id():
+    # Retrieve the last diagnostic test from the database
+    last_test = DiagnosticTest.objects.last()
+
+    # Extract the numeric part from the last TID, or start from 0 if there are no tests yet
+    last_test_number = int(last_test.test_id.split('-')[-1]) if last_test else 0
+
+    # Increment the numeric part for the new test
+    new_test_number = last_test_number + 1
+
+    # Format the TID with leading zeros and concatenate with the prefix "TID-"
+    new_test_id = f"TID-{new_test_number:05d}"
+
+    return new_test_id
+
+
