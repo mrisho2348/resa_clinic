@@ -2,7 +2,7 @@ from datetime import datetime
 import logging
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Company, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, Patients, Medicine, Procedure, Referral
+from .models import Company, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, Patients, Medicine, Procedure, Referral, Sample
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db import transaction
@@ -398,3 +398,37 @@ def edit_diagnostic_test(request, test_id):
 
     return HttpResponseBadRequest("Invalid request method")    
 
+
+def edit_sample(request, sample_id): 
+
+    if request.method == 'POST':
+        try:
+            # Retrieve form data from POST request
+            lab_test = request.POST.get('edit_lab_test')
+            collection_date = request.POST.get('edit_collection_date')
+            processing_date = request.POST.get('edit_processing_date')
+            analysis_date = request.POST.get('edit_analysis_date')
+            status = request.POST.get('edit_status')
+                        # Convert date strings to datetime objects if provided
+            collection_date = datetime.strptime(collection_date, '%Y-%m-%d') if collection_date else None
+            processing_date = datetime.strptime(processing_date, '%Y-%m-%d') if processing_date else None
+            analysis_date = datetime.strptime(analysis_date, '%Y-%m-%d') if analysis_date else None
+            
+            sample = get_object_or_404(Sample, id=sample_id)
+            # Update the existing Sample object
+            sample.lab_test = DiagnosticTest.objects.get(id=lab_test)
+            sample.collection_date = collection_date
+            sample.processing_date = processing_date
+            sample.analysis_date = analysis_date
+            sample.status = status
+
+            sample.save()
+
+            # Redirect to a success page or another appropriate URL
+            return redirect('sample_list')  # Adjust the URL as needed
+
+        except Exception as e:
+            print(f"ERROR: {str(e)}")
+            return HttpResponseBadRequest(f"Error: {str(e)}") 
+
+    return HttpResponseBadRequest("Invalid request method")  

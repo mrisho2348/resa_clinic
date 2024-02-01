@@ -90,6 +90,14 @@
                             <p>Health Insights</p>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        {% url 'sample_list' as sample_list %}
+                        <a href="{{ sample_list }}" class="nav-link{% if request.path == sample_list %} active {% endif %}">
+                            <i class="nav-icon fas fa-flask"></i>
+                            <p>Sample Management</p>
+                        </a>
+                    </li>
+                    
                     
                       <li class="nav-item">
                         {% url 'manage_referral' as manage_referral %}

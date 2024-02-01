@@ -2,7 +2,7 @@
 
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render,get_object_or_404
-from .models import Company, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, Patients, Procedure, Referral, Staffs
+from .models import Company, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, Patients, Procedure, Referral, Sample, Staffs
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -174,7 +174,18 @@ def delete_diagnostic_test(request, test_id):
     test.delete()
 
     # Redirect to the medicine inventory page
-    return redirect('diagnostic_tests') 
+    return redirect('diagnostic_tests')
+ 
+@require_POST
+def delete_sample(request, sample_id):
+    # Get the MedicineInventory object
+    sample = get_object_or_404(Sample, pk=sample_id)
+
+    # Perform deletion
+    sample.delete()
+
+    # Redirect to the medicine inventory page
+    return redirect('sample_list') 
 
    
 @require_POST

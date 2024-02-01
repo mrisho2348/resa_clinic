@@ -273,10 +273,11 @@ def generate_test_id():
 class Sample(models.Model):
     sample_id = models.CharField(max_length=12, unique=True, editable=False)
     lab_test = models.ForeignKey(DiagnosticTest, on_delete=models.CASCADE, related_name='samples')
-    collection_date = models.DateField()
+    collection_date = models.DateField(null=True, blank=True)
     processing_date = models.DateField(null=True, blank=True)
     analysis_date = models.DateField(null=True, blank=True)
-    status = models.CharField(max_length=20, choices=[('collected', 'Collected'), ('processing', 'Processing'), ('analyzed', 'Analyzed')])
+    status = models.CharField(max_length=20, choices=[('collected', 'Collected'), ('processing', 'Processing'), ('analyzed', 'Analyzed')], default='collected')
+
 
     def save(self, *args, **kwargs):
         # Generate a unique identifier based on count of existing records

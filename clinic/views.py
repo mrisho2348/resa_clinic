@@ -27,7 +27,7 @@ from tablib import Dataset
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import OuterRef, Subquery
-from .models import DiagnosticTest, HealthIssue, MedicationPayment, Procedure, Patients, Referral
+from .models import DiagnosticTest, HealthIssue, MedicationPayment, Procedure, Patients, Referral, Sample
 
 # Create your views here.
 def index(request):
@@ -1196,4 +1196,33 @@ def generate_test_id():
 
     return new_test_id
 
+def sample_list(request):
+    samples = Sample.objects.all()
+    diagnostic_tests = DiagnosticTest.objects.all()    
+    return render(request, 'hod_template/manage_sample_list.html', {'samples': samples,'diagnostic_tests':diagnostic_tests})
+
+
+def save_sample(request):
+    if request.method == 'POST':
+        try:
+            # Retrieve form data from POST request
+            lab_test = request.POST.get('lab_test')
+            collection_date = request.POST.get('collection_date')   
+                      # Create a new Sample object
+            sample = Sample(
+                lab_test= DiagnosticTest.objects.get(id=lab_test),  # Replace with the actual instance
+                collection_date=collection_date,               
+             
+            )
+
+            sample.save()
+
+            # Redirect to a success page or another appropriate URL
+            return redirect('sample_list')  # Adjust the URL as needed
+
+        except Exception as e:
+            print(f"ERROR: {str(e)}")
+            return HttpResponseBadRequest(f"Error: {str(e)}")
+
+    return HttpResponseBadRequest("Invalid request method")
 

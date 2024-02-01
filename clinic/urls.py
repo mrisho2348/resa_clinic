@@ -30,6 +30,7 @@ urlpatterns = [
         path('resa/new-request',views.add_request, name="add_request"),
         path('resa/update-staff-status',views.update_staff_status, name="update_staff_status"),
         path('add_inventory/',views.add_inventory, name="add_inventory"),
+        path('save_sample/',views.save_sample, name="save_sample"),
         path('save_staff_view/',views.save_staff_view, name="save_staff_view"),
         
         # reports urls 
@@ -67,6 +68,7 @@ urlpatterns = [
         path('resa/manage-pathodology',views.manage_pathodology, name="manage_pathodology"),
         path('resa/appointments/', views.appointment_list_view, name='appointment_list'),
         path('notifications/', views.notification_view, name='notification_view'),
+        path('sample_list/', views.sample_list, name='sample_list'),
         path('confirm_meeting/<int:appointment_id>/', views.confirm_meeting, name='confirm_meeting'),
         path('generate-bill/<int:procedure_id>/', views.generate_billing, name='generate_billing'),
         path('edit_meeting/<int:appointment_id>/', views.edit_meeting, name='edit_meeting'),
@@ -89,6 +91,7 @@ urlpatterns = [
         path('import-referral-records/', imports.import_referral_records, name='import_referral_records'),
         
         # edit urls 
+        path('edit-sample-test/<int:sample_id>/edit/', editView.edit_sample, name='edit_sample'),
         path('diagnostic-test/<int:test_id>/edit/', editView.edit_diagnostic_test, name='edit_diagnostic_test'),
         path('disease-records/<int:disease_id>/edit/', editView.edit_disease_record, name='edit_disease_record'),
         path('insurance-records/<int:insurance_id>/edit/', editView.edit_insurance, name='edit_insurance'),
@@ -117,5 +120,6 @@ urlpatterns = [
         path('delete_procedure/', delete.delete_procedure, name='delete_procedure'),
         path('delete_inventory/<int:inventory_id>/', delete.delete_inventory, name='delete_inventory'),
         path('delete_referral/', delete.delete_referral, name='delete_referral'),
+        path('delete_sample/<int:sample_id>/', delete.delete_sample, name='delete_sample'),
         path('delete_medication_payment/<int:payment_id>/', delete.delete_medication_payment, name='delete_medication_payment'),
 ]
