@@ -8,7 +8,9 @@ urlpatterns = [
         path('resa/dashboard',views.dashboard, name="dashboard"),
         path('resa/ImportExcel',views.import_staff, name="import_staff"),      
         path('pathology_diagnostic_test_save/', views.pathology_diagnostic_test_save, name='pathology_diagnostic_test_save'),
+        path('save_consultation_data/', views.save_consultation_data, name='save_consultation_data'),
         path('add_disease/', views.add_disease, name='add_disease'),
+        path('save_consultation_fee/', views.save_consultation_fee, name='save_consultation_fee'),
         path('add_insurance_company/', views.add_insurance_company, name='add_insurance_company'),
         path('add_company/', views.add_company, name='add_company'),
         path('add_pathodology_record/', views.add_pathodology_record, name='add_pathodology_record'),
@@ -33,6 +35,7 @@ urlpatterns = [
         path('add_inventory/',views.add_inventory, name="add_inventory"),
         path('save_sample/',views.save_sample, name="save_sample"),
         path('save_patient_disease/',views.save_patient_disease, name="save_patient_disease"),
+        path('save_service_data/',views.save_service_data, name="save_service_data"),
         path('save_staff_view/',views.save_staff_view, name="save_staff_view"),
         
         # reports urls 
@@ -62,6 +65,7 @@ urlpatterns = [
         path('resa/medicine-inventory/', views.medicine_inventory_list, name='medicine_inventory'),
         path('resa/all-patients',views.manage_patient, name="manage_patient"),
         path('resa/consultation-queue',views.manage_consultation, name="manage_consultation"),
+        path('consultation-fees/', views.consultation_fee_list, name='consultation_fee_list'),
         path('resa/manage-company',views.manage_company, name="manage_company"),
         path('resa/manage-disease',views.manage_disease, name="manage_disease"),
         path('diagnostic_tests/', views.diagnostic_tests_view, name='diagnostic_tests'),
@@ -85,6 +89,7 @@ urlpatterns = [
         path('change_referral_status/', views.change_referral_status, name='change_referral_status'),
         
         # imports urls 
+        path('resa/ImportExcel_service',imports.import_service_records, name="import_service_records"),
         path('resa/ImportExcel_disease',imports.import_disease_recode, name="import_disease_recode"),
         path('import-insurance-companies/', imports.import_insurance_companies, name='import_insurance_companies'),
         path('import-companies/', imports.import_companies, name='import_companies'),
@@ -95,14 +100,17 @@ urlpatterns = [
         path('import-referral-records/', imports.import_referral_records, name='import_referral_records'),
         
         # edit urls 
+        path('pathology-diagnostic-test-edit-save/<int:test_id>/edit/', editView.pathology_diagnostic_test_edit_save, name='pathology_diagnostic_test_edit_save'),
         path('edit-patient-disease-save/<int:patient_disease_id>/edit/', editView.edit_patient_disease_save, name='edit_patient_disease_save'),
         path('edit-sample-test/<int:sample_id>/edit/', editView.edit_sample, name='edit_sample'),
         path('diagnostic-test/<int:test_id>/edit/', editView.edit_diagnostic_test, name='edit_diagnostic_test'),
         path('disease-records/<int:disease_id>/edit/', editView.edit_disease_record, name='edit_disease_record'),
         path('insurance-records/<int:insurance_id>/edit/', editView.edit_insurance, name='edit_insurance'),
         path('pathodology/<int:pathodology_id>/edit/', editView.edit_pathodology, name='edit_pathodology'),
-        path('company/<int:company_id>/edit/', editView.edit_company, name='edit_company'), 
+        path('company/<int:company_id>/edit/', editView.edit_company, name='edit_company'),
+        path('update_consultation_data/<int:appointment_id>/', editView.update_consultation_data, name='update_consultation_data'), 
         path('Patient/<int:patient_id>/edit/', editView.edit_patient, name='edit_patient'),
+        path('update_consultation_fee/', editView.update_consultation_fee, name='update_consultation_fee'), 
         path('edit_procedure/', editView.edit_procedure, name='edit_procedure'), 
         path('edit_referral/', editView.edit_referral, name='edit_referral'), 
         path('Patient/<int:patient_id>/add/', views.appointment_view, name='appointment_view'), 
@@ -113,16 +121,21 @@ urlpatterns = [
         
         
         # delete urls 
+        path('delete-consultation-fee/<int:fee_id>/', delete.delete_consultation_fee, name='delete_consultation_fee'),
+        path('delete-consultation/<int:appointment_id>/', delete.delete_consultation, name='delete_consultation'),
+        path('pathology-diagnostic-test-delete/<int:test_id>/', delete.pathology_diagnostic_test_delete, name='pathology_diagnostic_test_delete'),
         path('delete-patient-disease/<int:patient_disease_id>/', delete.delete_patient_disease, name='delete_patient_disease'),
         path('delete-medication-payment/<int:payment_id>/', delete.delete_medication_payment, name='delete_medication_payment'),
         path('delete-diagnostic/test/<int:test_id>/', delete.delete_diagnostic_test, name='delete_diagnostic_test'),
         path('delete_medicine/<int:medicine_id>/', delete.delete_medicine, name='delete_medicine'),
-        path('disease-records/<int:disease_id>/delete/', delete.delete_disease_record, name='delete_disease_record'),        
+        path('disease-records/<int:disease_id>/delete/', delete.delete_disease_record, name='delete_disease_record'),
+                
         path('insurance-records/<int:insurance_id>/delete/', delete.delete_insurance, name='delete_insurance'),        
         path('pathodology/<int:pathodology_id>/delete/', delete.delete_pathodology, name='delete_pathodology'),
         path('company/<int:company_id>/delete/', delete.delete_company, name='delete_company'),
         path('delete_staff/<int:staff_id>/', delete.delete_staff, name='delete_staff'),
         path('delete-patient/<int:patient_id>/', delete.delete_patient, name='delete_patient'),
+        path('delete_service/', delete.delete_service, name='delete_service'),
         path('delete_procedure/', delete.delete_procedure, name='delete_procedure'),
         path('delete_inventory/<int:inventory_id>/', delete.delete_inventory, name='delete_inventory'),
         path('delete_referral/', delete.delete_referral, name='delete_referral'),

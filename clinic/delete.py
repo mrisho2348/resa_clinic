@@ -2,7 +2,7 @@
 
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render,get_object_or_404
-from .models import Company, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PatientDisease, Patients, Procedure, Referral, Sample, Staffs
+from .models import Company, Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Procedure, Referral, Sample, Service, Staffs
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -198,6 +198,51 @@ def delete_sample(request, sample_id):
     # Redirect to the medicine inventory page
     return redirect('sample_list') 
 
+@require_POST
+def pathology_diagnostic_test_delete(request, test_id):
+    # Get the PathologyDiagnosticTest object
+    pathology_diagnostic_test = get_object_or_404(PathologyDiagnosticTest, pk=test_id)
+
+    # Perform deletion
+    pathology_diagnostic_test.delete()
+
+    # Redirect to the PathologyDiagnosticTest  page
+    return redirect('pathology_diagnostic_test_list')
+ 
+@require_POST
+def delete_consultation(request, appointment_id):
+    # Get the Consultation object
+    consultation = get_object_or_404(Consultation, pk=appointment_id)
+
+    # Perform deletion
+    consultation.delete()
+
+    # Redirect to the Consultation  page
+    return redirect('appointment_list')
+ 
+@require_POST
+def delete_consultation_fee(request, fee_id):
+    # Get the ConsultationFee object
+    consultation_fee = get_object_or_404(ConsultationFee, pk=fee_id)
+
+    # Perform deletion
+    consultation_fee.delete()
+
+    # Redirect to the ConsultationFee  page
+    return redirect('consultation_fee_list') 
+
+@require_POST
+def delete_service(request):
+    # Get the Service object
+    service_id = request.POST.get('service_id')
+    service = get_object_or_404(Service, pk=service_id)
+
+    # Perform deletion
+    service.delete()
+
+    # Redirect to the Service  page
+    return redirect('manage_service') 
+
    
 @require_POST
 def delete_medication_payment(request, payment_id):
@@ -222,3 +267,6 @@ def delete_medication_payment(request, payment_id):
 
     except MedicationPayment.DoesNotExist:
         return HttpResponseBadRequest("MedicationPayment not found.")
+    
+    
+    

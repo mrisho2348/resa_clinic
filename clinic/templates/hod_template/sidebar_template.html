@@ -130,13 +130,21 @@
                           </a>
                       </li>
                       <li class="nav-item">
+                        {% url 'consultation_fee_list' as consultation_fee_list %}
+                          <a href="{% url "consultation_fee_list" %}" class="nav-link{% if request.path == consultation_fee_list %} active {% endif %}">
+                            <i class="nav-icon fas fa-money-bill-wave"></i>
+                              <p>Consultation Fees</p>
+                          </a>
+                      </li>
+                      <li class="nav-item">
                           <a href="{% url "add_request" %}" class="nav-link">
                               <i class="nav-icon fas fa-stethoscope"></i>
                               <p>request</p>
                           </a>
                       </li>
                       <li class="nav-item">
-                          <a href="{% url "manage_service" %}" class="nav-link">
+                        {% url 'manage_service' as manage_service %}
+                          <a href="{% url "manage_service" %}" class="nav-link{% if request.path == manage_service %} active {% endif %}">
                               <i class="nav-icon fas fa-medkit"></i>
                               <p>Services</p>
                           </a>

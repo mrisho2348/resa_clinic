@@ -27,7 +27,7 @@ from tablib import Dataset
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import OuterRef, Subquery
-from .models import DiagnosticTest, HealthIssue, MedicationPayment, PathologyDiagnosticTest, PatientDisease, Procedure, Patients, Referral, Sample
+from .models import ConsultationFee, DiagnosticTest, HealthIssue, MedicationPayment, PathologyDiagnosticTest, PatientDisease, Procedure, Patients, Referral, Sample, Service
 
 # Create your views here.
 def index(request):
@@ -148,7 +148,15 @@ def manage_patient(request):
 
 @login_required
 def manage_consultation(request):
-    return render(request,"hod_template/manage_consultation.html")
+    patients=Patients.objects.all() 
+    pathology_records=PathodologyRecord.objects.all() 
+    doctors=Staffs.objects.filter(role='doctor')
+    context = {
+        'patients':patients,
+        'pathology_records':pathology_records,
+        'doctors':doctors,
+    }
+    return render(request,"hod_template/manage_consultation.html",context)
 
 @login_required
 def add_consultation(request):
@@ -184,7 +192,11 @@ def resa_report(request):
 
 @login_required
 def manage_service(request):
-    return render(request,"hod_template/manage_service.html")
+    services=Service.objects.all()
+    context = {
+        'services':services
+    }
+    return render(request,"hod_template/manage_service.html",context)
 
 def manage_adjustment(request):
     return render(request,"hod_template/manage_adjustment.html")
@@ -797,7 +809,16 @@ def generate_billing(request, procedure_id):
 def appointment_list_view(request):
     appointments = Consultation.objects.all()
     unread_notification_count = Notification.objects.filter(is_read=False).count()
-    context = {'appointments': appointments, 'unread_notification_count': unread_notification_count}
+    patients=Patients.objects.all() 
+    pathology_records=PathodologyRecord.objects.all() 
+    doctors=Staffs.objects.filter(role='doctor')
+    context = {
+        'patients':patients,
+        'pathology_records':pathology_records,
+        'doctors':doctors,
+        'unread_notification_count':unread_notification_count,
+        'appointments':appointments,
+    }
     return render(request, 'hod_template/manage_appointment.html', context)
 
 def import_staff(request):
@@ -1331,3 +1352,111 @@ def pathology_diagnostic_test_save(request):
         # Handle non-POST requests if needed
         return HttpResponseBadRequest("Invalid request method.")
 
+
+
+@require_POST
+def save_consultation_data(request):
+    try:
+        # Retrieve data from the form
+        doctor_id = request.POST.get('doctor')
+        patient_id = request.POST.get('patient')
+        appointment_date = request.POST.get('appointmentDate')
+        start_time = request.POST.get('startTime')
+        end_time = request.POST.get('endTime')
+        description = request.POST.get('description')        
+        pathodology_record_id = request.POST.get('pathodologyRecord')
+
+        # Convert date and time strings to datetime objects
+        # appointment_datetime = datetime.combine(datetime.strptime(appointment_date, '%Y-%m-%d').date(), datetime.strptime(start_time, '%H:%M').time())
+        # end_datetime = datetime.combine(datetime.strptime(appointment_date, '%Y-%m-%d').date(), datetime.strptime(end_time, '%H:%M').time())
+
+        # Create or update Consultation object
+        consultation, created = Consultation.objects.update_or_create(
+            doctor=Staffs.objects.get(id=doctor_id),
+            patient=Patients.objects.get(id=patient_id),
+            appointment_date=appointment_date,
+            start_time=start_time,
+            end_time=end_time,
+            description=description,
+            pathodology_record= PathodologyRecord.objects.get(id=pathodology_record_id),
+            
+        )
+
+        return redirect('appointment_list')
+    except Exception as e:
+        return HttpResponseBadRequest(f"Error: {str(e)}")
+
+def consultation_fee_list(request):
+    # Get distinct patients who have consultations
+    patients = Patients.objects.filter(consultation__isnull=False).distinct()
+
+    # Get distinct doctors who have consultations
+    doctors = Staffs.objects.filter(consultation__isnull=False).distinct()
+
+    # Get all consultation fees
+    consultation_fees = ConsultationFee.objects.all()
+
+    # Get all consultations
+    consultations = Consultation.objects.all()
+
+    return render(request, 'hod_template/manage_consultation_fee_list.html', {
+        'consultation_fees': consultation_fees,
+        'patients': patients,
+        'doctors': doctors,
+        'consultations': consultations,
+    })
+
+@require_POST
+def save_consultation_fee(request):
+    try:
+        # Extract form data from the request
+        doctor_id = request.POST.get('doctor')
+        patient_id = request.POST.get('patient')
+        fee_amount = request.POST.get('feeAmount')
+        consultation_id = request.POST.get('consultation')
+
+        # Create ConsultationFee instance
+        consultation_fee = ConsultationFee.objects.create(
+            doctor=Staffs.objects.get(id=doctor_id),
+            patient=Patients.objects.get(id=patient_id),
+            fee_amount=fee_amount,
+            consultation=Consultation.objects.get(id=consultation_id),
+        )
+
+        # Return a JsonResponse to indicate success
+        return redirect('consultation_fee_list') 
+    except Exception as e:
+        # Return a JsonResponse with an error message
+        return HttpResponseBadRequest(f"Error: {str(e)}")  
+    
+    
+def save_service_data(request):
+    if request.method == 'POST':
+        service_id = request.POST.get('service_id')
+        department = request.POST.get('department')
+        type_service = request.POST.get('typeService')
+        name = request.POST.get('serviceName')
+        description = request.POST.get('description')
+        cost = request.POST.get('cost')
+
+        try:
+            if service_id:
+                # Editing existing service
+                service = Service.objects.get(pk=service_id)
+            else:
+                # Creating a new service
+                service = Service()
+
+            service.department = department
+            service.type_service = type_service
+            service.name = name
+            service.description = description
+            service.cost = cost
+            service.save()
+
+            return redirect('manage_service')
+        except Exception as e:
+            return HttpResponseBadRequest(f"Error: {str(e)}") 
+
+    # If the request is not a POST request, handle it accordingly
+    return HttpResponseBadRequest("Invalid request method.")   

@@ -2,7 +2,7 @@ from datetime import datetime
 import logging
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Company, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, PatientDisease, Patients, Medicine, Procedure, Referral, Sample
+from .models import Company, Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Medicine, Procedure, Referral, Sample, Staffs
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db import transaction
@@ -474,3 +474,96 @@ def edit_patient_disease_save(request, patient_disease_id):
             return HttpResponseBadRequest(f"Error: {str(e)}") 
 
     return HttpResponseBadRequest("Invalid request method")  
+
+
+def pathology_diagnostic_test_edit_save(request, test_id):
+    if request.method == 'POST':
+        try:
+            pathology_diagnostic_test = get_object_or_404(PathologyDiagnosticTest, pk=test_id)
+
+            # Retrieve data from the form
+            pathology_record_id = request.POST.get('pathologyRecord')
+            diagnostic_test_id = request.POST.get('diagnosticTest')
+            test_result = request.POST.get('testResult')
+            testing_date = request.POST.get('testingDate')
+            conducted_by = request.POST.get('conductedBy')
+
+            # Update PathologyDiagnosticTest object
+            pathology_diagnostic_test.pathology_record = PathodologyRecord.objects.get(id=pathology_record_id)
+            pathology_diagnostic_test.diagnostic_test =  DiagnosticTest.objects.get(id=diagnostic_test_id)
+            pathology_diagnostic_test.test_result = test_result
+            pathology_diagnostic_test.testing_date = testing_date
+            pathology_diagnostic_test.conducted_by = conducted_by
+
+            # Save the changes
+            pathology_diagnostic_test.save()
+
+            return redirect("pathology_diagnostic_test_list")
+        except Exception as e:
+            return HttpResponseBadRequest(f"Error: {str(e)}") 
+
+    return HttpResponseBadRequest("Invalid request method") 
+
+
+def update_consultation_data(request, appointment_id):
+    # Get the Consultation instance
+    if request.method == 'POST':
+        try:
+            # Extract form data from the request
+            doctor_id = request.POST.get('doctor')
+            patient_id = request.POST.get('patient')
+            appointment_date = request.POST.get('appointmentDate')
+            start_time = request.POST.get('startTime')
+            end_time = request.POST.get('endTime')
+            description = request.POST.get('description')
+            pathodology_record_id = request.POST.get('pathodologyRecord')
+            consultation = get_object_or_404(Consultation, id=appointment_id)
+            # Update Consultation instance with new data
+            consultation.doctor = Staffs.objects.get(id=doctor_id)
+            consultation.patient = Patients.objects.get(id=patient_id)
+            consultation.appointment_date = appointment_date
+            consultation.start_time = start_time
+            consultation.end_time = end_time
+            consultation.description = description
+            consultation.pathodology_record = PathodologyRecord.objects.get(id=pathodology_record_id)
+
+            # Save the updated Consultation instance
+            consultation.save()
+
+            # Return a JsonResponse to indicate success
+            return redirect("appointment_list")
+        except Exception as e:
+            # Return a JsonResponse with an error message
+            return HttpResponseBadRequest(f"Error: {str(e)}") 
+
+    # If the request is not a POST request, you might want to handle it accordingly (e.g., render a form)
+    return HttpResponseBadRequest("Invalid request method")
+
+
+require_POST
+@csrf_exempt  # For simplicity, you can use CSRF exemption. In a real-world scenario, handle CSRF properly.
+def update_consultation_fee(request):
+    try:
+        with transaction.atomic():
+            consultation_fee_id = request.POST.get('consultation_fee_id')
+            fee = get_object_or_404(ConsultationFee, id=consultation_fee_id)
+
+            # Extract form data from the request
+            doctor_id = request.POST.get('doctor')
+            patient_id = request.POST.get('patient')
+            fee_amount = request.POST.get('feeAmount')
+            consultation_id = request.POST.get('consultation')
+
+            # Update ConsultationFee instance with new data
+            fee.doctor=Staffs.objects.get(id=doctor_id)
+            fee.patient = Patients.objects.get(id=patient_id)
+            fee.fee_amount = fee_amount
+            fee.consultation= Consultation.objects.get(id=consultation_id)
+
+            # Save the updated ConsultationFee instance
+            fee.save()
+
+        return redirect("consultation_fee_list")
+    except Exception as e:
+        # Return a JsonResponse with an error message
+        return HttpResponseBadRequest(f"Error: {str(e)}") 

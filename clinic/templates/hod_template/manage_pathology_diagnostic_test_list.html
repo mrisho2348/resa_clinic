@@ -45,17 +45,102 @@ Pathology Diagnostic Tests
                     <td>{{ test.testing_date }}</td>
                     <td>{{ test.conducted_by }}</td>
                     <td>                      
-                    <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#editMedicationPaymentsModal{{ payment.id }}"  data-toggle="tooltip" title="Edit">
+                    <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#editPathologyDiagnosticTestModal{{ test.id }}"  data-toggle="tooltip" title="Edit">
                         <i class="fa fa-edit text-white"></i>
                     </button>
-                      <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteMedicationPaymentsModal{{ payment.id }}"  data-toggle="tooltip" title="Delete">
+                      <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deletePathologyDiagnosticTestModal{{ test.id }}"  data-toggle="tooltip" title="Delete">
                         <i class="fas fa-trash"></i>
                     </button>                        
                     </td>
 
+                    <!-- Bootstrap Modal for Deleting PathologyDiagnosticTest -->
+<div class="modal fade" id="deletePathologyDiagnosticTestModal{{ test.id }}" tabindex="-1" role="dialog" aria-labelledby="deletePathologyDiagnosticTestModal{{ test.id }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deletePathologyDiagnosticTestModal{{ test.id }}">Delete Pathology Diagnostic Test </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this Pathology Diagnostic Test for {{test.pathology_record.name}}?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <form id="deletePathologyDiagnosticTestForm" method="POST" action="{% url 'pathology_diagnostic_test_delete' test.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 
+                    <div class="modal fade" id="editPathologyDiagnosticTestModal{{ test.id }}" tabindex="-1" role="dialog" aria-labelledby="editPathologyDiagnosticTestModal{{ test.id }}" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editPathologyDiagnosticTestModal{{ test.id }}">Edit Pathology Diagnostic Test</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <!-- Form for editing PathologyDiagnosticTest -->
+                                    <form id="editPathologyDiagnosticTestForm" method="POST" action="{% url 'pathology_diagnostic_test_edit_save' test.id %}">
+                                        {% csrf_token %}
+                                        
+                                        <!-- Pathology Record -->
+                                        <div class="form-group">
+                                            <label for="editPathologyRecord">Pathology Record:</label>
+                                            <select class="form-control select2bs4" style="width: 100%;" id="editPathologyRecord" name="pathologyRecord">
+                                                <!-- Populate pathology records dynamically using Django template tags -->
+                                                {% for pathology_record in pathology_records %}
+                                                    <option value="{{ pathology_record.id }}" {% if pathology_record.id == test.pathology_record.id %} selected {% endif %}>{{ pathology_record.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Diagnostic Test -->
+                                        <div class="form-group">
+                                            <label for="editDiagnosticTest">Diagnostic Test:</label>
+                                            <select class="form-control select2bs4" style="width: 100%;" id="editDiagnosticTest" name="diagnosticTest">
+                                                <!-- Populate diagnostic tests dynamically using Django template tags -->
+                                                {% for diagnostic_test in diagnostic_tests %}
+                                                    <option value="{{ diagnostic_test.id }}" {% if diagnostic_test.id == test.diagnostic_test.id %} selected {% endif %}>{{ diagnostic_test.test_type }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                    
+                                        <!-- Test Result -->
+                                        <div class="form-group">
+                                            <label for="editTestResult">Test Result:</label>
+                                            <textarea class="form-control" id="editTestResult" name="testResult" rows="3" value="{{ test.test_result }}">Predefined Test Result</textarea>
+                                        </div>
+                    
+                                        <!-- Testing Date -->
+                                        <div class="form-group">
+                                            <label for="editTestingDate">Testing Date:</label>
+                                            <input type="date" class="form-control" id="editTestingDate" name="testingDate"  value="{{ test.testing_date|date:'Y-m-d' }}">
+                                        </div>
+                    
+                                        <!-- Conducted By -->
+                                        <div class="form-group">
+                                            <label for="editConductedBy">Conducted By:</label>
+                                            <input type="text" class="form-control" id="editConductedBy" name="conductedBy"  value="{{ test.conducted_by }}">
+                                        </div>
+                    
+                                        <!-- Save Button -->
+                                        <button type="submit" class="btn btn-primary">Save</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
 
 
 

@@ -107,12 +107,14 @@ class Service(models.Model):
     type_service = models.CharField(max_length=200)
     name = models.CharField(max_length=255)
     description = models.TextField()
+    cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)  # New field for cost
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
 
     def __str__(self):
         return self.name
+
         
 class PathodologyRecord(models.Model):
     name = models.CharField(max_length=255)
@@ -228,9 +230,11 @@ class Procedure(models.Model):
 class ConsultationFee(models.Model):
     doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE)
     patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
-    fee_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    consultation_date = models.DateField()
-
+    fee_amount = models.DecimalField(max_digits=10, decimal_places=2)    
+    consultation = models.ForeignKey('Consultation', on_delete=models.SET_NULL, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
     def __str__(self):
         return f"Consultation fee of {self.fee_amount} for {self.doctor.name} by {self.patient.fullname} on {self.consultation_date}"
     
@@ -311,15 +315,14 @@ class Consultation(models.Model):
         (6, 'Confirmed'),
         (7, 'Arrived'),
     ]
-    status = models.IntegerField(choices=STATUS_CHOICES, default=0)
-    cost = models.ForeignKey(ConsultationFee, on_delete=models.SET_NULL, blank=True, null=True)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=0)    
     pathodology_record = models.ForeignKey(PathodologyRecord, on_delete=models.SET_NULL, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()    
     
     def __str__(self):
-        return f"Appointment with {self.doctor.name} for {self.patient.name} on {self.appointment_date} from {self.start_time} to {self.end_time}"
+        return f"Appointment with {self.doctor.admin.first_name} {self.doctor.middle_name} {self.doctor.admin.last_name} for {self.patient.fullname} on {self.appointment_date} from {self.start_time} to {self.end_time}"
     
     def save(self, *args, **kwargs):
         # Set a default pathodology record if none is provided

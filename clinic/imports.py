@@ -3,9 +3,9 @@ import logging
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.db import IntegrityError
-from clinic.models import Company, DiseaseRecode, InsuranceCompany, Medicine, PathodologyRecord, Patients, Procedure, Referral
-from .resources import CompanyResource, DiseaseRecodeResource, InsuranceCompanyResource, MedicineResource, PathologyRecordResource, PatientsResource, ProcedureResource, ReferralResource
-from .forms import ImportCompanyForm, ImportDiseaseForm, ImportInsuranceCompanyForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientsForm, ImportProcedureForm, ImportReferralForm
+from clinic.models import Company, DiseaseRecode, InsuranceCompany, Medicine, PathodologyRecord, Patients, Procedure, Referral, Service
+from .resources import CompanyResource, DiseaseRecodeResource, InsuranceCompanyResource, MedicineResource, PathologyRecordResource, PatientsResource, ProcedureResource, ReferralResource, ServiceResource
+from .forms import ImportCompanyForm, ImportDiseaseForm, ImportInsuranceCompanyForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientsForm, ImportProcedureForm, ImportReferralForm, ImportServiceForm
 from tablib import Dataset
 logger = logging.getLogger(__name__)
 def import_disease_recode(request):
@@ -173,6 +173,43 @@ def import_patient_records(request):
         form = ImportPatientsForm()
 
     return render(request, 'hod_template/import_patients.html', {'form': form})
+
+
+def import_service_records(request):
+    if request.method == 'POST':
+        form = ImportServiceForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = ServiceResource()
+                new_records = request.FILES['service_records_file']
+
+                # Use tablib to load the imported data
+                dataset = resource.export()
+                imported_data = dataset.load(new_records.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+                
+                for data in imported_data:
+                    try:
+                        service_record = Service.objects.create(
+                            department=data[1],
+                            type_service=data[0],                     
+                            name=data[2],                     
+                            description=data[3],                     
+                            cost=data[4],                     
+                                              
+                        )
+                    except IntegrityError:
+                        messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
+                        continue
+
+                return redirect('manage_service') 
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportServiceForm()
+
+    return render(request, 'hod_template/import_service.html', {'form': form})
+
 
 def import_referral_records(request):
     if request.method == 'POST':
