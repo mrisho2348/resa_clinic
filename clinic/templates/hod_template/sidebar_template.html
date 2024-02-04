@@ -97,6 +97,21 @@
                             <p>Sample Management</p>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        {% url 'patient_diseases_view' as patient_diseases_view %}
+                        <a href="{{ patient_diseases_view }}" class="nav-link{% if request.path == patient_diseases_view %} active {% endif %}">
+                            <i class="nav-icon fas fa-heartbeat"></i> <!-- Replace 'fas fa-heartbeat' with the appropriate FontAwesome icon class -->
+                            <p>Patient Health Records</p> <!-- Replace with an attractive name for the navlink -->
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        {% url 'pathology_diagnostic_test_list' as pathology_diagnostic_test_list %}
+                        <a href="{{ pathology_diagnostic_test_list }}" class="nav-link{% if request.path == pathology_diagnostic_test_list %} active {% endif %}">
+                            <i class="nav-icon fas fa-notes-medical"></i>
+                            <p>Pathology Diagnostic Tests</p>
+                        </a>
+                    </li>
                     
                     
                       <li class="nav-item">

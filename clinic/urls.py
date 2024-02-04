@@ -7,6 +7,7 @@ urlpatterns = [
         path('',views.index, name="home"),
         path('resa/dashboard',views.dashboard, name="dashboard"),
         path('resa/ImportExcel',views.import_staff, name="import_staff"),      
+        path('pathology_diagnostic_test_save/', views.pathology_diagnostic_test_save, name='pathology_diagnostic_test_save'),
         path('add_disease/', views.add_disease, name='add_disease'),
         path('add_insurance_company/', views.add_insurance_company, name='add_insurance_company'),
         path('add_company/', views.add_company, name='add_company'),
@@ -31,6 +32,7 @@ urlpatterns = [
         path('resa/update-staff-status',views.update_staff_status, name="update_staff_status"),
         path('add_inventory/',views.add_inventory, name="add_inventory"),
         path('save_sample/',views.save_sample, name="save_sample"),
+        path('save_patient_disease/',views.save_patient_disease, name="save_patient_disease"),
         path('save_staff_view/',views.save_staff_view, name="save_staff_view"),
         
         # reports urls 
@@ -51,6 +53,8 @@ urlpatterns = [
        
         
         # manage urls 
+        path('resa/patient-diseases-view/', views.patient_diseases_view, name='patient_diseases_view'),
+        path('pathology_diagnostic_test_list/', views.pathology_diagnostic_test_list, name='pathology_diagnostic_test_list'),
         path('resa/medication-payments-view/', views.medication_payments_view, name='medication_payments_view'),
         path('patient/medicationpayment/history/<str:mrn>/', views.patient_medicationpayment_history_view, name='patient_medicationpayment_history_view_mrn'),
         path('resa/manage-referral/', views.manage_referral, name='manage_referral'),
@@ -91,6 +95,7 @@ urlpatterns = [
         path('import-referral-records/', imports.import_referral_records, name='import_referral_records'),
         
         # edit urls 
+        path('edit-patient-disease-save/<int:patient_disease_id>/edit/', editView.edit_patient_disease_save, name='edit_patient_disease_save'),
         path('edit-sample-test/<int:sample_id>/edit/', editView.edit_sample, name='edit_sample'),
         path('diagnostic-test/<int:test_id>/edit/', editView.edit_diagnostic_test, name='edit_diagnostic_test'),
         path('disease-records/<int:disease_id>/edit/', editView.edit_disease_record, name='edit_disease_record'),
@@ -108,6 +113,7 @@ urlpatterns = [
         
         
         # delete urls 
+        path('delete-patient-disease/<int:patient_disease_id>/', delete.delete_patient_disease, name='delete_patient_disease'),
         path('delete-medication-payment/<int:payment_id>/', delete.delete_medication_payment, name='delete_medication_payment'),
         path('delete-diagnostic/test/<int:test_id>/', delete.delete_diagnostic_test, name='delete_diagnostic_test'),
         path('delete_medicine/<int:medicine_id>/', delete.delete_medicine, name='delete_medicine'),

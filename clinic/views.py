@@ -27,7 +27,7 @@ from tablib import Dataset
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import OuterRef, Subquery
-from .models import DiagnosticTest, HealthIssue, MedicationPayment, Procedure, Patients, Referral, Sample
+from .models import DiagnosticTest, HealthIssue, MedicationPayment, PathologyDiagnosticTest, PatientDisease, Procedure, Patients, Referral, Sample
 
 # Create your views here.
 def index(request):
@@ -235,7 +235,11 @@ def product_summary(request):
 @login_required
 def manage_pathodology(request):
     pathodology_records=PathodologyRecord.objects.all() 
-    return render(request,"hod_template/manage_pathodology.html",{"pathodology_records":pathodology_records})
+    disease_records=DiseaseRecode.objects.all() 
+    return render(request,"hod_template/manage_pathodology.html",{
+        "pathodology_records":pathodology_records,
+        "disease_records":disease_records,
+        })
 
 
 logger = logging.getLogger(__name__)
@@ -900,24 +904,30 @@ def add_company(request):
         return JsonResponse({'success': False, 'error': str(e)})
  
 @csrf_exempt
-@login_required      
+@login_required
 def add_pathodology_record(request):
     try:
         if request.method == 'POST':
             name = request.POST.get('Name')
             description = request.POST.get('Description')
+            related_diseases_ids = request.POST.getlist('RelatedDiseases')
 
             # Save data to the model
-            PathodologyRecord.objects.create(
+            pathodology_record = PathodologyRecord.objects.create(
                 name=name,
                 description=description
             )
+
+            # Add related diseases
+            for disease_id in related_diseases_ids:
+                disease = DiseaseRecode.objects.get(pk=disease_id)
+                pathodology_record.related_diseases.add(disease)
 
             return JsonResponse({'success': True})
         else:
             return JsonResponse({'success': False, 'error': 'Invalid request method'})
     except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})    
+        return JsonResponse({'success': False, 'error': str(e)})
     
 
 @csrf_exempt
@@ -1225,4 +1235,99 @@ def save_sample(request):
             return HttpResponseBadRequest(f"Error: {str(e)}")
 
     return HttpResponseBadRequest("Invalid request method")
+
+
+def patient_diseases_view(request):
+    # Retrieve all diagnostic tests from the database
+    patient_diseases = PatientDisease.objects.all()
+
+    # Retrieve patients, diseases
+    patients = Patients.objects.all()
+    diseases = DiseaseRecode.objects.all()
+
+
+    context = {
+        'patient_diseases': patient_diseases,
+        'patients': patients,
+        'disease_records': diseases,
+      
+    }
+
+    return render(request, 'hod_template/manage_patient_disease_list.html', context)
+
+def save_patient_disease(request):
+    if request.method == 'POST':
+        try:
+            # Extract data from the POST request
+            patient_id = request.POST.get('patient_id')
+            disease_record_id = request.POST.get('diseaseRecord')
+            diagnosis_date = request.POST.get('diagnosisDate')
+            severity = request.POST.get('severity')
+            treatment_plan = request.POST.get('treatmentPlan')
+
+            # Validate data (add more validation as needed)
+            if not patient_id or not disease_record_id or not diagnosis_date:
+                return JsonResponse({'status': 'error', 'message': 'Incomplete data received'}, status=400)
+
+            # Convert data types if needed (e.g., converting string to datetime)
+            # ...
+
+            # Create a PatientDisease instance and save to the database
+            patient_disease = PatientDisease.objects.create(
+                patient_id=patient_id,
+                disease_record_id=disease_record_id,
+                diagnosis_date=diagnosis_date,
+                severity=severity,
+                treatment_plan=treatment_plan,
+            )
+
+            # You can include additional logic here if needed
+
+            return redirect('patient_diseases_view') 
+        except Exception as e:
+            print(f"ERROR: {str(e)}")
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    # If the request method is not POST, redirect to an appropriate page
+    return HttpResponseBadRequest("Invalid request method") 
+
+def pathology_diagnostic_test_list(request):
+    Pathology_diagnostic_tests = PathologyDiagnosticTest.objects.all()
+    pathology_records=PathodologyRecord.objects.all() 
+    diagnostic_tests = DiagnosticTest.objects.all()
+    return render(request, 'hod_template/manage_pathology_diagnostic_test_list.html', {
+        'Pathology_diagnostic_tests': Pathology_diagnostic_tests,
+        'pathology_records': pathology_records,
+        'diagnostic_tests': diagnostic_tests,
+        }) 
+
+def pathology_diagnostic_test_save(request):
+    if request.method == 'POST':
+        try:
+            # Retrieve data from the form
+            pathology_record_id = request.POST.get('pathologyRecord')
+            diagnostic_test_id = request.POST.get('diagnosticTest')
+            test_result = request.POST.get('testResult')
+            testing_date = request.POST.get('testingDate')
+            conducted_by = request.POST.get('conductedBy')
+
+            # Create PathologyDiagnosticTest instance
+            pathology_diagnostic_test = PathologyDiagnosticTest.objects.create(
+                pathology_record_id=pathology_record_id,
+                diagnostic_test_id=diagnostic_test_id,
+                test_result=test_result,
+                testing_date=testing_date,
+                conducted_by=conducted_by
+            )
+
+            # Optionally, you can perform additional actions or redirect to another page
+            return redirect('pathology_diagnostic_test_list') 
+
+        except Exception as e:
+            # Handle exceptions (e.g., invalid data, database errors)
+            return HttpResponseBadRequest(f"Error: {str(e)}")
+
+    else:
+        # Handle non-POST requests if needed
+        return HttpResponseBadRequest("Invalid request method.")
 

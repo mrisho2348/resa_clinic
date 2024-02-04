@@ -2,7 +2,7 @@ from datetime import datetime
 import logging
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Company, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, Patients, Medicine, Procedure, Referral, Sample
+from .models import Company, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, PatientDisease, Patients, Medicine, Procedure, Referral, Sample
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db import transaction
@@ -251,16 +251,26 @@ def edit_company(request, company_id):
 
 def edit_pathodology(request, pathodology_id):
     pathodology = get_object_or_404(PathodologyRecord, pk=pathodology_id)
+    disease_records=DiseaseRecode.objects.all() 
 
     if request.method == 'POST':
         try:
             # Retrieve data from the form
             name = request.POST.get('Name')
-            description = request.POST.get('description')
+            description = request.POST.get('Description')
+            related_diseases = request.POST.getlist('RelatedDiseases')
 
             # Update the PathodologyRecord object
             pathodology.name = name
             pathodology.description = description
+
+            # Assuming related_diseases is a comma-separated list of disease IDs
+            # Convert the string to a list of integers
+            for disease_id in related_diseases:
+                disease = DiseaseRecode.objects.get(pk=disease_id)
+                pathodology.related_diseases.add(disease)
+
+          
 
             # Save the changes
             pathodology.save()
@@ -269,9 +279,13 @@ def edit_pathodology(request, pathodology_id):
             return redirect('manage_pathodology')  # Replace 'your_redirect_url' with the appropriate URL name
 
         except Exception as e:
+            print(f"ERROR: {str(e)}")
             messages.error(request, f'An error occurred: {e}')
 
-    return render(request, 'update/edit_pathodology.html', {'pathodology': pathodology})
+    return render(request, 'update/edit_pathodology.html', {
+        'pathodology': pathodology,
+        'all_diseases': disease_records,
+        })
 
 
 @require_POST
@@ -426,6 +440,34 @@ def edit_sample(request, sample_id):
 
             # Redirect to a success page or another appropriate URL
             return redirect('sample_list')  # Adjust the URL as needed
+
+        except Exception as e:
+            print(f"ERROR: {str(e)}")
+            return HttpResponseBadRequest(f"Error: {str(e)}") 
+
+    return HttpResponseBadRequest("Invalid request method")  
+
+def edit_patient_disease_save(request, patient_disease_id): 
+
+    if request.method == 'POST':
+        try:
+            # Retrieve form data from POST request
+            patient_id = request.POST.get('patient_id')
+            disease_record_id = request.POST.get('diseaseRecord')
+            diagnosis_date = request.POST.get('diagnosisDate')
+            severity = request.POST.get('severity')
+            treatment_plan = request.POST.get('treatmentPlan')
+            patient_disease = get_object_or_404(PatientDisease, id=patient_disease_id)
+            patient_disease.patient = Patients.objects.get(id=patient_id)
+            patient_disease.disease_record = DiseaseRecode.objects.get(id=disease_record_id)
+            patient_disease.diagnosis_date = diagnosis_date
+            patient_disease.severity = severity
+            patient_disease.treatment_plan = treatment_plan
+
+            patient_disease.save()
+
+            # Redirect to a success page or another appropriate URL
+            return redirect('patient_diseases_view')  # Adjust the URL as needed
 
         except Exception as e:
             print(f"ERROR: {str(e)}")

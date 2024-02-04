@@ -117,7 +117,7 @@ class Service(models.Model):
 class PathodologyRecord(models.Model):
     name = models.CharField(max_length=255)
     related_diseases = models.ManyToManyField('DiseaseRecode', blank=True)
-    description = models.TextField()
+    description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
@@ -474,6 +474,17 @@ class MedicineInventory(models.Model):
                 purchase_date=purchase_date
             )
     
+# Now, the additional model
+class PathologyDiagnosticTest(models.Model):
+    pathology_record = models.ForeignKey(PathodologyRecord, on_delete=models.CASCADE, related_name='diagnostic_tests')
+    diagnostic_test = models.ForeignKey(DiagnosticTest, on_delete=models.CASCADE)
+    
+    # Additional fields
+    test_result = models.TextField(blank=True, null=True)
+    testing_date = models.DateField(blank=True, null=True)
+    conducted_by = models.CharField(max_length=255, blank=True, null=True)
+    def __str__(self):
+        return f"{self.pathology_record.name} - {self.diagnostic_test.test_type}"    
 class MedicationPayment(models.Model):
     patient = models.ForeignKey(Patients, on_delete=models.CASCADE, null=True, blank=True)
     non_registered_patient_name = models.CharField(max_length=255, null=True, blank=True)
