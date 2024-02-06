@@ -3,9 +3,9 @@ import logging
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.db import IntegrityError
-from clinic.models import Company, DiseaseRecode, InsuranceCompany, Medicine, PathodologyRecord, Patients, Procedure, Referral, Service
-from .resources import CompanyResource, DiseaseRecodeResource, InsuranceCompanyResource, MedicineResource, PathologyRecordResource, PatientsResource, ProcedureResource, ReferralResource, ServiceResource
-from .forms import ImportCompanyForm, ImportDiseaseForm, ImportInsuranceCompanyForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientsForm, ImportProcedureForm, ImportReferralForm, ImportServiceForm
+from clinic.models import Category, Company, DiseaseRecode, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, Patients, Procedure, Referral, Service, Supplier
+from .resources import CategoryResource, CompanyResource, DiseaseRecodeResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, PathologyRecordResource, PatientsResource, ProcedureResource, ReferralResource, ServiceResource, SupplierResource
+from .forms import ImportCategoryForm, ImportCompanyForm, ImportDiseaseForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientsForm, ImportProcedureForm, ImportReferralForm, ImportServiceForm, ImportSupplierForm
 from tablib import Dataset
 logger = logging.getLogger(__name__)
 def import_disease_recode(request):
@@ -71,6 +71,66 @@ def import_insurance_companies(request):
 
     return render(request, 'hod_template/import_insurance_companies.html', {'form': form})
 
+def import_category(request):
+    if request.method == 'POST':
+        form = ImportCategoryForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = CategoryResource()
+                new_category = request.FILES['category_records_file']
+                
+                # Use tablib to load the imported data
+                dataset = Dataset()
+                imported_data = dataset.load(new_category.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+
+                for data in imported_data:
+                     category_recode = Category(
+                        name=data[0],
+                      
+                    )
+                     category_recode.save()
+
+                return redirect('category_list') 
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportCategoryForm()
+
+    return render(request, 'hod_template/import_category.html', {'form': form})
+
+
+def import_supplier(request):
+    if request.method == 'POST':
+        form = ImportSupplierForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = SupplierResource()
+                new_supplier = request.FILES['supplier_records_file']
+                
+                # Use tablib to load the imported data
+                dataset = Dataset()
+                imported_data = dataset.load(new_supplier.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+
+                for data in imported_data:
+                     supplier_record = Supplier(
+                        name=data[0],
+                        address=data[1],
+                        contact_information=data[2],
+                        email=data[3],
+                      
+                    )
+                     supplier_record.save()
+
+                return redirect('supplier_list') 
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportSupplierForm()
+
+    return render(request, 'hod_template/import_supplier.html', {'form': form})
+
 
 def import_companies(request):
     if request.method == 'POST':
@@ -134,6 +194,47 @@ def import_pathology_records(request):
         form = ImportPathologyRecordForm()
 
     return render(request, 'hod_template/import_pathology_records.html', {'form': form})
+
+
+def import_ImportInventoryItemForm_records(request):
+    if request.method == 'POST':
+        form = ImportInventoryItemForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = InventoryItemResource()
+                new_records = request.FILES['InventoryItem_records_file']
+                
+                # Use tablib to load the imported data
+                dataset = resource.export()
+                imported_data = dataset.load(new_records.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+
+                for data in imported_data:
+                     pathodology_recode = InventoryItem(
+                        name=data[0],
+                        quantity=data[1],                     
+                        category=Category.objects.get(id=data[2]),                    
+                        description=data[3],                     
+                        supplier=Supplier.objects.get(id=data[4]),                     
+                        purchase_date=data[5],                     
+                        purchase_price=data[6],                     
+                        expiry_date=data[7],                     
+                        location_in_storage=data[8],                     
+                        min_stock_level=data[9],                     
+                        condition=data[10],                     
+                        remain_quantity=data[1],                     
+                      
+                        # Add other fields accordingly
+                    )
+                     pathodology_recode.save()
+
+                return redirect('inventory_list') 
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportInventoryItemForm()
+
+    return render(request, 'hod_template/import_InventoryItem.html', {'form': form})
 
 def import_patient_records(request):
     if request.method == 'POST':

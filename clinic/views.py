@@ -27,7 +27,7 @@ from tablib import Dataset
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import OuterRef, Subquery
-from .models import ConsultationFee, DiagnosticTest, HealthIssue, MedicationPayment, PathologyDiagnosticTest, PatientDisease, Procedure, Patients, Referral, Sample, Service
+from .models import Category, ConsultationFee, DiagnosticTest, HealthIssue, InventoryItem, MedicationPayment, PathologyDiagnosticTest, PatientDisease, Procedure, Patients, Referral, Sample, Service, Supplier, UsageHistory
 
 # Create your views here.
 def index(request):
@@ -1460,3 +1460,172 @@ def save_service_data(request):
 
     # If the request is not a POST request, handle it accordingly
     return HttpResponseBadRequest("Invalid request method.")   
+
+def category_list(request):
+    categories = Category.objects.all()
+    return render(request, 'hod_template/manage_category_list.html', {'categories': categories})
+
+
+@require_POST
+def add_category(request):
+    try:
+        category_id = request.POST.get('category_id')
+        name = request.POST.get('name')
+        # Add more fields as needed
+
+        if category_id:
+            # Editing an existing category
+            category = Category.objects.get(pk=category_id)
+            category.name = name
+         
+            category.save()
+        else:
+            # Adding a new category
+            category = Category(name=name)
+            category.save()
+
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+    
+def supplier_list(request):
+    suppliers = Supplier.objects.all()
+    return render(request, 'hod_template/manage_supplier_list.html', {'suppliers': suppliers})
+ 
+def inventory_list(request):
+    inventory_items  = InventoryItem.objects.all()    
+    suppliers = Supplier.objects.all()
+    categories = Category.objects.all()
+    return render(request, 'hod_template/manage_inventory_list.html', {
+        'inventory_items': inventory_items,
+        'suppliers': suppliers,
+        'categories': categories 
+        }) 
+
+
+@require_POST
+def add_supplier(request):
+    try:
+        supplier_id = request.POST.get('supplier_id')
+        name = request.POST.get('name')
+        address = request.POST.get('address', '')
+        contact_information = request.POST.get('contact_information', '')
+        email = request.POST.get('email', '')
+
+        if supplier_id:
+            # Editing an existing supplier
+            supplier = Supplier.objects.get(pk=supplier_id)
+            supplier.name = name
+            supplier.address = address
+            supplier.contact_information = contact_information
+            supplier.email = email         
+            supplier.save()
+        else:
+            # Adding a new supplier
+            supplier = Supplier(
+                name=name,
+                address=address,
+                contact_information=contact_information,
+                email=email,                
+            )
+            supplier.save()
+
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}) 
+    
+
+@require_POST
+def add_inventory_item(request):
+    try:
+        inventory_id = request.POST.get('inventory_id')
+        name = request.POST.get('name')
+        supplier = request.POST.get('supplier')
+        category = request.POST.get('category')
+        quantity = request.POST.get('quantity')
+        description = request.POST.get('description')
+        purchase_date = request.POST.get('purchase_date')
+        purchase_price = request.POST.get('purchase_price')
+        expiry_date = request.POST.get('expiry_date')
+        min_stock_level = request.POST.get('min_stock_level')
+        condition = request.POST.get('condition')
+        location_in_storage = request.POST.get('location_in_storage')
+        # Add more fields as needed
+
+        if inventory_id:
+            # Editing existing inventory item
+            inventory_item = InventoryItem.objects.get(pk=inventory_id)
+            inventory_item.name = name
+            inventory_item.quantity = quantity
+            inventory_item.remain_quantity = quantity
+            inventory_item.category =  Category.objects.get(id=category)
+            inventory_item.description = description
+            inventory_item.supplier =  Supplier.objects.get(id=supplier)
+            inventory_item.purchase_date = purchase_date
+            inventory_item.purchase_price = purchase_price
+            inventory_item.location_in_storage = location_in_storage
+            inventory_item.min_stock_level = min_stock_level
+            inventory_item.expiry_date = expiry_date
+            inventory_item.condition = condition
+            inventory_item.save()
+        else:
+            # Adding new inventory item
+            inventory_item = InventoryItem(
+                name=name,
+                quantity=quantity,
+                remain_quantity=quantity,
+                category = Category.objects.get(id=category),
+                description = description,
+                supplier = Supplier.objects.get(id=supplier),
+                purchase_date = purchase_date,
+                purchase_price = purchase_price,
+                location_in_storage = location_in_storage,
+                min_stock_level = min_stock_level,
+                expiry_date = expiry_date,
+                condition = condition,
+               
+            )
+            inventory_item.save()
+
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})      
+    
+
+def usage_history_list(request):
+    usage_history_list = UsageHistory.objects.all()
+    inventory_item = InventoryItem.objects.all()
+    return render(request, 'hod_template/manage_usage_history_list.html', {
+        'usage_history_list': usage_history_list,
+        'inventory_item': inventory_item,
+        })    
+
+@require_POST
+def save_usage_history(request):
+    try:
+        # Extract data from the request
+        usage_history_id = request.POST.get('usageHistoryId')
+
+        # Check if the usageHistoryId is provided for editing
+        if usage_history_id:
+            # Editing existing usage history
+            usage_history = UsageHistory.objects.get(pk=usage_history_id)
+        else:
+            # Creating new usage history
+            usage_history = UsageHistory()
+
+        # Update or set values for other fields
+        usage_history.usage_date = request.POST.get('usageDate')
+        usage_history.quantity_used = request.POST.get('quantityUsed')
+        usage_history.notes = request.POST.get('notes')
+        item = request.POST.get('item')
+        usage_history.inventory_item =  InventoryItem.objects.get(id=item)
+
+        # Add more fields as needed
+
+        # Save the usage history
+        usage_history.save()
+
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})    

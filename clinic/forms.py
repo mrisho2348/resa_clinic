@@ -66,6 +66,24 @@ class ImportServiceForm(forms.Form):
         validators=[FileExtensionValidator(allowed_extensions=['xlsx', 'xls'])],
         widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.xlsx, .xls'})
     )
+class ImportCategoryForm(forms.Form):
+    category_records_file = forms.FileField(
+        label='Choose an Excel file',
+        validators=[FileExtensionValidator(allowed_extensions=['xlsx', 'xls'])],
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.xlsx, .xls'})
+    )
+class ImportSupplierForm(forms.Form):
+    supplier_records_file = forms.FileField(
+        label='Choose an Excel file',
+        validators=[FileExtensionValidator(allowed_extensions=['xlsx', 'xls'])],
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.xlsx, .xls'})
+    )
+class ImportInventoryItemForm(forms.Form):
+    InventoryItem_records_file = forms.FileField(
+        label='Choose an Excel file',
+        validators=[FileExtensionValidator(allowed_extensions=['xlsx', 'xls'])],
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.xlsx, .xls'})
+    )
 
 class StaffsForm(forms.ModelForm):
     class Meta:

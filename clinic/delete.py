@@ -2,7 +2,7 @@
 
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render,get_object_or_404
-from .models import Company, Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Procedure, Referral, Sample, Service, Staffs
+from .models import Category, Company, Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Procedure, Referral, Sample, Service, Staffs, Supplier, UsageHistory
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -267,6 +267,47 @@ def delete_medication_payment(request, payment_id):
 
     except MedicationPayment.DoesNotExist:
         return HttpResponseBadRequest("MedicationPayment not found.")
+    
+
+@csrf_exempt      
+@require_POST
+def delete_category(request, category_id):
+    try:
+        category = get_object_or_404(Category, pk=category_id)
+        category.delete()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}) 
+       
+@csrf_exempt      
+@require_POST
+def delete_supplier(request, supplier_id):
+    try:
+        supplier = get_object_or_404(Supplier, pk=supplier_id)
+        supplier.delete()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})  
+      
+@csrf_exempt      
+@require_POST
+def delete_inventory(request, item_id):
+    try:
+        item = get_object_or_404(InventoryItem, pk=item_id)
+        item.delete()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}) 
+       
+@csrf_exempt      
+@require_POST
+def delete_usage_history(request, usage_id):
+    try:
+        usage = get_object_or_404(UsageHistory, pk=usage_id)
+        usage.delete()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})    
     
     
     

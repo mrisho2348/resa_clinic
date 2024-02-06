@@ -175,6 +175,36 @@
                               <p>Insurance</p>
                           </a>
                       </li>
+                      <li class="nav-item"> 
+                        {% url 'category_list' as category_list_url %}                   
+                        <a href="{% url 'category_list' %}" class="nav-link{% if request.path == category_list_url %} active {% endif %}">
+                            <i class="nav-icon fas fa-list"></i>
+                            <p>Manage Categories</p>
+                        </a>
+                    </li>
+                    <li class="nav-item"> 
+                        {% url 'supplier_list' as supplier_list_url %}                   
+                        <a href="{% url 'supplier_list' %}" class="nav-link{% if request.path == supplier_list_url %} active {% endif %}">
+                            <i class="nav-icon fas fa-truck"></i>
+                            <p>Suppliers</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item"> 
+                        {% url 'inventory_list' as inventory_list_url %}                   
+                        <a href="{% url 'inventory_list' %}" class="nav-link{% if request.path == inventory_list_url %} active {% endif %}">
+                            <i class="nav-icon fas fa-box"></i>
+                            <p>Inventory</p>
+                        </a>
+                    </li>
+                    <li class="nav-item"> 
+                        {% url 'usage_history_list' as usage_history_list_url %}                   
+                        <a href="{% url 'usage_history_list' %}" class="nav-link{% if request.path == usage_history_list_url %} active {% endif %}">
+                            <i class="nav-icon fas fa-history"></i>
+                            <p>Usage History</p>
+                        </a>
+                    </li>
+                    
                       <!-- Other Settings Links -->
                       <li class="nav-item">                    
                           <a href="{% url "manage_disease" %}" class="nav-link">                     
