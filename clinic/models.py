@@ -506,6 +506,7 @@ class Transaction(models.Model):
 class MedicineInventory(models.Model):
     medicine = models.ForeignKey('Medicine', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
+    remain_quantity = models.PositiveIntegerField(default=0)
     purchase_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -521,12 +522,14 @@ class MedicineInventory(models.Model):
         if existing_record:
             # Update the existing record's quantity
             existing_record.quantity += quantity
+            existing_record.remain_quantity += quantity
             existing_record.save()
         else:
             # Create a new record
             cls.objects.create(
                 medicine_id=medicine_id,
                 quantity=quantity,
+                remain_quantity=quantity, 
                 purchase_date=purchase_date
             )
     
@@ -629,7 +632,74 @@ class HealthIssue(models.Model):
     def __str__(self):
         return self.name
       
+class Equipment(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)  # Description of the equipment
+    manufacturer = models.CharField(max_length=100, blank=True)  # Manufacturer of the equipment
+    serial_number = models.CharField(max_length=50, blank=True)  # Serial number of the equipment
+    acquisition_date = models.DateField(null=True, blank=True)  # Date when the equipment was acquired
+    warranty_expiry_date = models.DateField(null=True, blank=True)  # Expiry date of the warranty
+    location = models.CharField(max_length=100, blank=True)  # Location where the equipment is stored
+    is_active = models.BooleanField(default=True)  # Flag indicating if the equipment is currently active
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
     
+    def __str__(self):
+        return self.name
+    
+class EquipmentMaintenance(models.Model):
+    equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)
+    maintenance_date = models.DateField()
+    technician = models.CharField(max_length=100)  # Technician who performed the maintenance
+    description = models.TextField(blank=True)  # Description of the maintenance performed
+    cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # Cost of maintenance
+    notes = models.TextField(blank=True)  # Additional notes or comments
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+    def __str__(self):
+        return f"{self.equipment.name} - Maintenance on {self.maintenance_date}" 
+    
+class Reagent(models.Model):
+    name = models.CharField(max_length=100)
+    expiration_date = models.DateField(blank=True, null=True)
+    manufacturer = models.CharField(max_length=100)
+    lot_number = models.CharField(max_length=50)
+    storage_conditions = models.TextField(blank=True)
+    quantity_in_stock = models.PositiveIntegerField()
+    price_per_unit = models.DecimalField(max_digits=10, decimal_places=2)
+    remaining_quantity = models.PositiveIntegerField()  # New field for remaining quantity
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+    def __str__(self):
+        return self.name   
+    
+class ReagentUsage(models.Model):
+    lab_technician = models.ForeignKey(Staffs, on_delete=models.CASCADE)
+    reagent = models.ForeignKey(Reagent, on_delete=models.CASCADE)
+    usage_date = models.DateField()
+    quantity_used = models.PositiveIntegerField()
+    # Add other reagent usage-related information
+    observation = models.TextField()  # Additional field for observations or notes
+    technician_notes = models.TextField()  # Additional field for technician notes 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()  
+    
+class QualityControl(models.Model):
+    lab_technician = models.ForeignKey('Staffs', on_delete=models.CASCADE)
+    control_date = models.DateField()
+    # Add other quality control-related information
+    control_type = models.CharField(max_length=50)  # Type of quality control performed
+    result = models.CharField(max_length=50)  # Result of the quality control test
+    remarks = models.TextField(blank=True)  # Additional remarks or comments
+
+    # Add more fields as needed         
+        
 @receiver(post_save, sender=CustomUser)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:

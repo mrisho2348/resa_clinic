@@ -2,7 +2,7 @@
 
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render,get_object_or_404
-from .models import Category, Company, Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Procedure, Referral, Sample, Service, Staffs, Supplier, UsageHistory
+from .models import Category, Company, Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Procedure, QualityControl, Reagent, ReagentUsage, Referral, Sample, Service, Staffs, Supplier, UsageHistory
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -155,7 +155,7 @@ def delete_pathodology(request, pathodology_id):
 
     
 @require_POST
-def delete_inventory(request, inventory_id):
+def delete_medicine_inventory(request, inventory_id):
     # Get the MedicineInventory object
     inventory = get_object_or_404(MedicineInventory, pk=inventory_id)
 
@@ -259,11 +259,11 @@ def delete_medication_payment(request, payment_id):
 
             # Adjust MedicineInventory
             MedicineInventory.objects.filter(medicine=medication_payment.medicine).update(
-                quantity=F('quantity') + deleted_quantity
+                remain_quantity=F('remain_quantity') + deleted_quantity
             )
 
         # Redirect to the MedicationPayment
-        return redirect('medicine_inventory')
+        return redirect('patient_medicationpayment_history_view_mrn', mrn=medication_payment.patient.mrn)
 
     except MedicationPayment.DoesNotExist:
         return HttpResponseBadRequest("MedicationPayment not found.")
@@ -298,13 +298,73 @@ def delete_inventory(request, item_id):
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}) 
+    
+@csrf_exempt      
+@require_POST
+def delete_equipment(request, equipment_id):
+    try:
+        equipment = get_object_or_404(Equipment, pk=equipment_id)
+        equipment.delete()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}) 
+    
+@csrf_exempt      
+@require_POST
+def delete_maintenance(request, maintenance_id):
+    try:
+        maintenance = get_object_or_404(EquipmentMaintenance, pk=maintenance_id)
+        maintenance.delete()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}) 
+    
+@csrf_exempt      
+@require_POST
+def delete_reagent(request, reagent_id):
+    try:
+        reagent = get_object_or_404(Reagent, pk=reagent_id)
+        reagent.delete()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}) 
+    
+@csrf_exempt      
+@require_POST
+def delete_qualitycontrol(request, control_id):
+    try:
+        control = get_object_or_404(QualityControl, pk=control_id)
+        control.delete()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}) 
        
 @csrf_exempt      
 @require_POST
 def delete_usage_history(request, usage_id):
     try:
-        usage = get_object_or_404(UsageHistory, pk=usage_id)
-        usage.delete()
+        with transaction.atomic():
+            usage = get_object_or_404(UsageHistory, pk=usage_id)
+            quantity_used = usage.quantity_used
+            inventory_item = usage.inventory_item
+            inventory_item.remain_quantity += quantity_used
+            inventory_item.save()
+            usage.delete()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+    
+@csrf_exempt      
+@require_POST
+def delete_reagent_used(request, reagentusage_id):
+    try:
+        with transaction.atomic():
+            usage = get_object_or_404(ReagentUsage, pk=reagentusage_id)
+            quantity_used = usage.quantity_used
+            inventory_item = usage.reagent
+            inventory_item.remaining_quantity += quantity_used
+            inventory_item.save()
+            usage.delete()
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})    

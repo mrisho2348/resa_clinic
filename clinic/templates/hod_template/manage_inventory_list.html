@@ -30,7 +30,7 @@ Inventory List
         <thead>
             <tr>
                 <th>Name</th>
-                <th>Quantity</th>
+                <th>Original Stock Level</th>
                 <th>Purchase Date</th>
                 <th>Purchase Price</th>
                 <th>Expiry Date</th>
@@ -49,7 +49,8 @@ Inventory List
                     <td>{{ item.purchase_price }}</td>
                     <td>{{ item.expiry_date }}</td>
                     <td>{{ item.location_in_storage }}</td>
-                    <td>{{ item.min_stock_level }}</td>                   
+                    <td {% if item.remain_quantity < item.min_stock_level %} class="below-min-stock" {% endif %}>{{ item.min_stock_level }}</td>
+                 
                     <td>{{ item.remain_quantity }}</td>
                     <td>
                       <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#editInventoryItemModal{{ item.id }}"  data-toggle="tooltip" title="Edit">
@@ -58,11 +59,162 @@ Inventory List
                       <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteInventoryItemModal{{ item.id }}"  data-toggle="tooltip" title="Delete">
                         <i class="fas fa-trash"></i>
                     </button>
+                    <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#increaseInventoryItemModal{{ item.id }}"  data-toggle="tooltip" title="Increase Stock Level">
+                        <i class="fas fa-plus"></i>
+                    </button>   
+                    <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#useInventoryItemModal{{ item.id }}"  data-toggle="tooltip" title="Use">
+                        <i class="fas fa-check"></i>
+                    </button> 
                     <button  class="btn btn-primary btn-sm" data-toggle="modal" data-target="#viewInventoryItemModal{{ item.id }}"  data-toggle="tooltip" title="View">
                         <i class="fa fa-eye text-dark"></i>
                     </button>  
-                              
+                        
                     </td>
+                    <style>
+                        .below-min-stock {
+                            background-color: red; /* Change the color to red */
+                            font-weight: bold; /* Optionally, make the text bold */
+                        }
+                    </style>
+<!-- Bootstrap modal for using the item -->
+<div class="modal fade" id="useInventoryItemModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="useInventoryItemModalLabel{{ item.id }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="useInventoryItemModalLabel{{ item.id }}">Use {{ item.name }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="useInventoryItemForm{{ item.id }}">
+                    {% csrf_token %}
+                    <input type="hidden" id="itemId{{ item.id }}" name="itemId" value="{{ item.id }}">
+
+                    <div class="form-group">
+                        <label for="quantityUsed{{ item.id }}">Quantity To Use</label>
+                        <input type="number" class="form-control" id="quantityUsed{{ item.id }}" name="quantityUsed" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="usageDate{{ item.id }}">Usage Date</label>
+                        <input type="date" class="form-control" id="usageDate{{ item.id }}" name="usageDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes{{ item.id }}">notes</label>
+                        <textarea name="notes" id="notes{{ item.id }}" cols="2"   class="form-control" ></textarea>
+                    </div>
+                    <!-- Add more fields as needed -->
+                    <div id="MessageContainer"></div>
+                    <button type="button" class="btn btn-primary" onclick="useInventoryItem({{ item.id }})">Use Item</button>
+                   
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function useInventoryItem(itemId) {
+        var quantityUsed = $('#quantityUsed' + itemId).val();
+        var usageDate = $('#usageDate' + itemId).val();
+        var notes = $('#notes' + itemId).val();
+   
+        $.ajax({
+            type: 'POST',
+            url: '/use_inventory_item/',
+            data: {                
+                notes: notes,
+                itemId: itemId,
+                quantityUsed: quantityUsed,
+                usageDate: usageDate
+            },
+            success: function(data) {
+                if (data.status === 'success') {
+                    // Display success message                    
+                    $('#useInventoryItemModal' + itemId).modal('hide');
+                    location.reload(true);
+                } 
+                else {
+                    // Display error message if any
+                    alert(data.message);
+                }
+                // Hide the modal after displaying the message
+              
+            },
+            error: function(error) {
+                console.log(error);
+                // Display error message
+                $('#successMessageContainer').html('<div class="alert alert-danger" role="alert">Failed to use item</div>');
+                // Hide the modal after displaying the message
+             
+            }
+        });
+    }
+</script>
+
+
+<!-- Increase Inventory Stock Level Modal -->
+<div class="modal fade" id="increaseInventoryItemModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="increaseInventoryItemModalLabel{{ item.id }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="increaseInventoryItemModalLabel{{ item.id }}">Increase Inventory Stock Level - {{ item.name }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="increaseInventoryStockForm{{ item.id }}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                    <div class="form-group">
+                        <label for="quantityToAdd">Quantity to Add</label>
+                        <input type="number" class="form-control" id="quantityToAdd{{ item.id }}" name="quantityToAdd" required>
+                    </div>
+                    <!-- Add more fields as needed -->
+                    <button type="button" class="btn btn-primary" onclick="increaseInventoryStock({{ item.id }})">Increase Stock</button>
+                    <div id="successMessageContainer"></div>
+                </form>
+
+
+                <script>
+                    function increaseInventoryStock(itemId) {
+                        var quantityToAdd = $('#quantityToAdd' + itemId).val();
+                
+                        $.ajax({
+                            type: 'POST',
+                            url: '/increase_inventory_stock/',
+                            data: {                                
+                                item_id: itemId,
+                                quantityToAdd: quantityToAdd
+                            },
+                            success: function(data) {
+                                if (data.status === 'success') {
+                                    // Display success message
+                                    $('#successMessageContainer').html('<div class="alert alert-success" role="alert">' + data.message + '</div>');
+                                       // Hide the modal after displaying the message
+                                            $('#increaseInventoryItemModal' + itemId).modal('hide');
+                                            location.reload(true);
+                                } else {
+                                    // Display error message if any
+                                    $('#successMessageContainer').html('<div class="alert alert-danger" role="alert">Failed to increase stock level</div>');
+                                }
+                             
+                            },
+                            error: function(error) {
+                                console.log(error);
+                                // Display error message
+                                $('#successMessageContainer').html('<div class="alert alert-danger" role="alert">Failed to increase stock level</div>');
+                                // Hide the modal after displaying the message
+                                $('#increaseInventoryItemModal' + itemId).modal('hide');
+                            }
+                        });
+                    }
+                </script>
+            </div>
+        </div>
+    </div>
+</div>                    
 
 
 <!-- Modal -->

@@ -3,9 +3,9 @@ import logging
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.db import IntegrityError
-from clinic.models import Category, Company, DiseaseRecode, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, Patients, Procedure, Referral, Service, Supplier
-from .resources import CategoryResource, CompanyResource, DiseaseRecodeResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, PathologyRecordResource, PatientsResource, ProcedureResource, ReferralResource, ServiceResource, SupplierResource
-from .forms import ImportCategoryForm, ImportCompanyForm, ImportDiseaseForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientsForm, ImportProcedureForm, ImportReferralForm, ImportServiceForm, ImportSupplierForm
+from clinic.models import Category, Company, DiseaseRecode, Equipment, EquipmentMaintenance, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, Patients, Procedure, Reagent, Referral, Service, Supplier
+from .resources import CategoryResource, CompanyResource, DiseaseRecodeResource, EquipmentMaintenanceResource, EquipmentResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, PathologyRecordResource, PatientsResource, ProcedureResource, ReagentResource, ReferralResource, ServiceResource, SupplierResource
+from .forms import ImportCategoryForm, ImportCompanyForm, ImportDiseaseForm, ImportEquipmentForm, ImportEquipmentMaintenanceForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientsForm, ImportProcedureForm, ImportReagentForm, ImportReferralForm, ImportServiceForm, ImportSupplierForm
 from tablib import Dataset
 logger = logging.getLogger(__name__)
 def import_disease_recode(request):
@@ -130,6 +130,112 @@ def import_supplier(request):
         form = ImportSupplierForm()
 
     return render(request, 'hod_template/import_supplier.html', {'form': form})
+
+def import_equipment(request):
+    if request.method == 'POST':
+        form = ImportEquipmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = EquipmentResource()
+                new_equipment = request.FILES['equipment_records_file']
+                
+                # Use tablib to load the imported data
+                dataset = Dataset()
+                imported_data = dataset.load(new_equipment.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+
+                for data in imported_data:
+                     equipment_record = Equipment(
+                        name=data[0],
+                        description=data[1],
+                        manufacturer=data[2],
+                        serial_number=data[3],
+                        acquisition_date=data[4],
+                        warranty_expiry_date=data[5],
+                        location=data[6],
+                      
+                    )
+                     equipment_record.save()
+
+                return redirect('equipment_list') 
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportEquipmentForm()
+
+    return render(request, 'hod_template/import_equipment.html', {'form': form})
+
+def import_maintenance(request):
+    if request.method == 'POST':
+        form = ImportEquipmentMaintenanceForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = EquipmentMaintenanceResource()
+                new_maintenance = request.FILES['maintenance_records_file']
+                
+                # Use tablib to load the imported data
+                dataset = Dataset()
+                imported_data = dataset.load(new_maintenance.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+
+                for data in imported_data:
+                     maintenance_record = EquipmentMaintenance(
+                        equipment= Equipment.objects.get(id=data[0]),
+                        maintenance_date=data[1],
+                        technician=data[2],
+                        description=data[3],
+                        cost=data[4],
+                        notes=data[5],
+                  
+                      
+                    )
+                     maintenance_record.save()
+
+                return redirect('equipment_maintenance_list') 
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportEquipmentMaintenanceForm()
+
+    return render(request, 'hod_template/import_maintenance.html', {'form': form})
+
+
+def import_reagent(request):
+    if request.method == 'POST':
+        form = ImportReagentForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = ReagentResource()
+                new_reagent = request.FILES['reagent_records_file']
+                
+                # Use tablib to load the imported data
+                dataset = Dataset()
+                imported_data = dataset.load(new_reagent.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+
+                for data in imported_data:
+                     reagent_record = Reagent(
+                        name=data[0],
+                        expiration_date=data[1],
+                        manufacturer=data[2],
+                        lot_number=data[3],
+                        storage_conditions=data[4],
+                        quantity_in_stock=data[5],
+                        price_per_unit=data[6],
+                        remaining_quantity=data[5],
+                       
+                  
+                      
+                    )
+                     reagent_record.save()
+
+                return redirect('reagent_list') 
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportReagentForm()
+
+    return render(request, 'hod_template/import_reagent.html', {'form': form})
 
 
 def import_companies(request):

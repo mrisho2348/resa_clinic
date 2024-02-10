@@ -10,6 +10,7 @@ from django.http import HttpResponse, HttpResponseBadRequest,HttpResponseRedirec
 from django.template import loader
 from django.shortcuts import render
 from django.urls import reverse
+from django.db.models import F
 from django.views.decorators.csrf import csrf_protect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -27,7 +28,7 @@ from tablib import Dataset
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import OuterRef, Subquery
-from .models import Category, ConsultationFee, DiagnosticTest, HealthIssue, InventoryItem, MedicationPayment, PathologyDiagnosticTest, PatientDisease, Procedure, Patients, Referral, Sample, Service, Supplier, UsageHistory
+from .models import Category, ConsultationFee, DiagnosticTest, Equipment, EquipmentMaintenance, HealthIssue, InventoryItem, MedicationPayment, PathologyDiagnosticTest, PatientDisease, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, Sample, Service, Supplier, UsageHistory
 
 # Create your views here.
 def index(request):
@@ -331,6 +332,35 @@ def update_staff_status(request):
 
     # Redirect back to the staff list page
     return redirect('manage_staff')  # Make sure 'manage_staffs' is the name of your staff list URL
+
+def update_equipment_status(request):
+    try:
+        if request.method == 'POST':
+            # Get the user_id and is_active values from POST data
+            equipment_id = request.POST.get('equipment_id')
+            is_active = request.POST.get('is_active')
+
+            # Retrieve the staff object or return a 404 response if not found
+            equipment = get_object_or_404(Equipment, id=equipment_id)
+
+            # Toggle the is_active status based on the received value
+            if is_active == '1':
+                equipment.is_active = False
+            elif is_active == '0':
+                equipment.is_active = True
+            else:
+                messages.error(request, 'Invalid request')
+                return redirect('equipment_list')  # Make sure 'manage_staffs' is the name of your staff list URL
+
+            equipment.save()
+            messages.success(request, 'equipment updated successfully')
+        else:
+            messages.error(request, 'Invalid request method')
+    except Exception as e:
+        messages.error(request, f'An error occurred: {str(e)}')
+
+    # Redirect back to the staff list page
+    return redirect('equipment_list')  # Make sure 'manage_staffs' is the name of your staff list URL
 
 def edit_staff(request, staff_id):
     # Check if the staff with the given ID exists, or return a 404 page
@@ -1025,14 +1055,19 @@ def add_medication_payment(request):
             non_registered_patient_email = request.POST.get('non_registered_patient_email')
             non_registered_patient_phone = request.POST.get('non_registered_patient_phone')
             medicine_id = request.POST.get('medicine')
-            quantity = int(request.POST.get('quantity'))
+            medicine_used = int(request.POST.get('quantity'))
             amount = request.POST.get('amount')
             payment_date = request.POST.get('payment_date')
 
-            # Retrieve patient and medicine instances
+     
+            
             patient = Patients.objects.get(mrn=patient_mrn) if patient_mrn else None
             medicine = Medicine.objects.get(id=medicine_id)
-
+            
+            # Check if there is sufficient stock
+            medicine_inventory = medicine.medicineinventory_set.first()
+            if medicine_inventory and medicine_used > medicine_inventory.remain_quantity:
+                 return JsonResponse({'success': False, 'message': f'Insufficient stock. Only {medicine_inventory.remain_quantity} {medicine.name} available.'})
             # Create MedicationPayment instance
             medication_payment = MedicationPayment(
                 patient=patient,
@@ -1040,7 +1075,7 @@ def add_medication_payment(request):
                 non_registered_patient_email=non_registered_patient_email,
                 non_registered_patient_phone=non_registered_patient_phone,
                 medicine=medicine,
-                quantity=quantity,
+                quantity=medicine_used,
                 amount=amount,
                 payment_date=payment_date,
             )
@@ -1050,7 +1085,7 @@ def add_medication_payment(request):
         except Patients.DoesNotExist:
             return JsonResponse({'success': False, 'message': 'Invalid patient ID.'})
         except IntegrityError:
-            return JsonResponse({'success': False, 'message': 'Duplicate entry. Referral record not saved.'})
+            return JsonResponse({'success': False, 'message': 'Duplicate entry.  record not saved.'})
         except Exception as e:
             return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
 
@@ -1102,7 +1137,7 @@ def medication_payments_view(request):
     # Additional filtering for medicines with enough quantity and not expired
     current_date = timezone.now().date()
     medicines_with_inventory = MedicineInventory.objects.filter(
-        quantity__gt=100,
+        remain_quantity__gt=0,
         medicine__expiration_date__gt=current_date
     ).values('medicine')
     
@@ -1493,7 +1528,7 @@ def supplier_list(request):
     return render(request, 'hod_template/manage_supplier_list.html', {'suppliers': suppliers})
  
 def inventory_list(request):
-    inventory_items  = InventoryItem.objects.all()    
+    inventory_items = InventoryItem.objects.all()  
     suppliers = Supplier.objects.all()
     categories = Category.objects.all()
     return render(request, 'hod_template/manage_inventory_list.html', {
@@ -1542,7 +1577,7 @@ def add_inventory_item(request):
         name = request.POST.get('name')
         supplier = request.POST.get('supplier')
         category = request.POST.get('category')
-        quantity = request.POST.get('quantity')
+        quantity = int(request.POST.get('quantity'))
         description = request.POST.get('description')
         purchase_date = request.POST.get('purchase_date')
         purchase_price = request.POST.get('purchase_price')
@@ -1593,7 +1628,7 @@ def add_inventory_item(request):
     
 
 def usage_history_list(request):
-    usage_history_list = UsageHistory.objects.all()
+    usage_history_list = UsageHistory.objects.filter(quantity_used__gt=0)
     inventory_item = InventoryItem.objects.all()
     return render(request, 'hod_template/manage_usage_history_list.html', {
         'usage_history_list': usage_history_list,
@@ -1605,27 +1640,466 @@ def save_usage_history(request):
     try:
         # Extract data from the request
         usage_history_id = request.POST.get('usageHistoryId')
+        usage_date = request.POST.get('usageDate')
+        quantity_used = int(request.POST.get('quantityUsed'))
+        notes = request.POST.get('notes')
+        item_id = request.POST.get('item')
+
+        # Retrieve the corresponding InventoryItem
+        item = InventoryItem.objects.get(id=item_id)
+        if quantity_used > item.remain_quantity:
+            return JsonResponse({'status': 'error', 'message': 'Quantity used exceeds available stock quantity'})
+
 
         # Check if the usageHistoryId is provided for editing
         if usage_history_id:
             # Editing existing usage history
             usage_history = UsageHistory.objects.get(pk=usage_history_id)
+            # Get the previous quantity used
+            previous_quantity_used = usage_history.quantity_used
+            # Calculate the difference in quantity
+            quantity_difference = quantity_used - previous_quantity_used
+            # Update the stock level of the corresponding item
+            item.remain_quantity -= quantity_difference
         else:
             # Creating new usage history
             usage_history = UsageHistory()
+         
 
         # Update or set values for other fields
-        usage_history.usage_date = request.POST.get('usageDate')
-        usage_history.quantity_used = request.POST.get('quantityUsed')
-        usage_history.notes = request.POST.get('notes')
-        item = request.POST.get('item')
-        usage_history.inventory_item =  InventoryItem.objects.get(id=item)
+        usage_history.usage_date = usage_date
+        usage_history.quantity_used = quantity_used
+        usage_history.notes = notes
+        usage_history.inventory_item = item
 
-        # Add more fields as needed
-
-        # Save the usage history
+        # Save the changes to both models
+        item.save()
         usage_history.save()
 
         return JsonResponse({'status': 'success'})
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)})    
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+@csrf_exempt
+def get_item_quantity(request):
+    if request.method == 'POST':
+        item_id = request.POST.get('itemId')  # Use request.POST.get() instead of request.GET.get()
+        print(item_id)      
+        try:
+            item = InventoryItem.objects.get(id=item_id)
+            quantity = item.quantity
+            print(quantity)
+            return JsonResponse({'quantity': quantity})
+        except InventoryItem.DoesNotExist:
+            return JsonResponse({'error': 'Item not found'}, status=404)
+    else:
+        return JsonResponse({'error': 'Invalid request'}, status=400)
+    
+
+def out_of_stock_items(request):
+    out_of_stock_items = InventoryItem.objects.filter(remain_quantity=0)
+    return render(request, 'hod_template/manage_out_of_stock_items.html', {'out_of_stock_items': out_of_stock_items}) 
+
+def in_stock_items(request):
+    in_stock_items = InventoryItem.objects.filter(remain_quantity__gt=0)
+    return render(request, 'hod_template/manage_in_stock_items.html', {'in_stock_items': in_stock_items})   
+
+def get_out_of_stock_count(request):
+    count = InventoryItem.objects.filter(remain_quantity=0).count()
+    
+    return JsonResponse({'count': count})
+
+def get_out_of_stock_count_reagent(request):
+    count = Reagent.objects.filter(remaining_quantity=0).count()
+    
+    return JsonResponse({'count': count})
+
+def get_items_below_min_stock(request):
+    items_below_min_stock = InventoryItem.objects.filter(remain_quantity__lt=F('min_stock_level')).count()
+    return JsonResponse({'count': items_below_min_stock})
+
+@csrf_exempt
+def increase_inventory_stock(request):
+    if request.method == 'POST':
+        item_id = request.POST.get('item_id')
+        quantity_to_add = int(request.POST.get('quantityToAdd'))
+        try:
+            item = InventoryItem.objects.get(id=item_id)
+            item.quantity += quantity_to_add
+            item.remain_quantity += quantity_to_add
+            item.save()
+            return JsonResponse({'status': 'success', 'message': f'Stock level increased by {quantity_to_add} for item {item.name}'})
+        except InventoryItem.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Item not found'}, status=404)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+    
+@csrf_exempt
+def increase_reagent_stock(request):
+    if request.method == 'POST':
+        reagent_id = request.POST.get('reagent_id')
+        quantity_to_add = int(request.POST.get('quantityToAdd'))
+        try:
+            reagent = Reagent.objects.get(id=reagent_id)
+            reagent.quantity_in_stock += quantity_to_add
+            reagent.remaining_quantity += quantity_to_add
+            reagent.save()
+            return JsonResponse({'status': 'success', 'message': f'Stock level increased by {quantity_to_add} for item {reagent.name}'})
+        except InventoryItem.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Item not found'}, status=404)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+@csrf_exempt    
+def use_inventory_item(request):
+    if request.method == 'POST':
+        item_id = request.POST.get('itemId')
+        notes = request.POST.get('notes')
+        quantity_used = int(request.POST.get('quantityUsed'))
+        usage_date = request.POST.get('usageDate')
+
+        try:
+            item = InventoryItem.objects.get(id=item_id)
+            if quantity_used > item.remain_quantity:
+                return JsonResponse({'status': 'error', 'message': 'Quantity used exceeds available stock quantity'})
+
+            # Create a new usage history entry
+            UsageHistory.objects.create(
+                inventory_item=item,
+                quantity_used=quantity_used,
+                notes=notes,
+                usage_date=usage_date
+            )
+
+            item.remain_quantity -= quantity_used
+            item.save()
+
+            message = f'Stock level decreased by {quantity_used} for item {item.name}'
+            return JsonResponse({'status': 'success', 'message': message})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+    
+def out_of_stock_medicines(request):
+    try:
+        # Query the database for the count of out-of-stock medicines
+        out_of_stock_count = MedicineInventory.objects.filter(remain_quantity=0).count()
+        
+        # Return the count in JSON format
+        return JsonResponse({'count': out_of_stock_count})
+    
+    except Exception as e:
+        # Handle any errors and return an error response
+        return JsonResponse({'error': str(e)}, status=500)    
+    
+def out_of_stock_medicines_view(request):
+    try:
+        # Query the database for out-of-stock medicines
+        out_of_stock_medicines = MedicineInventory.objects.filter(remain_quantity=0)
+        
+        # Render the template with the out-of-stock medicines data
+        return render(request, 'hod_template/manage_out_of_stock_medicines.html', {'out_of_stock_medicines': out_of_stock_medicines})
+    
+    except Exception as e:
+        # Handle any errors and return an error response
+        return render(request, 'error.html', {'error_message': str(e)}) 
+    
+def out_of_stock_reagent_view(request):
+    try:
+        # Query the database for out-of-stock medicines
+        out_of_stock_reagent = Reagent.objects.filter(remaining_quantity=0)
+        
+        # Render the template with the out-of-stock medicines data
+        return render(request, 'hod_template/manage_out_of_stock_reagent.html', {'out_of_stock_reagent': out_of_stock_reagent})
+    
+    except Exception as e:
+        # Handle any errors and return an error response
+        return render(request, 'error.html', {'error_message': str(e)}) 
+    
+    
+def in_stock_medicines_view(request):
+    # Retrieve medicines with inventory levels above zero
+    in_stock_medicines = MedicineInventory.objects.filter(remain_quantity__gt=0)
+
+    return render(request, 'hod_template/manage_in_stock_medicines.html', {'in_stock_medicines': in_stock_medicines})  
+
+def in_stock_reagent_view(request):
+    # Retrieve medicines with inventory levels above zero
+    in_stock_reagent = Reagent.objects.filter(remaining_quantity__gt=0)
+
+    return render(request, 'hod_template/manage_in_stock_reagent.html', {'in_stock_reagent': in_stock_reagent})  
+
+def equipment_list(request):
+    equipment_list = Equipment.objects.all()
+    return render(request, 'hod_template/manage_equipment_list.html', {'equipment_list': equipment_list})  
+
+ 
+@csrf_exempt     
+@require_POST
+def add_equipment(request):
+    try:
+        equipment_id = request.POST.get('equipment_id')
+        Manufacturer = request.POST.get('Manufacturer')
+        SerialNumber = request.POST.get('SerialNumber')
+        AcquisitionDate = request.POST.get('AcquisitionDate')
+        warrantyExpiryDate = request.POST.get('warrantyExpiryDate')
+        Location = request.POST.get('Location')
+        description = request.POST.get('description')
+        Name = request.POST.get('Name')
+      
+        # Add more fields as needed
+
+        if equipment_id:
+            # Editing existing inventory item
+            equipment = Equipment.objects.get(pk=equipment_id)
+            equipment.manufacturer = Manufacturer
+            equipment.serial_number = SerialNumber
+            equipment.acquisition_date = AcquisitionDate
+            equipment.warranty_expiry_date =  warrantyExpiryDate
+            equipment.description = description
+            equipment.location = Location
+            equipment.name = Name        
+            equipment.save()
+        else:
+            # Adding new inventory item
+            equipment = Equipment(
+                name=Name,
+                manufacturer=Manufacturer,
+                serial_number=SerialNumber,
+                acquisition_date = AcquisitionDate,
+                description = description,
+                warranty_expiry_date = warrantyExpiryDate,
+                location = Location,             
+               
+            )
+            equipment.save()
+
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})  
+    
+    
+def equipment_maintenance_list(request):
+    maintenance_list = EquipmentMaintenance.objects.all()
+    equipments = Equipment.objects.all()
+    return render(request, 'hod_template/manage_equipment_maintenance_list.html',
+                  {
+                      'maintenance_list': maintenance_list,
+                      'equipments': equipments,
+                   })    
+
+@csrf_exempt     
+@require_POST
+def add_maintainance(request):
+    try:
+        maintenance_id = request.POST.get('maintenance_id')
+        equipment = request.POST.get('equipment')
+        maintenance_date = request.POST.get('maintenance_date')
+        technician = request.POST.get('technician')
+        description = request.POST.get('description')
+        cost = request.POST.get('cost')
+        notes = request.POST.get('notes')
+      
+      
+        # Add more fields as needed
+
+        if maintenance_id:
+            # Editing existing inventory item
+            maintainance = EquipmentMaintenance.objects.get(pk=maintenance_id)
+            maintainance.equipment = Equipment.objects.get(id=equipment)
+            maintainance.maintenance_date = maintenance_date
+            maintainance.technician = technician
+            maintainance.description =  description
+            maintainance.cost = cost
+            maintainance.notes = notes                    
+            maintainance.save()
+        else:
+            # Adding new inventory item
+            maintainance = EquipmentMaintenance(
+                equipment= Equipment.objects.get(id=equipment),
+                maintenance_date=maintenance_date,
+                technician=technician,
+                description = description,
+                cost = cost,
+                notes = notes,
+                          
+               
+            )
+            maintainance.save()
+
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})  
+ 
+def reagent_list(request):
+    reagent_list = Reagent.objects.all()
+    return render(request, 'hod_template/manage_reagent_list.html', {'reagent_list': reagent_list})    
+
+@csrf_exempt     
+@require_POST
+def add_reagent(request):
+    try:
+        reagent_id = request.POST.get('reagent_id')
+        name = request.POST.get('name')
+        expiration_date = request.POST.get('expiration_date')
+        manufacturer = request.POST.get('manufacturer')
+        lot_number = request.POST.get('lot_number')
+        storage_conditions = request.POST.get('storage_conditions')
+        quantity_in_stock = int(request.POST.get('quantity_in_stock'))
+        price_per_unit = float(request.POST.get('price_per_unit'))
+      
+      
+        # Add more fields as needed
+
+        if reagent_id:
+            # Editing existing inventory item
+            reagent = Reagent.objects.get(pk=reagent_id)
+            reagent.name = name
+            reagent.expiration_date = expiration_date
+            reagent.manufacturer = manufacturer
+            reagent.lot_number =  lot_number
+            reagent.storage_conditions = storage_conditions
+            reagent.quantity_in_stock = quantity_in_stock                    
+            reagent.price_per_unit = price_per_unit                    
+            reagent.remaining_quantity = quantity_in_stock                    
+            reagent.save()
+        else:
+            # Adding new inventory item
+            reagent = Reagent(
+                name=name,
+                expiration_date=expiration_date,
+                manufacturer=manufacturer,
+                lot_number = lot_number,
+                storage_conditions = storage_conditions,
+                quantity_in_stock = quantity_in_stock,
+                price_per_unit = price_per_unit,
+                remaining_quantity = quantity_in_stock,
+                          
+               
+            )
+            reagent.save()
+
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})  
+
+def reagent_usage_list(request):
+    reagent_usage_list = ReagentUsage.objects.all()
+    technicians = Staffs.objects.all()
+    reagents = Reagent.objects.all()
+    return render(request, 'hod_template/manage_reagent_usage_list.html',
+                  {
+                      'reagent_usage_list': reagent_usage_list,
+                      'technicians': technicians,
+                      'reagents': reagents,
+                   }
+                  )
+
+@csrf_exempt
+@require_POST
+def add_reagent_used(request):
+    try:
+        # Extract data from the request
+        usage_id = request.POST.get('usage_id')
+        labTechnician = request.POST.get('labTechnician')
+        reagent_id = request.POST.get('reagent')
+        usage_date = request.POST.get('usage_date')
+        quantity_used = int(request.POST.get('quantity_used'))
+        observation = request.POST.get('observation')
+        technician_notes = request.POST.get('technician_notes')
+
+        # Retrieve the corresponding InventoryItem
+        labTechnician = Staffs.objects.get(id=labTechnician)
+        reagent = Reagent.objects.get(id=reagent_id)
+        
+        if quantity_used > reagent.remaining_quantity:
+            return JsonResponse({'status': 'error', 'message': 'Quantity used exceeds available stock quantity'})
+
+
+        # Check if the usageHistoryId is provided for editing
+        if usage_id:
+            # Editing existing usage history
+            usage_history = ReagentUsage.objects.get(pk=usage_id)
+            # Get the previous quantity used
+            previous_quantity_used = usage_history.quantity_used
+            # Calculate the difference in quantity
+            quantity_difference = quantity_used - previous_quantity_used
+            # Update the stock level of the corresponding item
+            reagent.remaining_quantity -= quantity_difference
+        else:
+            # Creating new usage history
+            usage_history = ReagentUsage()
+         
+
+        # Update or set values for other fields
+        usage_history.lab_technician = labTechnician
+        usage_history.usage_date = usage_date
+        usage_history.quantity_used = quantity_used
+        usage_history.technician_notes = technician_notes
+        usage_history.reagent = reagent
+        usage_history.observation = observation
+
+        # Save the changes to both models
+        reagent.save()
+        usage_history.save()
+
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+    
+def quality_control_list(request):
+    # Retrieve all QualityControl objects
+    quality_controls = QualityControl.objects.all()
+    technicians = Staffs.objects.all()
+    # Pass the queryset to the template for rendering
+    return render(request, 'hod_template/manage_quality_control_list.html', 
+                  {
+                      'quality_controls': quality_controls,
+                      'technicians': technicians,
+                      }
+                  ) 
+
+@csrf_exempt     
+@require_POST
+def add_quality_control(request):
+    try:
+        qualitycontrol_id = request.POST.get('qualitycontrol_id')
+        lab_technician = request.POST.get('lab_technician')
+        control_date = request.POST.get('control_date')
+        control_type = request.POST.get('control_type')
+        result = request.POST.get('result')
+        remarks = request.POST.get('remarks')
+
+      
+      
+        # Add more fields as needed
+        lab_technician = Staffs.objects.get(id=lab_technician)
+        
+        if qualitycontrol_id:
+            # Editing existing inventory item
+            reagent = QualityControl.objects.get(pk=qualitycontrol_id)
+            reagent.lab_technician = lab_technician
+            reagent.control_date = control_date
+            reagent.control_type = control_type
+            reagent.result =  result
+            reagent.remarks = remarks
+                            
+            reagent.save()
+        else:
+            # Adding new inventory item
+            reagent = QualityControl(
+            lab_technician=lab_technician,
+            control_date=control_date,
+            control_type=control_type,
+            result=result,
+            remarks=remarks
+                          
+               
+            )
+            reagent.save()
+
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})     

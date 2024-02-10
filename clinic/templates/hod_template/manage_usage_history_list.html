@@ -30,7 +30,7 @@ Usage History
                 <th>Usage Date</th>
                 <th>Quantity Used</th>
                 <th>Notes</th>
-                <th>Added At</th>                         
+                <th>Usage date</th>                         
                 <th>Action</th>              
             </tr>
         </thead>
@@ -160,7 +160,7 @@ Usage History
                                                 // Refresh the category list or perform any other actions
                                             } else {
                                                 // Handle other status cases if needed
-                                                console.log(data.message);
+                                                alert(data.message);
                                             }
                                         },
                                         error: function (error) {
@@ -241,7 +241,7 @@ Usage History
                     // Refresh the usage history list or perform any other actions
                 } else {
                     // Handle other status cases if needed
-                    console.log(data.message);
+                    alert(data.message);
                 }
             },
             error: function (error) {

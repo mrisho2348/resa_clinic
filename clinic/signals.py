@@ -2,7 +2,7 @@
 
 from django.db.models.signals import post_save,pre_save
 from django.dispatch import receiver
-from .models import InventoryItem, MedicationPayment, MedicineInventory, UsageHistory
+from .models import InventoryItem, MedicationPayment, MedicineInventory, Reagent, ReagentUsage, UsageHistory
 from django.db.models import F
 from django.db import models
 
@@ -10,7 +10,13 @@ from django.db import models
 def update_inventory(sender, instance, **kwargs):
     if kwargs.get('created', False) or kwargs.get('update_fields', None):
         # Use F() expression to perform the update in the database
-        MedicineInventory.objects.filter(medicine=instance.medicine).update(quantity=F('quantity') - instance.quantity)
+        MedicineInventory.objects.filter(medicine=instance.medicine).update(remain_quantity=F('remain_quantity') - instance.quantity)
+        
+@receiver(post_save, sender=ReagentUsage)
+def update_reagent_usage(sender, instance, **kwargs):
+    if kwargs.get('created', False) or kwargs.get('update_fields', None):
+        # Use F() expression to perform the update in the database
+        Reagent.objects.filter(id=instance.reagent_id).update(remaining_quantity=F('remaining_quantity') - instance.quantity_used)
         
 
 @receiver(post_save, sender=UsageHistory)

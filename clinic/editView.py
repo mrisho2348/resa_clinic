@@ -311,7 +311,7 @@ def edit_inventory(request, inventory_id):
         purchase_date = datetime.strptime(purchase_date, '%Y-%m-%d').date()
 
         # Update the existing MedicineInventory record
-        inventory.medicine_id = medicine_id
+        inventory.medicine = medicine_id
         inventory.quantity = quantity
         inventory.purchase_date = purchase_date
         inventory.save()
@@ -325,6 +325,7 @@ def edit_inventory(request, inventory_id):
     
     
 
+@csrf_exempt
 @require_POST
 def edit_medication_payment(request, payment_id):
     try:
@@ -335,24 +336,31 @@ def edit_medication_payment(request, payment_id):
         previous_quantity_sold = medication_payment.quantity
 
         # Update MedicationPayment object based on the form data
-        quantity = int(request.POST.get('edit_quantity'))
+        medicine_used = int(request.POST.get('edit_quantity'))
         amount = float(request.POST.get('edit_amount'))
         medicine_id = int(request.POST.get('medicine_id'))
 
         # Validate form data
-        if quantity <= 0 or amount < 0 or not Medicine.objects.filter(pk=medicine_id).exists():
+        if medicine_used <= 0 or amount < 0 or not Medicine.objects.filter(pk=medicine_id).exists():
             return HttpResponseBadRequest("Invalid form data.")
-
+        
+        medicine = Medicine.objects.get(id=medicine_id)
+        
+        # Check that there is enough stock of this medicine in the pharmacy
+        # Check if there is sufficient stock
+        medicine_inventory = medicine.medicineinventory_set.first()
+        if medicine_inventory and medicine_used > medicine_inventory.remain_quantity:
+            return JsonResponse({'success': False, 'message': f'Insufficient stock. Only {medicine_inventory.remain_quantity} {medicine.name} available.'})
         with transaction.atomic():
             # Update MedicationPayment object
-            medication_payment.quantity = quantity
+            medication_payment.quantity = medicine_used
             medication_payment.amount = amount
-            medication_payment.medicine_id = medicine_id
+            medication_payment.medicine = medicine_id
             medication_payment.save()
 
             # Adjust MedicineInventory
             MedicineInventory.objects.filter(medicine=medication_payment.medicine).update(
-                quantity=F('quantity') + (previous_quantity_sold - quantity)
+                remain_quantity=F('remain_quantity') + (previous_quantity_sold - medicine_used)
             )
 
         # Redirect to the medication history page or another appropriate page
