@@ -383,13 +383,13 @@ def edit_diagnostic_test(request, test_id):
             diseases_ids = None
             health_issues_ids = None
             if disease_or_pathology == 'pathology':
-                pathology_id = request.POST.get('pathology_id')
+                pathology_id = request.POST.get('Disease_Pathology_otherhealthissues')
                 
             if disease_or_pathology == 'disease':
-                diseases_ids = request.POST.getlist('diseases[]')
+                diseases_ids = request.POST.get('Disease_Pathology_otherhealthissues')
                 
             if disease_or_pathology == 'health_issue':
-                health_issues_ids = request.POST.getlist('health_issues')
+                health_issues_ids = request.POST.get('Disease_Pathology_otherhealthissues')
             # Retrieve the existing DiagnosticTest object
             diagnostic_test = get_object_or_404(DiagnosticTest, id=test_id)
 

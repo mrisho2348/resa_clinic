@@ -587,34 +587,7 @@ class PatientDisease(models.Model):
     def __str__(self):
         return f"{self.patient.fullname} - {self.disease_record.disease_name} ({self.diagnosis_date})"
     
-class MedicalRecordConsultation(models.Model):
-    # Relationship with Patient
-    patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
-    # Complaints Section
-    chief_complaint = models.CharField(max_length=255)
-    history_illness = models.TextField()
-    physical_examination = models.TextField()
-    # Allergy to Medications
-    allergy_medications = models.TextField()
-    # Diagnosis Section
-    provisional_diagnosis = models.TextField()
-    final_diagnosis = models.TextField()
-    # Pathology, Plan, and Injury
-    pathology = models.ForeignKey(PathodologyRecord, on_delete=models.CASCADE)
-    plan = models.TextField()
-    # Fatality, Injury Description, and Disposition
-    injury = models.CharField(max_length=200)
-    fatality = models.CharField(max_length=200)
-    injury_description = models.TextField()
-    # Disposition Section
-    disposition =  models.CharField(max_length=200)
-    destination = models.CharField(max_length=255)
-    disposition_description = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    objects = models.Manager()
-    def __str__(self):
-        return f"{self.patient.name}'s Medical Record"  
+
     
    
 class HealthIssue(models.Model):
@@ -627,6 +600,9 @@ class HealthIssue(models.Model):
     treatment_plan = models.TextField(blank=True, null=True)
     onset_date = models.DateField(blank=True, null=True)
     resolution_date = models.DateField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
     # Add more fields as needed
     
     def __str__(self):

@@ -5,7 +5,9 @@ from . import views,delete,imports,editView
 
 urlpatterns = [
         path('',views.index, name="home"),
+        path('add_health_issue',views.add_health_issue, name="add_health_issue"),
         path('resa/dashboard',views.dashboard, name="dashboard"),
+        path('fetch_model_data/', views.fetch_model_data, name='fetch_model_data'),
         path('resa/ImportExcel',views.import_staff, name="import_staff"),      
         path('pathology_diagnostic_test_save/', views.pathology_diagnostic_test_save, name='pathology_diagnostic_test_save'),
         path('save_consultation_data/', views.save_consultation_data, name='save_consultation_data'),
@@ -79,6 +81,7 @@ urlpatterns = [
         path('resa/reagent-usage-list/', views.reagent_usage_list, name='reagent_usage_list'),
         path('resa/equipment-maintenance-list/', views.equipment_maintenance_list, name='equipment_maintenance_list'),
         path('resa/equipment-list/', views.equipment_list, name='equipment_list'),
+        path('health-issues/', views.health_issue_list, name='health_issue_list'),
         path('resa/reagent-list/', views.reagent_list, name='reagent_list'),
         path('resa/in-stock-items/', views.in_stock_items, name='in_stock_items'),
         path('resa/out-of-stock-items/', views.out_of_stock_items, name='out_of_stock_items'),
@@ -131,6 +134,7 @@ urlpatterns = [
         path('import-insurance-companies/', imports.import_insurance_companies, name='import_insurance_companies'),
         path('import_maintenance/', imports.import_maintenance, name='import_maintenance'),
         path('import_reagent', imports.import_reagent, name='import_reagent'),
+        path('import_health_issue', imports.import_health_issue, name='import_health_issue'),
         path('import_equipment', imports.import_equipment, name='import_equipment'),
         path('import-companies/', imports.import_companies, name='import_companies'),
         path('import-patients/', imports.import_patient_records, name='import_patient_records'),
@@ -177,6 +181,7 @@ urlpatterns = [
         path('delete_medicine_inventory/<int:inventory_id>/', delete.delete_medicine_inventory, name='delete_medicine_inventory'),
         path('delete_reagent/<int:reagent_id>/', delete.delete_reagent, name='delete_reagent'),
         path('delete_usage_history/<int:usage_id>/', delete.delete_usage_history, name='delete_usage_history'),
+        path('delete_health_issue/<int:health_issue_id>/', delete.delete_health_issue, name='delete_health_issue'),
         path('delete_reagent_used/<int:reagentusage_id>/', delete.delete_reagent_used, name='delete_reagent_used'),
                 
         path('insurance-records/<int:insurance_id>/delete/', delete.delete_insurance, name='delete_insurance'),        

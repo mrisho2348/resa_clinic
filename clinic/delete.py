@@ -2,7 +2,7 @@
 
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render,get_object_or_404
-from .models import Category, Company, Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Procedure, QualityControl, Reagent, ReagentUsage, Referral, Sample, Service, Staffs, Supplier, UsageHistory
+from .models import Category, Company, Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Procedure, QualityControl, Reagent, ReagentUsage, Referral, Sample, Service, Staffs, Supplier, UsageHistory
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -335,6 +335,16 @@ def delete_qualitycontrol(request, control_id):
     try:
         control = get_object_or_404(QualityControl, pk=control_id)
         control.delete()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}) 
+    
+@csrf_exempt      
+@require_POST
+def delete_health_issue(request, health_issue_id):
+    try:
+        health_issue = get_object_or_404(HealthIssue, pk=health_issue_id)
+        health_issue.delete()
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}) 

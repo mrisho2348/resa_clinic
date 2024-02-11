@@ -3,9 +3,9 @@ import logging
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.db import IntegrityError
-from clinic.models import Category, Company, DiseaseRecode, Equipment, EquipmentMaintenance, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, Patients, Procedure, Reagent, Referral, Service, Supplier
-from .resources import CategoryResource, CompanyResource, DiseaseRecodeResource, EquipmentMaintenanceResource, EquipmentResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, PathologyRecordResource, PatientsResource, ProcedureResource, ReagentResource, ReferralResource, ServiceResource, SupplierResource
-from .forms import ImportCategoryForm, ImportCompanyForm, ImportDiseaseForm, ImportEquipmentForm, ImportEquipmentMaintenanceForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientsForm, ImportProcedureForm, ImportReagentForm, ImportReferralForm, ImportServiceForm, ImportSupplierForm
+from clinic.models import Category, Company, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, Patients, Procedure, Reagent, Referral, Service, Supplier
+from .resources import CategoryResource, CompanyResource, DiseaseRecodeResource, EquipmentMaintenanceResource, EquipmentResource, HealthIssueResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, PathologyRecordResource, PatientsResource, ProcedureResource, ReagentResource, ReferralResource, ServiceResource, SupplierResource
+from .forms import ImportCategoryForm, ImportCompanyForm, ImportDiseaseForm, ImportEquipmentForm, ImportEquipmentMaintenanceForm, ImportHealthIssueForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientsForm, ImportProcedureForm, ImportReagentForm, ImportReferralForm, ImportServiceForm, ImportSupplierForm
 from tablib import Dataset
 logger = logging.getLogger(__name__)
 def import_disease_recode(request):
@@ -236,6 +236,43 @@ def import_reagent(request):
         form = ImportReagentForm()
 
     return render(request, 'hod_template/import_reagent.html', {'form': form})
+
+def import_health_issue(request):
+    if request.method == 'POST':
+        form = ImportHealthIssueForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = HealthIssueResource()
+                new_health = request.FILES['health_records_file']
+                
+                # Use tablib to load the imported data
+                dataset = Dataset()
+                imported_data = dataset.load(new_health.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+
+                for data in imported_data:
+                     health_record = HealthIssue(
+                        name=data[0],
+                        description=data[1],
+                        is_disease=data[2],
+                        severity=data[3],
+                        treatment_plan=data[4],
+                        onset_date=data[5],
+                        resolution_date=data[6],
+                      
+                       
+                  
+                      
+                    )
+                     health_record.save()
+
+                return redirect('health_issue_list') 
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportHealthIssueForm()
+
+    return render(request, 'hod_template/import_health.html', {'form': form})
 
 
 def import_companies(request):

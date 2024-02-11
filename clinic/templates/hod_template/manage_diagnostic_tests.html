@@ -153,7 +153,7 @@ Diagnostic Tests
 
 
 
-                            <!-- Edit Diagnostic Test Modal -->
+<!-- Edit Diagnostic Test Modal -->
 <div class="modal fade" id="editDiagnosticTestModal{{ test.id }}" tabindex="-1" role="dialog" aria-labelledby="editDiagnosticTestModalLabel{{ test.id }}" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -171,7 +171,7 @@ Diagnostic Tests
                     <!-- Patient selection -->
                     <div class="form-group">
                         <label for="patient">Patient:</label>
-                        <select class="form-control select2bs4" style="width: 100%;" id="patient" name="patient" required>
+                        <select class="form-control select2bs4" style="width: 100%;" id="patient{{ test.id }}" name="patient" required>
                             {% for patient in patients %}
                                 <option value="{{ patient.id }}" {% if patient.id == test.patient.id %} selected {% endif %}>{{ patient.fullname }}</option>
                             {% endfor %}
@@ -181,60 +181,67 @@ Diagnostic Tests
                     <!-- Test type -->
                     <div class="form-group">
                         <label for="test_type">Test Type:</label>
-                        <input type="text" class="form-control" id="test_type" name="test_type" value="{{ test.test_type }}" required>
+                        <input type="text" class="form-control" id="test_type{{ test.id }}" name="test_type" value="{{ test.test_type }}" required>
                     </div>
 
                     <!-- Test date -->
                     <div class="form-group">
                         <label for="test_date">Test Date:</label>
-                        <input type="date" class="form-control" id="test_date" name="test_date" value="{{ test.test_date|date:'Y-m-d' }}" required>
+                        <input type="date" class="form-control" id="test_date{{ test.id }}" name="test_date" value="{{ test.test_date|date:'Y-m-d' }}" required>
                     </div>
 
                     <!-- Result -->
                     <div class="form-group">
                         <label for="result">Result:</label>
-                        <textarea class="form-control" id="result" name="result" rows="3">{{ test.result }}</textarea>
+                        <textarea class="form-control" id="result{{ test.id }}" name="result" rows="3">{{ test.result }}</textarea>
                     </div>
 
-                    <!-- Diseases/Pathology selection -->
+                  
                     <div class="form-group">
-                        <label for="disease_or_pathology">Disease or Pathology:</label>
-                        <select class="form-control select2bs4" style="width: 100%;" id="disease_or_pathology" name="disease_or_pathology" required>
+                        <label for="disease_or_pathology">Disease or Pathology or other health issue:</label>
+                        <select class="form-control" id="diseasepathology{{ test.id }}" name="disease_or_pathology" required>
                             <option value="disease" {% if test.diseases.all %} selected {% endif %}>Disease</option>
                             <option value="pathology" {% if test.pathology_record %} selected {% endif %}>Pathology</option>
-                            <option value="health_issue" {% if test.health_issues.all %} selected {% endif %}>Other Health Issue</option>
+                            <option value="health_issue" {% if test.health_issues.all %} selected {% endif %}>other health issue</option>
                         </select>
                     </div>
 
-                    <!-- Diseases selection -->
-                    <div class="form-group" id="diseases_selection" {% if not test.diseases.all %} style="display: none;" {% endif %}>
-                        <label for="diseases">Diseases:</label>
-                        <select class="form-control select2bs4" style="width: 100%;" id="diseases" name="diseases[]" multiple>
-                            {% for disease in diseases %}
-                                <option value="{{ disease.id }}" {% if disease in test.diseases.all %} selected {% endif %}>{{ disease.disease_name }}</option>
-                            {% endfor %}
+                     <!-- Pathology selection -->
+                     <div class="form-group" id="disease_or_pathology_container{{ test.id }}">                                             
+                        <select class="form-control select2bs4" style="width: 100%;" id="Disease_Pathology_otherhealthissue{{ test.id }}" name="Disease_Pathology_otherhealthissues">
                         </select>
                     </div>
+                    <script>
+                        $(document).ready(function () {
+                            $('#diseasepathology{{ test.id }}').change(function () {
+                                var selectedOption = $(this).val();
+                                $.ajax({
+                                    url: '/fetch_model_data/',
+                                    data: {
+                                        'selected_option': selectedOption
+                                    },
+                                    dataType: 'json',
+                                    success: function (data) {
+                                        var selectField = $('#disease_or_pathology_container{{ test.id }}');
+                                        selectField.empty();
+                                        var selectElement = $('<select class="form-control select2bs4" style="width: 100%;" name="Disease_Pathology_otherhealthissues"></select>');
+                                        $.each(data.data, function (index, item) {
+                                            selectElement.append('<option value="' + item[0] + '">' + item[1] + '</option>');
+                                        });
+                                        selectField.append(selectElement);
+                                        // Update the label text
+                                        var selectedOptionText = $('#diseasepathology{{ test.id }} option:selected').text();
+                                        $('#disease_or_pathology_label{{ test.id }}').text(selectedOptionText);
+                                    }
+                                });
+                            });
+                    
+                            // Trigger change event on page load
+                            $('#diseasepathology{{ test.id }}').trigger('change');
+                        });
+                    </script>
+                
 
-                    <!-- Pathology selection -->
-                    <div class="form-group" id="pathology_selection" {% if not test.pathology_record %} style="display: none;" {% endif %}>
-                        <label for="pathology">Pathology:</label>
-                        <select class="form-control select2bs4" style="width: 100%;" id="pathology" name="pathology">
-                            {% for pathology in pathologies %}
-                                <option value="{{ pathology.id }}" {% if pathology == test.pathology_record %} selected {% endif %}>{{ pathology.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Health issues -->
-                    <div class="form-group" id="other_health_issues" {% if not test.health_issues.all %} style="display: none;" {% endif %}>
-                        <label for="health_issues">Health Issues:</label>
-                        <select class="form-control select2bs4" style="width: 100%;" id="health_issues" name="health_issues[]" multiple>
-                            {% for health_issue in health_issues %}
-                                <option value="{{ health_issue.id }}" {% if health_issue in test.health_issues.all %} selected {% endif %}>{{ health_issue.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
 
                     <!-- Save button -->
                     <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -244,30 +251,7 @@ Diagnostic Tests
     </div>
 </div>
 
-<script>
-    $(document).ready(function () {
-        // Toggle diseases/pathology selection based on the chosen option
-        document.getElementById('disease_or_pathology').addEventListener('change', function () {
-            var diseasesSelection = document.getElementById('diseases_selection');
-            var pathologySelection = document.getElementById('pathology_selection');
-            var other_health_issuesSelection = document.getElementById('other_health_issues');
 
-            if (this.value === 'disease') {
-                diseasesSelection.style.display = 'block';
-                pathologySelection.style.display = 'none';
-                other_health_issuesSelection.style.display = 'none';
-            } else if (this.value === 'pathology') {
-                diseasesSelection.style.display = 'none';
-                pathologySelection.style.display = 'block';
-                other_health_issuesSelection.style.display = 'none';
-            } else if (this.value === 'health_issue') {
-                diseasesSelection.style.display = 'none';
-                pathologySelection.style.display = 'none';
-                other_health_issuesSelection.style.display = 'block';
-            }
-        });
-    });
-</script>
 
 
 
@@ -324,48 +308,26 @@ Diagnostic Tests
                     <!-- Result -->
                     <div class="form-group">
                         <label for="result">Result:</label>
-                        <textarea class="form-control" id="result" name="result" rows="3"></textarea>
+                        <textarea class="form-control" id="result" name="result" cols="2"></textarea>
                     </div>
 
                     <!-- Diseases/Pathology selection -->
                     <div class="form-group">
                         <label for="disease_or_pathology">Disease or Pathology or other health issue:</label>
-                        <select class="form-control" id="disease_or_pathology" name="disease_or_pathology" required>
+                        <select class="form-control" id="diseasepathology" name="disease_or_pathology" required>
                             <option value="disease">Disease</option>
                             <option value="pathology">Pathology</option>
                             <option value="health_issue">other health issue</option>
                         </select>
                     </div>
 
-                    <!-- Diseases selection -->
-                    <div class="form-group" id="diseases_selection">
-                        <label for="diseases">Diseases:</label>
-                        <select class="form-control select2bs4" style="width: 100%;" id="diseases" name="diseases[]" multiple>
-                            {% for disease in diseases %}
-                                <option value="{{ disease.id }}">{{ disease.disease_name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
                     <!-- Pathology selection -->
-                    <div class="form-group" id="pathology_selection" style="display: none;">
-                        <label for="pathology">Pathology:</label>
-                        <select class="form-control select2bs4" style="width: 100%;" id="pathology" name="pathology">
-                            {% for pathology in pathologies %}
-                                <option value="{{ pathology.id }}">{{ pathology.name }}</option>
-                            {% endfor %}
+                    <div class="form-group" id="disease_or_pathology_container">                                             
+                        <select class="form-control select2bs4" style="width: 100%;" id="Disease_Pathology_otherhealthissue" name="Disease_Pathology_otherhealthissues">
                         </select>
                     </div>
 
-                    <!-- Health issues -->
-                    <div class="form-group" id="other_health_issues"  style="display: none;">
-                        <label for="health_issues">Health Issues:</label>
-                        <select class="form-control select2bs4" style="width: 100%;" id="health_issues" name="health_issues[]">
-                            {% for health_issue in health_issues %}
-                                <option value="{{ health_issue.id }}">{{ health_issue.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                   
 
                     <!-- Save button -->
                     <button type="submit" class="btn btn-primary">Save Diagnostic Test</button>
@@ -379,29 +341,27 @@ Diagnostic Tests
 
 <script>
     $(document).ready(function () {
-         // Toggle diseases/pathology selection based on the chosen option
-    document.getElementById('disease_or_pathology').addEventListener('change', function () {
-        var diseasesSelection = document.getElementById('diseases_selection');
-        var pathologySelection = document.getElementById('pathology_selection');
-        var other_health_issuesSelection = document.getElementById('other_health_issues');
-
-        if (this.value === 'disease') {
-            diseasesSelection.style.display = 'block';
-            pathologySelection.style.display = 'none';
-            other_health_issuesSelection.style.display = 'none';
-        } 
-        else if (this.value === 'pathology') {
-            diseasesSelection.style.display = 'none';
-            pathologySelection.style.display = 'block';
-            other_health_issuesSelection.style.display = 'none';
-        }
-        else if (this.value === 'health_issue') {
-            diseasesSelection.style.display = 'none';
-            pathologySelection.style.display = 'none';
-            other_health_issuesSelection.style.display = 'block';
-        }
-    });
-   
+        $('#diseasepathology').change(function () {
+            var selectedOption = $(this).val();
+            $.ajax({
+                url: '/fetch_model_data/',
+                data: {
+                    'selected_option': selectedOption
+                },
+                dataType: 'json',
+                success: function (data) {
+                    var selectField = $('#disease_or_pathology_container');  // Updated selector
+                    selectField.empty();
+                    var selectElement = $('<select class="form-control select2bs4" style="width: 100%;" name="Disease_Pathology_otherhealthissues"></select>');  // Create select element
+                    $.each(data.data, function (index, item) {
+                        selectElement.append('<option value="' + item[0] + '">' + item[1] + '</option>');
+                    });
+                    selectField.append(selectElement);  // Append select element to container
+                    var selectedOptionText = $('#diseasepathology option:selected').text();
+                    $('#disease_or_pathology_label').text(selectedOptionText);
+                }
+            });
+        });
     });
 </script>
 

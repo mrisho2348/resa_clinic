@@ -1,5 +1,5 @@
 from import_export import resources
-from .models import Category, Company, DiseaseRecode, Equipment, EquipmentMaintenance, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, Patients, Procedure, Reagent, Referral, Service, Staffs, Supplier
+from .models import Category, Company, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, Patients, Procedure, Reagent, Referral, Service, Staffs, Supplier
 
 class StaffResources(resources.ModelResource):
     class Meta:
@@ -54,3 +54,6 @@ class EquipmentMaintenanceResource(resources.ModelResource):
 class ReagentResource(resources.ModelResource):
     class Meta:
         model = Reagent
+class HealthIssueResource(resources.ModelResource):
+    class Meta:
+        model = HealthIssue

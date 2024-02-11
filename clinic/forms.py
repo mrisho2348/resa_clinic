@@ -102,6 +102,12 @@ class ImportReagentForm(forms.Form):
         validators=[FileExtensionValidator(allowed_extensions=['xlsx', 'xls'])],
         widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.xlsx, .xls'})
     )
+class ImportHealthIssueForm(forms.Form):
+    health_records_file = forms.FileField(
+        label='Choose an Excel file',
+        validators=[FileExtensionValidator(allowed_extensions=['xlsx', 'xls'])],
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.xlsx, .xls'})
+    )
 
 class StaffsForm(forms.ModelForm):
     class Meta:

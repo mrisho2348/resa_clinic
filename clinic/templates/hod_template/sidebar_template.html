@@ -246,6 +246,13 @@
                               <p>Diseases</p>
                           </a>
                       </li>
+                      <li class="nav-item"> 
+                        {% url 'health_issue_list' as health_issue_list_url %}                    
+                        <a href="{{ health_issue_list_url }}" class="nav-link{% if request.path == health_issue_list_url %} active {% endif %}">                     
+                            <i class="nav-icon fas fa-heartbeat"></i> <!-- Assuming "fa-heartbeat" represents health issues -->
+                            <p>Health Issues</p> <!-- Updated to a more descriptive name -->
+                        </a>
+                    </li>
                       
                       <li class="nav-item">  
                         {% url 'equipment_list' as equipment_list_url %}                   

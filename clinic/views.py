@@ -1210,12 +1210,12 @@ def save_diagnostic_test(request):
             diseases_ids = None
             health_issues_ids = None
             if disease_or_pathology == 'pathology':
-                pathology_id = request.POST.get('pathology_id')
+                pathology_id = request.POST.get('Disease_Pathology_otherhealthissues')
                 
             if disease_or_pathology == 'disease':
-                diseases_ids = request.POST.getlist('diseases[]')                
+                diseases_ids = request.POST.get('Disease_Pathology_otherhealthissues')                
             if disease_or_pathology == 'health_issue':
-                health_issues_ids = request.POST.getlist('health_issues')
+                health_issues_ids = request.POST.get('Disease_Pathology_otherhealthissues')
             # Convert test_date to a valid date object (you may need to adjust the format)
             # test_date = datetime.datetime.strptime(test_date, '%Y-%m-%d').date()
             test_id = generate_test_id()
@@ -2102,4 +2102,70 @@ def add_quality_control(request):
 
         return JsonResponse({'status': 'success'})
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)})     
+        return JsonResponse({'status': 'error', 'message': str(e)})  
+    
+def health_issue_list(request):
+    health_issues = HealthIssue.objects.all()
+    return render(request, 'hod_template/manage_health_issues.html', {'health_issues': health_issues})       
+
+@csrf_exempt     
+@require_POST
+def add_health_issue(request):
+    try:
+        health_id = request.POST.get('health_id')
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        is_disease = request.POST.get('is_disease')
+        severity = request.POST.get('severity')
+        treatment_plan = request.POST.get('treatment_plan')
+        onset_date = request.POST.get('onset_date')
+        resolution_date = request.POST.get('resolution_date')
+
+      
+      
+      
+        
+        if health_id:
+            # Editing existing HealthIssue item
+            health_issue = HealthIssue.objects.get(pk=health_id)
+            health_issue.name = name
+            health_issue.description = description
+            health_issue.is_disease = bool(is_disease)
+            health_issue.onset_date =  onset_date            
+            health_issue.severity = severity
+            health_issue.treatment_plan = treatment_plan
+            health_issue.resolution_date = resolution_date
+                            
+            health_issue.save()
+        else:
+            # Adding new HealthIssue item
+            health_issue = HealthIssue(
+            name=name,
+            description=description,
+            is_disease=bool(is_disease),
+            severity=severity,
+            onset_date=onset_date,
+            treatment_plan=treatment_plan,
+            resolution_date=resolution_date
+                          
+               
+            )
+            health_issue.save()
+
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}) 
+    
+
+def fetch_model_data(request):
+    selected_option = request.GET.get('selected_option')
+    data = []
+
+    if selected_option == 'disease':
+        data = list(DiseaseRecode.objects.values_list('id', 'disease_name'))
+    elif selected_option == 'pathology':
+        data = list(PathodologyRecord.objects.values_list('id', 'name'))
+    elif selected_option == 'health_issue':
+        data = list(HealthIssue.objects.values_list('id', 'name'))
+
+    return JsonResponse({'data': data})    
