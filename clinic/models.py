@@ -6,7 +6,7 @@ from django.dispatch import receiver
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
-
+from django.utils.translation import gettext_lazy as _
 # Create your models here.
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, email, password=None, user_type=1, **extra_fields):
@@ -103,10 +103,11 @@ class Company(models.Model):
     
 
 class Service(models.Model):
-    department = models.CharField(max_length=200)
-    type_service = models.CharField(max_length=200)
+    covarage = models.CharField(max_length=200, blank=True, null=True)
+    department = models.CharField(max_length=200, blank=True, null=True)
+    type_service = models.CharField(max_length=200, blank=True, null=True)
     name = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(blank=True, null=True)
     cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)  # New field for cost
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -217,7 +218,16 @@ class Patients(models.Model):
     phone = models.CharField(max_length=15)
     address = models.TextField()
     nationality = models.CharField(max_length=255)
-    company = models.CharField(max_length=255)
+     # New payment-related fields
+    PAYMENT_CHOICES = [
+        ('cash', 'Cash'),
+        ('insurance', 'Insurance'),
+    ]
+    payment_form = models.CharField(max_length=255, choices=PAYMENT_CHOICES)
+    insurance_name = models.CharField(max_length=255, blank=True, null=True)
+    insurance_number = models.CharField(max_length=255, blank=True, null=True)
+ 
+    
     marital_status = models.CharField(max_length=255)
     patient_type = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -250,6 +260,58 @@ def generate_mrn():
     return new_mrn
     
     
+    
+class PatientVisits(models.Model):
+    VISIT_TYPES = (
+        ('Normal', _('Normal')),
+        ('Emergency', _('Emergency')),
+        ('Referral', _('Referral')),
+        ('Follow up', _('Follow up')),
+    )
+
+    patient = models.ForeignKey('Patients', on_delete=models.CASCADE)
+    vst = models.CharField(max_length=20, unique=True, editable=False)
+    visit_type = models.CharField( max_length=15, choices=VISIT_TYPES)
+    visit_reason = models.TextField(blank=True, null=True)
+    referral_number = models.CharField(max_length=50, blank=True, null=True)
+    primary_service = models.CharField(max_length=50)
+    insurance_number = models.CharField(max_length=50, blank=True, null=True)
+    insurance_name = models.CharField(max_length=50, blank=True, null=True)
+    payment_scheme = models.CharField(max_length=50, blank=True, null=True)
+    authorization_code = models.CharField(max_length=50, blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Visit')
+        verbose_name_plural = _('Visits')
+        
+    def save(self, *args, **kwargs):
+        # Generate MRN only if it's not provided
+        if not self.vst:
+            self.vst = generate_vst()
+
+        super().save(*args, **kwargs)   
+
+    def __str__(self):
+        return f'{self.patient} - {self.get_visit_type_display()}'
+    
+def generate_vst():
+    # Retrieve the last patient's VST from the database
+    last_patient_visit = PatientVisits.objects.last()
+
+    # Extract the numeric part from the last VST, or start from 0 if there are no patients yet
+    last_vst_number = int(last_patient_visit.vst.split('-')[-1]) if last_patient_visit else 0
+
+    # Increment the numeric part for the new patient
+    new_vst_number = last_vst_number + 1
+
+    # Format the VST with leading zeros and concatenate with the prefix "PAT-"
+    new_vst = f"VST-{new_vst_number:07d}"
+
+    return new_vst    
+        
 class Payment(models.Model):
     PAYMENT_TYPES = [
         ('Cash', 'Cash'),
@@ -508,6 +570,7 @@ class MedicineInventory(models.Model):
     quantity = models.PositiveIntegerField()
     remain_quantity = models.PositiveIntegerField(default=0)
     purchase_date = models.DateField()
+    total_payment = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()

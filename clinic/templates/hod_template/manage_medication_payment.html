@@ -29,8 +29,7 @@ Medication Payments
         <thead>
             <tr>
                 <th>Payment Date</th>
-                <th>Patient</th>               
-                <th>Medicine</th>
+                <th>Patient</th>              
                 <th>Quantity</th>
                 <th>Amount</th>
                 <th>Action</th>
@@ -40,8 +39,7 @@ Medication Payments
             {% for payment in data %}
                 <tr>
                     <td>{{ payment.payment_date }}</td>
-                    <td>{{ payment.mrn }}</td>                 
-                    <td>{{ payment.medicine }}</td>
+                    <td>{{ payment.mrn }}</td>              
                     <td>{{ payment.quantity }}</td>
                     <td>{{ payment.amount }}/Tsh</td>
                     <td>

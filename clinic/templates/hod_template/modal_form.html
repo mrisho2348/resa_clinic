@@ -62,9 +62,29 @@
                       </select>
                   </div>
                   <div class="form-group col-sm-4">
-                      <label for="company" class="col-form-label">Company</label>
-                      <input type="text" class="form-control" name="company" id="company" placeholder="">
-                  </div>
+                    <label for="payment_type" class="col-form-label">Payment Type</label>
+                    <select class="form-control select2bs4" style="width: 100%;" name="payment_type" id="payment_type">
+                        <option value="cash">Cash</option>
+                        <option value="insurance">Insurance</option>
+                    </select>
+                </div>
+                <div class="form-group col-sm-4" id="insurance_name_container" style="display: none;">
+                    <label for="insurance_name" class="col-form-label">Insurance Name</label>
+                    <select class="form-control select2bs4" style="width: 100%;" name="insurance_name" id="insurance_name">
+                        <option value="">Select Insurance Company</option>
+                        <option value="NHIF">NHIF</option>
+                        <option value="Jubilee">Jubilee</option>
+                        <option value="Strateggies">Strateggies</option>
+                        <option value="Assembly">Assembly</option>
+                        <option value="Britam">Britam</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group col-sm-4" id="insurance_details_container" style="display: none;">
+                    <label for="insurance_number" class="col-form-label">Insurance Number</label>
+                    <input type="text" class="form-control" name="insurance_number" id="insurance_number" placeholder="Insurance Number">
+                </div>
+            
                   <div class="form-group col-sm-4">
                       <label for="maritalStatus" class="col-form-label">Marital Status</label>
                       <select class="form-control select2bs4" style="width: 100%;" name="maritalStatus" id="maritalStatus">
@@ -98,6 +118,8 @@
                 <div id="messageContainer" class="text-center mt-2"></div>
 
                 <script>
+
+                    
                     $(document).ready(function () {
                         // Handle form submission
                         $('#patientForm').submit(function (e) {
@@ -125,6 +147,23 @@
                             });
                         });
                     });
+                </script>
+                <script>
+                    $(document).ready(function(){
+                                                // Inside the $(document).ready() function
+                    $('#payment_type').change(function () {
+                        var paymentType = $(this).val();
+                        if (paymentType === 'insurance') {
+                            $('#insurance_name_container').show();
+                            $('#insurance_details_container').show();
+                            $('#authorization_code_container').show();
+                        } else {
+                            $('#insurance_name_container').hide();
+                            $('#insurance_details_container').hide();
+                            $('#authorization_code_container').hide();
+                        }
+                    });
+                    })
                 </script>
             </div>
         </div>

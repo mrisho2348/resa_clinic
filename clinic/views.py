@@ -28,7 +28,7 @@ from tablib import Dataset
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import OuterRef, Subquery
-from .models import Category, ConsultationFee, DiagnosticTest, Equipment, EquipmentMaintenance, HealthIssue, InventoryItem, MedicationPayment, PathologyDiagnosticTest, PatientDisease, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, Sample, Service, Supplier, UsageHistory
+from .models import Category, ConsultationFee, DiagnosticTest, Equipment, EquipmentMaintenance, HealthIssue, InventoryItem, MedicationPayment, PathologyDiagnosticTest, PatientDisease, PatientVisits, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, Sample, Service, Supplier, UsageHistory
 
 # Create your views here.
 def index(request):
@@ -659,11 +659,14 @@ def medicine_inventory_list(request):
     low_quantity_medicines = MedicineInventory.objects.filter(quantity__lt=100)
     current_date = timezone.now().date()
     non_expired_medicines = Medicine.objects.filter(expiration_date__gte=current_date)
+    total_payment = sum(inventory.total_payment for inventory in medicine_inventories)
+
     # Pass the context variables to the template
     context = {
         'medicine_inventories': medicine_inventories,
         'low_quantity_medicines': low_quantity_medicines,
         'non_expired_medicines': non_expired_medicines,
+        'total_payment': total_payment,
     }
 
     return render(request, 'hod_template/manage_medical_inventory.html', context)
@@ -992,13 +995,15 @@ def add_patient(request):
             gender = request.POST.get('gender')
             phone = request.POST.get('phone')
             address = request.POST.get('Address')
-            nationality = request.POST.get('profession')
-            company = request.POST.get('company')
+            nationality = request.POST.get('profession')            
             marital_status = request.POST.get('maritalStatus')
             patient_type = request.POST.get('patient_type')
+            payment_type = request.POST.get('payment_type')
+            insurance_name = request.POST.get('insurance_name')
+            insurance_number = request.POST.get('insurance_number')
+           
 
             # Generate the medical record number (mrn)
-            # You can use your own logic to generate a unique mrn
             mrn = generate_mrn()
 
             # Create an instance of the Patient model
@@ -1010,11 +1015,17 @@ def add_patient(request):
                 gender=gender,
                 phone=phone,
                 address=address,
-                nationality=nationality,
-                company=company,
+                nationality=nationality,                
                 marital_status=marital_status,
-                patient_type=patient_type
+                patient_type=patient_type,
+                payment_form=payment_type,
             )
+
+            # If payment type is insurance, save insurance details
+            if payment_type == 'insurance':
+                patient_instance.insurance_name = insurance_name
+                patient_instance.insurance_number = insurance_number
+               
 
             # Save the instance to the database
             patient_instance.save()
@@ -1468,6 +1479,7 @@ def save_consultation_fee(request):
 def save_service_data(request):
     if request.method == 'POST':
         service_id = request.POST.get('service_id')
+        covarage = request.POST.get('covarage')
         department = request.POST.get('department')
         type_service = request.POST.get('typeService')
         name = request.POST.get('serviceName')
@@ -1482,6 +1494,7 @@ def save_service_data(request):
                 # Creating a new service
                 service = Service()
 
+            service.covarage = covarage
             service.department = department
             service.type_service = type_service
             service.name = name
@@ -2154,9 +2167,76 @@ def add_health_issue(request):
 
         return JsonResponse({'status': 'success'})
     except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+    
+     
+@csrf_exempt     
+@require_POST
+def add_patient_visit(request):
+    try:
+        visit_id = request.POST.get('visit_id')
+        visitType = request.POST.get('visitType')        
+        insuranceName = request.POST.get('insuranceName')
+        insuranceNumber = request.POST.get('insuranceNumber')
+        verificationCode = request.POST.get('verificationCode')
+        visitReason = request.POST.get('visitReason')
+        patient_id = request.POST.get('patient_id')    
+        referral_number = request.POST.get('visitReason')    
+        primary_service = request.POST.get('primary_service')  
+        
+        patient = Patients.objects.get(pk=patient_id)
+        if visit_id:
+            # Editing existing HealthIssue item
+            visit = PatientVisits.objects.get(pk=visit_id)
+            visit.visit_type = visitType         
+            visit.patient = patient
+            visit.primary_service = primary_service
+            visit.insurance_name = insuranceName
+            visit.insurance_number =  insuranceNumber            
+            visit.authorization_code = verificationCode
+            visit.visit_reason = visitReason
+            visit.referral_number = referral_number
+                            
+            visit.save()
+        else:
+            # Adding new PatientVisit item
+            vst = generate_vst() 
+            
+            visit = PatientVisits(
+            patient=patient,
+            visit_type=visitType,
+            vst=vst,
+            primary_service=primary_service,
+            insurance_name=insuranceName,
+            insurance_number=insuranceNumber,
+            authorization_code=verificationCode,
+            visit_reason=visitReason,
+            referral_number=referral_number
+                          
+               
+            )
+            visit.save()
+
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}) 
     
 
+def generate_vst():
+    # Retrieve the last patient's VST from the database
+    last_patient_visit = PatientVisits.objects.last()
+
+    # Extract the numeric part from the last VST, or start from 0 if there are no patients yet
+    last_vst_number = int(last_patient_visit.visit_id.split('-')[-1]) if last_patient_visit else 0
+
+    # Increment the numeric part for the new patient
+    new_vst_number = last_vst_number + 1
+
+    # Format the VST with leading zeros and concatenate with the prefix "PAT-"
+    new_vst = f"VST-{new_vst_number:07d}"
+
+    return new_vst  
+   
 def fetch_model_data(request):
     selected_option = request.GET.get('selected_option')
     data = []

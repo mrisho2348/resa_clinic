@@ -12,6 +12,17 @@ def update_inventory(sender, instance, **kwargs):
         # Use F() expression to perform the update in the database
         MedicineInventory.objects.filter(medicine=instance.medicine).update(remain_quantity=F('remain_quantity') - instance.quantity)
         
+
+@receiver(post_save, sender=MedicineInventory)
+def update_total_payment(sender, instance, created, **kwargs):
+    if created:
+        # Calculate total payment for the inventory
+        total_payment = instance.quantity * instance.medicine.unit_price
+        
+        # Update the total_payment field of the MedicineInventory instance
+        instance.total_payment = total_payment
+        instance.save(update_fields=['total_payment'])        
+        
 @receiver(post_save, sender=ReagentUsage)
 def update_reagent_usage(sender, instance, **kwargs):
     if kwargs.get('created', False) or kwargs.get('update_fields', None):

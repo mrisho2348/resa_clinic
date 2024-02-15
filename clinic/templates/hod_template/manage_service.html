@@ -37,24 +37,26 @@
 </div> 
     <table class="table table-hover text-nowrap table-bordered table-striped table-sm" id="example">
         <thead>
-            <tr>
-              <th scope="col">Department</th>
-              <th scope="col">Type of Service</th>
-              <th scope="col">Service Name</th>
-              <th scope="col">Description</th>
-              <th scope="col">Cost</th>
-              <th scope="col">Created At</th>
+            <tr>  
+            <th scope="col">Service Name</th>   
+            <th scope="col">covarage</th>  
+            <th scope="col">Cost</th>       
+            <th scope="col">Type of Service</th>
+             <th scope="col">Description</th>
+             <th scope="col">department</th>
+             <th scope="col">Created At</th>
               <th>Actions</th>
               </tr>
         </thead>
         <tbody>
           {% for service in services %}
           <tr>
-            <td>{{ service.department }}</td>
-            <td>{{ service.type_service }}</td>
             <td>{{ service.name }}</td>
+            <td>{{ service.covarage }}</td>
+            <td>{{ service.cost }}</td>            
+            <td>{{ service.type_service }}</td>            
             <td class="wrap-text">{{ service.description }}</td>
-            <td>{{ service.cost }}</td>
+            <td>{{ service.department }}</td>
             <td>{{ service.created_at }}</td>
             <td>  
                <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#editServiceModal{{ service.id }}"  data-toggle="tooltip" title="Edit">
@@ -136,6 +138,17 @@
                       <label for="editDescription">Description:</label>
                       <textarea class="form-control" id="editDescription" name="description" rows="3">{{ service.description }}</textarea>
                   </div>
+                  <!-- Description -->
+                  <div class="form-group">
+                      <label for="editcovarage">covarage:</label>                  
+                    
+                        <select class="form-control" name="covarage" id="editcovarage">
+                          <option value="insurance" {% if service.service == 'insurance' %}selected{% endif %}>Insurance</option>
+                          <option value="cash" {% if service.service == 'cash' %}selected{% endif %}>Cash</option>
+                       
+                        </select>
+                    
+                  </div>
 
                   <!-- Cost -->
                   <div class="form-group">
@@ -204,7 +217,14 @@
                       <label for="cost">Cost:</label>
                       <input type="text" class="form-control" id="cost" name="cost" required>
                   </div>
-
+                  <div class="form-group">
+                    <label for="editcovarage">covarage:</label>                
+                     <select class="form-control" name="covarage" id="editcovarage">
+                        <option value="insurance">Insurance</option>
+                        <option value="cash">Cash</option>                     
+                      </select>
+                  
+                </div>
                   <!-- Save Button -->
                   <button type="submit" class="btn btn-primary">Save</button>
               </form>

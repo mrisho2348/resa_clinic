@@ -124,28 +124,42 @@ def edit_patient(request, patient_id):
             gender = request.POST.get('gender')
             phone = request.POST.get('phone')
             address = request.POST.get('Address')
-            nationality = request.POST.get('profession')
-            company = request.POST.get('company')
+            nationality = request.POST.get('profession')            
             marital_status = request.POST.get('maritalStatus')
             patient_type = request.POST.get('patient_type')
+            payment_form = request.POST.get('payment_type')
+            insurance_name = request.POST.get('insurance_name')
+            insurance_number = request.POST.get('insurance_number')
+      
 
-            # Update the InsuranceCompany object
+            # Update the Patient object
             patient.fullname = fullname
-            patient.phone = phone
-            patient.dob = dob
             patient.email = email
-            patient.address = address
+            patient.dob = dob
             patient.gender = gender
-            patient.nationality = nationality
-            patient.company = company
+            patient.phone = phone
+            patient.address = address
+            patient.nationality = nationality            
             patient.marital_status = marital_status
             patient.patient_type = patient_type
+            patient.payment_form = payment_form
+
+            # If payment type is insurance, update insurance details
+            if payment_form == 'insurance':
+                patient.insurance_name = insurance_name
+                patient.insurance_number = insurance_number
+          
+            else:
+                # Clear insurance details if payment form is cash
+                patient.insurance_name = None
+                patient.insurance_number = None
+                patient.authorization_code = None
 
             # Save the changes
             patient.save()
 
-            messages.success(request, 'patient details updated successfully!')
-            return redirect('manage_patient')  # Replace 'your_redirect_url' with the appropriate URL name
+            messages.success(request, 'Patient details updated successfully!')
+            return redirect('manage_patient')  # Replace 'manage_patient' with the appropriate URL name
 
         except Exception as e:
             messages.error(request, f'An error occurred: {e}')
@@ -311,17 +325,22 @@ def edit_inventory(request, inventory_id):
         purchase_date = datetime.strptime(purchase_date, '%Y-%m-%d').date()
 
         # Update the existing MedicineInventory record
-        inventory.medicine = medicine_id
+        inventory.medicine_id = medicine_id
         inventory.quantity = quantity
         inventory.purchase_date = purchase_date
         inventory.save()
 
+        # Recalculate total payment based on updated quantity and medicine unit price
+        total_payment = inventory.quantity * inventory.medicine.unit_price
+        inventory.total_payment = total_payment
+        inventory.save(update_fields=['total_payment'])
+
         # Redirect to a success page or the medicine inventory page
         return redirect('medicine_inventory')  # Adjust the URL as needed
 
-    except ValueError:
+    except (ValueError, TypeError):
         # Handle invalid data types, redirect or display an error message
-        return redirect('medicine_inventory')  # Adjust the URL as needed
+        return redirect('medicine_inventory')
     
     
 

@@ -5,6 +5,7 @@ from . import views,delete,imports,editView
 
 urlpatterns = [
         path('',views.index, name="home"),
+        path('add_patient_visit',views.add_patient_visit, name="add_patient_visit"),
         path('add_health_issue',views.add_health_issue, name="add_health_issue"),
         path('resa/dashboard',views.dashboard, name="dashboard"),
         path('fetch_model_data/', views.fetch_model_data, name='fetch_model_data'),

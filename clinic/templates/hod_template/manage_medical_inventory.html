@@ -29,7 +29,31 @@ medicine inventory
   $(".alert").alert();
 </script>
 {% comment %} <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css"> {% endcomment %}
+<!-- Add the following line above the table -->
+<p class="total-payment">Total Payment for All Inventory: {{ total_payment }}/Tsh</p>
 
+<style>
+    .total-payment {
+        font-family: 'Roboto', sans-serif; /* Use a custom font */
+        font-weight: bold;
+        font-size: 24px;
+        color: #2c3e50; /* Text color */
+        background-color: #f1c40f; /* Background color */
+        padding: 10px 20px; /* Padding around the text */
+        border-radius: 10px; /* Rounded corners */
+        border: 2px solid #e67e22; /* Border */
+        display: inline-block; /* Display as inline block */
+        margin-bottom: 20px; /* Bottom margin for spacing */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Box shadow */
+        transition: background-color 0.3s ease; /* Smooth background color transition */
+    }
+    
+    .total-payment:hover {
+        background-color: #e67e22; /* Change background color on hover */
+        color: #fff; /* Change text color on hover */
+    }
+    
+</style>
 <div class="">
     <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
         <thead>
@@ -37,6 +61,7 @@ medicine inventory
                 <th>Medicine Name</th>
                 <th>Original Stock Level</th>
                 <th>Remaining Quantity</th>  
+                <th>Price used</th>  
                 <th>Purchase Date</th>
                 <th>Action</th>
             </tr>
@@ -47,7 +72,8 @@ medicine inventory
                     <td>{{ inventory.medicine.name }}</td>
                     <td>{{ inventory.quantity }}</td>
                     <td>{{ inventory.remain_quantity }}</td>
-                    <td>{{ inventory.purchase_date }}</td>
+                    <td>{{ inventory.total_payment }}</td>
+                    <td>{{ inventory.updated_at }}</td>
                     
                     <td>                      
                         <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#editInventoryModal{{ inventory.id }}"  data-toggle="tooltip" title="Edit">
