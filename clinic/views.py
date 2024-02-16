@@ -28,7 +28,7 @@ from tablib import Dataset
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import OuterRef, Subquery
-from .models import Category, ConsultationFee, DiagnosticTest, Equipment, EquipmentMaintenance, HealthIssue, InventoryItem, MedicationPayment, PathologyDiagnosticTest, PatientDisease, PatientVisits, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, Sample, Service, Supplier, UsageHistory
+from .models import Category, ConsultationFee, DiagnosticTest, Equipment, EquipmentMaintenance, HealthIssue, InventoryItem, MedicationPayment, PathologyDiagnosticTest, PatientDisease, PatientVisits, Prescription, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, Sample, Service, Supplier, UsageHistory
 
 # Create your views here.
 def index(request):
@@ -2062,6 +2062,74 @@ def add_reagent_used(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
     
+@csrf_exempt
+@require_POST
+def add_prescription(request):
+    try:
+        # Extract data from the request
+        prescription_id = request.POST.get('prescription_id')
+        patient_d = request.POST.get('patient')
+        medicine_id = request.POST.get('medicine')
+        route = request.POST.get('route')
+        medicine_used = int(request.POST.get('quantity'))
+        frequency = request.POST.get('frequency')
+        duration = request.POST.get('duration')
+        dose = request.POST.get('dose')
+
+        # Retrieve the corresponding InventoryItem
+      
+        patient = Patients.objects.get(id=patient_d) if patient_d else None
+        medicine = Medicine.objects.get(id=medicine_id)
+            
+            # Check if there is sufficient stock
+        medicine_inventory = medicine.medicineinventory_set.first()
+        if medicine_inventory and medicine_used > medicine_inventory.remain_quantity:
+                 return JsonResponse({'success': False, 'message': f'Insufficient stock. Only {medicine_inventory.remain_quantity} {medicine.name} available.'})
+
+
+        # Check if the usageHistoryId is provided for editing
+        if prescription_id:
+            # Editing existing usage history
+            prescription = Prescription.objects.get(pk=prescription_id)
+            # Get the previous quantity used
+            previous_quantity_used = prescription.quantity_used
+            # Calculate the difference in quantity
+            quantity_difference = medicine_used - previous_quantity_used
+            # Update the stock level of the corresponding item
+            medicine.remain_quantity -= quantity_difference            
+            total_price = prescription.quantity * prescription.medicine.unit_price
+            prescription.total_price = total_price
+            prescription.save(update_fields=['total_price'])
+        else:
+            # Creating new usage history
+            prescription = Prescription()
+            prs_no = generate_prescription_id()
+        
+        # Update or set values for other fields
+        prescription.lab_technician = patient
+        prescription.prs_no = prs_no
+        prescription.usage_date = medicine
+        prescription.route = route
+        prescription.dose = dose
+        prescription.frequency = frequency
+        prescription.duration = duration
+        prescription.quantity_used = medicine_used
+
+        # Save the changes to both models
+        medicine.save()
+        prescription.save()
+
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+    
+    
+def generate_prescription_id():
+    last_prescription = Prescription.objects.last()
+    last_sample_number = int(last_prescription.prs_no.split('-')[-1]) if last_prescription else 0
+    new_prescription_id = last_sample_number + 1
+    return f"PRS-{new_prescription_id:07d}"
+    
 def quality_control_list(request):
     # Retrieve all QualityControl objects
     quality_controls = QualityControl.objects.all()
@@ -2227,7 +2295,7 @@ def generate_vst():
     last_patient_visit = PatientVisits.objects.last()
 
     # Extract the numeric part from the last VST, or start from 0 if there are no patients yet
-    last_vst_number = int(last_patient_visit.visit_id.split('-')[-1]) if last_patient_visit else 0
+    last_vst_number = int(last_patient_visit.vst.split('-')[-1]) if last_patient_visit else 0
 
     # Increment the numeric part for the new patient
     new_vst_number = last_vst_number + 1
@@ -2249,3 +2317,22 @@ def fetch_model_data(request):
         data = list(HealthIssue.objects.values_list('id', 'name'))
 
     return JsonResponse({'data': data})    
+
+def patient_visit_history_view(request, patient_id):
+    # Retrieve visit history for the specified patient
+    visit_history = PatientVisits.objects.filter(patient_id=patient_id)
+    patient = Patients.objects.get(id=patient_id)
+
+    return render(request, 'hod_template/manage_patient_visit_history.html', {'visit_history': visit_history,'patient':patient})
+def patient_health_record_view(request, patient_id):
+    # Retrieve visit history for the specified patient
+    visit_history = PatientVisits.objects.filter(patient_id=patient_id)
+    patient = Patients.objects.get(id=patient_id)
+
+    return render(request, 'hod_template/manage_patitent_health_record.html', {'visit_history': visit_history,'patient':patient})
+
+
+def prescription_list(request):
+    # Retrieve all prescriptions from the database
+    prescriptions = Prescription.objects.all()
+    return render(request, 'hod_template/manage_prescription_list.html', {'prescriptions': prescriptions})

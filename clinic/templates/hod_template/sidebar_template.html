@@ -50,6 +50,14 @@
                               <p>Medicine</p>
                           </a>
                       </li>
+                      <li class="nav-item">
+                        {% url 'prescription_list' as prescription_list_url %}
+                        <a href="{{ prescription_list_url }}" class="nav-link{% if request.path == prescription_list_url %} active {% endif %}">
+                            <i class="nav-icon fas fa-prescription-bottle"></i>
+                            <p>Prescriptions</p>
+                        </a>
+                    </li>
+                    
                       <!-- Other Clinic Links -->
                       <li class="nav-item">
                         {% url 'manage_patient' as manage_patient %}

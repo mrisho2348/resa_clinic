@@ -75,6 +75,10 @@
                         <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#addVisitModal{{ patient.id }}" title="Add Visit">
                             <i class="fas fa-eye text-dark"></i>
                           </button>
+                                 <!-- Add more action links as needed -->
+                        <a href="{% url 'patient_visit_history_view' patient.id %}" data-toggle="tooltip" title="open visit History">
+                        <button type="button" class="btn btn-primary btn-sm"><i class="fa fa-eye text-dark"></i></button>
+                    </a>   
                     </td>
 
 
@@ -103,7 +107,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label class="control-label">Primary Service:</label>
-                                            <select class="form-control select2bs4" style="width: 100%;" id="Service{{ patient.id }}" name="primary_service">
+                                            <select class="form-control select2bs4" style="width: 100%;" id="primary_service{{ patient.id }}" name="primary_service">
                                                 <option value="Consultation">Consultation</option>
                                                 <option value="Imaging">Imaging</option>
                                                 <option value="Investigation">Investigation</option>
@@ -138,7 +142,7 @@
                                             <div class="row">
                                                 <div class="col-md-8"></div>
                                                 <div class="col-md-4">
-                                                    <button type="submit" class="btn btn-md btn-primary" id="submitBtn">Save and Continue <i class="mdi mdi-forward"></i></button>
+                                                    <button type="button" class="btn btn-md btn-primary"  onclick="AddVisit({{ patient.id }})">Save and Continue <i class="mdi mdi-forward"></i></button>
                                                 </div>
                                             </div>
                                         </div>
@@ -149,35 +153,56 @@
                     </div>
                        
                     <script>
-                        // Handle form submission using AJAX
-                        $(document).ready(function () {
-                            // Assuming you have a loop or iteration for categories, replace "forEach" with your actual loop
-                            {% for patient in patient_records %}
-                                $('#addVisitForm{{ patient.id }}').submit(function (e) {
-                                    e.preventDefault();
-                                    $.ajax({
-                                        type: 'POST',
-                                        url: '{% url "add_patient_visit" %}',  // Replace with your URL
-                                        data: $('#addVisitForm{{ patient.id }}').serialize(),
-                                        success: function (data) {
-                                            if (data.status === 'success') {
-                                                $('#addVisitModal{{ patient.id }}').modal('hide');
-                                                location.reload(true);
-                                                // Refresh the category list or perform any other actions
-                                            } else {
-                                                // Handle other status cases if needed
-                                                alert(data.message);
-                                            }
-                                        },
-                                        error: function (error) {
-                                            alert(error);
-                                            // Handle errors if necessary
-                                        }
-                                    });
-                                });
-                            {% endfor %}
-                        });
+                        function AddVisit(patientId) {
+                            var visitType = $('#visitType' + patientId).val();
+                            var primary_service = $('#primary_service' + patientId).val();
+                            var insuranceName = $('#insuranceName' + patientId).val();
+                            var insuranceNumber = $('#insuranceNumber' + patientId).val();
+                            var verificationCode = $('#verificationCode' + patientId).val();
+                            var visitReason = $('#visitReason' + patientId).val();
+                            var referralNumber = $('#referralNumber' + patientId).val();
+                            var patient_id = $('#patient_id' + patientId).val();
+                            var visit_id = $('#visit_id' + patientId).val();
+                         
+                       
+                            $.ajax({
+                                type: 'POST',
+                                url: '/add_patient_visit/',
+                                data: {                
+                                    visitType: visitType,                              
+                                    insuranceName: insuranceName,
+                                    insuranceNumber: insuranceNumber,
+                                    verificationCode: verificationCode,
+                                    visitReason: visitReason,
+                                    referralNumber: referralNumber,
+                                    patient_id: patient_id,
+                                    visit_id: visit_id,
+                                    primary_service: primary_service
+                                },
+                                success: function(data) {
+                                    if (data.status === 'success') {
+                                        // Display success message                    
+                                        $('#addVisitModal' + patientId).modal('hide');
+                                        location.reload(true);
+                                    } 
+                                    else {
+                                        // Display error message if any
+                                        alert(data.message);
+                                    }
+                                    // Hide the modal after displaying the message
+                                  
+                                },
+                                error: function(error) {
+                                    alert(error);
+                                    // Display error message
+                                    $('#successMessageContainer').html('<div class="alert alert-danger" role="alert">Failed to use item</div>');
+                                    // Hide the modal after displaying the message
+                                 
+                                }
+                            });
+                        }
                     </script>
+                    
                     <script>
                         $(document).ready(function () {
                             // Show/hide additional fields based on visit type

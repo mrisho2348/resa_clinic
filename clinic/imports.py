@@ -3,9 +3,9 @@ import logging
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.db import IntegrityError
-from clinic.models import Category, Company, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, Patients, Procedure, Reagent, Referral, Service, Supplier
-from .resources import CategoryResource, CompanyResource, DiseaseRecodeResource, EquipmentMaintenanceResource, EquipmentResource, HealthIssueResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, PathologyRecordResource, PatientsResource, ProcedureResource, ReagentResource, ReferralResource, ServiceResource, SupplierResource
-from .forms import ImportCategoryForm, ImportCompanyForm, ImportDiseaseForm, ImportEquipmentForm, ImportEquipmentMaintenanceForm, ImportHealthIssueForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientsForm, ImportProcedureForm, ImportReagentForm, ImportReferralForm, ImportServiceForm, ImportSupplierForm
+from clinic.models import Category, Company, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, Patients, Prescription, Procedure, Reagent, Referral, Service, Supplier
+from .resources import CategoryResource, CompanyResource, DiseaseRecodeResource, EquipmentMaintenanceResource, EquipmentResource, HealthIssueResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, PathologyRecordResource, PatientsResource, PrescriptionResource, ProcedureResource, ReagentResource, ReferralResource, ServiceResource, SupplierResource
+from .forms import ImportCategoryForm, ImportCompanyForm, ImportDiseaseForm, ImportEquipmentForm, ImportEquipmentMaintenanceForm, ImportHealthIssueForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientsForm, ImportPrescriptionForm, ImportProcedureForm, ImportReagentForm, ImportReferralForm, ImportServiceForm, ImportSupplierForm
 from tablib import Dataset
 logger = logging.getLogger(__name__)
 def import_disease_recode(request):
@@ -378,6 +378,40 @@ def import_ImportInventoryItemForm_records(request):
         form = ImportInventoryItemForm()
 
     return render(request, 'hod_template/import_InventoryItem.html', {'form': form})
+
+def import_prescription_records(request):
+    if request.method == 'POST':
+        form = ImportPrescriptionForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = PrescriptionResource()
+                new_records = request.FILES['prescription_records_file']
+                
+                # Use tablib to load the imported data
+                dataset = resource.export()
+                imported_data = dataset.load(new_records.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+
+                for data in imported_data:
+                     prescription_record = Prescription(
+                        route=data[2],
+                        quantity_used=data[6],                     
+                        patient=Patients.objects.get(id=data[0]),                    
+                        dose=data[3],                     
+                        medicine=Medicine.objects.get(id=data[1]),                     
+                        frequency=data[4],                     
+                        duration=data[5],                     
+                                         
+                       )
+                     prescription_record.save()
+
+                return redirect('prescription_list') 
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportPrescriptionForm()
+
+    return render(request, 'hod_template/import_prescription.html', {'form': form})
 
 def import_patient_records(request):
     if request.method == 'POST':

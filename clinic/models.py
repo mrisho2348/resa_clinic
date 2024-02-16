@@ -226,7 +226,6 @@ class Patients(models.Model):
     payment_form = models.CharField(max_length=255, choices=PAYMENT_CHOICES)
     insurance_name = models.CharField(max_length=255, blank=True, null=True)
     insurance_number = models.CharField(max_length=255, blank=True, null=True)
- 
     
     marital_status = models.CharField(max_length=255)
     patient_type = models.CharField(max_length=255)
@@ -596,6 +595,33 @@ class MedicineInventory(models.Model):
                 purchase_date=purchase_date
             )
     
+class Prescription(models.Model):
+    patient = models.ForeignKey('Patients', on_delete=models.CASCADE)
+    medicine = models.ForeignKey('Medicine', on_delete=models.CASCADE)  # Link with Medicine model
+    prs_no = models.CharField(max_length=20, unique=True, editable=False)
+    route = models.CharField(max_length=50)
+    dose = models.CharField(max_length=50)
+    frequency = models.CharField(max_length=50)
+    duration = models.CharField(max_length=50)
+    quantity_used = models.PositiveIntegerField()   
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def save(self, *args, **kwargs):
+        # Generate a unique identifier based on count of existing records
+        if not self.prs_no:
+            self.prs_no = generate_prescription_id()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.patient.fullname} - {self.drug.name}"  # Accessing drug's name   
+    
+def generate_prescription_id():
+    last_prescription = Prescription.objects.last()
+    last_sample_number = int(last_prescription.prs_no.split('-')[-1]) if last_prescription else 0
+    new_prescription_id = last_sample_number + 1
+    return f"PRS-{new_prescription_id:07d}"         
 # Now, the additional model
 class PathologyDiagnosticTest(models.Model):
     pathology_record = models.ForeignKey(PathodologyRecord, on_delete=models.CASCADE, related_name='diagnostic_tests')
