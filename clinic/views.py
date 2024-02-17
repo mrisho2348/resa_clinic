@@ -2068,7 +2068,7 @@ def add_prescription(request):
     try:
         # Extract data from the request
         prescription_id = request.POST.get('prescription_id')
-        patient_d = request.POST.get('patient')
+        patient_id = request.POST.get('patient')
         medicine_id = request.POST.get('medicine')
         route = request.POST.get('route')
         medicine_used = int(request.POST.get('quantity'))
@@ -2076,39 +2076,41 @@ def add_prescription(request):
         duration = request.POST.get('duration')
         dose = request.POST.get('dose')
 
-        # Retrieve the corresponding InventoryItem
-      
-        patient = Patients.objects.get(id=patient_d) if patient_d else None
+        # Retrieve the corresponding patient and medicine
+        patient = Patients.objects.get(id=patient_id)
         medicine = Medicine.objects.get(id=medicine_id)
-            
-            # Check if there is sufficient stock
+        
+        # Check if there is sufficient stock
         medicine_inventory = medicine.medicineinventory_set.first()
         if medicine_inventory and medicine_used > medicine_inventory.remain_quantity:
-                 return JsonResponse({'success': False, 'message': f'Insufficient stock. Only {medicine_inventory.remain_quantity} {medicine.name} available.'})
-
+            return JsonResponse({'success': False, 'message': f'Insufficient stock. Only {medicine_inventory.remain_quantity} {medicine.name} available.'})
 
         # Check if the usageHistoryId is provided for editing
         if prescription_id:
-            # Editing existing usage history
+            # Editing existing prescription
             prescription = Prescription.objects.get(pk=prescription_id)
             # Get the previous quantity used
             previous_quantity_used = prescription.quantity_used
+            print(previous_quantity_used)
             # Calculate the difference in quantity
             quantity_difference = medicine_used - previous_quantity_used
+            print(quantity_difference)
             # Update the stock level of the corresponding item
-            medicine.remain_quantity -= quantity_difference            
-            total_price = prescription.quantity * prescription.medicine.unit_price
+            if medicine_inventory:
+                medicine_inventory.remain_quantity -= quantity_difference
+                medicine_inventory.save()
+            # Recalculate total price
+            total_price = medicine_used * medicine.unit_price
             prescription.total_price = total_price
-            prescription.save(update_fields=['total_price'])
         else:
-            # Creating new usage history
+            # Creating new prescription
             prescription = Prescription()
             prs_no = generate_prescription_id()
-        
+            prescription.prs_no = prs_no
+
         # Update or set values for other fields
-        prescription.lab_technician = patient
-        prescription.prs_no = prs_no
-        prescription.usage_date = medicine
+        prescription.patient = patient
+        prescription.medicine = medicine
         prescription.route = route
         prescription.dose = dose
         prescription.frequency = frequency
@@ -2116,12 +2118,12 @@ def add_prescription(request):
         prescription.quantity_used = medicine_used
 
         # Save the changes to both models
-        medicine.save()
         prescription.save()
 
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
+
     
     
 def generate_prescription_id():
@@ -2335,4 +2337,18 @@ def patient_health_record_view(request, patient_id):
 def prescription_list(request):
     # Retrieve all prescriptions from the database
     prescriptions = Prescription.objects.all()
-    return render(request, 'hod_template/manage_prescription_list.html', {'prescriptions': prescriptions})
+    patients = Patients.objects.all()
+    current_date = timezone.now().date()
+
+    # Retrieve medicines with inventory levels not equal to zero or greater than zero, and not expired
+    medicines = Medicine.objects.filter(
+        medicineinventory__remain_quantity__gt=0,  # Inventory level greater than zero
+        expiration_date__gt=current_date  # Not expired
+    ).distinct() 
+    total_price = sum(prescription.total_price for prescription in prescriptions) 
+    return render(request, 'hod_template/manage_prescription_list.html', {
+        'prescriptions': prescriptions,
+        'medicines': medicines,
+        'patients': patients,
+        'total_price': total_price,
+        })

@@ -22,9 +22,30 @@ Prescription List
 
 {% load static %}
 {% block main_content %}
+<p class="total-payment">Total Payment for All Prescription: {{ total_price }}/Tsh</p>
 
-{% comment %} <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css"> {% endcomment %}
-
+<style>
+    .total-payment {
+        font-family: 'Roboto', sans-serif; /* Use a custom font */
+        font-weight: bold;
+        font-size: 24px;
+        color: #2c3e50; /* Text color */
+        background-color: #f1c40f; /* Background color */
+        padding: 10px 20px; /* Padding around the text */
+        border-radius: 10px; /* Rounded corners */
+        border: 2px solid #e67e22; /* Border */
+        display: inline-block; /* Display as inline block */
+        margin-bottom: 20px; /* Bottom margin for spacing */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Box shadow */
+        transition: background-color 0.3s ease; /* Smooth background color transition */
+    }
+    
+    .total-payment:hover {
+        background-color: #e67e22; /* Change background color on hover */
+        color: #fff; /* Change text color on hover */
+    }
+    
+</style>
 <div class="">
     <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
         <thead>
@@ -52,29 +73,18 @@ Prescription List
                     <td>{{ prescription.dose }}</td>
                     <td>{{ prescription.frequency }}</td>
                     <td>{{ prescription.duration }}</td>
-                    <td>{{ prescription.quantity }}</td>
+                    <td>{{ prescription.quantity_used }}</td>
                     <td>{{ prescription.total_price }}</td>
                     <td>{{ prescription.created_at }}</td>
+                    <td>
                       <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#editPrescriptionModal{{ prescription.id }}"  data-toggle="tooltip" title="Edit">
                         <i class="fa fa-edit text-white"></i>
                     </button>
                       <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deletePrescriptionModal{{ prescription.id }}"  data-toggle="tooltip" title="Delete">
                         <i class="fas fa-trash"></i>
-                    </button>
-              
-                
-                        
-                    </td>
-         
-
-
-
-                 
-
-
-<!-- Modal -->
-
-                      <!-- Delete Modal -->
+                    </button>    
+                    </td>         
+                                <!-- Delete Modal -->
     <div class="modal fade" id="deletePrescriptionModal{{ prescription.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteInventoryItemModalLabel{{ prescription.id }}" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -135,7 +145,7 @@ Prescription List
                             {% csrf_token %}
                             <div class="form-group">
                               <label for="patient">Patient:</label>
-                              <select class="form-control" id="patient" name="patient" required>
+                              <select class="form-control select2bs4" style="width: 100%;" id="patient" name="patient" required>
                                 <option value="">Select Patient</option>
                                 {% for patient in patients %}
                                   <option value="{{ patient.id }}" {% if patient.id == prescription.patient.id  %} selected{% endif %}>{{ patient.fullname }}</option>
@@ -144,7 +154,7 @@ Prescription List
                             </div>
                             <div class="form-group">
                               <label for="medicine">Medicine:</label>
-                              <select class="form-control" id="medicine" name="medicine" required>
+                              <select class="form-control select2bs4" style="width: 100%;" id="medicine" name="medicine" required>
                                 <option value="">Select Medicine</option>
                                 {% for medicine in medicines %}
                                   <option value="{{ medicine.id }}" {% if medicine.id == prescription.medicine.id  %} selected {% endif %}>{{ medicine.name }}</option>
@@ -153,7 +163,7 @@ Prescription List
                             </div>
                             <div class="form-group">
                               <label for="route">Route:</label>
-                              <input type="text" class="form-control" id="route" name="route" required>
+                              <input type="text" class="form-control" id="route" name="route"  value="{{ prescription.route }}" required>
                               <input type="hidden" class="form-control" id="prescription_id" name="prescription_id" value="{{ prescription.id }}">
                             </div>
                             <div class="form-group">
@@ -170,7 +180,7 @@ Prescription List
                             </div>
                             <div class="form-group">
                               <label for="quantity">Quantity:</label>
-                              <input type="number" class="form-control" id="quantity" name="quantity" value="{{ prescription.quantity }}"  required>
+                              <input type="number" class="form-control" id="quantity" name="quantity" value="{{ prescription.quantity_used }}"  required>
                             </div>      
                             <button type="submit" class="btn btn-primary" id="submitBtn">Edit Prescription</button>   
                            </form>
@@ -188,7 +198,7 @@ Prescription List
                                     e.preventDefault();
                                     $.ajax({
                                         type: 'POST',
-                                        url: '{% url "add_inventory_item" %}',  // Replace with your URL
+                                        url: '{% url "add_prescription" %}',  // Replace with your URL
                                         data: $('#editPrescriptionModalForm{{ prescription.id }}').serialize(),
                                         success: function (data) {
                                             if (data.status === 'success') {
@@ -197,11 +207,11 @@ Prescription List
                                                 // Refresh the category list or perform any other actions
                                             } else {
                                                 // Handle other status cases if needed
-                                                console.log(data.message);
+                                                alert(data.message);
                                             }
                                         },
                                         error: function (error) {
-                                            console.log(error);
+                                            alert(error);
                                             // Handle errors if necessary
                                         }
                                     });
@@ -237,7 +247,7 @@ Prescription List
             {% csrf_token %}
             <div class="form-group">
               <label for="patient">Patient:</label>
-              <select class="form-control" id="patient" name="patient" required>
+              <select class="form-control select2bs4" style="width: 100%;" id="patient" name="patient" required>
                 <option value="">Select Patient</option>
                 {% for patient in patients %}
                   <option value="{{ patient.id }}">{{ patient.fullname }}</option>
@@ -246,7 +256,7 @@ Prescription List
             </div>
             <div class="form-group">
               <label for="medicine">Medicine:</label>
-              <select class="form-control" id="medicine" name="medicine" required>
+              <select class="form-control select2bs4" style="width: 100%;" id="medicine" name="medicine" required>
                 <option value="">Select Medicine</option>
                 {% for medicine in medicines %}
                   <option value="{{ medicine.id }}">{{ medicine.name }}</option>

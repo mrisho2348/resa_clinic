@@ -325,7 +325,18 @@ def delete_patient_visit(request, patient_visit_id):
 def delete_prescription(request, prescription_id):
     try:
         prescription = get_object_or_404(Prescription, pk=prescription_id)
-        prescription.delete()
+        deleted_quantity = prescription.quantity_used
+        
+        with transaction.atomic():
+            # Perform deletion
+            prescription.delete()
+
+            # Adjust MedicineInventory
+            MedicineInventory.objects.filter(medicine=prescription.medicine).update(
+                remain_quantity=F('remain_quantity') + deleted_quantity
+            )
+
+        
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}) 

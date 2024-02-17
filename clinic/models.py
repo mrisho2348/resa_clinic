@@ -604,7 +604,7 @@ class Prescription(models.Model):
     frequency = models.CharField(max_length=50)
     duration = models.CharField(max_length=50)
     quantity_used = models.PositiveIntegerField()   
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

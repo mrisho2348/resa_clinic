@@ -27,7 +27,7 @@ def update_total_payment(sender, instance, created, **kwargs):
 def update_total_payment_per_prescription(sender, instance, created, **kwargs):
     if created:
         # Calculate total payment for the inventory
-        total_price = instance.quantity * instance.medicine.unit_price
+        total_price = instance.quantity_used * instance.medicine.unit_price
         
         # Update the total_payment field of the MedicineInventory instance
         instance.total_price = total_price
@@ -53,8 +53,8 @@ def update_medicine_inventory_per_prescription(sender, instance, created, **kwar
     if created:
         # Deduct quantity from MedicineInventory when a new Prescription is created
         try:
-            medicine_inventory = MedicineInventory.objects.get(medicine=instance.drug)
-            medicine_inventory.remain_quantity -= instance.quantity
+            medicine_inventory = MedicineInventory.objects.get(medicine=instance.medicine)
+            medicine_inventory.remain_quantity -= instance.quantity_used
             medicine_inventory.save()
         except MedicineInventory.DoesNotExist:
             # Handle if medicine inventory does not exist
