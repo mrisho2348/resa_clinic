@@ -114,6 +114,24 @@ class ImportPrescriptionForm(forms.Form):
         validators=[FileExtensionValidator(allowed_extensions=['xlsx', 'xls'])],
         widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.xlsx, .xls'})
     )
+class ImportPatientVitalForm(forms.Form):
+    vital_records_file = forms.FileField(
+        label='Choose an Excel file',
+        validators=[FileExtensionValidator(allowed_extensions=['xlsx', 'xls'])],
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.xlsx, .xls'})
+    )
+class ImportDiagnosisForm(forms.Form):
+    diagnosis_records_file = forms.FileField(
+        label='Choose an Excel file',
+        validators=[FileExtensionValidator(allowed_extensions=['xlsx', 'xls'])],
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.xlsx, .xls'})
+    )
+class ImportConsultationNotesForm(forms.Form):
+    consultation_records_file = forms.FileField(
+        label='Choose an Excel file',
+        validators=[FileExtensionValidator(allowed_extensions=['xlsx', 'xls'])],
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.xlsx, .xls'})
+    )
 
 class StaffsForm(forms.ModelForm):
     class Meta:

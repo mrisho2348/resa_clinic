@@ -5,6 +5,10 @@ from . import views,delete,imports,editView
 
 urlpatterns = [
         path('',views.index, name="home"),
+        path('patient_info_form/',views.patient_info_form, name="patient_info_form"),
+        path('save_diagnosis/',views.save_diagnosis, name="save_diagnosis"),
+        path('save_consultation_notes/',views.save_consultation_notes, name="save_consultation_notes"),
+        path('save_patient_vital/',views.save_patient_vital, name="save_patient_vital"),
         path('add_prescription/',views.add_prescription, name="add_prescription"),
         path('add_patient_visit/',views.add_patient_visit, name="add_patient_visit"),
         path('add_health_issue',views.add_health_issue, name="add_health_issue"),
@@ -20,6 +24,7 @@ urlpatterns = [
         path('add_pathodology_record/', views.add_pathodology_record, name='add_pathodology_record'),
         path('update_equipment_status', views.update_equipment_status, name='update_equipment_status'),        
         path('login', views.ShowLogin, name='login'),        
+        path('add_remotepatient_visit', views.add_remotepatient_visit, name='add_remotepatient_visit'),  # Move this line here
         path('logout_user', views.logout_user, name='logout_user'),  # Move this line here
         path('contact/', views.ContactFormView.as_view(), name='contact_form'),
         path('GetUserDetails', views.GetUserDetails, name='GetUserDetails'),
@@ -80,9 +85,14 @@ urlpatterns = [
        
         
         # manage urls 
+        path('resa/remotemanage_patient/', views.remotemanage_patient, name='remotemanage_patient'),
+        path('diagnosis/', views.diagnosis_list, name='diagnosis_list'),
+        path('consultation-notes/', views.consultation_notes_view, name='consultation_notes'),
+        path('resa/patient_vital_all_listt/', views.patient_vital_all_list, name='patient_vital_all_list'),
         path('resa/reagent-usage-list/', views.reagent_usage_list, name='reagent_usage_list'),
         path('resa/equipment-maintenance-list/', views.equipment_maintenance_list, name='equipment_maintenance_list'),
         path('resa/equipment-list/', views.equipment_list, name='equipment_list'),
+        path('patient_vital_list/<int:patient_id>/', views.patient_vital_list, name='patient_vital_list'),
         path('patient_health_record_view/<int:patient_id>/', views.patient_health_record_view, name='patient_health_record_view'),
         path('patient_visit_history/<int:patient_id>/', views.patient_visit_history_view, name='patient_visit_history_view'),
         path('health-issues/', views.health_issue_list, name='health_issue_list'),
@@ -131,6 +141,7 @@ urlpatterns = [
         path('api/out-of-stock-reagent-count/', views.get_out_of_stock_count_reagent, name='get_out_of_stock_count_reagent'),
         
         # imports urls 
+        path('resa/import_Import/import_patient_vital_records',imports.import_patient_vital_records, name="import_patient_vital_records"),
         path('resa/import_Import/Inventory/ItemForm_records',imports.import_ImportInventoryItemForm_records, name="import_ImportInventoryItemForm_records"),
         path('resa/ImportExcel_supplier',imports.import_supplier, name="import_supplier"),
         path('resa/ImportExcel_category',imports.import_category, name="import_category"),
@@ -140,8 +151,10 @@ urlpatterns = [
         path('import_maintenance/', imports.import_maintenance, name='import_maintenance'),
         path('import_reagent', imports.import_reagent, name='import_reagent'),
         path('import_health_issue', imports.import_health_issue, name='import_health_issue'),
+        path('import-diagnosis-records', imports.import_diagnosis_records, name='import_diagnosis_records'),
         path('import_equipment', imports.import_equipment, name='import_equipment'),
         path('import_prescription_records', imports.import_prescription_records, name='import_prescription_records'),
+        path('import_consultation_notes_records', imports.import_consultation_notes_records, name='import_consultation_notes_records'),
         path('import-companies/', imports.import_companies, name='import_companies'),
         path('import-patients/', imports.import_patient_records, name='import_patient_records'),
         path('import-pathology-records/', imports.import_pathology_records, name='import_pathology_records'),
@@ -171,6 +184,9 @@ urlpatterns = [
         
         
         # delete urls 
+        path('delete_diagnosis/<int:diagnosis_id>/', delete.delete_diagnosis, name='delete_diagnosis'),
+        path('delete_ConsultationNotes/<int:consultation_id>/', delete.delete_ConsultationNotes, name='delete_ConsultationNotes'),
+        path('delete_patient_vital/<int:vital_id>/', delete.delete_patient_vital, name='delete_patient_vital'),
         path('delete_prescription/<int:prescription_id>/', delete.delete_prescription, name='delete_prescription'),
         path('delete-consultation-fee/<int:fee_id>/', delete.delete_consultation_fee, name='delete_consultation_fee'),
         path('delete-consultation/<int:appointment_id>/', delete.delete_consultation, name='delete_consultation'),

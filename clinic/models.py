@@ -169,7 +169,8 @@ class Supplier(models.Model):
     objects = models.Manager()
 
     def __str__(self):
-        return self.name        
+        return self.name    
+        
 class PathodologyRecord(models.Model):
     name = models.CharField(max_length=255)
     related_diseases = models.ManyToManyField('DiseaseRecode', blank=True)
@@ -243,6 +244,9 @@ class Patients(models.Model):
     def __str__(self):
         return self.fullname
 
+
+
+    
 def generate_mrn():
     # Retrieve the last patient's MRN from the database
     last_patient = Patients.objects.last()
@@ -258,8 +262,110 @@ def generate_mrn():
 
     return new_mrn
     
+
+
+class RemotePatient(models.Model):
+ 
+
+    INSURANCE_CHOICES = [
+        ('Insured', 'Insured'),
+        ('Uninsured', 'Uninsured')
+    ]
+
+    mrn = models.CharField(max_length=20, unique=True, editable=False, verbose_name='MRN')
+    first_name = models.CharField(max_length=100, verbose_name='First Name')
+    middle_name = models.CharField(max_length=100, blank=True, null=True, verbose_name='Middle Name')
+    last_name = models.CharField(max_length=100, verbose_name='Last Name')
+    gender = models.CharField(max_length=10, verbose_name='Gender')
+    age = models.IntegerField(verbose_name='Age')
+    marital_status = models.CharField(max_length=20, blank=True, null=True, verbose_name='Marital Status')
+    nationality = models.CharField(max_length=100, verbose_name='Nationality')
+    tribe = models.CharField(max_length=100, blank=True, null=True, verbose_name='Tribe')
+    patient_type = models.CharField(max_length=100, verbose_name='Patient Type')
+    company = models.CharField(max_length=100, verbose_name='Company')
+    occupation = models.CharField(max_length=100, verbose_name='Occupation')
+    phone = models.CharField(max_length=20, verbose_name='Phone')
+    employee_number = models.CharField(max_length=50, blank=True, null=True, verbose_name='Employee Number')
+    date_of_first_employment = models.DateField(blank=True, null=True, verbose_name='Date of First Employment')
+    longtime_illness = models.CharField(max_length=100, verbose_name='Longtime Illness')
+    longtime_medication = models.CharField(max_length=100, verbose_name='Longtime Medication')
+    osha_certificate = models.BooleanField(default=False, verbose_name='OSHA Certificate')
+    date_of_osha_certification = models.DateField(blank=True, null=True, verbose_name='Date of OSHA Certification')
+    insurance = models.CharField(max_length=100, choices=INSURANCE_CHOICES, verbose_name='Insurance')
+    insurance_company = models.CharField(max_length=100, blank=True, null=True, verbose_name='Insurance Company')
+    insurance_number = models.CharField(max_length=100, blank=True, null=True, verbose_name='Insurance Number')
+    emergency_contact_name = models.CharField(max_length=50, verbose_name='Emergency Contact Name')
+    emergency_contact_relation = models.CharField(max_length=20, verbose_name='Emergency Contact Relation')
+    emergency_contact_phone = models.CharField(max_length=20, verbose_name='Emergency Contact Phone')
+    emergency_contact_mobile = models.CharField(max_length=20, verbose_name='Emergency Contact Mobile')
+    life_style = models.CharField(max_length=100, verbose_name='Lifestyle')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Created At')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Updated At')
+
+    objects = models.Manager()
+
+    def save(self, *args, **kwargs):
+        # Generate MRN only if it's not provided
+        if not self.mrn:
+            self.mrn = generate_mrn()
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"   
     
+class PatientHealthCondition(models.Model):
+    patient = models.OneToOneField(RemotePatient, on_delete=models.CASCADE, related_name='health_conditions', verbose_name='Patient')    
+    has_health_condition = models.BooleanField(default=False, verbose_name='Has Health Condition')
+    health_condition_notes = models.CharField(max_length=200, blank=True, null=True, verbose_name='Health Condition Notes')  
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Created At')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Updated At')
     
+    objects = models.Manager()  
+
+class FamilyMedicalHistory(models.Model):
+    patient = models.ForeignKey(RemotePatient, on_delete=models.CASCADE, related_name='family_medical_history', verbose_name='Patient')
+    condition = models.CharField(max_length=100, verbose_name='Condition')
+    relationship = models.CharField(max_length=100, blank=True, null=True, verbose_name='Relationship')
+    comments = models.CharField(max_length=100, blank=True, null=True, verbose_name='Comments')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Created At')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Updated At')
+
+    objects = models.Manager()
+
+    def __str__(self):
+        return f"{self.patient} - {self.condition}"
+    
+class PatientVital(models.Model):
+    patient = models.ForeignKey('Patients', on_delete=models.CASCADE)
+    recorded_at = models.DateTimeField(auto_now_add=True)
+    respiratory_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Respiratory rate in breaths per minute")
+    pulse_rate = models.PositiveIntegerField(null=True, blank=True, help_text="Pulse rate in beats per minute")
+    blood_pressure = models.CharField(max_length=20, null=True, blank=True, help_text="Blood pressure measurement")
+    spo2 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="SPO2 measurement in percentage")
+    temperature = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Temperature measurement in Celsius")
+    gcs = models.PositiveIntegerField(null=True, blank=True, help_text="Glasgow Coma Scale measurement")
+    avpu = models.CharField(max_length=20, null=True, blank=True, help_text="AVPU scale measurement")
+    unique_identifier = models.CharField(max_length=20, unique=True, editable=False)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+    def __str__(self):
+        return f"Vital information for {self.patient} recorded at {self.recorded_at}"
+
+    def save(self, *args, **kwargs):
+        # Generate a unique identifier based on the patient's format
+        if not self.unique_identifier:
+            self.unique_identifier = self.generate_unique_identifier()
+        super().save(*args, **kwargs)
+
+    def generate_unique_identifier(self):
+        last_patient_vital = PatientVital.objects.last()
+        last_number = int(last_patient_vital.unique_identifier.split('-')[-1]) if last_patient_vital else 0
+        new_number = last_number + 1
+        return f"VTN-{new_number:07d}"
+
+        
 class PatientVisits(models.Model):
     VISIT_TYPES = (
         ('Normal', _('Normal')),
@@ -299,6 +405,93 @@ class PatientVisits(models.Model):
 def generate_vst():
     # Retrieve the last patient's VST from the database
     last_patient_visit = PatientVisits.objects.last()
+
+    # Extract the numeric part from the last VST, or start from 0 if there are no patients yet
+    last_vst_number = int(last_patient_visit.vst.split('-')[-1]) if last_patient_visit else 0
+
+    # Increment the numeric part for the new patient
+    new_vst_number = last_vst_number + 1
+
+    # Format the VST with leading zeros and concatenate with the prefix "PAT-"
+    new_vst = f"VST-{new_vst_number:07d}"
+
+    return new_vst  
+
+
+class Diagnosis(models.Model):
+    diagnosis_name= models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+    
+    def __str__(self):
+        return self.diagnosis_name
+    
+    
+
+class ConsultationNotes(models.Model):
+    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
+    chief_complaints = models.TextField(null=True, blank=True)
+    history_of_presenting_illness = models.TextField(null=True, blank=True)
+    consultation_number = models.CharField(max_length=20, unique=True)
+    physical_examination = models.TextField(null=True, blank=True)
+    allergy_to_medications = models.CharField(max_length=255, null=True, blank=True)
+    provisional_diagnosis = models.ManyToManyField(Diagnosis, related_name='provisional_diagnosis_notes', blank=True)
+    final_diagnosis = models.ManyToManyField(Diagnosis, related_name='final_diagnosis_notes', blank=True)
+    pathology = models.ManyToManyField(PathodologyRecord, blank=True)
+    doctor_plan = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+    def __str__(self):
+        return f"Consultation for {self.patient} by Dr. {self.doctor}"
+    
+    def save(self, *args, **kwargs):
+        if not self.consultation_number:
+            self.consultation_number = generate_consultation_number()
+        super().save(*args, **kwargs)   
+    
+def generate_consultation_number():
+    last_consultation_notes = ConsultationNotes.objects.last()
+    last_sample_number = int(last_consultation_notes.consultation_number.split('-')[-1]) if last_consultation_notes else 0
+    new_consultation_number = last_sample_number + 1
+    return f"CTN-{new_consultation_number:07d}"       
+  
+class RemotePatientVisits(models.Model):
+    VISIT_TYPES = (
+        ('Normal', _('Normal')),
+        ('Emergency', _('Emergency')),
+        ('Referral', _('Referral')),
+        ('Follow up', _('Follow up')),
+    )
+
+    patient = models.ForeignKey('Patients', on_delete=models.CASCADE)
+    vst = models.CharField(max_length=20, unique=True, editable=False)
+    visit_type = models.CharField( max_length=15, choices=VISIT_TYPES)
+    visit_reason = models.TextField(blank=True, null=True)   
+    primary_service = models.CharField(max_length=50) 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Visit')
+        verbose_name_plural = _('Visits')
+        
+    def save(self, *args, **kwargs):
+        # Generate MRN only if it's not provided
+        if not self.vst:
+            self.vst = generate_vst()
+
+        super().save(*args, **kwargs)   
+
+    def __str__(self):
+        return f'{self.patient} - {self.get_visit_type_display()}'
+    
+def generate_vst():
+    # Retrieve the last patient's VST from the database
+    last_patient_visit = RemotePatientVisits.objects.last()
 
     # Extract the numeric part from the last VST, or start from 0 if there are no patients yet
     last_vst_number = int(last_patient_visit.vst.split('-')[-1]) if last_patient_visit else 0

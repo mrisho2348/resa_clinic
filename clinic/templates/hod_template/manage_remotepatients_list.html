@@ -1,0 +1,81 @@
+{% extends 'hod_template/base_template.html' %}
+
+{% block title %}
+   All patient
+{% endblock title %}
+
+{% block page_title %}
+   All patient
+{% endblock page_title %}
+
+{% block breadcrumb %}
+{% include "hod_template/modal_form.html" %}
+<a class="btn btn-primary float-right" href="{% url 'patient_info_form' %}">
+    <i class="fas fa-plus"></i> New patient
+</a>
+
+<!-- Add Import Staff link and modal trigger -->
+<a class="btn btn-success float-right mr-2" href="{% url 'import_staff' %}">
+    <i class="fas fa-file-import"></i> Import patient
+</a>
+
+{% endblock breadcrumb %}
+
+{% load static %}
+{% block main_content %}
+        
+   
+
+<div class="">
+    <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
+        <thead>
+            <tr>
+                <th>MRN</th>
+                <th>Name</th>           
+                <th>Gender</th>
+                <th>Age</th>
+                <th>Company</th>
+                <th>Phone</th>
+                <th>Created At</th>              
+                <th>Patient Type</th>               
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="student-table-body">
+            {% for staff in staffs %}
+            <tr>
+                <td>{{ patient.mrn }}</td>
+                <td>{{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</td>                
+                <td>{{ patient.gender }}</td>
+                <td>{{ patient.age }}</td>
+                <td>{{ patient.company }}</td>
+                <td>{{ patient.phone }}</td>
+                <td>{{ patient.created_at }}</td>              
+                <td>{{ patient.patient_type }}</td>              
+                 <td class="text-center">
+                    <a href="{% url 'single_staff_detail' staff_id=staff.id %}" data-toggle="tooltip" title="View detail">
+                        <button type="button" class="btn btn-light border btn-sm"><i class="fa fa-eye text-dark"></i></button>
+                    </a>
+                    <a href="{% url 'edit_staff' staff_id=staff.id %}" data-toggle="tooltip" title="Edit Staff">
+                        <button type="button" class="btn btn-primary btn-sm"><i class="fa fa-edit text-white"></i></button>
+                    </a>
+                    <a href="{% url 'delete_staff' staff_id=staff.id %}" class="btn btn-danger btn-delete" data-toggle="tooltip" title="Delete staff" onclick="return confirm('Are you sure you want to delete this staff record?');">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function submitForm(checkbox) {
+        checkbox.form.submit();
+    }
+</script>
+<!-- Add this script at the end of your HTML file -->
+
+
+{% include 'hod_template/datatable.html' %}
+{% endblock main_content %}

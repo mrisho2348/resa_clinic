@@ -1,0 +1,188 @@
+{% extends 'hod_template/base_template.html' %}
+
+{% block title %}
+    Add Patients
+{% endblock title %}
+{% block breadcrumb %}
+{% endblock breadcrumb %}
+{% block main_content %}
+    {% load static %}             
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card mt-5">
+                    <div class="card-header">
+                        Patient Information
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{% url 'patient_info_form' %}">
+                            <!-- Basic Information -->
+                            <div class="form-group">
+                                <label for="first_name">First Name:</label>
+                                <input type="text" class="form-control" id="first_name">
+                            </div>
+                            <div class="form-group">
+                                <label for="middle_name">Middle Name:</label>
+                                <input type="text" class="form-control" id="middle_name">
+                            </div>
+                            <div class="form-group">
+                                <label for="last_name">Last Name:</label>
+                                <input type="text" class="form-control" id="last_name">
+                            </div>
+                            <div class="form-group">
+                                <label for="gender">Gender:</label>
+                                <select class="form-control" id="gender">
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <!-- Employment Information -->
+                            <div class="form-group">
+                                <label for="occupation">Occupation:</label>
+                                <input type="text" class="form-control" id="occupation">
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone:</label>
+                                <input type="tel" class="form-control" id="phone">
+                            </div>
+                            <div class="form-group">
+                                <label for="employee_number">Employee Number:</label>
+                                <input type="text" class="form-control" id="employee_number">
+                            </div>
+                            <div class="form-group">
+                                <label for="date_of_first_employment">Date of First Employment:</label>
+                                <input type="date" class="form-control" id="date_of_first_employment">
+                            </div>
+                            <!-- Health Information -->
+                            <div class="form-group">
+                                <label for="longtime_illness">Longtime Illness:</label>
+                                <input type="text" class="form-control" id="longtime_illness">
+                            </div>
+                            <div class="form-group">
+                                <label for="longtime_medication">Longtime Medication:</label>
+                                <input type="text" class="form-control" id="longtime_medication">
+                            </div>
+                            <!-- OSHA Certification -->
+                            <div class="form-group">
+                                <label for="osha_certificate">OSHA Certificate:</label>
+                                <select class="form-control" id="osha_certificate" onchange="toggleOshaFields()">
+                                    <option value="false">No</option>
+                                    <option value="true">Yes</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="oshaDateField" style="display: none;">
+                                <label for="date_of_osha_certification">Date of OSHA Certification:</label>
+                                <input type="date" class="form-control" id="date_of_osha_certification">
+                            </div>
+                            <!-- Insurance Information -->
+                            <div class="form-group">
+                                <label for="insurance">Insurance:</label>
+                                <select class="form-control" id="insurance" onchange="toggleInsuranceFields()">
+                                    <option value="Insured">Insured</option>
+                                    <option value="Uninsured">Uninsured</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="insuranceFields" style="display: none;">
+                                <label for="insurance_company">Insurance Company:</label>
+                                <input type="text" class="form-control" id="insurance_company">
+                            </div>
+                            <div class="form-group" id="insuranceNumberField" style="display: none;">
+                                <label for="insurance_number">Insurance Number:</label>
+                                <input type="text" class="form-control" id="insurance_number">
+                            </div>
+                            <!-- Emergency Contact Information -->
+                            <div class="form-group">
+                                <label for="emergency_contact_name">Emergency Contact Name:</label>
+                                <input type="text" class="form-control" id="emergency_contact_name">
+                            </div>
+                            <div class="form-group">
+                                <label for="emergency_contact_relation">Emergency Contact Relation:</label>
+                                <input type="text" class="form-control" id="emergency_contact_relation">
+                            </div>
+                            <div class="form-group">
+                                <label for="emergency_contact_phone">Emergency Contact Phone:</label>
+                                <input type="tel" class="form-control" id="emergency_contact_phone">
+                            </div>
+                            <div class="form-group">
+                                <label for="emergency_contact_mobile">Emergency Contact Mobile:</label>
+                                <input type="tel" class="form-control" id="emergency_contact_mobile">
+                            </div>
+                            <!-- Other Information -->
+                            <div class="form-group">
+                                <label for="life_style">Lifestyle:</label>
+                                <input type="text" class="form-control" id="life_style">
+                            </div>
+                            <div class="form-group">
+                                <label for="created_at">Created At:</label>
+                                <input type="text" class="form-control" id="created_at" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="updated_at">Updated At:</label>
+                                <input type="text" class="form-control" id="updated_at" disabled>
+                            </div>
+                            <!-- Additional Fields -->
+                            <div class="form-group">
+                                <label for="age">Age:</label>
+                                <input type="number" class="form-control" id="age">
+                            </div>
+                            <div class="form-group">
+                                <label for="marital_status">Marital Status:</label>
+                                <input type="text" class="form-control" id="marital_status">
+                            </div>
+                            <div class="form-group">
+                                <label for="nationality">Nationality:</label>
+                                <input type="text" class="form-control" id="nationality">
+                            </div>
+                            <div class="form-group">
+                                <label for="tribe">Tribe:</label>
+                                <input type="text" class="form-control" id="tribe">
+                            </div>
+                            <div class="form-group">
+                                <label for="patient_type">Patient Type:</label>
+                                <input type="text" class="form-control" id="patient_type">
+                            </div>
+                            <div class="form-group">
+                                <label for="company">Company:</label>
+                                <input type="text" class="form-control" id="company">
+                            </div>
+                            <!-- End of Form -->
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    
+    <script>
+        function toggleInsuranceFields() {
+            var insurance = document.getElementById('insurance').value;
+            var insuranceFields = document.getElementById('insuranceFields');
+            var insuranceNumberField = document.getElementById('insuranceNumberField');
+            if (insurance === 'Insured') {
+                insuranceFields.style.display = 'block';
+                insuranceNumberField.style.display = 'block';
+            } else {
+                insuranceFields.style.display = 'none';
+                insuranceNumberField.style.display = 'none';
+            }
+        }
+
+        function toggleOshaFields() {
+            var oshaCertificate = document.getElementById('osha_certificate').value;
+            var oshaDateField = document.getElementById('oshaDateField');
+            if (oshaCertificate === 'true') {
+                oshaDateField.style.display = 'block';
+            } else {
+                oshaDateField.style.display = 'none';
+            }
+        }
+    </script>
+ 
+
+                
+{% endblock main_content %}

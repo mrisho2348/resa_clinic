@@ -28,7 +28,7 @@ from tablib import Dataset
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import OuterRef, Subquery
-from .models import Category, ConsultationFee, DiagnosticTest, Equipment, EquipmentMaintenance, HealthIssue, InventoryItem, MedicationPayment, PathologyDiagnosticTest, PatientDisease, PatientVisits, Prescription, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, Sample, Service, Supplier, UsageHistory
+from .models import Category, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, Diagnosis, Equipment, EquipmentMaintenance, HealthIssue, InventoryItem, MedicationPayment, PathologyDiagnosticTest, PatientDisease, PatientVisits, PatientVital, Prescription, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, RemotePatient, RemotePatientVisits, Sample, Service, Supplier, UsageHistory
 
 # Create your views here.
 def index(request):
@@ -146,6 +146,10 @@ def portfolio_details(request):
 def manage_patient(request):
     patient_records=Patients.objects.all() 
     return render(request,"hod_template/manage_patients.html", {"patient_records":patient_records})
+@login_required
+def remotemanage_patient(request):
+    patient_records=Patients.objects.all() 
+    return render(request,"hod_template/remote_manage_patients.html", {"patient_records":patient_records})
 
 @login_required
 def manage_consultation(request):
@@ -2305,6 +2309,59 @@ def generate_vst():
     # Format the VST with leading zeros and concatenate with the prefix "PAT-"
     new_vst = f"VST-{new_vst_number:07d}"
 
+    return new_vst 
+ 
+@csrf_exempt     
+@require_POST
+def add_remotepatient_visit(request):
+    try:
+        visit_id = request.POST.get('visit_id')
+        visitType = request.POST.get('visitType')      
+        patient_id = request.POST.get('patient_id')    
+        primary_service = request.POST.get('primary_service')  
+        patient = Patients.objects.get(pk=patient_id)
+        if visit_id:
+            # Editing existing HealthIssue item
+            visit = RemotePatientVisits.objects.get(pk=visit_id)
+            visit.visit_type = visitType         
+            visit.patient = patient
+            visit.primary_service = primary_service
+         
+                            
+            visit.save()
+        else:
+            # Adding new PatientVisit item
+            vst = generate_vst() 
+            
+            visit = RemotePatientVisits(
+            patient=patient,
+            visit_type=visitType,
+            vst=vst,
+            primary_service=primary_service,
+          
+                          
+               
+            )
+            visit.save()
+
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}) 
+    
+
+def generate_vst():
+    # Retrieve the last patient's VST from the database
+    last_patient_visit = RemotePatientVisits.objects.last()
+
+    # Extract the numeric part from the last VST, or start from 0 if there are no patients yet
+    last_vst_number = int(last_patient_visit.vst.split('-')[-1]) if last_patient_visit else 0
+
+    # Increment the numeric part for the new patient
+    new_vst_number = last_vst_number + 1
+
+    # Format the VST with leading zeros and concatenate with the prefix "PAT-"
+    new_vst = f"VST-{new_vst_number:07d}"
+
     return new_vst  
    
 def fetch_model_data(request):
@@ -2352,3 +2409,260 @@ def prescription_list(request):
         'patients': patients,
         'total_price': total_price,
         })
+    
+def patient_vital_list(request, patient_id):
+    # Retrieve the patient object
+    patient = Patients.objects.get(pk=patient_id)
+    range_51 = range(51)
+    range_301 = range(301)
+    range_101 = range(101)
+    range_15 = range(3, 16)
+    # Retrieve all vital information for the patient
+    patient_vitals = PatientVital.objects.filter(patient=patient).order_by('-recorded_at')
+
+    # Render the template with the patient's vital information
+    context = {
+        'range_51': range_51,
+        'range_301': range_301,
+        'range_101': range_101,
+        'range_15': range_15,
+        'patient': patient, 
+        'patient_vitals': patient_vitals
+    }
+    
+    return render(request, 'hod_template/manage_patient_vital_list.html', context)    
+def patient_vital_all_list(request):
+    # Retrieve the patient object
+    patients = Patients.objects.all()
+    range_51 = range(51)
+    range_301 = range(301)
+    range_101 = range(101)
+    range_15 = range(3, 16)
+    # Retrieve all vital information for the patient
+    patient_vitals = PatientVital.objects.all().order_by('-recorded_at')
+    
+    context = {
+        'range_51': range_51,
+        'range_301': range_301,
+        'range_101': range_101,
+        'range_15': range_15,
+        'patients': patients, 
+        'patient_vitals': patient_vitals
+    }
+    # Render the template with the patient's vital information
+    return render(request, 'hod_template/manage_all_patient_vital.html', context)    
+
+@csrf_exempt
+@require_POST
+def save_patient_vital(request):
+    try:
+        # Extract data from the request
+        vital_id = request.POST.get('vital_id')
+        patient_id = request.POST.get('patient_id')
+        respiratory_rate = request.POST.get('respiratory_rate')
+        pulse_rate = request.POST.get('pulse_rate')
+        blood_pressure = request.POST.get('blood_pressure')
+        spo2 = request.POST.get('spo2')
+        temperature = request.POST.get('temperature')
+        gcs = request.POST.get('gcs')
+        avpu = request.POST.get('avpu')
+
+        # Retrieve the corresponding InventoryItem
+        patient = Patients.objects.get(id=patient_id)
+       
+              
+
+
+        # Check if the usageHistoryId is provided for editing
+        if vital_id:
+            # Editing existing usage history
+            vital = PatientVital.objects.get(pk=vital_id)
+          
+        else:
+            # Creating new usage history
+            vital = PatientVital()
+         
+
+        # Update or set values for other fields
+        vital.respiratory_rate = respiratory_rate
+        vital.pulse_rate = pulse_rate
+        vital.blood_pressure = blood_pressure
+        vital.spo2 = spo2
+        vital.gcs = gcs
+        vital.temperature = temperature
+        vital.avpu = avpu
+        vital.patient = patient
+
+    
+        vital.save()
+
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+    
+def consultation_notes_view(request):
+    consultation_notes = ConsultationNotes.objects.all()  
+    pathology_records = PathodologyRecord.objects.all()# Fetch all consultation notes from the database
+    patients = Patients.objects.all()# Fetch all consultation notes from the database
+    doctors = Staffs.objects.filter(role='doctor')
+    provisional_diagnoses = Diagnosis.objects.all()
+    final_diagnoses = Diagnosis.objects.all()
+    return render(request, 'hod_template/manage_consultation_notes.html', {
+        'consultation_notes': consultation_notes,
+        'pathology_records': pathology_records,
+        'provisional_diagnoses': provisional_diagnoses,
+        'final_diagnoses': final_diagnoses,
+        'patients': patients,
+        'doctors': doctors,
+        })    
+
+
+@csrf_exempt
+@require_POST
+def save_consultation_notes(request):
+    try:
+        # Extract data from the request
+        notes_id = request.POST.get('notes_id')
+        doctor_id = request.POST.get('doctor')
+        patient_id = request.POST.get('patient')
+        chief_complaints = request.POST.get('chief_complaints')
+        history_of_presenting_illness = request.POST.get('history_of_presenting_illness')
+        physical_examination = request.POST.get('physical_examination')
+        allergy_to_medications = request.POST.get('allergy_to_medications')
+        provisional_diagnosis = request.POST.getlist('provisional_diagnosis')
+        final_diagnosis = request.POST.getlist('final_diagnosis')
+        pathology_ids = request.POST.getlist('pathology')  # Assuming pathology is a ManyToMany field
+        doctor_plan = request.POST.get('doctor_plan')
+
+        # Retrieve the corresponding patient and doctor objects
+        patient = Patients.objects.get(id=patient_id)
+        doctor = Staffs.objects.get(id=doctor_id)
+
+        # Check if the notes ID is provided for editing
+        if notes_id:
+            # Editing existing consultation notes
+            consultation_notes = ConsultationNotes.objects.get(pk=notes_id)
+        else:
+            # Creating new consultation notes
+            consultation_notes = ConsultationNotes()
+
+        # Update or set values for consultation notes fields
+        consultation_notes.doctor = doctor
+        consultation_notes.patient = patient
+        consultation_notes.chief_complaints = chief_complaints
+        consultation_notes.history_of_presenting_illness = history_of_presenting_illness
+        consultation_notes.physical_examination = physical_examination
+        consultation_notes.allergy_to_medications = allergy_to_medications
+        consultation_notes.doctor_plan = doctor_plan
+        consultation_notes.save()
+        
+        # Update ManyToMany fields
+        consultation_notes.pathology.set(pathology_ids)
+        consultation_notes.provisional_diagnosis.set(provisional_diagnosis)
+        consultation_notes.final_diagnosis.set(final_diagnosis)
+
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+    
+def diagnosis_list(request):
+    diagnoses = Diagnosis.objects.all().order_by('-created_at')    
+    return render(request, 'hod_template/manage_diagnosis_list.html', {'diagnoses': diagnoses}) 
+
+
+@csrf_exempt
+@require_POST
+def save_diagnosis(request):
+    try:
+        # Extract data from the request
+        diagnosis_name = request.POST.get('diagnosis_name')
+        diagnosis_id = request.POST.get('diagnosis_id')
+
+        # Check if the Diagnosis ID is provided for editing
+        if diagnosis_id:
+            # Editing existing diagnosis
+            diagnosis = Diagnosis.objects.get(pk=diagnosis_id)
+            diagnosis.diagnosis_name = diagnosis_name
+        else:
+            # Creating a new diagnosis
+            diagnosis = Diagnosis.objects.create(diagnosis_name=diagnosis_name)
+
+        diagnosis.save()
+
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+    
+    
+def patient_info_form(request):
+    if request.method == 'POST':
+        try:
+            # Retrieve data from the form submission
+            first_name = request.POST.get('first_name')
+            middle_name = request.POST.get('middle_name')
+            last_name = request.POST.get('last_name')
+            gender = request.POST.get('gender')
+            occupation = request.POST.get('occupation')
+            phone = request.POST.get('phone')
+            employee_number = request.POST.get('employee_number')
+            date_of_first_employment = request.POST.get('date_of_first_employment')
+            longtime_illness = request.POST.get('longtime_illness')
+            longtime_medication = request.POST.get('longtime_medication')
+            osha_certificate = request.POST.get('osha_certificate')
+            date_of_osha_certification = request.POST.get('date_of_osha_certification')
+            insurance = request.POST.get('insurance')
+            insurance_company = request.POST.get('insurance_company')
+            insurance_number = request.POST.get('insurance_number')
+            emergency_contact_name = request.POST.get('emergency_contact_name')
+            emergency_contact_relation = request.POST.get('emergency_contact_relation')
+            emergency_contact_phone = request.POST.get('emergency_contact_phone')
+            emergency_contact_mobile = request.POST.get('emergency_contact_mobile')
+            life_style = request.POST.get('life_style')
+            age = request.POST.get('age')
+            marital_status = request.POST.get('marital_status')
+            nationality = request.POST.get('nationality')
+            tribe = request.POST.get('tribe')
+            patient_type = request.POST.get('patient_type')
+            company = request.POST.get('company')
+
+            # Create a new Patient object with the submitted data
+            patient = RemotePatient(
+                first_name=first_name,
+                middle_name=middle_name,
+                last_name=last_name,
+                gender=gender,
+                occupation=occupation,
+                phone=phone,
+                employee_number=employee_number,
+                date_of_first_employment=date_of_first_employment,
+                longtime_illness=longtime_illness,
+                longtime_medication=longtime_medication,
+                osha_certificate=osha_certificate,
+                date_of_osha_certification=date_of_osha_certification,
+                insurance=insurance,
+                insurance_company=insurance_company,
+                insurance_number=insurance_number,
+                emergency_contact_name=emergency_contact_name,
+                emergency_contact_relation=emergency_contact_relation,
+                emergency_contact_phone=emergency_contact_phone,
+                emergency_contact_mobile=emergency_contact_mobile,
+                life_style=life_style,
+                age=age,
+                marital_status=marital_status,
+                nationality=nationality,
+                tribe=tribe,
+                patient_type=patient_type,
+                company=company
+            )
+
+            # Save the patient object to the database
+            patient.save()
+
+            # Redirect to a success page or render a success message
+            return HttpResponse('Patient information submitted successfully!')
+        except Exception as e:
+            # Handle the exception, you can log it or render an error message
+            return HttpResponse(f'An error occurred: {str(e)}')
+
+    # If the request method is not POST, render the form template
+    return render(request, 'patient_info_form.html')    

@@ -3,9 +3,9 @@ import logging
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.db import IntegrityError
-from clinic.models import Category, Company, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, Patients, Prescription, Procedure, Reagent, Referral, Service, Supplier
-from .resources import CategoryResource, CompanyResource, DiseaseRecodeResource, EquipmentMaintenanceResource, EquipmentResource, HealthIssueResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, PathologyRecordResource, PatientsResource, PrescriptionResource, ProcedureResource, ReagentResource, ReferralResource, ServiceResource, SupplierResource
-from .forms import ImportCategoryForm, ImportCompanyForm, ImportDiseaseForm, ImportEquipmentForm, ImportEquipmentMaintenanceForm, ImportHealthIssueForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientsForm, ImportPrescriptionForm, ImportProcedureForm, ImportReagentForm, ImportReferralForm, ImportServiceForm, ImportSupplierForm
+from clinic.models import Category, Company, ConsultationNotes, Diagnosis, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, PatientVital, Patients, Prescription, Procedure, Reagent, Referral, Service, Staffs, Supplier
+from .resources import CategoryResource, CompanyResource, ConsultationNotesResource, DiagnosisResource, DiseaseRecodeResource, EquipmentMaintenanceResource, EquipmentResource, HealthIssueResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, PathologyRecordResource, PatientVitalResource, PatientsResource, PrescriptionResource, ProcedureResource, ReagentResource, ReferralResource, ServiceResource, SupplierResource
+from .forms import ImportCategoryForm, ImportCompanyForm, ImportConsultationNotesForm, ImportDiagnosisForm, ImportDiseaseForm, ImportEquipmentForm, ImportEquipmentMaintenanceForm, ImportHealthIssueForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientVitalForm, ImportPatientsForm, ImportPrescriptionForm, ImportProcedureForm, ImportReagentForm, ImportReferralForm, ImportServiceForm, ImportSupplierForm
 from tablib import Dataset
 logger = logging.getLogger(__name__)
 def import_disease_recode(request):
@@ -412,6 +412,109 @@ def import_prescription_records(request):
         form = ImportPrescriptionForm()
 
     return render(request, 'hod_template/import_prescription.html', {'form': form})
+
+def import_patient_vital_records(request):
+    if request.method == 'POST':
+        form = ImportPatientVitalForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = PatientVitalResource()
+                new_records = request.FILES['vital_records_file']
+                
+                # Use tablib to load the imported data
+                dataset = resource.export()
+                imported_data = dataset.load(new_records.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+
+                for data in imported_data:
+                     patient_vital_record = PatientVital(
+                        patient=Patients.objects.get(id=data[0]),
+                        respiratory_rate=data[1],                     
+                        pulse_rate=data[2],                    
+                        blood_pressure=data[3],                     
+                        spo2=data[4],                     
+                        temperature=data[5],                     
+                        gcs=data[6],                     
+                        avpu=data[7],                     
+                                         
+                       )
+                     patient_vital_record.save()
+
+                return redirect('patient_vital_all_list') 
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportPatientVitalForm()
+
+    return render(request, 'hod_template/import_patient_vital.html', {'form': form})
+
+def import_consultation_notes_records(request):
+    if request.method == 'POST':
+        form = ImportConsultationNotesForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = ConsultationNotesResource()
+                new_records = request.FILES['consultation_records_file']
+                
+                # Use tablib to load the imported data
+                dataset = resource.export()
+                imported_data = dataset.load(new_records.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+
+                for data in imported_data:
+                     consultation_notes_record = ConsultationNotes(
+                        doctor=Staffs.objects.get(id=data[0]),
+                        patient=Patients.objects.get(id=data[1]),
+                        chief_complaints=data[2],                     
+                        history_of_presenting_illness=data[3],                    
+                        consultation_number=data[4],                     
+                        physical_examination=data[5],                     
+                        allergy_to_medications=data[6],                     
+                        provisional_diagnosis=Diagnosis.objects.get(id=data[7]),                    
+                        final_diagnosis=Diagnosis.objects.get(id=data[8]),                    
+                        pathology=PathodologyRecord.objects.get(id=data[9]),                     
+                        doctor_plan=data[10],                     
+                                         
+                       )
+                     consultation_notes_record.save()
+
+                return redirect('consultation_notes') 
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportConsultationNotesForm()
+
+    return render(request, 'hod_template/import_consultation_notes.html', {'form': form})
+
+def import_diagnosis_records(request):
+    if request.method == 'POST':
+        form = ImportDiagnosisForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = DiagnosisResource()
+                new_records = request.FILES['diagnosis_records_file']
+                
+                # Use tablib to load the imported data
+                dataset = resource.export()
+                imported_data = dataset.load(new_records.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+
+                for data in imported_data:
+                     diagnosis_record = Diagnosis(
+                 
+                        diagnosis_name=data[0],                     
+                                          
+                                         
+                       )
+                     diagnosis_record.save()
+
+                return redirect('diagnosis_list') 
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportDiagnosisForm()
+
+    return render(request, 'hod_template/import_diagnosis.html', {'form': form})
 
 def import_patient_records(request):
     if request.method == 'POST':

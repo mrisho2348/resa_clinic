@@ -2,7 +2,7 @@
 
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render,get_object_or_404
-from .models import Category, Company, Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, PatientVisits, Patients, Prescription, Procedure, QualityControl, Reagent, ReagentUsage, Referral, Sample, Service, Staffs, Supplier, UsageHistory
+from .models import Category, Company, Consultation, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, PatientVisits, PatientVital, Patients, Prescription, Procedure, QualityControl, Reagent, ReagentUsage, Referral, Sample, Service, Staffs, Supplier, UsageHistory
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -357,6 +357,36 @@ def delete_reagent(request, reagent_id):
     try:
         reagent = get_object_or_404(Reagent, pk=reagent_id)
         reagent.delete()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}) 
+    
+@csrf_exempt      
+@require_POST
+def delete_patient_vital(request, vital_id):
+    try:
+        vital = get_object_or_404(PatientVital, pk=vital_id)
+        vital.delete()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}) 
+    
+@csrf_exempt      
+@require_POST
+def delete_diagnosis(request, diagnosis_id):
+    try:
+        diagnosis = get_object_or_404(Diagnosis, pk=diagnosis_id)
+        diagnosis.delete()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}) 
+    
+@csrf_exempt      
+@require_POST
+def delete_ConsultationNotes(request, consultation_id):
+    try:
+        consultation = get_object_or_404(ConsultationNotes, pk=consultation_id)
+        consultation.delete()
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}) 

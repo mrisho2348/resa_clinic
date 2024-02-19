@@ -82,6 +82,10 @@ Patient Visit History
                                 <a href="{% url 'patient_health_record_view' visit.patient.id %}" data-toggle="tooltip" title="open">
                                     <button type="button" class="btn btn-primary btn-sm"><i class="fa fa-eye text-dark"></i></button>
                                 </a>   
+                                              <!-- Add more action links as needed -->
+                                <a href="{% url 'patient_vital_list' visit.patient.id %}" data-toggle="tooltip" title="open">
+                                    <button type="button" class="btn btn-primary btn-sm"><i class="fa fa-eye text-dark"></i></button>
+                                </a>   
                                     
                                 </td>
                          

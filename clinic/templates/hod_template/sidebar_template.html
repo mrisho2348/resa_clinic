@@ -67,11 +67,19 @@
                           </a>
                       </li>
                       <li class="nav-item">
-                          <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-tachometer-alt"></i>
-                              <p>Visit</p>
+                        {% url 'remotemanage_patient' as remotemanage_patient %}
+                          <a href="{% url "remotemanage_patient" %}" class="nav-link{% if request.path == remotemanage_patient %} active {% endif %}">
+                              <i class="nav-icon fas fa-users"></i>
+                              <p>Remote Patients</p>
                           </a>
                       </li>
+                      <li class="nav-item">
+                        {% url 'patient_vital_all_list' as patient_vital_all_list %}
+                        <a href="{% url 'patient_vital_all_list'  %}" class="nav-link{% if request.path == patient_vital_all_list %} active {% endif %}">
+                            <i class="nav-icon fas fa-heartbeat"></i> <!-- Font Awesome icon for vital signs -->
+                            <p>All Vital Signs</p> <!-- Renamed navigation link -->
+                        </a>
+                    </li>
                       <li class="nav-item">
                         {% url 'medicine_inventory' as medicine_inventory %}
                           <a href="{% url "medicine_inventory" %}" class="nav-link{% if request.path == medicine_inventory %} active {% endif %}">
@@ -153,6 +161,13 @@
                           <a href="{% url "appointment_list" %}" class="nav-link{% if request.path == appointment_list %} active {% endif %}">
                             <i class="nav-icon fas fa-calendar"></i>
                               <p>Consultations</p>
+                          </a>
+                      </li>
+                      <li class="nav-item">
+                        {% url 'consultation_notes' as consultation_notes %}
+                          <a href="{% url "consultation_notes" %}" class="nav-link{% if request.path == consultation_notes %} active {% endif %}">
+                            <i class="nav-icon fas fa-calendar"></i>
+                              <p>consultation notes</p>
                           </a>
                       </li>
                       <li class="nav-item">
@@ -256,6 +271,13 @@
                               <p>Diseases</p>
                           </a>
                       </li>
+                      <li class="nav-item"> 
+                        {% url 'diagnosis_list' as diagnosis_list_url %}
+                        <a href="{{ diagnosis_list_url }}" class="nav-link{% if request.path == diagnosis_list_url %} active {% endif %}">
+                            <i class="nav-icon fas fa-notes-medical"></i>
+                            <p>View Diagnoses</p>
+                        </a>
+                    </li>
                       <li class="nav-item"> 
                         {% url 'health_issue_list' as health_issue_list_url %}                    
                         <a href="{{ health_issue_list_url }}" class="nav-link{% if request.path == health_issue_list_url %} active {% endif %}">                     
