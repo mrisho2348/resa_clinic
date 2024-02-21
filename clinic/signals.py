@@ -2,7 +2,7 @@
 
 from django.db.models.signals import post_save,pre_save
 from django.dispatch import receiver
-from .models import InventoryItem, MedicationPayment, MedicineInventory, Prescription, Reagent, ReagentUsage, UsageHistory
+from .models import InventoryItem, MedicationPayment, MedicineInventory, Prescription, Reagent, ReagentUsage, RemotePrescription, UsageHistory
 from django.db.models import F
 from django.db import models
 
@@ -31,6 +31,16 @@ def update_total_payment_per_prescription(sender, instance, created, **kwargs):
         
         # Update the total_payment field of the MedicineInventory instance
         instance.total_price = total_price
+        instance.save(update_fields=['total_price']) 
+               
+@receiver(post_save, sender=RemotePrescription)
+def update_total_payment_prescription(sender, instance, created, **kwargs):
+    if created:
+        # Calculate total payment for the inventory
+        total_price = instance.quantity_used * instance.medicine.unit_price
+        
+        # Update the total_payment field of the MedicineInventory instance
+        instance.total_price = total_price
         instance.save(update_fields=['total_price'])        
         
 @receiver(post_save, sender=ReagentUsage)
@@ -50,6 +60,17 @@ def update_quantity_from_usage_history(sender, instance, **kwargs):
     
 @receiver(post_save, sender=Prescription)
 def update_medicine_inventory_per_prescription(sender, instance, created, **kwargs):
+    if created:
+        # Deduct quantity from MedicineInventory when a new Prescription is created
+        try:
+            medicine_inventory = MedicineInventory.objects.get(medicine=instance.medicine)
+            medicine_inventory.remain_quantity -= instance.quantity_used
+            medicine_inventory.save()
+        except MedicineInventory.DoesNotExist:
+            # Handle if medicine inventory does not exist
+            pass    
+@receiver(post_save, sender=RemotePrescription)
+def update_medicine_inventory_prescription(sender, instance, created, **kwargs):
     if created:
         # Deduct quantity from MedicineInventory when a new Prescription is created
         try:

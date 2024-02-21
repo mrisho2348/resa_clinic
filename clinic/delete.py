@@ -2,7 +2,7 @@
 
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render,get_object_or_404
-from .models import Category, Company, Consultation, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, PatientVisits, PatientVital, Patients, Prescription, Procedure, QualityControl, Reagent, ReagentUsage, Referral, Sample, Service, Staffs, Supplier, UsageHistory
+from .models import Category, Company, Consultation, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, PatientVisits, PatientVital, Patients, Prescription, Procedure, QualityControl, Reagent, ReagentUsage, Referral, RemotePatient, Sample, Service, Staffs, Supplier, UsageHistory
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -377,6 +377,15 @@ def delete_diagnosis(request, diagnosis_id):
     try:
         diagnosis = get_object_or_404(Diagnosis, pk=diagnosis_id)
         diagnosis.delete()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}) 
+@csrf_exempt      
+@require_POST
+def delete_remote_patient(request, patient_id):
+    try:
+        patient_remote = get_object_or_404(RemotePatient, pk=patient_id)
+        patient_remote.delete()
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}) 

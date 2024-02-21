@@ -6,7 +6,7 @@ from django.db import models
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import logout,login
-from django.http import HttpResponse, HttpResponseBadRequest,HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseBadRequest,HttpResponseRedirect
 from django.template import loader
 from django.shortcuts import render
 from django.urls import reverse
@@ -28,7 +28,7 @@ from tablib import Dataset
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import OuterRef, Subquery
-from .models import Category, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, Diagnosis, Equipment, EquipmentMaintenance, HealthIssue, InventoryItem, MedicationPayment, PathologyDiagnosticTest, PatientDisease, PatientVisits, PatientVital, Prescription, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, RemotePatient, RemotePatientVisits, Sample, Service, Supplier, UsageHistory
+from .models import Category, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, Diagnosis, Equipment, EquipmentMaintenance, FamilyMedicalHistory, HealthIssue, InventoryItem, MedicationPayment, PathologyDiagnosticTest, PatientDisease, PatientHealthCondition, PatientVisits, PatientVital, Prescription, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, RemotePatient, RemotePatientVisits, RemotePrescription, Sample, Service, Supplier, UsageHistory
 
 # Create your views here.
 def index(request):
@@ -37,9 +37,11 @@ def index(request):
 def dashboard(request):
     total_patients = Patients.objects.count()
     recently_added_patients = Patients.objects.order_by('-created_at')[:6]
+    doctors = Staffs.objects.filter(role='doctor')
     context = {
         'total_patients': total_patients,
         'recently_added_patients': recently_added_patients,
+        'doctors': doctors,
         # 'gender_based_monthly_counts': gender_based_monthly_counts,
     }
     return render(request,"hod_template/home_content.html",context)
@@ -146,10 +148,10 @@ def portfolio_details(request):
 def manage_patient(request):
     patient_records=Patients.objects.all() 
     return render(request,"hod_template/manage_patients.html", {"patient_records":patient_records})
-@login_required
-def remotemanage_patient(request):
-    patient_records=Patients.objects.all() 
-    return render(request,"hod_template/remote_manage_patients.html", {"patient_records":patient_records})
+# @login_required
+# def remotemanage_patient(request):
+#     patient_records=Patients.objects.all() 
+#     return render(request,"hod_template/remote_manage_patients.html", {"patient_records":patient_records})
 
 @login_required
 def manage_consultation(request):
@@ -500,7 +502,61 @@ def appointment_view(request, patient_id):
     except Exception as e:
         # Handle other exceptions
         messages.error(request, f"An unexpected error occurred: {str(e)}")
-        return redirect('appointment_view', patient_id=patient_id)
+        return JsonResponse({'status': 'error', 'message': str(e)})
+    
+@csrf_exempt
+def appointment_view_remote(request, patient_id):
+    try:
+        if request.method == 'POST':
+            # Extract data from the request
+            doctor_id = request.POST.get('doctor')
+            date_of_consultation = request.POST.get('date_of_consultation')
+            start_time = request.POST.get('start_time')
+            end_time = request.POST.get('end_time')
+            description = request.POST.get('description')
+
+            # Check if all required fields are present
+            if not (doctor_id and date_of_consultation and start_time and end_time):
+                return JsonResponse({'status': 'error', 'message': 'Missing required fields'})
+
+            # Retrieve doctor and patient instances
+            doctor = get_object_or_404(Staffs, id=doctor_id)
+            patient = get_object_or_404(Patients, id=patient_id)
+
+            # Create a Consultation instance
+            consultation = Consultation(
+                doctor=doctor,
+                patient=patient,
+                appointment_date=date_of_consultation,
+                start_time=start_time,
+                end_time=end_time,
+                description=description
+            )
+            consultation.save()
+
+            # Create a notification for the patient
+            notification_message = f"New appointment scheduled with Dr. { doctor.admin.get_full_name() } on {date_of_consultation} from {start_time} to {end_time}."
+            Notification.objects.create(
+                content_type=ContentType.objects.get_for_model(Patients),
+                object_id=patient.id,
+                message=notification_message
+            )
+
+            messages.success(request, "Appointment created successfully.")
+            return JsonResponse({'status': 'success'})
+       
+    except IntegrityError as e:
+        # Handle integrity error (e.g., duplicate entry)
+        messages.error(request, f"Error creating appointment: {str(e)}")
+        return JsonResponse({'status': 'error', 'message': str(e)})
+    except Exception as e:
+        # Handle other exceptions
+        messages.error(request, f"An unexpected error occurred: {str(e)}")
+        return JsonResponse({'status': 'error', 'message': 'An unexpected error occurred'})
+
+    # Handle invalid request method
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
     
 def notification_view(request):
     notifications = Notification.objects.filter(is_read=False)
@@ -2095,10 +2151,10 @@ def add_prescription(request):
             prescription = Prescription.objects.get(pk=prescription_id)
             # Get the previous quantity used
             previous_quantity_used = prescription.quantity_used
-            print(previous_quantity_used)
+            
             # Calculate the difference in quantity
             quantity_difference = medicine_used - previous_quantity_used
-            print(quantity_difference)
+            
             # Update the stock level of the corresponding item
             if medicine_inventory:
                 medicine_inventory.remain_quantity -= quantity_difference
@@ -2126,12 +2182,20 @@ def add_prescription(request):
 
         return JsonResponse({'status': 'success'})
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)})
-
-    
+        return JsonResponse({'status': 'error', 'message': str(e)})    
     
 def generate_prescription_id():
     last_prescription = Prescription.objects.last()
+    last_sample_number = int(last_prescription.prs_no.split('-')[-1]) if last_prescription else 0
+    new_prescription_id = last_sample_number + 1
+    return f"PRS-{new_prescription_id:07d}"
+
+
+
+    
+    
+def generate_remoteprescription_id():
+    last_prescription = RemotePrescription.objects.last()
     last_sample_number = int(last_prescription.prs_no.split('-')[-1]) if last_prescription else 0
     new_prescription_id = last_sample_number + 1
     return f"PRS-{new_prescription_id:07d}"
@@ -2310,15 +2374,16 @@ def generate_vst():
     new_vst = f"VST-{new_vst_number:07d}"
 
     return new_vst 
- 
+
 @csrf_exempt     
 @require_POST
 def add_remotepatient_visit(request):
     try:
         visit_id = request.POST.get('visit_id')
         visitType = request.POST.get('visitType')      
-        patient_id = request.POST.get('patient_id')    
+        patient_id = request.POST.get('patient_id')   
         primary_service = request.POST.get('primary_service')  
+        
         patient = Patients.objects.get(pk=patient_id)
         if visit_id:
             # Editing existing HealthIssue item
@@ -2326,19 +2391,19 @@ def add_remotepatient_visit(request):
             visit.visit_type = visitType         
             visit.patient = patient
             visit.primary_service = primary_service
-         
+    
                             
             visit.save()
         else:
             # Adding new PatientVisit item
-            vst = generate_vst() 
+            vst = remotegenerate_vst() 
             
             visit = RemotePatientVisits(
             patient=patient,
             visit_type=visitType,
             vst=vst,
             primary_service=primary_service,
-          
+         
                           
                
             )
@@ -2349,7 +2414,7 @@ def add_remotepatient_visit(request):
         return JsonResponse({'status': 'error', 'message': str(e)}) 
     
 
-def generate_vst():
+def remotegenerate_vst():
     # Retrieve the last patient's VST from the database
     last_patient_visit = RemotePatientVisits.objects.last()
 
@@ -2362,7 +2427,12 @@ def generate_vst():
     # Format the VST with leading zeros and concatenate with the prefix "PAT-"
     new_vst = f"VST-{new_vst_number:07d}"
 
-    return new_vst  
+    return new_vst 
+ 
+
+    
+
+
    
 def fetch_model_data(request):
     selected_option = request.GET.get('selected_option')
@@ -2380,9 +2450,18 @@ def fetch_model_data(request):
 def patient_visit_history_view(request, patient_id):
     # Retrieve visit history for the specified patient
     visit_history = PatientVisits.objects.filter(patient_id=patient_id)
+    current_date = timezone.now().date()
     patient = Patients.objects.get(id=patient_id)
+    medicines = Medicine.objects.filter(
+        medicineinventory__remain_quantity__gt=0,  # Inventory level greater than zero
+        expiration_date__gt=current_date  # Not expired
+    ).distinct() 
 
-    return render(request, 'hod_template/manage_patient_visit_history.html', {'visit_history': visit_history,'patient':patient})
+    return render(request, 'hod_template/manage_patient_visit_history.html', {
+        'visit_history': visit_history,
+        'patient':patient,
+        'medicines':medicines,
+        })
 def patient_health_record_view(request, patient_id):
     # Retrieve visit history for the specified patient
     visit_history = PatientVisits.objects.filter(patient_id=patient_id)
@@ -2624,9 +2703,16 @@ def patient_info_form(request):
             tribe = request.POST.get('tribe')
             patient_type = request.POST.get('patient_type')
             company = request.POST.get('company')
+            
+            if date_of_first_employment == '':
+                 date_of_first_employment = None
 
-            # Create a new Patient object with the submitted data
-            patient = RemotePatient(
+            if date_of_osha_certification == '':
+                date_of_osha_certification = None
+            # Create a new RemotePatient object with the submitted data
+          
+            
+            patient = RemotePatient(            
                 first_name=first_name,
                 middle_name=middle_name,
                 last_name=last_name,
@@ -2658,11 +2744,308 @@ def patient_info_form(request):
             # Save the patient object to the database
             patient.save()
 
-            # Redirect to a success page or render a success message
-            return HttpResponse('Patient information submitted successfully!')
+            # Determine which button was clicked
+            if 'save_back' in request.POST:
+                # Redirect to patients list
+                return redirect('patients_list')  # Replace 'patients_list' with the URL name of your patients list view
+            elif 'save_add_another' in request.POST:
+                # Redirect to the same form to add another patient
+                messages.success(request, 'Patient  record added successfully.')
+                return render(request, 'hod_template/add_remotePatients.html')
+            elif 'save_continue_health' in request.POST:
+                # Redirect to health information form
+                return redirect(reverse('save_patient_health_condition', args=[patient.id]))  # Replace 'health_info_form' with the URL name of your health information form view
         except Exception as e:
             # Handle the exception, you can log it or render an error message
-            return HttpResponse(f'An error occurred: {str(e)}')
+            messages.error(request, f'Error adding Patient  record : {str(e)}')
+            range_100 = range(100)
+            return render(request, 'hod_template/add_remotePatients.html',{'range_100':range_100})
 
     # If the request method is not POST, render the form template
-    return render(request, 'patient_info_form.html')    
+    range_100 = range(100)
+    return render(request, 'hod_template/add_remotePatients.html',{'range_100':range_100})
+
+
+
+def patients_list(request):
+    patients =RemotePatient.objects.order_by('-created_at')    
+    return render(request, 'hod_template/manage_remotepatients_list.html', {'patients': patients})
+
+
+def save_patient_health_condition(request, patient_id):
+    try:
+        # Retrieve the patient object using the patient_id from URL parameters
+        patient = RemotePatient.objects.get(pk=patient_id)
+
+        if request.method == 'POST':
+            # Retrieve data from the form submission
+            health_condition = request.POST.get('health_condition')
+            health_condition_notes = request.POST.get('health_condition_notes')
+
+            # Create a new PatientHealthCondition object with the submitted data
+            patient_health_condition = PatientHealthCondition(
+                patient=patient,
+                health_condition=health_condition,
+                health_condition_notes=health_condition_notes
+            )
+
+            # Save the patient health condition object to the database
+            patient_health_condition.save()
+
+            # Determine which button was clicked
+            if 'save_and_return' in request.POST:
+                # Redirect back to patient information
+                return redirect('patient_information')  # Replace with the appropriate URL name
+
+            elif 'save_and_continue_add_another_health_record' in request.POST:
+                # Redirect to add another patient health record
+                messages.success(request, 'Patient  health record added successfully.')
+                return redirect(reverse('save_patient_health_condition', args=[patient_id]))  # Replace with the appropriate URL name
+
+            elif 'save_and_continue' in request.POST:
+                # Redirect to add family health information
+                return redirect(reverse('save_family_medical_history', args=[patient_id]))  # Replace with the appropriate URL name
+
+    except RemotePatient.DoesNotExist:
+        # Handle the case where the patient ID is not valid
+        messages.error(request, f'Patient not found: {str(e)}')
+        return render(request, 'hod_template/add_patient_health_condition_form.html', {'patient': patient})
+
+    except Exception as e:
+        # Handle other exceptions
+        messages.error(request, f'Error adding Patient  health record : {str(e)}')
+        return render(request, 'hod_template/add_patient_health_condition_form.html', {'patient': patient})
+
+    # If the request method is not POST or if there's an error, render an empty form
+    return render(request, 'hod_template/add_patient_health_condition_form.html', {'patient': patient})
+
+
+
+def save_family_medical_history(request, patient_id):
+    try:
+        # Attempt to retrieve the patient object
+        patient = RemotePatient.objects.get(pk=patient_id)
+    except RemotePatient.DoesNotExist:
+        # If the patient does not exist, raise a 404 error
+        raise Http404("Patient does not exist")
+
+    if request.method == 'POST':
+        try:
+            # Retrieve form data
+            condition = request.POST.get('condition')
+            relationship = request.POST.get('relationship')
+            comments = request.POST.get('comments')
+
+            # Create a new FamilyMedicalHistory object with the submitted data
+            family_medical_history = FamilyMedicalHistory.objects.create(
+                patient=patient,
+                condition=condition,
+                relationship=relationship,
+                comments=comments
+            )
+
+            # Determine which button was clicked
+            if 'save_and_continue_add_another_family_record' in request.POST:
+                # Redirect to the same form to add another family record
+                messages.success(request, 'Patient family health record added successfully.')
+                return redirect(reverse('save_family_medical_history', args=[patient_id]))
+
+            elif 'save_and_return' in request.POST:
+                # Redirect to the patients list
+                return redirect('patients_list')
+
+        except Exception as e:
+            # Handle the exception, you can log it or render an error message
+            messages.error(request, f'Error adding Patient family health record : {str(e)}')
+            return render(request, 'hod_template/add_patient_family_condition_form.html', {'patient': patient})
+
+    # If the request method is not POST, render the form template
+    return render(request, 'hod_template/add_patient_family_condition_form.html', {'patient': patient})
+
+
+def patient_info_form_edit(request, patient_id):    
+    try:
+        patient = RemotePatient.objects.get(pk=patient_id)    
+    except RemotePatient.DoesNotExist:
+        # Handle the case where the patient does not exist
+        # For example, you can redirect to an error page or return an appropriate response
+        return HttpResponse("Patient not found", status=404)
+    
+    if request.method == 'POST':
+        try:
+            # Extract data from POST request
+            first_name = request.POST.get('first_name')
+            middle_name = request.POST.get('middle_name')
+            last_name = request.POST.get('last_name')
+            gender = request.POST.get('gender')
+            occupation = request.POST.get('occupation')
+            phone = request.POST.get('phone')
+            employee_number = request.POST.get('employee_number')
+            date_of_first_employment = request.POST.get('date_of_first_employment')
+            longtime_illness = request.POST.get('longtime_illness')
+            longtime_medication = request.POST.get('longtime_medication')
+            osha_certificate = request.POST.get('osha_certificate') == '1'
+            date_of_osha_certification = request.POST.get('date_of_osha_certification')
+            insurance = request.POST.get('insurance')
+            insurance_company = request.POST.get('insurance_company')
+            insurance_number = request.POST.get('insurance_number')
+            emergency_contact_name = request.POST.get('emergency_contact_name')
+            emergency_contact_relation = request.POST.get('emergency_contact_relation')
+            emergency_contact_phone = request.POST.get('emergency_contact_phone')
+            emergency_contact_mobile = request.POST.get('emergency_contact_mobile')
+            life_style = request.POST.getlist('life_style')
+            age = int(request.POST.get('age'))
+            marital_status = request.POST.get('marital_status')
+            nationality = request.POST.get('nationality')
+            tribe = request.POST.get('tribe')
+            patient_type = request.POST.get('patient_type')
+            company = request.POST.get('company')
+
+            # Convert empty strings to None for date fields
+            if date_of_first_employment == '':
+                date_of_first_employment = None
+
+            if date_of_osha_certification == '':
+                date_of_osha_certification = None
+
+            # Update patient object
+            patient.first_name = first_name
+            patient.middle_name = middle_name
+            patient.last_name = last_name
+            patient.gender = gender
+            patient.occupation = occupation
+            patient.phone = phone
+            patient.employee_number = employee_number
+            patient.date_of_first_employment = date_of_first_employment
+            patient.longtime_illness = longtime_illness
+            patient.longtime_medication = longtime_medication
+            patient.osha_certificate = osha_certificate
+            patient.date_of_osha_certification = date_of_osha_certification
+            patient.insurance = insurance      
+            patient.emergency_contact_name = emergency_contact_name
+            patient.emergency_contact_relation = emergency_contact_relation
+            patient.emergency_contact_phone = emergency_contact_phone
+            patient.emergency_contact_mobile = emergency_contact_mobile
+            patient.life_style = life_style
+            patient.age = age
+            patient.marital_status = marital_status
+            patient.nationality = nationality
+            patient.tribe = tribe
+            patient.patient_type = patient_type
+            patient.company = company
+            if insurance == 'Insured':
+                patient.insurance_company = insurance_company
+                patient.insurance_number = insurance_number
+            patient.save()
+
+            if 'save_back' in request.POST:
+                # Redirect to the patients list view
+                return redirect('patients_list')
+            elif 'save_continue_health' in request.POST:
+                # Redirect to continue editing health information
+                try:
+        # Save the changes made to the patient's information
+                    patient.save()     
+    
+                    return redirect(reverse('health_info_edit', args=[patient_id]))
+    
+                except Exception as e:
+        # Handle any errors that may occur during the save operation
+                    messages.error(request, f'Error saving changes: {str(e)}')
+                    range_100 = range(100)
+                    return render(request, 'hod_template/edit_remotepatient.html', {'patient': patient, 'range_100': range_100})
+                    
+
+        except Exception as e:
+            # Handle any other exceptions that may occur during form processing
+            # For example, you can log the error and render an error page
+            messages.error(request, f'Error editing Patient  record : {str(e)}')
+            range_100 = range(100)
+            return render(request, 'hod_template/edit_remotepatient.html', {'patient': patient, 'range_100': range_100})
+
+    # Render the template with patient data if available
+    range_100 = range(100)
+    return render(request, 'hod_template/edit_remotepatient.html', {'patient': patient, 'range_100': range_100})
+
+
+def health_info_edit(request, patient_id):
+    try:
+        patient = RemotePatient.objects.get(pk=patient_id)
+        patient_health_condition =PatientHealthCondition.objects.filter(patient=patient).first()
+        
+        if request.method == 'POST':
+            health_condition = request.POST.get('health_condition')
+            health_condition_notes = request.POST.get('health_condition_notes')
+            
+            # Update patient's health condition
+            patient_health_condition.health_condition = health_condition
+            patient_health_condition.health_condition_notes = health_condition_notes
+            patient_health_condition.save()
+            
+            if 'save_and_return' in request.POST:
+                return redirect('patients_list')
+            elif 'save_and_continue_family_health' in request.POST:
+                return redirect('family_health_info_edit', patient_id=patient.id)
+
+            elif 'save_and_continue_add_another_health_record' in request.POST:
+                # Redirect to add another patient health record
+                messages.success(request, 'Patient  health record added successfully.')
+                return redirect(reverse('save_patient_health_condition', args=[patient_id])) 
+        # Prepopulate form fields with existing data
+        initial_data = {
+            'health_condition': patient_health_condition.health_condition,
+            'health_condition_notes': patient_health_condition.health_condition_notes
+        }
+        
+        return render(request, 'hod_template/edit_patient_health_condition_form.html', {'patient': patient, 'initial_data': initial_data})
+    
+    except Exception as e:
+        messages.error(request, f'Error editing Patient  health record : {str(e)}')
+        initial_data = {
+            'health_condition': patient_health_condition.health_condition,
+            'health_condition_notes': patient_health_condition.health_condition_notes
+        }
+        
+        return render(request, 'hod_template/edit_patient_health_condition_form.html', {'patient': patient, 'initial_data': initial_data})
+    
+def family_health_info_edit(request, patient_id):
+    try:
+        # Retrieve existing family medical history record for the patient
+        patient = RemotePatient.objects.get(pk=patient_id)
+        family_medical_history = FamilyMedicalHistory.objects.filter(patient=patient).first()
+        print(family_medical_history)
+        if request.method == 'POST':
+            condition = request.POST.get('condition')
+            relationship = request.POST.get('relationship')
+            comments = request.POST.get('comments')
+
+            # Update the existing family medical history instance
+            if family_medical_history:
+                family_medical_history.condition = condition
+                family_medical_history.relationship = relationship
+                family_medical_history.comments = comments
+                family_medical_history.save()
+                messages.success(request, 'Patient family health record edited successfully.')
+            else:
+                messages.error(request, 'Family medical history record does not exist for this patient.')
+
+            # Check which button was clicked
+            if 'save_and_continue_add_another_family_record' in request.POST:
+                return redirect(reverse('family_health_info_edit', args=[patient_id]))
+            elif 'save_and_return' in request.POST:
+                # Redirect to the patients list page
+                return redirect('patients_list')
+
+    except Exception as e:
+        messages.error(request, f'Error occurred: {e}')
+        # Redirect back to the edit page with an error message
+        return redirect(reverse('family_health_info_edit', args=[patient_id]))
+
+    context = {
+        'patient': patient,
+        'family_medical_history': family_medical_history
+    }
+
+    return render(request, 'hod_template/edit_patient_family_condition_form.html', context)
+
+

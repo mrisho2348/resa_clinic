@@ -261,6 +261,21 @@ def generate_mrn():
     new_mrn = f"PAT-{new_mrn_number:05d}"
 
     return new_mrn
+
+def generate_for_remote_mrn():
+    # Retrieve the last patient's MRN from the database
+    last_patient = RemotePatient.objects.last()
+
+    # Extract the numeric part from the last MRN, or start from 0 if there are no patients yet
+    last_mrn_number = int(last_patient.mrn.split('-')[-1]) if last_patient else 0
+
+    # Increment the numeric part for the new patient
+    new_mrn_number = last_mrn_number + 1
+
+    # Format the MRN with leading zeros and concatenate with the prefix "PAT-"
+    new_mrn = f"PAT-{new_mrn_number:05d}"
+
+    return new_mrn
     
 
 
@@ -307,7 +322,7 @@ class RemotePatient(models.Model):
     def save(self, *args, **kwargs):
         # Generate MRN only if it's not provided
         if not self.mrn:
-            self.mrn = generate_mrn()
+            self.mrn = generate_for_remote_mrn()
 
         super().save(*args, **kwargs)
 
@@ -315,8 +330,8 @@ class RemotePatient(models.Model):
         return f"{self.first_name} {self.last_name}"   
     
 class PatientHealthCondition(models.Model):
-    patient = models.OneToOneField(RemotePatient, on_delete=models.CASCADE, related_name='health_conditions', verbose_name='Patient')    
-    has_health_condition = models.BooleanField(default=False, verbose_name='Has Health Condition')
+    patient = models.ForeignKey(RemotePatient, on_delete=models.CASCADE, related_name='health_conditions', verbose_name='Patient')    
+    health_condition = models.CharField(max_length=200, blank=True, null=True, verbose_name='Health Condition')
     health_condition_notes = models.CharField(max_length=200, blank=True, null=True, verbose_name='Health Condition Notes')  
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Created At')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Updated At')
@@ -469,8 +484,7 @@ class RemotePatientVisits(models.Model):
 
     patient = models.ForeignKey('Patients', on_delete=models.CASCADE)
     vst = models.CharField(max_length=20, unique=True, editable=False)
-    visit_type = models.CharField( max_length=15, choices=VISIT_TYPES)
-    visit_reason = models.TextField(blank=True, null=True)   
+    visit_type = models.CharField( max_length=15, choices=VISIT_TYPES)     
     primary_service = models.CharField(max_length=50) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -482,14 +496,14 @@ class RemotePatientVisits(models.Model):
     def save(self, *args, **kwargs):
         # Generate MRN only if it's not provided
         if not self.vst:
-            self.vst = generate_vst()
+            self.vst = remotegenerate_vst()
 
         super().save(*args, **kwargs)   
 
     def __str__(self):
         return f'{self.patient} - {self.get_visit_type_display()}'
     
-def generate_vst():
+def remotegenerate_vst():
     # Retrieve the last patient's VST from the database
     last_patient_visit = RemotePatientVisits.objects.last()
 
@@ -810,6 +824,34 @@ class Prescription(models.Model):
     def __str__(self):
         return f"{self.patient.fullname} - {self.drug.name}"  # Accessing drug's name   
     
+class RemotePrescription(models.Model):
+    patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE)
+    medicine = models.ForeignKey('Medicine', on_delete=models.CASCADE)  # Link with Medicine model
+    visit = models.ForeignKey(RemotePatientVisits, on_delete=models.CASCADE)  # Link with Medicine model
+    prs_no = models.CharField(max_length=20, unique=True, editable=False)    
+    dose = models.CharField(max_length=50)
+    frequency = models.CharField(max_length=50)
+    duration = models.CharField(max_length=50)
+    quantity_used = models.PositiveIntegerField()   
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def save(self, *args, **kwargs):
+        # Generate a unique identifier based on count of existing records
+        if not self.prs_no:
+            self.prs_no = generate_remoteprescription_id()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.patient.fullname} - {self.drug.name}"  # Accessing drug's name   
+    
+def generate_remoteprescription_id():
+    last_prescription = RemotePrescription.objects.last()
+    last_sample_number = int(last_prescription.prs_no.split('-')[-1]) if last_prescription else 0
+    new_prescription_id = last_sample_number + 1
+    return f"PRS-{new_prescription_id:07d}"   
+      
 def generate_prescription_id():
     last_prescription = Prescription.objects.last()
     last_sample_number = int(last_prescription.prs_no.split('-')[-1]) if last_prescription else 0

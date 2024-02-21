@@ -1,0 +1,452 @@
+{% load static %}
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+  <!-- Brand Logo -->
+  <a href="#" class="brand-link">
+      <img src="{% static 'dist/img/resalogo.png' %}" alt="resa Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+      <span class="brand-text font-weight-light">Resa Clinic </span>
+  </a>
+
+  <!-- Sidebar -->
+  <div class="sidebar"> 
+      <!-- Sidebar user panel (optional) -->
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+          <div class="image">
+              {% if doctor.profile_pic %}
+                  <img src="" class="img-circle elevation-2" alt="User Image">
+              {% else %}
+                  <img src="{% static 'dist/img/user2-160x160.jpg' %}" class="img-circle elevation-2" alt="User Image">
+              {% endif %}
+          </div>
+          <div class="info">
+              {% url 'kahamahmis:admin_profile' as admin_profile %}
+              <a href="#" class="d-block">{{user.username}}</a>
+          </div>
+      </div> 
+
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+              <!-- Home Section -->
+              <li class="nav-item">
+                  {% url 'kahama_dashboard' as kahama_dashboard %}
+                  <a href="{% url "kahamahmis:kahama_dashboard" %}" class="nav-link {% if request.path == kahama_dashboard %} active {% endif %}">
+                      <i class="nav-icon fas fa-th"></i>
+                      <p>HOME</p>
+                  </a>
+              </li> 
+
+              <!-- Clinic Section -->
+              <li class="nav-item has-treeview">
+                  <a href="#" class="nav-link">
+                      <i class="nav-icon fas fa-hospital"></i>
+                      <p>Clinic <i class="fas fa-angle-left right"></i></p>
+                  </a>
+                  <ul class="nav nav-treeview">
+                      <!-- Dashboard Link -->
+                      {% comment %} <li class="nav-item">
+                        {% url 'medicine_list' as medicine_list %}
+                          <a href="{% url "medicine_list" %}" class="nav-link{% if request.path == medicine_list %} active {% endif %}">                           
+                            <i class="nav-icon fas fa-pills"></i>
+                              <p>Medicine</p>
+                          </a>
+                      </li> {% endcomment %}
+                      {% comment %} <li class="nav-item">
+                        {% url 'prescription_list' as prescription_list_url %}
+                        <a href="{{ prescription_list_url }}" class="nav-link{% if request.path == prescription_list_url %} active {% endif %}">
+                            <i class="nav-icon fas fa-prescription-bottle"></i>
+                            <p>Prescriptions</p>
+                        </a>
+                    </li> {% endcomment %}
+
+                      <li class="nav-item">
+                        {% url 'patients_list' as patients_list %}
+                          <a href="{% url "kahamahmis:patients_list" %}" class="nav-link{% if request.path == patients_list %} active {% endif %}">
+                              <i class="nav-icon fas fa-users"></i>
+                              <p>Patients</p>
+                          </a>
+                      </li>
+             
+                      {% comment %} <li class="nav-item">
+                        {% url 'patient_vital_all_list' as patient_vital_all_list %}
+                        <a href="{% url 'patient_vital_all_list'  %}" class="nav-link{% if request.path == patient_vital_all_list %} active {% endif %}">
+                            <i class="nav-icon fas fa-heartbeat"></i> <!-- Font Awesome icon for vital signs -->
+                            <p>All Vital Signs</p> <!-- Renamed navigation link -->
+                        </a>
+                    </li> {% endcomment %}
+                      {% comment %} <li class="nav-item">
+                        {% url 'medicine_inventory' as medicine_inventory %}
+                          <a href="{% url "medicine_inventory" %}" class="nav-link{% if request.path == medicine_inventory %} active {% endif %}">
+                            <i class="nav-icon fas fa-pills"></i>
+                              <p>Medical Inventoory</p>
+                          </a>
+                      </li> {% endcomment %}
+
+                      {% comment %} <li class="nav-item">
+                        {% url 'in_stock_medicines_view' as in_stock_medicines_view_url %}
+                        <a href="{{ in_stock_medicines_view_url }}" class="nav-link{% if request.path == in_stock_medicines_view_url %} active {% endif %}">
+                            <i class="nav-icon fas fa-pills"></i> <!-- Example: Use the "fa-pills" icon for medicines -->
+                            <p>Available Medicines</p> <!-- Updated name for the link -->
+                        </a>
+                    </li> {% endcomment %}
+                      {% comment %} <li class="nav-item">
+                        {% url 'out_of_stock_medicines_view' as out_of_stock_medicines_view_url %}
+                        <a href="{{ out_of_stock_medicines_view_url }}" class="nav-link{% if request.path == out_of_stock_medicines_view_url %} active {% endif %}">
+                            <i class="nav-icon fas fa-exclamation-circle"></i> <!-- Font awesome icon for an alert or notification -->
+                            <p>Medicine Stock Alerts</p> <!-- Updated name for the navbar link -->
+                            <span id="notification-count" class="badge badge-danger"  title="medicine out of  Stock"></span> <!-- Notification badge -->
+                        </a>
+                    </li> {% endcomment %}
+                      {% comment %} <li class="nav-item">
+                        {% url 'patient_procedure_view' as patient_procedure_view %}
+                          <a href="{% url "patient_procedure_view" %}" class="nav-link{% if request.path == patient_procedure_view %} active {% endif %}">
+                            <i class="nav-icon fas fa-hospital"></i>
+                              <p>Medical Procedure</p>
+                          </a>
+                      </li> {% endcomment %}
+                      {% comment %} <li class="nav-item">
+                        {% url 'medication_payments_view' as medication_payments_url %}
+                        <a href="{{ medication_payments_url }}" class="nav-link{% if request.path == medication_payments_url %} active {% endif %}">
+                            <i class="nav-icon fas fa-prescription-bottle-alt"></i>
+                            <p>Medication Records</p>
+                        </a>
+                    </li> {% endcomment %}
+                    {% comment %} <li class="nav-item">
+                        {% url 'diagnostic_tests' as diagnostic_tests_url %}
+                        <a href="{{ diagnostic_tests_url }}" class="nav-link{% if request.path == diagnostic_tests_url %} active {% endif %}">
+                            <i class="nav-icon fas fa-flask"></i>
+                            <p>Health Insights</p>
+                        </a>
+                    </li> {% endcomment %}
+                    {% comment %} <li class="nav-item">
+                        {% url 'sample_list' as sample_list %}
+                        <a href="{{ sample_list }}" class="nav-link{% if request.path == sample_list %} active {% endif %}">
+                            <i class="nav-icon fas fa-flask"></i>
+                            <p>Sample Management</p>
+                        </a>
+                    </li> {% endcomment %}
+                    {% comment %} <li class="nav-item">
+                        {% url 'patient_diseases_view' as patient_diseases_view %}
+                        <a href="{{ patient_diseases_view }}" class="nav-link{% if request.path == patient_diseases_view %} active {% endif %}">
+                            <i class="nav-icon fas fa-heartbeat"></i> <!-- Replace 'fas fa-heartbeat' with the appropriate FontAwesome icon class -->
+                            <p>Patient Health Records</p> <!-- Replace with an attractive name for the navlink -->
+                        </a>
+                    </li> {% endcomment %}
+{% comment %}                     
+                    <li class="nav-item">
+                        {% url 'pathology_diagnostic_test_list' as pathology_diagnostic_test_list %}
+                        <a href="{{ pathology_diagnostic_test_list }}" class="nav-link{% if request.path == pathology_diagnostic_test_list %} active {% endif %}">
+                            <i class="nav-icon fas fa-notes-medical"></i>
+                            <p>Pathology Diagnostic Tests</p>
+                        </a>
+                    </li> {% endcomment %}
+                    
+                    
+                      {% comment %} <li class="nav-item">
+                        {% url 'manage_referral' as manage_referral %}
+                        <a href="{% url 'manage_referral' %}" class="nav-link{% if request.path == manage_referral %} active {% endif %}">
+                            <i class="nav-icon fas fa-handshake"></i>
+                            <p>Referral</p>
+                        </a>
+                    </li> {% endcomment %}
+                 
+                      {% comment %} <li class="nav-item">
+                        {% url 'appointment_list' as appointment_list %}
+                          <a href="{% url "appointment_list" %}" class="nav-link{% if request.path == appointment_list %} active {% endif %}">
+                            <i class="nav-icon fas fa-calendar"></i>
+                              <p>Consultations</p>
+                          </a>
+                      </li> {% endcomment %}
+                      <li class="nav-item">
+                        {% url 'consultation_notes' as consultation_notes %}
+                          <a href="{% url "kahamahmis:consultation_notes" %}" class="nav-link{% if request.path == consultation_notes %} active {% endif %}">
+                            <i class="nav-icon fas fa-calendar"></i>
+                              <p>consultation</p>
+                          </a>
+                      </li>
+                      {% comment %} <li class="nav-item">
+                        {% url 'consultation_fee_list' as consultation_fee_list %}
+                          <a href="{% url "consultation_fee_list" %}" class="nav-link{% if request.path == consultation_fee_list %} active {% endif %}">
+                            <i class="nav-icon fas fa-money-bill-wave"></i>
+                              <p>Consultation Fees</p>
+                          </a>
+                      </li> {% endcomment %}
+                      {% comment %} <li class="nav-item">
+                          <a href="{% url "add_request" %}" class="nav-link">
+                              <i class="nav-icon fas fa-stethoscope"></i>
+                              <p>request</p>
+                          </a>
+                      </li> {% endcomment %}
+                      <li class="nav-item">
+                        {% url 'manage_service' as manage_service %}
+                          <a href="{% url "kahamahmis:manage_service" %}" class="nav-link{% if request.path == manage_service %} active {% endif %}">
+                              <i class="nav-icon fas fa-medkit"></i>
+                              <p>Services</p>
+                          </a>
+                      </li>
+                      <li class="nav-item">
+                          <a href="{% url "kahamahmis:resa_report" %}" class="nav-link">
+                              <i class="nav-icon fas fa-file-alt"></i>
+                              <p>Reports</p>
+                          </a>
+                      </li>            
+                  </ul>
+              </li>
+
+              <!-- Settings Section -->
+              <li class="nav-header">Settings</li>
+              <li class="nav-item has-treeview">
+                  <a href="#" class="nav-link">
+                      <i class="nav-icon fas fa-cog"></i>
+                      <p>                    
+                          <i class="fas fa-angle-left right"></i>
+                      </p>
+                  </a>
+                  <ul class="nav nav-treeview">
+                      <!-- Insurance Link -->
+                      <li class="nav-item">                    
+                          <a href="{% url "kahamahmis:manage_insurance" %}" class="nav-link">
+                              <i class="nav-icon fas fa-shield-alt"></i>
+                              <p>Insurance</p>
+                          </a>
+                      </li>
+                      {% comment %} <li class="nav-item"> 
+                        {% url 'category_list' as category_list_url %}                   
+                        <a href="{% url 'category_list' %}" class="nav-link{% if request.path == category_list_url %} active {% endif %}">
+                            <i class="nav-icon fas fa-list"></i>
+                            <p>Manage Categories</p>
+                        </a>
+                    </li> {% endcomment %}
+                    {% comment %} <li class="nav-item"> 
+                        {% url 'supplier_list' as supplier_list_url %}                   
+                        <a href="{% url 'supplier_list' %}" class="nav-link{% if request.path == supplier_list_url %} active {% endif %}">
+                            <i class="nav-icon fas fa-truck"></i>
+                            <p>Suppliers</p>
+                        </a>
+                    </li> {% endcomment %}
+{% comment %} 
+                    <li class="nav-item"> 
+                        {% url 'inventory_list' as inventory_list_url %}                   
+                        <a href="{% url 'inventory_list' %}" class="nav-link{% if request.path == inventory_list_url %} active {% endif %}">
+                            <i class="nav-icon fas fa-box"></i>
+                            <p>Inventory</p>
+
+                            <span id="minStockNotification" class="badge badge-danger" title="Items Below Minimum Stock Level"></span> <!-- Notification badge -->
+                        </a>
+                    </li> {% endcomment %}
+                    {% comment %} <li class="nav-item"> 
+                        {% url 'in_stock_items' as in_stock_items %}                   
+                        <a href="{% url 'in_stock_items' %}" class="nav-link{% if request.path == in_stock_items %} active {% endif %}">
+                            <i class="nav-icon fas fa-box-open"></i>
+                            <p>Available Items</p>
+                        </a>
+                    </li>                     {% endcomment %}
+                    {% comment %} <li class="nav-item"> 
+                        {% url 'out_of_stock_items' as out_of_stock_items %}                   
+                        <a href="{% url 'out_of_stock_items' %}" class="nav-link{% if request.path == out_of_stock_items %} active {% endif %}">
+                            <i class="nav-icon fas fa-exclamation-triangle"></i>
+                            <p>Stock Alerts</p>
+                            <span id="outOfStockNotification" class="badge badge-danger"  title="Items out  Stock"></span> <!-- Notification badge -->
+                        </a>
+                    </li> {% endcomment %}
+                    {% comment %} <li class="nav-item"> 
+                        {% url 'usage_history_list' as usage_history_list_url %}                   
+                        <a href="{% url 'usage_history_list' %}" class="nav-link{% if request.path == usage_history_list_url %} active {% endif %}">
+                            <i class="nav-icon fas fa-history"></i>
+                            <p>Usage History</p>
+                        </a>
+                    </li> {% endcomment %}
+                    
+                      <!-- Other Settings Links -->
+                      <li class="nav-item"> 
+                        {% url 'manage_disease' as manage_disease %}                    
+                          <a href="{% url "kahamahmis:manage_disease" %}" class="nav-link{% if request.path == manage_disease %} active {% endif %}">                     
+                              <i class="nav-icon fas fa-biohazard"></i>
+                              <p>Diseases</p>
+                          </a>
+                      </li>
+                      {% comment %} <li class="nav-item"> 
+                        {% url 'diagnosis_list' as diagnosis_list_url %}
+                        <a href="{{ diagnosis_list_url }}" class="nav-link{% if request.path == diagnosis_list_url %} active {% endif %}">
+                            <i class="nav-icon fas fa-notes-medical"></i>
+                            <p>View Diagnoses</p>
+                        </a>
+                    </li> {% endcomment %}
+                      {% comment %} <li class="nav-item"> 
+                        {% url 'health_issue_list' as health_issue_list_url %}                    
+                        <a href="{{ health_issue_list_url }}" class="nav-link{% if request.path == health_issue_list_url %} active {% endif %}">                     
+                            <i class="nav-icon fas fa-heartbeat"></i> <!-- Assuming "fa-heartbeat" represents health issues -->
+                            <p>Health Issues</p> <!-- Updated to a more descriptive name -->
+                        </a>
+                    </li> {% endcomment %}
+                      
+                      {% comment %} <li class="nav-item">  
+                        {% url 'equipment_list' as equipment_list_url %}                   
+                        <a href="{{ equipment_list_url }}" class="nav-link{% if request.path == equipment_list_url %} active {% endif %}">                     
+                            <i class="nav-icon fas fa-tools"></i> <!-- Assuming "fa-tools" represents equipment -->
+                            <p>Equipment Inventory</p> <!-- Renamed to "Equipment Inventory" for better readability -->
+                        </a>
+                    </li> {% endcomment %}
+{% comment %} 
+                    <li class="nav-item">  
+                        {% url 'equipment_maintenance_list' as maintenance_list_url %}                   
+                        <a href="{{ maintenance_list_url }}" class="nav-link{% if request.path == maintenance_list_url %} active {% endif %}">                     
+                            <i class="nav-icon fas fa-tools"></i> <!-- Assuming "fa-tools" represents maintenance -->
+                            <p>Equipment Maintenance</p> <!-- Renamed to "Equipment Maintenance" for better readability -->
+                        </a>
+                    </li> {% endcomment %}
+                    {% comment %} <li class="nav-item">  
+                        {% url 'reagent_list' as reagent_list_url %}                   
+                        <a href="{{ reagent_list_url }}" class="nav-link{% if request.path == reagent_list_url %} active {% endif %}">                     
+                            <i class="nav-icon fas fa-flask"></i> <!-- Assuming "fa-flask" represents reagents -->
+                            <p>Reagent Inventory</p> <!-- Renamed to "Reagent Inventory" for better readability -->
+                        </a>
+                    </li> {% endcomment %}
+                    {% comment %} <li class="nav-item">  
+                        {% url 'reagent_usage_list' as reagent_usage_list_url %}                   
+                        <a href="{{ reagent_usage_list_url }}" class="nav-link{% if request.path == reagent_usage_list_url %} active {% endif %}">                     
+                            <i class="nav-icon fas fa-vial"></i> <!-- Assuming "fa-vial" represents reagent usage -->
+                            <p>Reagent Usage History</p> <!-- Renamed to "Reagent Usage History" for better readability -->
+                        </a>
+                    </li> {% endcomment %}
+                    {% comment %} <li class="nav-item">  
+                        {% url 'in_stock_reagent_view' as in_stock_reagent_view_url %}                   
+                        <a href="{{ in_stock_reagent_view_url }}" class="nav-link{% if request.path == in_stock_reagent_view_url %} active {% endif %}">                     
+                            <i class="nav-icon fas fa-flask"></i> <!-- Assuming "fa-flask" represents reagents -->
+                            <p>Available Reagents</p> <!-- Renamed to "Available Reagents" for better readability -->
+                        </a>
+                    </li> {% endcomment %}
+                    {% comment %} <li class="nav-item">  
+                        {% url 'out_of_stock_reagent_view' as out_of_stock_reagent_view_url %}                   
+                        <a href="{{ out_of_stock_reagent_view_url }}" class="nav-link{% if request.path == out_of_stock_reagent_view_url %} active {% endif %}">                     
+                            <i class="nav-icon fas fa-exclamation-circle"></i> <!-- Assuming "fa-exclamation-circle" represents out-of-stock -->
+                            <p>Out of Stock Reagents</p> <!-- Renamed to "Out of Stock Reagents" for better readability -->
+                            <span id="notification-count-reagent" class="badge badge-danger"  title="reagent out  Stock"></span> <!-- Notification badge -->
+                        </a>
+                    </li> {% endcomment %}
+                    {% comment %} <li class="nav-item">  
+                        {% url 'quality_control_list' as quality_control_list_url %}                   
+                        <a href="{{ quality_control_list_url }}" class="nav-link{% if request.path == quality_control_list_url %} active {% endif %}">                     
+                            <i class="nav-icon fas fa-tasks"></i> <!-- Assuming "fa-tasks" represents quality control -->
+                            <p>Quality Control</p> <!-- Updated to a more descriptive name -->
+                        </a>
+                    </li> {% endcomment %}
+                    
+                      <li class="nav-item">                    
+                          <a href="{% url "kahamahmis:manage_company" %}" class="nav-link ">
+                              <i class="nav-icon fas fa-building"></i>
+                              <p>Companies</p>
+                          </a>
+                      </li>
+                      <li class="nav-item">                   
+                          <a href="{% url "kahamahmis:manage_pathodology" %}" class="nav-link ">
+                              <i class="nav-icon fas fa-vial"></i>
+                              <p>Pathology</p>
+                          </a>
+                      </li>
+                      <li class="nav-item">                   
+                          <a href="{% url "kahamahmis:manage_staff" %}" class="nav-link">
+                              <i class="nav-icon fas fa-users"></i>
+                              <p>Staffs</p>
+                          </a>
+                      </li>
+                      <li class="nav-item">                  
+                          <a href="#" class="nav-link">
+                              <i class="nav-icon fas fa-bars"></i>
+                              <p>Company</p>
+                          </a>
+                      </li>
+                  </ul>
+              </li>
+          </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+  </div>
+  <!-- /.sidebar -->
+</aside>
+
+<script>
+    function updateOutOfStockNotification() {
+        $.ajax({
+            type: 'GET',
+            url: '/get_out_of_stock_count/',
+            dataType: 'json',
+            success: function(data) {
+                var count = data.count;
+                $('#outOfStockNotification').text(count); // Update the notification element
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function updateNotificationCount() {
+        $.ajax({
+            url: '/api/out-of-stock-medicines/', // Replace with your API endpoint URL
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                var count = data.count;
+                // Update the notification count with the count received from the backend
+                $('#notification-count').text(count);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching notification count:', error);
+            }
+        });
+    }
+
+    function ReagentOutNotificationCount() {
+        $.ajax({
+            url: '/api/out-of-stock-reagent-count/', // Replace with your API endpoint URL
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                var count = data.count;
+                // Update the notification count with the count received from the backend
+                $('#notification-count-reagent').text(count);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching notification count:', error);
+            }
+        });
+    }  
+    
+    $(document).ready(function() {
+        // Update the notification when the page loads
+        updateOutOfStockNotification();
+        updateNotificationCount();
+        ReagentOutNotificationCount();
+    
+        // Periodically update the notification (e.g., every 5 seconds)
+        setInterval(updateOutOfStockNotification, 60000);
+    });
+    
+</script>
+
+<script>
+    function getItemsBelowMinStock() {
+        $.ajax({
+            type: 'GET',
+            url: '/get_items_below_min_stock/',
+            success: function(data) {
+                var count = data.count;
+                if (count > 0) {
+                    $('#minStockNotification').html('<span class="badge badge-danger">' + count + '</span>');
+                } else {
+                    $('#minStockNotification').empty();
+                }
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    }
+    
+    // Periodically check for items below minimum stock level
+    $(document).ready(function() {
+        getItemsBelowMinStock(); // Initial check
+        setInterval(getItemsBelowMinStock, 60000); // Check every minute
+    });
+    
+</script>

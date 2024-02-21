@@ -5,11 +5,19 @@ from . import views,delete,imports,editView
 
 urlpatterns = [
         path('',views.index, name="home"),
+        path('family_health_info_edit/<int:patient_id>/',views.family_health_info_edit, name="family_health_info_edit"),
+        path('save_patient_health_condition/<int:patient_id>/',views.save_patient_health_condition, name="save_patient_health_condition"),
+        path('patient_info_form_edit/<int:patient_id>/',views.patient_info_form_edit, name="patient_info_form_edit"),
+        path('health_info_edit/<int:patient_id>/',views.health_info_edit, name="health_info_edit"),
+        # path('add_another_family_record/<int:patient_id>/', views.add_another_family_record, name='add_another_family_record'),
+        path('save_family_medical_history/<int:patient_id>/',views.save_family_medical_history, name="save_family_medical_history"),
         path('patient_info_form/',views.patient_info_form, name="patient_info_form"),
+        path('add_remotepatient_visit/',views.add_remotepatient_visit, name="add_remotepatient_visit"),
         path('save_diagnosis/',views.save_diagnosis, name="save_diagnosis"),
         path('save_consultation_notes/',views.save_consultation_notes, name="save_consultation_notes"),
         path('save_patient_vital/',views.save_patient_vital, name="save_patient_vital"),
         path('add_prescription/',views.add_prescription, name="add_prescription"),
+
         path('add_patient_visit/',views.add_patient_visit, name="add_patient_visit"),
         path('add_health_issue',views.add_health_issue, name="add_health_issue"),
         path('resa/dashboard',views.dashboard, name="dashboard"),
@@ -85,7 +93,8 @@ urlpatterns = [
        
         
         # manage urls 
-        path('resa/remotemanage_patient/', views.remotemanage_patient, name='remotemanage_patient'),
+        # path('resa/remotemanage_patient/', views.remotemanage_patient, name='remotemanage_patient'),
+        path('patients/', views.patients_list, name='patients_list'),
         path('diagnosis/', views.diagnosis_list, name='diagnosis_list'),
         path('consultation-notes/', views.consultation_notes_view, name='consultation_notes'),
         path('resa/patient_vital_all_listt/', views.patient_vital_all_list, name='patient_vital_all_list'),
@@ -177,6 +186,7 @@ urlpatterns = [
         path('edit_procedure/', editView.edit_procedure, name='edit_procedure'), 
         path('edit_referral/', editView.edit_referral, name='edit_referral'), 
         path('Patient/<int:patient_id>/add/', views.appointment_view, name='appointment_view'), 
+        path('appointment_view/<int:patient_id>/', views.appointment_view_remote, name='appointment_view_remote'),
         path('patient-procedure-history/<str:mrn>/view/', views.patient_procedure_history_view, name='patient_procedure_history_view_mrn'), 
         path('edit_medicine/<int:medicine_id>/', editView.edit_medicine, name='edit_medicine'),        
         path('edit_inventory/<int:inventory_id>/', editView.edit_inventory, name='edit_inventory'),
@@ -211,6 +221,7 @@ urlpatterns = [
         path('pathodology/<int:pathodology_id>/delete/', delete.delete_pathodology, name='delete_pathodology'),
         path('company/<int:company_id>/delete/', delete.delete_company, name='delete_company'),
         path('delete_staff/<int:staff_id>/', delete.delete_staff, name='delete_staff'),
+        path('delete_remote_patient/<int:patient_id>/', delete.delete_remote_patient, name='delete_remote_patient'),
         path('delete-patient/<int:patient_id>/', delete.delete_patient, name='delete_patient'),
         path('delete_service/', delete.delete_service, name='delete_service'),
         path('delete_procedure/', delete.delete_procedure, name='delete_procedure'),        

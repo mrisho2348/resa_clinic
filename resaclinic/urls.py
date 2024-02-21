@@ -22,7 +22,8 @@ from resaclinic import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('clinic.urls')),
-    path('resa', include('centric.urls')),
+    path('resa/', include('centric.urls')),
+    path('kahama/', include(('kahamahmis.urls', 'kahamahmis'), namespace='kahamahmis')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

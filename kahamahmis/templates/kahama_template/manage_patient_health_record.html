@@ -1,0 +1,590 @@
+{% extends 'kahama_template/base_template.html' %}
+
+{% block title %}
+Patient - Health Record
+{% endblock title %}
+
+{% block page_title %}
+Patient - Health Record
+{% endblock page_title %}
+
+{% block breadcrumb %}
+{% include "kahama_template/modal_form.html" %}
+<a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#addPrescriptionModal">
+    <i class="fas fa-plus"></i> prescription
+</a>
+<!-- Add Import insurance link and modal trigger -->
+{% endblock breadcrumb %}
+
+
+{% load static %}
+{% block main_content %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">            
+                <div class="card-body">
+                    <ul class="navigation list-group">
+                        <li class="list-group-item navigation-header">Navigation</li>
+                        <li class="list-group-item active">
+                            <a href="#health" data-toggle="tab" aria-expanded="true">
+                                <i class="fas fa-heartbeat"></i> Health Records
+                            </a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="#investigation" data-toggle="tab" aria-expanded="false">
+                                <i class="far fa-file"></i> Orders Request
+                            </a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="#lab_result" data-toggle="tab" aria-expanded="false">
+                                <i class="far fa-file-alt"></i> Lab Result
+                            </a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="#procedure_result" data-toggle="tab" aria-expanded="false">
+                                <i class="fas fa-file-medical"></i> Procedures Result
+                            </a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="#prescription" data-toggle="tab" aria-expanded="false">
+                                <i class="fas fa-file-prescription"></i> Prescriptions
+                            </a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="#notes" data-toggle="tab" aria-expanded="false">
+                                <i class="far fa-clipboard"></i> Consultation
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="card-body">
+                                <div class="row" style="font-size:13px;">
+                                    <div class="col-md-3"><b>PATIENT: {{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</b></div>
+                                    <div class="col-md-3"><b>Age: {{ patient.age }}</b></div>
+                                    <div class="col-md-3"><b>SEX: {{ patient.gender }}</b></div>
+                                    <div class="col-md-3"><b>FILE NO : {{ patient.mrn }}</b> </div>
+                                </div>
+                                    <div class="row mt-3">
+                                        <div class="col-md-3"><b>PAYMENT MODE: {{ patient.payment_form }}</b></div>
+                                    </div>
+                            </div>    
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="tab-content">
+                                <div class="tab-pane fade active" id="health">
+                                    <div class="panel panel-flat">                                     
+                                        <div class="panel-body">
+                                            <div class="tabbable">
+                                                <!-- Navigation tabs with additional styles -->
+                                             <div class="container mb-3 ">
+                                                <ul class="nav nav-tabs nav-tabs-highlight custom-tabs">
+                                                    <li class="list-inline-item active"><a href="#left-icon-tab1" data-toggle="tab" aria-expanded="true" onclick="changeActiveTab(event, 'left-icon-tab1')"><i class="icon-menu7 position-left"></i> Vital Sign</a></li>
+                                                    <li class="list-inline-item"><a href="#left-icon-tab2" data-toggle="tab" aria-expanded="true" onclick="changeActiveTab(event, 'left-icon-tab2')">Diagnosis</a></li>
+                                                </ul>
+                                             </div>
+                                                                                            
+                                                <div class="tab-content">
+                                                    <div class="tab-pane active" id="left-icon-tab1">
+                                                        <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example1"  style="width:100%">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>ASSESMENT DATE</th>
+                                                                    <th>VITAL NAME</th>
+                                                                    <th>RESULT</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td>16/02/2024</td>
+                                                                    <td>BLOOD PRESSURE</td>
+                                                                    <td>129/78</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>16/02/2024</td>
+                                                                    <td>HEART RATE</td>
+                                                                    <td>87 /min</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>16/02/2024</td>
+                                                                    <td>RESPIRATORY RATE</td>
+                                                                    <td>16 /min</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>16/02/2024</td>
+                                                                    <td>OXYGEN SATURATION(SP02)</td>
+                                                                    <td>98 %</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>16/02/2024</td>
+                                                                    <td>WEIGHT</td>
+                                                                    <td>66.1 kg</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>16/02/2024</td>
+                                                                    <td>TEMPERATURE</td>
+                                                                    <td>36.7 cel</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                
+                                                    <div class="tab-pane" id="left-icon-tab2">
+                                                        <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display"  style="width:100%">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <th>Preliminary Diagnosis</th>
+                                                                    <th>Final Diagnosis</th>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <ul>
+                                                                            <li>Malaria (unspecified) * B54</li>
+                                                                            <li>Urinary tract infection, site not specified * N39.0</li>
+                                                                        </ul>
+                                                                    </td>
+                                                                    <td>
+                                                                        <ul>
+                                                                            <li>Malaria (unspecified) * B54</li>
+                                                                        </ul>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="tab-pane fade" id="investigation">
+                                    <h5 class="panel-title">Orders Request</h5>                                    <!-- Content for Orders Request tab -->
+                                    <div class="panel panel-flat">
+                                        <div class="panel-body">
+                                            <a class="btn btn-default" href="/Consultations/Register/523678?visit=5dc1365a-3a87-491d-a380-106734e64852">Consultation</a>
+                                            <a class="btn btn-default" href="/Order/Register/523678?visit=5dc1365a-3a87-491d-a380-106734e64852">Laboratory</a>
+                                            <a class="btn btn-default" href="/Imaging/Register/523678?visit=5dc1365a-3a87-491d-a380-106734e64852">Imaging</a>
+                                            <a class="btn btn-default" href="/Procedure/Register/523678?visit=5dc1365a-3a87-491d-a380-106734e64852">Procedure</a>
+                                            <a class="btn btn-default" href="/Physio/Register/523678?visit=5dc1365a-3a87-491d-a380-106734e64852">Physiotherapy</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="lab_result">
+                                    <h5 class="panel-title">Lab Result</h5>
+                                    <div class="panel panel-flat">                                   
+                                        <div class="panel-body">
+                                            <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example3"  style="width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Code</th>
+                                                        <th>Description</th>
+                                                        <th>Amount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for result in lab_results %}
+                                                    <tr>
+                                                        <td>{{ forloop.counter }}</td>
+                                                        <td>{{ result.code }}</td>
+                                                        <td>{{ result.description }}</td>
+                                                        <td>{{ result.amount }}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade active in" id="procedure_result">
+                                    <h5 class="panel-title">Procedures Result</h5>
+                                    <div class="panel panel-flat">                                       
+                                        <div class="panel-body">
+                                            <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example4"  style="width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Code</th>
+                                                        <th>Description</th>
+                                                        <th></th>
+                                                        <th>Amount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for procedure_result in procedure_results %}
+                                                    <tr>
+                                                        <td>{{ procedure_result.id }}</td>
+                                                        <td>{{ procedure_result.code }}</td>
+                                                        <td>{{ procedure_result.description }}</td>
+                                                        <td></td> <!-- Add the appropriate content for this column if needed -->
+                                                        <td>{{ procedure_result.amount }}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="tab-pane fade active in" id="prescription">
+                                    <h5 class="panel-title">Prescription and total amount <span style="background-color: red;">{{total_price}}</span></h5>
+                                    <div class="panel panel-flat">                                     
+                                        <div class="panel-body">
+                                            <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example5"  style="width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Drug</th>                                                      
+                                                        <th>Dose</th>
+                                                        <th>Frequency</th>
+                                                        <th>Duration</th>
+                                                        <th>Quantity</th>
+                                                        <th>Unit Price</th>
+                                                        <th>Total Price</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for prescription in prescriptions %}
+                                                    <tr>
+                                                        <td>{{ prescription.id }}</td>
+                                                        <td>{{ prescription.medicine.name }}</td>
+                                                        <td>{{ prescription.dose }}</td>                                                       
+                                                        <td>{{ prescription.frequency }}</td>
+                                                        <td>{{ prescription.duration }}</td>
+                                                        <td>{{ prescription.quantity_used }}</td>
+                                                        <td>{{ prescription.medicine.unit_price }}</td>
+                                                        <td>{{ prescription.total_price }}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="tab-pane fade" id="notes">
+                                    <h5 class="panel-title">Consultation</h5>
+                                    <div class="panel panel-flat">                                       
+                                        <div class="panel-body">
+                                            <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example6"  style="width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Code</th>
+                                                        <th>Description</th>
+                                                        <th></th>
+                                                        <th>Amount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for consultation in consultations %}
+                                                    <tr>
+                                                        <td>{{ forloop.counter }}</td>
+                                                        <td>{{ consultation.code }}</td>
+                                                        <td>{{ consultation.description }}</td>
+                                                        <td></td>
+                                                        <td>{{ consultation.amount }}</td>
+                                                        <td><a href="#notes_modal_{{ consultation.id }}" data-toggle="modal">Notes</a></td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Modal for viewing notes -->
+                                {% for consultation in consultations %}
+                                <div class="modal fade" id="notes_modal_{{ consultation.id }}">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">Consultation Notes</h4>
+                                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>{{ consultation.notes }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addPrescriptionModal" tabindex="-1" role="dialog" aria-labelledby="addPrescriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addPrescriptionModalLabel">Add Prescription for visit {{ visits.vst }} and patient {{ patient }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addPrescriptionModalForm{{ visit.id }}" method="post">
+                    {% csrf_token %}
+                    <table class="table table-bordered" id="prescriptionTable{{ visit.id }}">
+                        <thead>
+                            <tr>
+                                <th>Drug</th>
+                                <th>Dose</th>
+                                <th>Frequency</th>
+                                <th>Duration</th>
+                                <th>Quantity</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td> <select class="form-control select2bs4" style="width: 100%;" id="medicine" name="medicine[]" required>
+                                    <option value="">Select Medicine</option>
+                                    {% for medicine in medicines %}
+                                      <option value="{{ medicine.id }}" {% if medicine.id == prescription.medicine.id  %} selected {% endif %}>{{ medicine.name }}</option>
+                                    {% endfor %}
+                                  </select></td>
+                                <td><input type="text" class="form-control" name="dose[]" value="0"></td>
+                                <td><select class="form-control select2bs4" style="width: 100%;" id="frequency" name="frequency[]">                                
+                                        <option value="PRN">PRN</option>
+                                        <option value="QID">QID</option>
+                                        <option value="TID">TID</option>
+                                        <option value="BID">BID</option>
+                                        <option value="STAT">STAT</option>
+                                        <option value="OD">OD</option>                                    
+                                </select></td></td>
+                                <td> <select class="form-control select2bs4" style="width: 100%;" id="duration" name="duration[]">
+                                    {% for rate in range_31 %}
+                                        <option value="{{ rate }}">{{ rate }}</option>
+                                    {% endfor %}
+                                </select></td>
+                                <td><input type="text" class="form-control" name="quantity[]" value="1"></td>
+                                <td><button type="button" class="btn btn-danger delete-row">Delete</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <input type="hidden" class="form-control" id="visit_id" name="visit_id" value="{{ visits.id }}">
+                    <input type="hidden" class="form-control" id="patient_id" name="patient_id" value="{{ patient.id }}">
+                    <button type="button" class="btn btn-success" id="addRow{{ visit.id }}">Add Row</button>
+                    <button type="button" class="btn btn-primary"  onclick="addPrescription()">Save Prescriptions</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function() {
+        // Add row button functionality
+        $('#addRow{{ visit.id }}').click(function() {
+            var newRow = `
+                <tr>
+                    <td> <select class="form-control select2bs4" style="width: 100%;" id="medicine" name="medicine[]" required>
+                        <option value="">Select Medicine</option>
+                        {% for medicine in medicines %}
+                          <option value="{{ medicine.id }}" {% if medicine.id == prescription.medicine.id  %} selected {% endif %}>{{ medicine.name }}</option>
+                        {% endfor %}
+                      </select></td>
+                    <td><input type="text" class="form-control" name="dose[]" value="0"></td>
+                    <td><select class="form-control select2bs4" style="width: 100%;" id="frequency" name="frequency[]">                                
+                        <option value="PRN">PRN</option>
+                        <option value="QID">QID</option>
+                        <option value="TID">TID</option>
+                        <option value="BID">BID</option>
+                        <option value="STAT">STAT</option>
+                        <option value="OD">OD</option>                                    
+                </select></td></td>
+                <td> <select class="form-control select2bs4" style="width: 100%;" id="duration" name="duration[]">
+                    {% for rate in range_31 %}
+                        <option value="{{ rate }}">{{ rate }}</option>
+                    {% endfor %}
+                </select></td>
+                    <td><input type="text" class="form-control" name="quantity[]" value="1"></td>
+                    <td><button type="button" class="btn btn-danger delete-row">Delete</button></td>
+                </tr>`;
+            $('#prescriptionTable{{ visit.id }} tbody').append(newRow);
+        });
+
+        // Delete row button functionality
+        $(document).on('click', '.delete-row', function() {
+            $(this).closest('tr').remove();
+        });
+
+        // Trigger modal only when button is clicked
+        $('.add-prescription').click(function() {
+            var visitId = $(this).data('visit-id');
+            $('#addPrescriptionModal' + visitId).modal('show');
+        });
+    });
+</script>
+
+<script>
+    // Handle form submission using AJAX
+    function addPrescription() {
+        $.ajax({
+            type: 'POST',
+            url: '{% url "kahamahmis:add_remoteprescription" %}',  // Replace with your URL
+            data: $('#addPrescriptionModalForm').serialize(),
+            success: function (data) {
+                if (data.status === 'success') {
+                    $('#addPrescriptionModal').modal('hide');
+                    location.reload(true);
+                    // Refresh the inventory item list or perform any other actions
+                } else {
+                    // Handle other status cases if needed
+                    alert(data.message);
+                }
+            },
+            error: function (error) {
+                alert(error);
+                // Handle errors if necessary
+            }
+        });
+    }
+</script>
+
+<script>
+    function collapsePanel() {
+        // Code to handle collapse action
+        console.log("Panel collapsed");
+        // You can add your specific logic here
+    }
+    
+    function reloadPanel() {
+        // Code to handle reload action
+        console.log("Panel reloaded");
+        // You can add your specific logic here
+    }
+    
+    function closePanel() {
+        // Code to handle close action
+        console.log("Panel closed");
+        // You can add your specific logic here
+    }
+    
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('.navigation a').on('click', function(e) {
+            e.preventDefault();
+            $(this).tab('show');
+            // Remove active class from all list items
+            $('.navigation li').removeClass('active');
+            // Add active class to the clicked list item
+            $(this).closest('li').addClass('active');
+        });
+    });
+</script>
+
+<style>
+    /* Reset default margin and padding */
+.navigation {
+    padding-left: 0;
+    list-style: none;
+}
+
+/* Style for the header */
+.navigation-header {
+    background-color: #f0f0f0; /* Header background color */
+    color: #333; /* Header text color */
+    font-weight: bold;
+    padding: 10px; /* Add padding to the header */
+    border-radius: 5px; /* Add border radius */
+    margin-bottom: 10px; /* Add space between header and links */
+}
+
+/* Style for each list item */
+.navigation li {
+    margin-bottom: 5px;
+}
+
+/* Style for each link */
+.navigation li a {
+    color: #333; /* Default text color */
+    text-decoration: none;
+    display: block;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease; /* Smooth transition for background color */
+}
+
+/* Style for the active link */
+.navigation li.active a {
+    background-color: #007bff; /* Active background color */
+    color: #fff; /* Active text color */
+}
+
+/* Style for link hover */
+.navigation li a:hover {
+    background-color: #e0e0e0; /* Hover background color */
+    color: #000; /* Change text color on hover */
+}
+
+    
+</style>
+<style>
+    /* styles.css */
+
+/* Add custom styles for the container */
+.container {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+}
+
+/* Add styles for the card */
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Add styles for the table */
+.table {
+    width: 100%;
+}
+
+/* Add styles for table headers */
+.table th {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* Add styles for table rows */
+.table tbody tr {
+    background-color: #f9f9f9;
+}
+
+/* Add styles for buttons */
+.btn {
+    border-radius: 5px;
+    margin-right: 5px;
+}
+
+/* Add more styles as needed */
+
+</style>
+{% include 'kahama_template/datatable.html' %}
+{% endblock main_content %}

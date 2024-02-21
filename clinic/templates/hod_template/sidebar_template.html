@@ -66,13 +66,21 @@
                               <p>Patients</p>
                           </a>
                       </li>
+                      <!-- Other Clinic Links -->
                       <li class="nav-item">
+                        {% url 'patients_list' as patients_list %}
+                          <a href="{% url "patients_list" %}" class="nav-link{% if request.path == patients_list %} active {% endif %}">
+                              <i class="nav-icon fas fa-users"></i>
+                              <p>Remote Patients</p>
+                          </a>
+                      </li>
+                      {% comment %} <li class="nav-item">
                         {% url 'remotemanage_patient' as remotemanage_patient %}
                           <a href="{% url "remotemanage_patient" %}" class="nav-link{% if request.path == remotemanage_patient %} active {% endif %}">
                               <i class="nav-icon fas fa-users"></i>
                               <p>Remote Patients</p>
                           </a>
-                      </li>
+                      </li> {% endcomment %}
                       <li class="nav-item">
                         {% url 'patient_vital_all_list' as patient_vital_all_list %}
                         <a href="{% url 'patient_vital_all_list'  %}" class="nav-link{% if request.path == patient_vital_all_list %} active {% endif %}">
