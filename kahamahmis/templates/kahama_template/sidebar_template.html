@@ -355,6 +355,13 @@
                               <p>Company</p>
                           </a>
                       </li>
+                      <li class="nav-item"> 
+                        {% url 'remoteservice_list' as remoteservice_list %}                    
+                          <a href="{% url 'kahamahmis:remoteservice_list' %}" class="nav-link{% if request.path == remoteservice_list %} active {% endif %}">
+                              <i class="nav-icon fas fa-servicestack"></i>
+                              <p>Services</p>
+                          </a>
+                      </li>
                   </ul>
               </li>
           </ul>

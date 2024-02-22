@@ -11,6 +11,7 @@ urlpatterns = [
         path('health_info_edit/<int:patient_id>/',views.health_info_edit, name="health_info_edit"),
         # path('add_another_family_record/<int:patient_id>/', views.add_another_family_record, name='add_another_family_record'),
         path('save_family_medical_history/<int:patient_id>/',views.save_family_medical_history, name="save_family_medical_history"),
+        
         path('patient_info_form/',views.patient_info_form, name="patient_info_form"),
         path('add_remotepatient_visit/',views.add_remotepatient_visit, name="add_remotepatient_visit"),
         path('save_diagnosis/',views.save_diagnosis, name="save_diagnosis"),
@@ -210,6 +211,7 @@ urlpatterns = [
         path('delete_equipment/<int:equipment_id>/', delete.delete_equipment, name='delete_equipment'),
         path('delete_inventory/<int:item_id>/', delete.delete_inventory, name='delete_inventory'),
         path('delete_category/<int:category_id>/', delete.delete_category, name='delete_category'),
+        path('delete_remote_service/<int:service_id>/', delete.delete_remote_service, name='delete_remote_service'),
         path('delete_maintenance/<int:maintenance_id>/', delete.delete_maintenance, name='delete_maintenance'),
         path('delete_medicine_inventory/<int:inventory_id>/', delete.delete_medicine_inventory, name='delete_medicine_inventory'),
         path('delete_reagent/<int:reagent_id>/', delete.delete_reagent, name='delete_reagent'),

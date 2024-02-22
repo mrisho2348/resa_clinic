@@ -27,24 +27,28 @@ Consultation Notes
     <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
         <thead>
             <tr>
-                <th>ConsultationNotes No</th>
+                <th>VISIT NO.</th>
                 <th>Patient</th>
                 <th>Doctor</th>          
-                <th>Chief Complaints</th>
-                <th>History of Presenting Illness</th>                  
+                <th>Order date</th>                               
                 <th>Action</th>              
             </tr>
         </thead>
         <tbody>
             {% for note in consultation_notes %}
                 <tr>
-                    <td>{{ note.consultation_number }}</td>
+                    <td>{{ note.visit.vst }}</td>
                     <td>{{ note.patient }}</td>
                     <td>{{ note.doctor }}</td>                    
-                    <td>{{ note.chief_complaints }}</td>
-                    <td>{{ note.history_of_presenting_illness }}</td>
+                    <td>{{ note.created_at }}</td>                  
                     <td>
                       <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#editConsultationModal{{ note.id }}"  data-toggle="tooltip" title="Edit">
+                        <i class="fa fa-edit text-white"></i>
+                    </button>
+                    <a href="{% url 'kahamahmis:patient_consultation_record_view' note.patient.id note.visit.id %}" data-toggle="tooltip" title="open">
+                        <button type="button" class="btn btn-success btn-sm"><i class="fa fa-calendar-alt text-dark"></i></button>
+                    </a> 
+                      <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#editConsultationModal{{ note.id }}"  data-toggle="tooltip" title="Record">
                         <i class="fa fa-edit text-white"></i>
                     </button>
                       <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteConsultationNotesModal{{ note.id }}"  data-toggle="tooltip" title="Delete">

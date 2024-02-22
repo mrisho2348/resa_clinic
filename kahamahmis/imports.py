@@ -3,9 +3,9 @@ import logging
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.db import IntegrityError
-from clinic.models import Category, Company, ConsultationNotes, Diagnosis, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, PatientVital, Patients, Prescription, Procedure, Reagent, Referral, Service, Staffs, Supplier
-from clinic.resources import CategoryResource, CompanyResource, ConsultationNotesResource, DiagnosisResource, DiseaseRecodeResource, EquipmentMaintenanceResource, EquipmentResource, HealthIssueResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, PathologyRecordResource, PatientVitalResource, PatientsResource, PrescriptionResource, ProcedureResource, ReagentResource, ReferralResource, ServiceResource, SupplierResource
-from clinic.forms import ImportCategoryForm, ImportCompanyForm, ImportConsultationNotesForm, ImportDiagnosisForm, ImportDiseaseForm, ImportEquipmentForm, ImportEquipmentMaintenanceForm, ImportHealthIssueForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientVitalForm, ImportPatientsForm, ImportPrescriptionForm, ImportProcedureForm, ImportReagentForm, ImportReferralForm, ImportServiceForm, ImportSupplierForm
+from clinic.models import Category, Company, ConsultationNotes, Diagnosis, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, PatientVital, Patients, Prescription, Procedure, Reagent, Referral, RemoteService, Service, Staffs, Supplier
+from clinic.resources import CategoryResource, CompanyResource, ConsultationNotesResource, DiagnosisResource, DiseaseRecodeResource, EquipmentMaintenanceResource, EquipmentResource, HealthIssueResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, PathologyRecordResource, PatientVitalResource, PatientsResource, PrescriptionResource, ProcedureResource, ReagentResource, ReferralResource, RemoteServiceResource, ServiceResource, SupplierResource
+from clinic.forms import ImportCategoryForm, ImportCompanyForm, ImportConsultationNotesForm, ImportDiagnosisForm, ImportDiseaseForm, ImportEquipmentForm, ImportEquipmentMaintenanceForm, ImportHealthIssueForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientVitalForm, ImportPatientsForm, ImportPrescriptionForm, ImportProcedureForm, ImportReagentForm, ImportReferralForm, ImportRemoteServiceForm, ImportServiceForm, ImportSupplierForm
 from tablib import Dataset
 logger = logging.getLogger(__name__)
 def import_disease_recode(request):
@@ -447,6 +447,38 @@ def import_patient_vital_records(request):
         form = ImportPatientVitalForm()
 
     return render(request, 'hod_template/import_patient_vital.html', {'form': form})
+
+def import_remoteservice_records(request):
+    if request.method == 'POST':
+        form = ImportRemoteServiceForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = RemoteServiceResource()
+                new_records = request.FILES['service_records_file']
+                
+                # Use tablib to load the imported data
+                dataset = resource.export()
+                imported_data = dataset.load(new_records.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+
+                for data in imported_data:
+                     service_record = RemoteService(
+                        name=data[0],
+                        price=data[1],                     
+                        description=data[2],                    
+                        category=data[3],                  
+                                        
+                                         
+                       )
+                     service_record.save()
+
+                return redirect('kahamahmis:remoteservice_list') 
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportRemoteServiceForm()
+
+    return render(request, 'kahama_template/import_remoteservice.html', {'form': form})
 
 def import_consultation_notes_records(request):
     if request.method == 'POST':

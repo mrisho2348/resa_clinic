@@ -350,7 +350,37 @@ class FamilyMedicalHistory(models.Model):
 
     def __str__(self):
         return f"{self.patient} - {self.condition}"
+            
+class RemoteService(models.Model):
+    name = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=10, decimal_places=2) 
+    description = models.TextField( null=True, blank=True,)
+    category = models.CharField(max_length=50, null=True, blank=True,)   
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()        
     
+    def __str__(self):
+        return f"{self.name}-{self.category}"
+    
+class ServiceRequest(models.Model):
+    STATUS_CHOICES = (
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+    )
+
+    patient = models.ForeignKey(RemotePatient, on_delete=models.CASCADE)
+    visit = models.ForeignKey('RemotePatientVisits', on_delete=models.CASCADE)
+    service = models.ForeignKey(RemoteService, on_delete=models.CASCADE)
+    date_requested = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    result = models.TextField(blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+    def __str__(self):
+        return f"{self.patient} - {self.service} ({self.status})"    
 class PatientVital(models.Model):
     patient = models.ForeignKey('Patients', on_delete=models.CASCADE)
     recorded_at = models.DateTimeField(auto_now_add=True)
@@ -376,6 +406,36 @@ class PatientVital(models.Model):
 
     def generate_unique_identifier(self):
         last_patient_vital = PatientVital.objects.last()
+        last_number = int(last_patient_vital.unique_identifier.split('-')[-1]) if last_patient_vital else 0
+        new_number = last_number + 1
+        return f"VTN-{new_number:07d}"
+    
+class RemotePatientVital(models.Model):
+    patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE)
+    visit = models.OneToOneField('RemotePatientVisits', on_delete=models.CASCADE)  
+    recorded_at = models.DateTimeField(auto_now_add=True)
+    respiratory_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Respiratory rate in breaths per minute")
+    pulse_rate = models.PositiveIntegerField(null=True, blank=True, help_text="Pulse rate in beats per minute")
+    blood_pressure = models.CharField(max_length=20, null=True, blank=True, help_text="Blood pressure measurement")
+    spo2 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="SPO2 measurement in percentage")
+    temperature = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Temperature measurement in Celsius")
+    gcs = models.PositiveIntegerField(null=True, blank=True, help_text="Glasgow Coma Scale measurement")
+    avpu = models.CharField(max_length=20, null=True, blank=True, help_text="AVPU scale measurement")
+    unique_identifier = models.CharField(max_length=20, unique=True, editable=False)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+    def __str__(self):
+        return f"Vital information for {self.patient} recorded at {self.recorded_at}"
+
+    def save(self, *args, **kwargs):
+        # Generate a unique identifier based on the patient's format
+        if not self.unique_identifier:
+            self.unique_identifier = self.generate_remoteunique_identifier()
+        super().save(*args, **kwargs)
+
+    def generate_remoteunique_identifier(self):
+        last_patient_vital = RemotePatientVital.objects.last()
         last_number = int(last_patient_vital.unique_identifier.split('-')[-1]) if last_patient_vital else 0
         new_number = last_number + 1
         return f"VTN-{new_number:07d}"
@@ -470,6 +530,37 @@ class ConsultationNotes(models.Model):
     
 def generate_consultation_number():
     last_consultation_notes = ConsultationNotes.objects.last()
+    last_sample_number = int(last_consultation_notes.consultation_number.split('-')[-1]) if last_consultation_notes else 0
+    new_consultation_number = last_sample_number + 1
+    return f"CTN-{new_consultation_number:07d}"    
+   
+class RemoteConsultationNotes(models.Model):
+    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE)
+    patient = models.ForeignKey(RemotePatient, on_delete=models.CASCADE)
+    visit = models.ForeignKey('RemotePatientVisits', on_delete=models.CASCADE)  
+    chief_complaints = models.TextField(null=True, blank=True)
+    history_of_presenting_illness = models.TextField(null=True, blank=True)
+    consultation_number = models.CharField(max_length=20, unique=True)
+    physical_examination = models.TextField(null=True, blank=True)
+    allergy_to_medications = models.CharField(max_length=255, null=True, blank=True)
+    provisional_diagnosis = models.ManyToManyField(Diagnosis, related_name='provisional_notes', blank=True)
+    final_diagnosis = models.ManyToManyField(Diagnosis, related_name='final_notes', blank=True)
+    pathology = models.ManyToManyField(PathodologyRecord, blank=True)
+    doctor_plan = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+    def __str__(self):
+        return f"Consultation for {self.patient} by Dr. {self.doctor}"
+    
+    def save(self, *args, **kwargs):
+        if not self.consultation_number:
+            self.consultation_number = generate_remoteconsultation_number()
+        super().save(*args, **kwargs)   
+    
+def generate_remoteconsultation_number():
+    last_consultation_notes = RemoteConsultationNotes.objects.last()
     last_sample_number = int(last_consultation_notes.consultation_number.split('-')[-1]) if last_consultation_notes else 0
     new_consultation_number = last_sample_number + 1
     return f"CTN-{new_consultation_number:07d}"       
@@ -744,7 +835,7 @@ class Medicine(models.Model):
     dosage = models.CharField(max_length=50)
     storage_condition = models.CharField(max_length=100)
     manufacturer = models.CharField(max_length=100)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)   
     expiration_date = models.DateField()
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     transactions = models.ManyToManyField('Transaction', blank=True)

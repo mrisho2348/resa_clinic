@@ -65,17 +65,20 @@ Patient Visit History
                                   <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#editVisitModal{{ visit.id }}"  data-toggle="tooltip" title="Edit">
                                     <i class="fa fa-edit text-white"></i>
                                 </button>
+                                  <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#addRemotePatientVitalModal{{ visit.id }}"  data-toggle="tooltip" title="add vital">
+                                    <i class="fa fa-plus text-white"></i>
+                                </button>
                                   <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deletetVisitModal{{ visit.id }}"  data-toggle="tooltip" title="Delete">
                                     <i class="fas fa-trash"></i>
                                 </button>
                              
                                               <!-- Add more action links as needed -->
-                                <a href="{% url 'kahamahmis:patient_health_record_view' visit.patient.id visit.id %}" data-toggle="tooltip" title="open">
-                                    <button type="button" class="btn btn-primary btn-sm"><i class="fa fa-eye text-dark"></i></button>
+                                <a href="{% url 'kahamahmis:patient_health_record_view' visit.patient.id visit.id %}" data-toggle="tooltip" title="open health record">
+                                    <button type="button" class="btn btn-success btn-sm"><i class="fa fa-eye text-dark"></i></button>
                                 </a>   
                                               <!-- Add more action links as needed -->
-                                <a href="{% url 'patient_vital_list' visit.patient.id %}" data-toggle="tooltip" title="open">
-                                    <button type="button" class="btn btn-primary btn-sm"><i class="fa fa-eye text-dark"></i></button>
+                                <a href="{% url 'kahamahmis:patient_vital_list' visit.patient.id %}" data-toggle="tooltip" title="open vital">
+                                    <button type="button" class="btn btn-secondary btn-sm"><i class="fa fa-eye text-dark"></i></button>
                                 </a>   
                                     
                                 </td>
@@ -208,6 +211,126 @@ Patient Visit History
                                             });
                                         {% endfor %}
                                     });
+                                </script>
+                                
+
+
+                                <div class="modal fade" id="addRemotePatientVitalModal{{ visit.id }}" tabindex="-1" aria-labelledby="addRemotePatientVitalModalLabel{{ visit.id }}" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="addRemotePatientVitalModalLabel{{ visit.id }}">Add Patient Vital for {{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form id="addRemotePatientVitalForm{{ visit.id }}" method="post">
+                                                    <!-- CSRF token -->
+                                                    {% csrf_token %}
+                                                    <!-- Hidden inputs for visit ID and patient ID -->
+                                                    <input type="hidden" class="form-control" id="vital_id" name="vital_id" >
+                                                    <input type="hidden" class="form-control" id="visit_id" name="visit_id" value="{{ visit.id }}">
+                                                    <input type="hidden" class="form-control" id="patient_id" name="patient_id" value="{{ patient.id }}">
+                                                    <!-- Vital inputs -->
+                                                    <div class="row">
+                                                        <!-- Column 1 -->
+                                                        <div class="col-md-4">
+                                                            <div class="mb-3 form-group">
+                                                                <label for="respiratoryRate" class="form-label">Respiratory Rate (bpm)</label>
+                                                                <select class="form-control select2bs4" style="width: 100%;" id="respiratoryRate" name="respiratory_rate">
+                                                                    {% for rate in range_15 %}
+                                                                        <option value="{{ rate }}">{{ rate }}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+                                                            <div class="mb-3 form-group">
+                                                                <label for="pulseRate" class="form-label">Pulse Rate (bpm)</label>
+                                                                <select class="form-control select2bs4" style="width: 100%;" id="pulseRate" name="pulse_rate">
+                                                                    {% for rate in range_301 %}
+                                                                        <option value="{{ rate }}">{{ rate }}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Column 2 -->
+                                                        <div class="col-md-4">
+                                                            <div class="mb-3 form-group">
+                                                                <label for="bloodPressure" class="form-label">Blood Pressure</label>
+                                                                <input type="text" class="form-control" id="bloodPressure" name="blood_pressure">
+                                                            </div>
+                                                            <div class="mb-3 form-group">
+                                                                <label for="spo2" class="form-label">SPO2 (%)</label>
+                                                                <select class="form-control select2bs4" style="width: 100%;" id="spo2" name="spo2">
+                                                                    {% for percentage in range_101 %}
+                                                                        <option value="{{ percentage }}">{{ percentage }}%</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Column 3 -->
+                                                        <div class="col-md-4">
+                                                            <div class="mb-3 form-group">
+                                                                <label for="temperature" class="form-label">Temperature (°C)</label>
+                                                                <select class="form-control select2bs4" style="width: 100%;" id="temperature" name="temperature">
+                                                                    {% for temp in range_51 %}
+                                                                        <option value="{{ temp }}">{{ temp }}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+                                                            <div class="mb-3 form-group">
+                                                                <label for="gcs" class="form-label">Glasgow Coma Scale</label>
+                                                                <select class="form-control select2bs4" style="width: 100%;" id="gcs" name="gcs">
+                                                                    {% for score in range_15 %}
+                                                                        <option value="{{ score }}">{{ score }}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+                                                            <div class="mb-3 form-group">
+                                                                <label for="avpu" class="form-label">AVPU Scale</label>
+                                                                <select class="form-control select2bs4" style="width: 100%;" id="avpu" name="avpu">
+                                                                    <option value="Alert">Alert</option>
+                                                                    <option value="Verbal">Verbal</option>
+                                                                    <option value="Pain">Pain</option>
+                                                                    <option value="Unresponsive">Unresponsive</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Submit button -->
+                                                    <div class="form-row">
+                                                        <div class="col-md-12">
+                                                            <button type="button" class="btn btn-primary float-lg-right" onclick="addRemotePatientVital()">Add Patient Vital</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <script>
+                                    // Handle form submission using AJAX
+                                    function addRemotePatientVital() {
+                                        $.ajax({
+                                            type: 'POST',
+                                            url: '{% url "kahamahmis:save_remotepatient_vital" %}',  // Replace with your URL
+                                            data: $('#addRemotePatientVitalForm{{ visit.id }}').serialize(),
+                                            success: function (data) {
+                                                if (data.status === 'success') {
+                                                    $('#addRemotePatientVitalModal{{ visit.id }}').modal('hide');
+                                                    location.reload(true);
+                                                    // Refresh the inventory vital list or perform any other actions
+                                                } else {
+                                                    // Handle other status cases if needed
+                                                    alert(data.message);
+                                                }
+                                            },
+                                            error: function (xhr, status, error) {
+                                                alert(xhr.responseText);
+                                                // Handle errors if necessary
+                                            }
+                                        });
+                                    }
                                 </script>
                                 
                                 
