@@ -201,7 +201,7 @@ List of Consultation
                                                 </button>
                                             </div>
                                             <div class="modal-body">
-                                                <p>Have you already met with {{ appointment.patient.fullname }}?</p>
+                                                <p>Have you already met with {{ appointment.patient }}?</p>
                                                 <!-- Add a form with a dropdown for selecting the status -->
                                                 <form method="post" action="{% url 'confirm_meeting' appointment.id %}">
                                                     {% csrf_token %}
@@ -240,7 +240,7 @@ List of Consultation
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <p>Confirm that you have a meeting with {{ appointment.patient.fullname }} before editing.</p>
+                                        <p>Confirm that you have a meeting with {{ appointment.patient }} before editing.</p>
                                         <!-- Add a form with fields for start time and end time -->
                                         <form method="post" action="{% url 'edit_meeting' appointment.id %}">
                                             {% csrf_token %}
@@ -324,7 +324,7 @@ List of Consultation
             </div>
             <div class="modal-body">
                 <!-- Form for adding Consultation -->
-                <form id="addConsultationForm" action="{% url 'save_consultation_data' %}" method="post" onsubmit="return validateAndSaveConsultation()">
+                <form id="addConsultationForm" action="{% url 'kahamahmis:save_consultation_data' %}" method="post" onsubmit="return validateAndSaveConsultation()">
                     {% csrf_token %}
                     <div class="row">
                         <!-- Doctor -->
@@ -344,7 +344,7 @@ List of Consultation
                             <select class="form-control select2bs4" style="width: 100%;" id="patientSelect" name="patient" required>
                                 <!-- Populate patients dynamically using Django template tags -->
                                 {% for patient in patients %}
-                                    <option value="{{ patient.id }}">{{ patient.fullname }}</option>
+                                    <option value="{{ patient.id }}">{{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</option>
                                 {% endfor %}
                             </select>
                         </div>

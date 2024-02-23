@@ -14,90 +14,72 @@ Patient Visits Reports
 {% block main_content %}
 
 
-    <table class="table table-hover text-nowrap table-bordered table-striped table-sm" id="example">
-        <thead>
-            <tr>              
-                <th>Number</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Day</th>
-                <th>Full name</th>
-                <th>Age</th>
-                <th>Gender</th>
-                <th>SP02</th>
-                <th>Blood</th>
-                <th>Temperature</th>
-                <th>Weigth</th>
-                <th>height</th>
-                <th>Chief Complaint</th>
-                <th>Diagnosis</th>
-                <th>Investigation</th>
-                <th>Treatment</th>
-                <th>Company</th>
-            </tr>
-        </thead>
+<table class="table table-hover text-nowrap table-bordered table-striped table-sm" id="example">
+    <thead>
+        <tr>
+            <th>Patient Number</th>
+            <th>Visit number</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Day</th>
+            <th>Full Name</th>
+            <th>Age</th>
+            <th>Gender</th>
+            <th>SPO2</th>
+            <th>Temperature</th>
+            <th>Pulse Rate</th>
+            <th>Respiratory Rate</th>
+            <th>blood pressure</th>        
+            <th>gcs</th>
+            <th>avpu</th>
+            <th>Chief Complaints</th>
+            <th>History of Presenting Illness</th>
+            <th>Allergy to Medications</th>
+            <th>Provisional Diagnosis</th>
+            <th>Final Diagnosis</th>
+            <th>Doctor Plan</th>
+            <th>Company</th>
+        </tr>
+    </thead>
 
-        <tbody>
-            <tr>
-                <td>PAT-00106</td>
-                <td>2024-01-10</td>
-                <td>12:45</td>
-                <td>Wednesday</td>
-                <td>SUNGURA SIMON</td>
-                <td>28</td>
-                <td>Male</td>
-                <td>99</td>
-                <td>113/67</td>
-                <td>36.4</td>
-                <td>68</td>
-                <td>164</td>
-                <td>Running nose 1/7</td>
-                <td>"Allergic rhinitis, unspecified*J30.4"</td>
-                <td></td>
-                <td></td>
-                <td>FABEC</td>
-            </tr>
-            <tr>
-                <td>PAT-00106</td>
-                <td>2024-01-10</td>
-                <td>12:45</td>
-                <td>Wednesday</td>
-                <td>SUNGURA SIMON</td>
-                <td>28</td>
-                <td>Male</td>
-                <td>99</td>
-                <td>113/67</td>
-                <td>36.4</td>
-                <td>68</td>
-                <td>164</td>
-                <td>Running nose 1/7</td>
-                <td>"Allergic rhinitis, unspecified*J30.4"</td>
-                <td></td>
-                <td></td>
-                <td>FABEC</td>
-            </tr>
-            <tr>
-                <td>PAT-00340</td>
-                <td>2024-01-10</td>
-                <td>11:55</td>
-                <td>Wednesday</td>
-                <td>JOANESS AGUMBA</td>
-                <td>45</td>
-                <td>Male</td>
-                <td>100</td>
-                <td>121/79</td>
-                <td>37.2</td>
-                <td>120</td>
-                <td>181</td>
-                <td>Headache 2/7</td>
-                <td>"Malaise and fatigue*R53"</td>
-                <td>MALARIA RAPID TEST (MRDT), URINALYSIS</td>
-                <td></td>
-                <td>GARDA</td>
-            </tr>
-        </tbody> 
-    </table>
-</div>
+    <tbody>
+        {% for visit in visits %}
+        <tr>
+            <td>{{ visit.patient.mrn }}</td>
+            <td>{{ visit.vst }}</td>
+            <td>{{ visit.created_at|date:"Y-m-d" }}</td>
+            <td>{{ visit.created_at|time:"H:i:s" }}</td>
+            <td>{{ visit.created_at|date:"l" }}</td>
+            <td>{{ visit.patient.first_name }} {{ visit.patient.middle_name }} {{ visit.patient.last_name }}</td>
+            <td>{{ visit.patient.age }}</td>
+            <td>{{ visit.patient.gender }}</td>
+            <td>{{ visit.remotepatientvital.spo2 }}</td>
+            <td>{{ visit.remotepatientvital.temperature }}</td>
+            <td>{{ visit.remotepatientvital.pulse_rate }}</td>
+            <td>{{ visit.remotepatientvital.respiratory_rate }}</td>
+            <td>{{ visit.remotepatientvital.blood_pressure }}</td>
+            <td>{{ visit.remotepatientvital.gcs }}</td>
+            <td>{{ visit.remotepatientvital.avpu }}</td>
+            <td>{{ visit.remoteconsultationnotes.chief_complaints }}</td>
+            <td>{{ visit.remoteconsultationnotes.history_of_presenting_illness }}</td>
+            <td>{{ visit.remoteconsultationnotes.allergy_to_medications }}</td>
+            <td>
+                {% for diagnosis in visit.remoteconsultationnotes.provisional_diagnosis.all %}
+                    {{ diagnosis.diagnosis_name }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </td>
+            <td>
+                {% for diagnosis in visit.remoteconsultationnotes.final_diagnosis.all %}
+                    {{ diagnosis.diagnosis_name }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </td>
+            <td>{{ visit.remoteconsultationnotes.doctor_plan }}</td>
+            <td>{{ visit.patient.company }}</td>
+        </tr>
+        {% endfor %}
+    </tbody> 
+</table>
+
 
    
 

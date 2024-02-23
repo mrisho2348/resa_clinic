@@ -537,7 +537,7 @@ def generate_consultation_number():
 class RemoteConsultationNotes(models.Model):
     doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE)
     patient = models.ForeignKey(RemotePatient, on_delete=models.CASCADE)
-    visit = models.ForeignKey('RemotePatientVisits', on_delete=models.CASCADE)  
+    visit = models.OneToOneField('RemotePatientVisits', on_delete=models.CASCADE)  
     chief_complaints = models.TextField(null=True, blank=True)
     history_of_presenting_illness = models.TextField(null=True, blank=True)
     consultation_number = models.CharField(max_length=20, unique=True)
@@ -573,7 +573,7 @@ class RemotePatientVisits(models.Model):
         ('Follow up', _('Follow up')),
     )
 
-    patient = models.ForeignKey('Patients', on_delete=models.CASCADE)
+    patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE)
     vst = models.CharField(max_length=20, unique=True, editable=False)
     visit_type = models.CharField( max_length=15, choices=VISIT_TYPES)     
     primary_service = models.CharField(max_length=50) 
@@ -627,6 +627,21 @@ class Payment(models.Model):
 
 class Procedure(models.Model):
     patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    duration_time = models.CharField(max_length=50)
+    equipments_used = models.CharField(max_length=255)
+    cost = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+    def __str__(self):
+        return f"Procedure: {self.name} for {self.patient}"
+class RemoteProcedure(models.Model):
+    patient = models.ForeignKey(RemotePatient, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE)
+    visit = models.ForeignKey(RemotePatientVisits, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     description = models.TextField()
     duration_time = models.CharField(max_length=50)
@@ -713,6 +728,39 @@ def generate_sample_id():
 class Consultation(models.Model):
     doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE)
     patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
+    appointment_date = models.DateField()
+    start_time = models.TimeField(blank=True, null=True)
+    end_time = models.TimeField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    STATUS_CHOICES = [
+        (0, 'Pending'),
+        (1, 'Completed'),
+        (2, 'Canceled'),
+        (3, 'Rescheduled'),
+        (4, 'No-show'),
+        (5, 'In Progress'),
+        (6, 'Confirmed'),
+        (7, 'Arrived'),
+    ]
+    status = models.IntegerField(choices=STATUS_CHOICES, default=0)    
+    pathodology_record = models.ForeignKey(PathodologyRecord, on_delete=models.SET_NULL, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()    
+    
+    def __str__(self):
+        return f"Appointment with {self.doctor.admin.first_name} {self.doctor.middle_name} {self.doctor.admin.last_name} for {self.patient.fullname} on {self.appointment_date} from {self.start_time} to {self.end_time}"
+    
+    def save(self, *args, **kwargs):
+        # Set a default pathodology record if none is provided
+        if not self.pathodology_record:
+            default_pathodology = PathodologyRecord.objects.get_or_create(name="Default Pathodology")[0]
+            self.pathodology_record = default_pathodology
+
+        super().save(*args, **kwargs)
+class RemoteConsultation(models.Model):
+    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE)
+    patient = models.ForeignKey(RemotePatient, on_delete=models.CASCADE)
     appointment_date = models.DateField()
     start_time = models.TimeField(blank=True, null=True)
     end_time = models.TimeField(blank=True, null=True)

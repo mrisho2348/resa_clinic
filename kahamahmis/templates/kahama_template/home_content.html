@@ -196,7 +196,10 @@ ADMIN HOME
             <div class="card">
                 <div class="card-header">
                     New Patients
-                    <button class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#registerModal">Add Patient</button>
+                    
+                    <a class="btn btn-primary float-right" href="{% url 'patient_info_form' %}">
+                        <i class="fas fa-plus"></i> New patient
+                    </a>
                     <button class="btn btn-secondary float-right mr-2">View All</button>
                 </div>
                 <!-- Card Body with Table -->

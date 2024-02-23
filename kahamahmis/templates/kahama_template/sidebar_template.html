@@ -149,13 +149,13 @@
                         </a>
                     </li> {% endcomment %}
                  
-                      {% comment %} <li class="nav-item">
+                  <li class="nav-item">
                         {% url 'appointment_list' as appointment_list %}
-                          <a href="{% url "appointment_list" %}" class="nav-link{% if request.path == appointment_list %} active {% endif %}">
+                          <a href="{% url "kahamahmis:appointment_list" %}" class="nav-link{% if request.path == appointment_list %} active {% endif %}">
                             <i class="nav-icon fas fa-calendar"></i>
-                              <p>Consultations</p>
+                              <p>All Apointment</p>
                           </a>
-                      </li> {% endcomment %}
+                      </li>
                       <li class="nav-item">
                         {% url 'consultation_notes' as consultation_notes %}
                           <a href="{% url "kahamahmis:consultation_notes" %}" class="nav-link{% if request.path == consultation_notes %} active {% endif %}">

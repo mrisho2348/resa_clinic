@@ -3,9 +3,9 @@ import logging
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.db import IntegrityError
-from clinic.models import Category, Company, ConsultationNotes, Diagnosis, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, PatientVital, Patients, Prescription, Procedure, Reagent, Referral, RemoteService, Service, Staffs, Supplier
-from clinic.resources import CategoryResource, CompanyResource, ConsultationNotesResource, DiagnosisResource, DiseaseRecodeResource, EquipmentMaintenanceResource, EquipmentResource, HealthIssueResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, PathologyRecordResource, PatientVitalResource, PatientsResource, PrescriptionResource, ProcedureResource, ReagentResource, ReferralResource, RemoteServiceResource, ServiceResource, SupplierResource
-from clinic.forms import ImportCategoryForm, ImportCompanyForm, ImportConsultationNotesForm, ImportDiagnosisForm, ImportDiseaseForm, ImportEquipmentForm, ImportEquipmentMaintenanceForm, ImportHealthIssueForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientVitalForm, ImportPatientsForm, ImportPrescriptionForm, ImportProcedureForm, ImportReagentForm, ImportReferralForm, ImportRemoteServiceForm, ImportServiceForm, ImportSupplierForm
+from clinic.models import Category, Company, ConsultationNotes, Diagnosis, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, PatientVital, Patients, Prescription, Procedure, Reagent, Referral, RemotePatient, RemoteService, Service, Staffs, Supplier
+from clinic.resources import CategoryResource, CompanyResource, ConsultationNotesResource, DiagnosisResource, DiseaseRecodeResource, EquipmentMaintenanceResource, EquipmentResource, HealthIssueResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, PathologyRecordResource, PatientVitalResource, PatientsResource, PrescriptionResource, ProcedureResource, ReagentResource, ReferralResource, RemotePatientResource, RemoteServiceResource, ServiceResource, SupplierResource
+from clinic.forms import ImportCategoryForm, ImportCompanyForm, ImportConsultationNotesForm, ImportDiagnosisForm, ImportDiseaseForm, ImportEquipmentForm, ImportEquipmentMaintenanceForm, ImportHealthIssueForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientVitalForm, ImportPatientsForm, ImportPrescriptionForm, ImportProcedureForm, ImportReagentForm, ImportReferralForm, ImportRemotePatientForm, ImportRemoteServiceForm, ImportServiceForm, ImportSupplierForm
 from tablib import Dataset
 logger = logging.getLogger(__name__)
 def import_disease_recode(request):
@@ -36,7 +36,7 @@ def import_disease_recode(request):
     else:
         form = ImportDiseaseForm()
 
-    return render(request, 'hod_template/import_disease_recode.html', {'form': form})
+    return render(request, 'kahama_template/import_disease_recode.html', {'form': form})
 
 
 def import_insurance_companies(request):
@@ -69,7 +69,7 @@ def import_insurance_companies(request):
     else:
         form = ImportInsuranceCompanyForm()
 
-    return render(request, 'hod_template/import_insurance_companies.html', {'form': form})
+    return render(request, 'kahama_template/import_insurance_companies.html', {'form': form})
 
 def import_category(request):
     if request.method == 'POST':
@@ -97,7 +97,7 @@ def import_category(request):
     else:
         form = ImportCategoryForm()
 
-    return render(request, 'hod_template/import_category.html', {'form': form})
+    return render(request, 'kahama_template/import_category.html', {'form': form})
 
 
 def import_supplier(request):
@@ -129,7 +129,7 @@ def import_supplier(request):
     else:
         form = ImportSupplierForm()
 
-    return render(request, 'hod_template/import_supplier.html', {'form': form})
+    return render(request, 'kahama_template/import_supplier.html', {'form': form})
 
 def import_equipment(request):
     if request.method == 'POST':
@@ -163,7 +163,7 @@ def import_equipment(request):
     else:
         form = ImportEquipmentForm()
 
-    return render(request, 'hod_template/import_equipment.html', {'form': form})
+    return render(request, 'kahama_template/import_equipment.html', {'form': form})
 
 def import_maintenance(request):
     if request.method == 'POST':
@@ -197,7 +197,7 @@ def import_maintenance(request):
     else:
         form = ImportEquipmentMaintenanceForm()
 
-    return render(request, 'hod_template/import_maintenance.html', {'form': form})
+    return render(request, 'kahama_template/import_maintenance.html', {'form': form})
 
 
 def import_reagent(request):
@@ -235,7 +235,7 @@ def import_reagent(request):
     else:
         form = ImportReagentForm()
 
-    return render(request, 'hod_template/import_reagent.html', {'form': form})
+    return render(request, 'kahama_template/import_reagent.html', {'form': form})
 
 def import_health_issue(request):
     if request.method == 'POST':
@@ -272,7 +272,7 @@ def import_health_issue(request):
     else:
         form = ImportHealthIssueForm()
 
-    return render(request, 'hod_template/import_health.html', {'form': form})
+    return render(request, 'kahama_template/import_health.html', {'form': form})
 
 
 def import_companies(request):
@@ -305,7 +305,7 @@ def import_companies(request):
     else:
         form = ImportCompanyForm()
 
-    return render(request, 'hod_template/import_companies.html', {'form': form})
+    return render(request, 'kahama_template/import_companies.html', {'form': form})
 
 
 def import_pathology_records(request):
@@ -336,7 +336,7 @@ def import_pathology_records(request):
     else:
         form = ImportPathologyRecordForm()
 
-    return render(request, 'hod_template/import_pathology_records.html', {'form': form})
+    return render(request, 'kahama_template/import_pathology_records.html', {'form': form})
 
 
 def import_ImportInventoryItemForm_records(request):
@@ -377,7 +377,7 @@ def import_ImportInventoryItemForm_records(request):
     else:
         form = ImportInventoryItemForm()
 
-    return render(request, 'hod_template/import_InventoryItem.html', {'form': form})
+    return render(request, 'kahama_template/import_InventoryItem.html', {'form': form})
 
 def import_prescription_records(request):
     if request.method == 'POST':
@@ -411,7 +411,7 @@ def import_prescription_records(request):
     else:
         form = ImportPrescriptionForm()
 
-    return render(request, 'hod_template/import_prescription.html', {'form': form})
+    return render(request, 'kahama_template/import_prescription.html', {'form': form})
 
 def import_patient_vital_records(request):
     if request.method == 'POST':
@@ -446,7 +446,59 @@ def import_patient_vital_records(request):
     else:
         form = ImportPatientVitalForm()
 
-    return render(request, 'hod_template/import_patient_vital.html', {'form': form})
+    return render(request, 'kahama_template/import_patient_vital.html', {'form': form})
+
+def import_patient(request):
+    if request.method == 'POST':
+        form = ImportRemotePatientForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = RemotePatientResource()
+                new_records = request.FILES['patient_records_file']
+                
+                # Use tablib to load the imported data
+                dataset = resource.export()
+                imported_data = dataset.load(new_records.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+
+                for data in imported_data:
+                     patient_record = RemotePatient(
+                        first_name=data[0],
+                        middle_name=data[1],                     
+                        last_name=data[2],                    
+                        gender=data[3],                     
+                        age=data[4],                     
+                        marital_status=data[5],                     
+                        nationality=data[6],                     
+                        tribe=data[7],                     
+                        patient_type=data[8],                     
+                        company=data[9],                     
+                        occupation=data[10],                     
+                        phone=data[11],                     
+                        employee_number=data[12],                     
+                        date_of_first_employment=data[13],                     
+                        longtime_illness=data[14],                     
+                        longtime_medication=data[15],                     
+                        date_of_osha_certification=data[16],                     
+                        insurance=data[18],                     
+                        insurance_company=data[19],                     
+                        insurance_number=data[20],                     
+                        emergency_contact_name=data[21],                     
+                        emergency_contact_relation=data[22],                     
+                        emergency_contact_phone=data[23],                     
+                        emergency_contact_mobile=data[24],                     
+                        life_style=data[25],                     
+                                         
+                       )
+                     patient_record.save()
+
+                return redirect('patient_vital_all_list') 
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportRemotePatientForm()
+
+    return render(request, 'kahama_template/import_patient.html', {'form': form})
 
 def import_remoteservice_records(request):
     if request.method == 'POST':
@@ -516,7 +568,7 @@ def import_consultation_notes_records(request):
     else:
         form = ImportConsultationNotesForm()
 
-    return render(request, 'hod_template/import_consultation_notes.html', {'form': form})
+    return render(request, 'kahama_template/import_consultation_notes.html', {'form': form})
 
 def import_diagnosis_records(request):
     if request.method == 'POST':
@@ -546,7 +598,7 @@ def import_diagnosis_records(request):
     else:
         form = ImportDiagnosisForm()
 
-    return render(request, 'hod_template/import_diagnosis.html', {'form': form})
+    return render(request, 'kahama_template/import_diagnosis.html', {'form': form})
 
 def import_patient_records(request):
     if request.method == 'POST':
@@ -585,7 +637,7 @@ def import_patient_records(request):
     else:
         form = ImportPatientsForm()
 
-    return render(request, 'hod_template/import_patients.html', {'form': form})
+    return render(request, 'kahama_template/import_patients.html', {'form': form})
 
 
 def import_service_records(request):
@@ -621,7 +673,7 @@ def import_service_records(request):
     else:
         form = ImportServiceForm()
 
-    return render(request, 'hod_template/import_service.html', {'form': form})
+    return render(request, 'kahama_template/import_service.html', {'form': form})
 
 
 def import_referral_records(request):
@@ -657,7 +709,7 @@ def import_referral_records(request):
     else:
         form = ImportReferralForm()
 
-    return render(request, 'hod_template/import_referral.html', {'form': form})
+    return render(request, 'kahama_template/import_referral.html', {'form': form})
 
 
 def import_procedure_records(request):
@@ -693,7 +745,7 @@ def import_procedure_records(request):
     else:
         form = ImportProcedureForm()
 
-    return render(request, 'hod_template/import_procedure.html', {'form': form})
+    return render(request, 'kahama_template/import_procedure.html', {'form': form})
 
 def import_medicine_records(request):
     if request.method == 'POST':
@@ -732,7 +784,7 @@ def import_medicine_records(request):
     else:
         form = ImportMedicineForm()
 
-    return render(request, 'hod_template/import_medicine_records.html', {'form': form})
+    return render(request, 'kahama_template/import_medicine_records.html', {'form': form})
 
 
 def generate_mrn():

@@ -2,6 +2,7 @@ from datetime import date, datetime
 import json
 from django.utils import timezone
 import logging
+import pdfkit
 from django.db import models
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render
@@ -22,12 +23,14 @@ from django.core.mail import send_mail
 from clinic.emailBackEnd import EmailBackend
 from django.core.exceptions import ObjectDoesNotExist
 from clinic.forms import ImportStaffForm
-from clinic.models import Company, Consultation, ContactDetails, CustomUser, DiseaseRecode, InsuranceCompany, Medicine, MedicineInventory, Notification, NotificationMedicine, PathodologyRecord, Patients, Procedure, RemoteConsultationNotes, RemotePatientVital, RemotePrescription, RemoteService, ServiceRequest, Staffs
+from clinic.models import Company, Consultation, ContactDetails, CustomUser, DiseaseRecode, InsuranceCompany, Medicine, MedicineInventory, Notification, NotificationMedicine, PathodologyRecord, Patients, Procedure, RemoteConsultation, RemoteConsultationNotes, RemotePatientVital, RemotePrescription, RemoteProcedure, RemoteService, ServiceRequest, Staffs
 from clinic.resources import StaffResources
 from tablib import Dataset
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import OuterRef, Subquery
+from django.template.loader import render_to_string
+from wkhtmltopdf.views import PDFTemplateResponse
 from clinic.models import Category, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, Diagnosis, Equipment, EquipmentMaintenance, FamilyMedicalHistory, HealthIssue, InventoryItem, MedicationPayment, PathologyDiagnosticTest, PatientDisease, PatientHealthCondition, PatientVisits, PatientVital, Prescription, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, RemotePatient, RemotePatientVisits, Sample, Service, Supplier, UsageHistory
 
 # Create your views here.
@@ -209,9 +212,28 @@ def manage_adjustment(request):
 def reports_adjustments(request):
     return render(request,"kahama_template/reports_adjustments.html")
 
+
 @login_required
 def reports_by_visit(request):
-    return render(request,"kahama_template/reports_by_visit.html")
+    # Retrieve all patients
+    patients = RemotePatient.objects.all()
+
+    # Create a list to store each patient along with their total visit count
+    patients_with_visit_counts = []
+
+    # Iterate through each patient and calculate their total visit count
+    for patient in patients:
+        total_visits = RemotePatientVisits.objects.filter(patient=patient).count()
+        if total_visits > 0:
+            patients_with_visit_counts.append({
+                'patient': patient,
+                'total_visits': total_visits
+            })
+
+    context = {
+        'patients_with_visit_counts': patients_with_visit_counts
+    }
+    return render(request, 'kahama_template/reports_by_visit.html', context)
 
 @login_required
 def reports_comprehensive(request):
@@ -219,11 +241,87 @@ def reports_comprehensive(request):
 
 @login_required
 def reports_patients_visit_summary(request):
-    return render(request,"kahama_template/reports_patients_visit_summary.html")
+    visits = RemotePatientVisits.objects.all()
+    context = {'visits':visits}
+    return render(request,"kahama_template/reports_patients_visit_summary.html",context)
 
 @login_required
 def reports_patients(request):
-    return render(request,"kahama_template/reports_patients.html")
+    patients_report = RemotePatient.objects.order_by('-created_at') 
+    context = {'patients':patients_report}
+    return render(request,"kahama_template/reports_patients.html",context)
+
+#---------------------------AJAX FUNCTIONS -------------------------------
+"""
+@csrf_exempt
+@api_view(['POST'])
+def add_remote_user(request,format=None):
+
+    Add a remote user to the database from the Kahama system.
+    This is called by the Kahama system when it adds a new patient or staff member.
+    The request should contain JSON data with fields: firstname, lastname and id.
+    If successful, returns an HttpResponse with status code 201 (Created).
+    Otherwise, returns an HttpResponse with appropriate error status code.
+    
+    if request.method == 'POST':
+        try:
+            # Get the json data from the POST request
+            data = JSONParser().parse(request)
+            
+            # Create a new instance of the model using the validated data
+            user = RemoteUser(**data)
+            
+            # Save the object to the database
+            user.save()
+                        
+            # Return a response that the resource was created successfully
+            return Response(status=status.HTTP_201_CREATED)
+    
+        except Exception as e:
+            print("Error in adding user: ",e)
+            # Return a response that there was an error creating the resource
+            return Response({'error':'There was an error adding this user.'},status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+# @api_view(['GET','PUT'])
+def get_or_update_remote_user(request,pk,format=None):
+    
+    Retrieve or update a user's information.
+    GET /users/id : Returns a User object with the given id.
+              If no such user exists, returns HTTP 404 Not Found.
+    PUT /users/id : Update the user's information.
+              The request should contain JSON data with fields: firstname, lastname and id.
+              If successful, returns an HttpResponse with status code 200 (OK).
+              Otherwise, returns an HttpResponse with appropriate error status code.
+    
+try:
+        # Check for a GET request
+        if request.method=='GET':
+            # Try to retrieve the user with the provided id
+            user = RemoteUser.objects.get(id=pk)
+            
+            # Serialize the user and return it as a JsonResponse
+            serializer = UserSerializer(user)
+            return JsonResponse(serializer.data, safe=False)
+        
+        elif request.method=='PUT':
+            # Validate the received data against the UserSerializer
+            serializer = UserSerializer(RemoteUser.objects.get(id=pk),data=request.DATA,partial=True)
+            serializer.is_valid(raise_exception=True)
+            
+            # Perform the actual save of the updated user
+            serializer.object.save()
+            
+            # Return a success message
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        
+        else:
+            return Response({"error":"Invalid request method"},status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+    except RemoteUser.DoesNotExist:
+        return Response({"error": "No user found with id "+str(pk)},status=status.HTTP_404_NOT_FOUND)
+        """
 
 @login_required
 def reports_service(request):
@@ -241,8 +339,16 @@ def reports_orders(request):
     return render(request,"kahama_template/reports_orders.html")
 
 @login_required
-def individual_visit(request):
-    return render(request,"kahama_template/reports_individual_visit.html")
+def individual_visit(request, patient_id):
+    # Retrieve the RemotePatient instance
+    patient = get_object_or_404(RemotePatient, id=patient_id)
+    
+    # Retrieve all visits of the patient and order them by created_at
+    patient_visits = RemotePatientVisits.objects.filter(patient=patient).order_by('-created_at')
+
+    context = {'patient': patient, 'patient_visits': patient_visits}
+    return render(request, 'kahama_template/reports_individual_visit.html', context)
+    
 
 @login_required
 def product_summary(request):
@@ -515,7 +621,7 @@ def notification_view(request):
 def confirm_meeting(request, appointment_id):
     try:
         # Retrieve the appointment
-        appointment = get_object_or_404(Consultation, id=appointment_id)
+        appointment = get_object_or_404(RemoteConsultation, id=appointment_id)
 
         if request.method == 'POST':
             # Get the selected status from the form
@@ -528,9 +634,9 @@ def confirm_meeting(request, appointment_id):
                 appointment.save()
 
                 # Add a success message
-                messages.success(request, f"Meeting with {appointment.patient.fullname} confirmed.")
+                messages.success(request, f"Meeting with {appointment.patient.first_name} confirmed.")
             else:
-                messages.warning(request, f"Meeting with {appointment.patient.fullname} is already confirmed.")
+                messages.warning(request, f"Meeting with {appointment.patient.first_name} is already confirmed.")
         else:
             messages.warning(request, "Invalid request method for confirming meeting.")
 
@@ -538,7 +644,7 @@ def confirm_meeting(request, appointment_id):
         # Handle IntegrityError (e.g., database constraint violation)
         messages.error(request, f"Error confirming meeting: {str(e)}")
 
-    return redirect('appointment_list')  # Adjust the URL name based on your actual URL structure
+    return redirect('kahamahmis:appointment_list')  # Adjust the URL name based on your actual URL structure
 
 def edit_meeting(request, appointment_id):
     try:
@@ -546,18 +652,18 @@ def edit_meeting(request, appointment_id):
             start_time = request.POST.get('start_time')
             end_time = request.POST.get('end_time')
 
-            appointment = get_object_or_404(Consultation, id=appointment_id)
+            appointment = get_object_or_404(RemoteConsultation, id=appointment_id)
 
             # Perform the edit action (e.g., update start time and end time)
             appointment.start_time = start_time
             appointment.end_time = end_time
             appointment.save()
 
-            messages.success(request, f"Meeting time for {appointment.patient.fullname} edited successfully.")
+            messages.success(request, f"Meeting time for {appointment.patient.first_name} edited successfully.")
     except Exception as e:
         messages.error(request, f"Error editing meeting time: {str(e)}")
 
-    return redirect('appointment_list')
+    return redirect('kahamahmis:appointment_list')
 
 @login_required
 def medicine_list(request):
@@ -775,6 +881,52 @@ def save_procedure(request):
 
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
+@csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
+def save_remoteprocedure(request):
+    if request.method == 'POST':
+        try:
+            patient_id = request.POST.get('patient_id')
+            name = request.POST.get('name')
+            start_time_str = request.POST.get('start_time')
+            end_time_str = request.POST.get('end_time')
+            visit_id = request.POST.get('visit_id')
+            doctor = request.POST.get('doctor')
+            description = request.POST.get('description')
+            equipments_used = request.POST.get('equipments_used')
+            cost = request.POST.get('cost')
+
+            # Validate start and end times
+            start_time = datetime.strptime(start_time_str, '%H:%M').time()
+            end_time = datetime.strptime(end_time_str, '%H:%M').time()
+
+            if start_time >= end_time:
+                return JsonResponse({'success': False, 'message': 'Start time must be greater than end time.'})
+
+            # Calculate duration in hours
+            duration = (datetime.combine(datetime.today(), end_time) - datetime.combine(datetime.today(), start_time)).seconds / 3600
+
+            # Save procedure record
+            procedure_record = RemoteProcedure.objects.create(
+                patient=RemotePatient.objects.get(id=patient_id),
+                visit=RemotePatientVisits.objects.get(id=visit_id),
+                doctor=Staffs.objects.get(id=doctor),
+                name=name,
+                description=description,
+                duration_time=duration,
+                equipments_used=equipments_used,
+                cost=cost
+            )
+
+            return JsonResponse({'success': True, 'message': f'Procedure record for {procedure_record.name} saved successfully.'})
+        except Patients.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid patient ID.'})
+        except IntegrityError:
+            return JsonResponse({'success': False, 'message': 'Duplicate entry. Procedure record not saved.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
 
 @csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
 def save_referral(request):
@@ -843,9 +995,9 @@ def generate_billing(request, procedure_id):
     return render(request, 'kahama_template/billing_template.html', context)
 
 def appointment_list_view(request):
-    appointments = Consultation.objects.all()
+    appointments = RemoteConsultation.objects.all()
     unread_notification_count = Notification.objects.filter(is_read=False).count()
-    patients=Patients.objects.all() 
+    patients=RemotePatient.objects.all() 
     pathology_records=PathodologyRecord.objects.all() 
     doctors=Staffs.objects.filter(role='doctor')
     context = {
@@ -1420,9 +1572,9 @@ def save_consultation_data(request):
         # end_datetime = datetime.combine(datetime.strptime(appointment_date, '%Y-%m-%d').date(), datetime.strptime(end_time, '%H:%M').time())
 
         # Create or update Consultation object
-        consultation, created = Consultation.objects.update_or_create(
+        consultation, created = RemoteConsultation.objects.update_or_create(
             doctor=Staffs.objects.get(id=doctor_id),
-            patient=Patients.objects.get(id=patient_id),
+            patient=RemotePatient.objects.get(id=patient_id),
             appointment_date=appointment_date,
             start_time=start_time,
             end_time=end_time,
@@ -1431,7 +1583,7 @@ def save_consultation_data(request):
             
         )
 
-        return redirect('appointment_list')
+        return redirect('kahamahmis:appointment_list')
     except Exception as e:
         return HttpResponseBadRequest(f"Error: {str(e)}")
 
@@ -1820,7 +1972,7 @@ def out_of_stock_medicines_view(request):
     
     except Exception as e:
         # Handle any errors and return an error response
-        return render(request, 'error.html', {'error_message': str(e)}) 
+        return render(request, '404.html', {'error_message': str(e)}) 
     
 def out_of_stock_reagent_view(request):
     try:
@@ -1832,7 +1984,7 @@ def out_of_stock_reagent_view(request):
     
     except Exception as e:
         # Handle any errors and return an error response
-        return render(request, 'error.html', {'error_message': str(e)}) 
+        return render(request, '404.html', {'error_message': str(e)}) 
     
     
 def in_stock_medicines_view(request):
@@ -2484,6 +2636,11 @@ def patient_health_record_view(request, patient_id, visit_id):
             vital = RemotePatientVital.objects.get(patient=patient_id, visit=visit_id)
         except RemotePatientVital.DoesNotExist:
             vital = None
+            
+        try:
+            procedure = RemoteProcedure.objects.get(patient=patient_id, visit=visit_id)
+        except RemoteProcedure.DoesNotExist:
+            procedure = None
         pathology_records = PathodologyRecord.objects.all()  # Fetch all consultation notes from the database
         doctors = Staffs.objects.filter(role='doctor')
         provisional_diagnoses = Diagnosis.objects.all()
@@ -2513,10 +2670,66 @@ def patient_health_record_view(request, patient_id, visit_id):
             'provisional_diagnoses': provisional_diagnoses,
             'final_diagnoses': final_diagnoses,
             'vital': vital,
+            'procedure': procedure,
         })
     except Exception as e:
         # Handle other exceptions if necessary
-        return render(request, 'error.html', {'error_message': str(e)})
+        return render(request, '404.html', {'error_message': str(e)})
+    
+    
+def patient_visit_details_view(request, patient_id, visit_id):
+    try:
+        # Retrieve visit history for the specified patient
+        visits = RemotePatientVisits.objects.get(id=visit_id)
+        visit_history = RemotePatientVisits.objects.filter(patient_id=patient_id)
+        prescriptions = RemotePrescription.objects.filter(patient=patient_id, visit=visit_id)
+        try:
+            consultation_notes = RemoteConsultationNotes.objects.get(patient_id=patient_id, visit=visit_id)
+        except RemoteConsultationNotes.DoesNotExist:
+            consultation_notes = None
+        try:
+            vital = RemotePatientVital.objects.get(patient=patient_id, visit=visit_id)
+        except RemotePatientVital.DoesNotExist:
+            vital = None
+            
+        try:
+            procedure = RemoteProcedure.objects.get(patient=patient_id, visit=visit_id)
+        except RemoteProcedure.DoesNotExist:
+            procedure = None
+        pathology_records = PathodologyRecord.objects.all()  # Fetch all consultation notes from the database
+        doctors = Staffs.objects.filter(role='doctor')
+        provisional_diagnoses = Diagnosis.objects.all()
+        final_diagnoses = Diagnosis.objects.all()
+
+        total_price = sum(prescription.total_price for prescription in prescriptions)
+        range_31 = range(31)
+        current_date = timezone.now().date()
+        patient = RemotePatient.objects.get(id=patient_id)
+
+        medicines = Medicine.objects.filter(
+            medicineinventory__remain_quantity__gt=0,  # Inventory level greater than zero
+            expiration_date__gt=current_date  # Not expired
+        ).distinct()
+
+        return render(request, 'kahama_template/manage_patient_visital_detail_record.html', {
+            'visit_history': visit_history,
+            'patient': patient,
+            'visits': visits,
+            'range_31': range_31,
+            'medicines': medicines,
+            'prescriptions': prescriptions,
+            'total_price': total_price,
+            'consultation_notes': consultation_notes,
+            'pathology_records': pathology_records,
+            'doctors': doctors,
+            'provisional_diagnoses': provisional_diagnoses,
+            'final_diagnoses': final_diagnoses,
+            'vital': vital,
+            'procedure': procedure,
+        })
+    except Exception as e:
+        # Handle other exceptions if necessary
+        return render(request, '404.html', {'error_message': str(e)})
     
 def patient_consultation_record_view(request, patient_id, visit_id):
     try:
@@ -2574,7 +2787,7 @@ def patient_consultation_record_view(request, patient_id, visit_id):
         })
     except Exception as e:
         # Handle other exceptions if necessary
-        return render(request, 'error.html', {'error_message': str(e)})
+        return render(request, '404.html', {'error_message': str(e)})
 
 def prescription_list(request):
     # Retrieve all prescriptions from the database
@@ -2978,7 +3191,12 @@ def patient_info_form(request):
 
 def patients_list(request):
     patients =RemotePatient.objects.order_by('-created_at')    
-    return render(request, 'kahama_template/manage_remotepatients_list.html', {'patients': patients})
+    doctors = Staffs.objects.filter(role='doctor')
+    return render(request, 'kahama_template/manage_remotepatients_list.html',
+                  {
+                      'patients': patients,
+                      'doctors': doctors,
+                      })
 
 
 def save_patient_health_condition(request, patient_id):
@@ -3334,3 +3552,65 @@ def save_service_requests(request):
     else:
         # Return an error response if the request method is not POST
         return JsonResponse({'status': 'error', 'message': 'Only POST requests are allowed'}, status=405)
+    
+    
+@require_POST
+def add_remote_consultation(request):
+    if request.method == 'POST':
+        try:
+            # Retrieve data from the POST request
+            doctor_id = request.POST.get('doctor')
+            patient_id = request.POST.get('patient_id')
+            description = request.POST.get('description')
+            date_of_consultation = request.POST.get('date_of_consultation')
+            start_time = request.POST.get('start_time')
+            end_time = request.POST.get('end_time')
+
+            # Ensure date_of_consultation is greater than the current date
+            if timezone.now().date() >= timezone.datetime.strptime(date_of_consultation, "%Y-%m-%d").date():
+                return JsonResponse({'status': 'error', 'message': 'Consultation date must be greater than the current date'})
+
+            patient = RemotePatient.objects.get(id=patient_id)
+            doctor = Staffs.objects.get(id=doctor_id)
+
+            # Validate the time inputs
+            if not validate_time(start_time, end_time):
+                return JsonResponse({'status': 'error', 'message': 'End time must be greater than start time'})
+
+            # Create a new consultation object in the database
+            consultation = RemoteConsultation(
+                doctor=doctor,
+                patient=patient,
+                description=description,
+                appointment_date=date_of_consultation,
+                start_time=start_time,
+                end_time=end_time
+            )
+            consultation.save()
+
+            # Return a JSON response indicating success
+            return JsonResponse({'status': 'success', 'message': 'Consultation added successfully'})
+        except Exception as e:
+            # If an exception occurs, return a JSON response with an error message
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    else:
+        # If the request method is not POST, return a JSON response with an error message
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+def validate_time(start_time, end_time):
+    # Validate that end time is greater than start time
+    return start_time < end_time
+
+config = pdfkit.configuration(wkhtmltopdf=r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe")
+def generatePDF(request, patient_id, visit_id):
+    # Generate the URL for the patient_visit_details_view using reverse
+    url = request.build_absolute_uri(reverse('kahamahmis:patient_visit_details_view', kwargs={'patient_id': patient_id, 'visit_id': visit_id}))
+    
+    # Assuming 'config' is defined somewhere in your code
+    pdf = pdfkit.from_url(url, False, configuration=config)
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="Mrisho_jumanne.pdf"'
+    return response
+
+
+

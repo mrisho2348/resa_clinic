@@ -81,6 +81,9 @@ Patient Visit History
                                     <button type="button" class="btn btn-secondary btn-sm"><i class="fa fa-eye text-dark"></i></button>
                                 </a>   
                                     
+                                <a href="{% url 'kahamahmis:patient_visit_details_view' visit.patient.id visit.id %}" data-toggle="tooltip" title="open visit details">
+                                    <button type="button" class="btn btn-light border btn-sm"><i class="fa fa-eye text-dark"></i></button>
+                                </a>  
                                 </td>
  
                          

@@ -45,182 +45,179 @@ Patient Visits Reports
         
     </style>
     {% include "kahama_template/modal_form.html" %}
-        <div class="card">
-            <div class="card-body">
-                <div class="row patient-info-container">
-                    <div class="col-md-8 patient-info">
-                        <p class="patient-details">PATIENT: MOSHI ARON | AGE: 33 | SEX: Male | FILE NO: PAT-00104</p>
-                        <p class="company-name">COMPANY: <span>No Company Information</span></p>
-                    </div>
-                    <div class="col-md-4">
-                        <button class="btn btn-primary add-visit-btn float-right"  data-toggle="modal" data-target="#visitModal">ADD VISIT</button>
-                    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row patient-info-container">
+                <div class="col-md-8 patient-info">
+                    <p class="patient-details">PATIENT:  {{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }} | AGE:  {{ patient.age }} | SEX:  {{ patient.gender }} | FILE NO:  {{ patient.mrn }}</p>
+                    <p class="company-name">COMPANY: <span> {{ patient.company }}</span></p>
                 </div>
-                
-                <div class="row">
-                    <div class="col-md-12">
-                        <table class="table table-hover text-nowrap table-bordered table-striped table-sm" id="example">
-                            <thead class="thead-dark">
+                <div class="col-md-4">
+                    <button class="btn btn-primary add-visit-btn float-right"  data-toggle="modal" data-target="#addVisitModal">ADD VISIT</button>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-hover text-nowrap table-bordered table-striped table-sm" id="example">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th scope="col">Visit No</th>
+                                <th scope="col">Visit Date</th>
+                                <th scope="col">Visit Time</th>
+                                <th scope="col">Center</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for visit in patient_visits %}
                                 <tr>
-                                  <th scope="col">Visit No</th>
-                                  <th scope="col">Visit Date</th>
-                                  <th scope="col">Visit Time</th>
-                                  <th scope="col">Center</th>
-                                  <th scope="col">Actions</th>
+                                    <td>{{ visit.vst }}</td>
+                                    <td>{{ visit.created_at|date:"m/d/Y" }}</td>
+                                    <td>{{ visit.created_at|time:"H:i" }}</td>
+                                    <td>{{ visit.primary_service }}</td>
+                                    <td>
+                                        <a href="{% url 'kahamahmis:patient_health_record_view' visit.patient.id visit.id %}" class="text-primary">HEALTH RECORDS</a>
+                                        <a href="#" class="text-danger" type="button" data-toggle="modal" data-target="#deletetVisitModal{{ visit.id }}">DELETE</a>
+                                    </td>
+
+                                    
+                                <div class="modal fade" id="deletetVisitModal{{ visit.id }}" tabindex="-1" role="dialog" aria-labelledby="deletetVisitModalLabel{{ item.id }}" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="deletetVisitModalLabel{{ visit.id }}">Delete Category</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Are you sure you want to delete this patient visit: <strong>{{ visit }}</strong>?</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                <button type="button" class="btn btn-danger" onclick="deletetVisit({{ visit.id }})">Delete</button>
+                                            </div>
+                                        </div>
+                            
+                                        <script>
+                                            function deletetVisit(patient_visit_id) {
+                                                $.ajax({
+                                                    type: 'POST',
+                                                    url: '/delete_patient_visit/' + patient_visit_id + '/',  // Replace with your URL
+                                                    data: {},
+                                                    success: function (data) {
+                                                        if (data.status === 'success') {
+                                                            $('#deletetVisitModal' + patient_visit_id).modal('hide');
+                                                            location.reload(true);
+                                                            // Refresh the category list or perform any other actions
+                                                        } else {
+                                                            // Handle other status cases if needed
+                                                            alert(data.message);
+                                                        }
+                                                    },
+                                                    error: function (error) {
+                                                        alert(error);
+                                                        // Handle errors if necessary
+                                                    }
+                                                });
+                                            }
+                                        </script>
+                                    </div>
+                                </div>
+                          
                                 </tr>
-                              </thead>
-                              <tbody>
-                                <tr>
-                                  <td>VST-01853</td>
-                                  <td>7/12/2023</td>
-                                  <td>16:12</td>
-                                  <td>DIVINE HEART EMS</td>
-                                  <td>
-                                    <a href="#" class="text-primary">HEALTH RECORDS</a>
-                                    <a href="#" class="text-danger">DELETE</a>
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td>VST-01556</td>
-                                  <td>27/10/2023</td>
-                                  <td>12:05</td>
-                                  <td>DIVINE HEART EMS</td>
-                                  <td>
-                                    <a href="#" class="text-primary">HEALTH RECORDS</a>
-                                    <a href="#" class="text-danger">DELETE</a>
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td>VST-01519</td>
-                                  <td>23/10/2023</td>
-                                  <td>11:37</td>
-                                  <td>DIVINE HEART EMS</td>
-                                  <td>
-                                    <a href="#" class="text-primary">HEALTH RECORDS</a>
-                                    <a href="#" class="text-danger">DELETE</a>
-                                  </td>
-                                </tr>
-                                <tr>
-                                    <td>VST-01853</td>
-                                    <td>7/12/2023</td>
-                                    <td>16:12</td>
-                                    <td>DIVINE HEART EMS</td>
-                                    <td>
-                                      <a href="#" class="text-primary">HEALTH RECORDS</a>
-                                      <a href="#" class="text-danger">DELETE</a>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td>VST-01556</td>
-                                    <td>27/10/2023</td>
-                                    <td>12:05</td>
-                                    <td>DIVINE HEART EMS</td>
-                                    <td>
-                                      <a href="#" class="text-primary">HEALTH RECORDS</a>
-                                      <a href="#" class="text-danger">DELETE</a>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td>VST-01519</td>
-                                    <td>23/10/2023</td>
-                                    <td>11:37</td>
-                                    <td>DIVINE HEART EMS</td>
-                                    <td>
-                                      <a href="#" class="text-primary">HEALTH RECORDS</a>
-                                      <a href="#" class="text-danger">DELETE</a>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td>VST-01336</td>
-                                    <td>23/9/2023</td>
-                                    <td>12:03</td>
-                                    <td>DIVINE HEART EMS</td>
-                                    <td>
-                                      <a href="#" class="text-primary">HEALTH RECORDS</a>
-                                      <a href="#" class="text-danger">DELETE</a>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td>VST-01276</td>
-                                    <td>10/9/2023</td>
-                                    <td>08:18</td>
-                                    <td>DIVINE HEART EMS</td>
-                                    <td>
-                                      <a href="#" class="text-primary">HEALTH RECORDS</a>
-                                      <a href="#" class="text-danger">DELETE</a>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td>VST-01231</td>
-                                    <td>2/9/2023</td>
-                                    <td>16:00</td>
-                                    <td>DIVINE HEART EMS</td>
-                                    <td>
-                                      <a href="#" class="text-primary">HEALTH RECORDS</a>
-                                      <a href="#" class="text-danger">DELETE</a>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td>VST-01172</td>
-                                    <td>23/8/2023</td>
-                                    <td>14:10</td>
-                                    <td>DIVINE HEART EMS</td>
-                                    <td>
-                                      <a href="#" class="text-primary">HEALTH RECORDS</a>
-                                      <a href="#" class="text-danger">DELETE</a>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td>VST-01164</td>
-                                    <td>22/8/2023</td>
-                                    <td>11:32</td>
-                                    <td>DIVINE HEART EMS</td>
-                                    <td>
-                                      <a href="#" class="text-primary">HEALTH RECORDS</a>
-                                      <a href="#" class="text-danger">DELETE</a>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td>VST-00993</td>
-                                    <td>31/7/2023</td>
-                                    <td>15:19</td>
-                                    <td>DIVINE HEART EMS</td>
-                                    <td>
-                                      <a href="#" class="text-primary">HEALTH RECORDS</a>
-                                      <a href="#" class="text-danger">DELETE</a>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td>VST-00918</td>
-                                    <td>20/6/2023</td>
-                                    <td>11:54</td>
-                                    <td>DIVINE HEART EMS</td>
-                                    <td>
-                                      <a href="#" class="text-primary">HEALTH RECORDS</a>
-                                      <a href="#" class="text-danger">DELETE</a>
-                                    </td>
-                                  </tr>
-                                <!-- Add more rows for the provided data -->
-                                <!-- ... (repeat this block for the remaining rows) ... -->
-                              </tbody>
-                        </table>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addVisitModal" tabindex="-1" aria-labelledby="addVisitModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addVisitModalLabel">Add Visit</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addVisitModalForm" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="visitType">Visit Type</label>
+                            <select class="form-control select2bs4" style="width: 100%;" id="visitTypes" name="visitType">
+                                <option value="Normal">Normal</option>
+                                <option value="Emergency">Emergency</option>
+                                <option value="Referral">Referral</option>
+                                <option value="Follow up">Follow up</option>
+                            </select>
+                        </div>
+                        <input type="hidden" class="form-control" id="patient_id" name="patient_id" value="{{ patient.id }}">
+                        <input type="hidden" class="form-control" id="visit_id" name="visit_id">
+                      
+                        <div class="form-group">
+                            <label class="control-label">Primary Service:</label>
+                            <select class="form-control select2bs4" style="width: 100%;" id="primary_service" name="primary_service">
+                                <option value="Consultation">Consultation</option>
+                                <option value="Imaging">Imaging</option>
+                                <option value="Investigation">Investigation</option>
+                                <option value="Procedure">Procedure</option>
+                                <option value="Physiotherapy">Physiotherapy</option>
+                                <option value="Ambulance">Ambulance</option>
+                            </select>
+                        </div>
+                       
+               
+                       
+                    </form>
+                </div>
+                <div class="form-group pt-2 float-end">
+                    <div class="row">
+                        <div class="col-md-8"></div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-md btn-primary" onclick="addVisit()">Save and Continue <i class="mdi mdi-forward"></i></button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
-   
-</div>
-
-   
-
-    <script>
-        function submitForm(checkbox) {
-            checkbox.form.submit();
-        }
-    </script>
-
-{% include 'kahama_template/datatable.html' %}
+    </div>
     
-
+    <script>
+        function addVisit() {
+            var visitType = $('#visitType').val();
+            var primary_service = $('#primary_service').val();      
+            var patient_id = $('#patient_id').val();
+            var visit_id = $('#visit_id').val();
+    
+            $.ajax({
+                type: 'POST',
+                url: '/add_remotepatient_visit/',
+                data: {
+                    visitType: visitType,              
+                    patient_id: patient_id,
+                    visit_id: visit_id,
+                    primary_service: primary_service
+                },
+                success: function (data) {
+                    if (data.status === 'success') {
+                        $('#addVisitModal').modal('hide');
+                        location.reload(true);
+                    } else {
+                        alert(data.message);
+                    }
+                },
+                error: function (error) {
+                    alert('An error occurred while processing your request.');
+                }
+            });
+        }
+    
+      
+    </script>
+    
 {% endblock main_content %}

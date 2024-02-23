@@ -15,7 +15,7 @@
 </a>
 
 <!-- Add Import Staff link and modal trigger -->
-<a class="btn btn-success float-right mr-2" href="{% url 'import_staff' %}">
+<a class="btn btn-success float-right mr-2" href="{% url 'kahamahmis:import_patient' %}">
     <i class="fas fa-file-import"></i> Import patient
 </a>
 
@@ -56,6 +56,9 @@
                     <button  class="btn btn-success btn-sm" data-toggle="modal" data-target="#patientDetailsModal{{ patient.id }}"  data-toggle="tooltip" title="View">
                         <i class="fa fa-eye text-dark"></i>
                     </button>  
+                    <button  class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#addConsultationModal{{ patient.id }}"  data-toggle="tooltip" title="Appointment">
+                        <i class="fa fa-calendar-alt text-dark"></i>
+                    </button>  
                     <a href="{% url 'patient_info_form_edit' patient_id=patient.id %}" data-toggle="tooltip" title="Edit patient">
                         <button type="button" class="btn btn-secondary btn-sm"><i class="fa fa-edit text-white"></i></button>
                     </a>
@@ -70,9 +73,93 @@
                         <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#addVisitModal{{ patient.id }}" title="Add Visit">
                             <i class="fas fa-eye text-dark"></i>
                           </button>
-                   
+
+    
+                       
                 </td>
                 
+
+                        <!-- Modal -->
+            <!-- Modal for adding consultation -->
+            <div class="modal fade" id="addConsultationModal{{ patient.id }}" tabindex="-1" aria-labelledby="addConsultationModalLabel{{ patient.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h5 class="modal-title" id="addConsultationModalLabel{{ patient.id }}">Add Consultation for {{ patient }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    </div>
+                    <div class="modal-body">
+                    <!-- Consultation form -->
+                    <form id="addConsultationForm{{ patient.id }}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                        <label for="doctor">Doctor:</label>
+                        <select class="form-control select2bs4" style="width: 100%;" name="doctor" required>
+                            <option value="">Select Doctor</option>
+                            {% for doctor in doctors %}
+                            <option value="{{ doctor.id }}">{{ doctor.admin.first_name }} {{ doctor.middle_name }} {{ doctor.admin.last_name }}</option>
+                            {% endfor %}
+                        </select>
+                        </div>
+                        <input type="hidden" class="form-control" id="patient_id{{ patient.id }}" name="patient_id" value="{{ patient.id }}">
+                        <div class="form-group">
+                        <label for="description">Description:</label>
+                        <textarea id="description" name="description" rows="2" class="form-control"></textarea>
+                        </div>
+                        <div class="form-group">
+                        <label for="date_of_consultation">Date of Consultation:</label>
+                        <input type="date" id="date_of_consultation" name="date_of_consultation" class="form-control">
+                        </div>
+                        <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="start_time">Start Time:</label>
+                            <input type="time" class="form-control" name="start_time" id="start_time">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="end_time">End Time:</label>
+                            <input type="time" class="form-control" name="end_time" id="end_time">
+                        </div>
+                        </div>
+                    </form>
+                    </div>
+                    <div class="modal-footer">                    
+                        <div class="form-row">
+                            <div class="col-md-12">
+                                <button type="button" class="btn btn-success btn-block" onclick="addRemoteConsultation()">Create an Appointment</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+  
+            <script>        
+                
+              
+                // Function to add remote consultation using AJAX
+                function addRemoteConsultation() {               
+                    $.ajax({
+                      type: 'POST',
+                      url: '{% url "kahamahmis:add_remote_consultation" %}',
+                      data: $('#addConsultationForm{{ patient.id }}').serialize(),
+                      success: function(data) {
+                        if (data.status === 'success') {
+                          $('#addConsultationModal{{ patient.id }}').modal('hide');
+                          location.reload(true); // Refresh the page
+                        } else {
+                          alert(data.message); // Display error message if any
+                        }
+                      },
+                      error: function(xhr, status, error) {
+                        alert(xhr.responseText); // Display error message if AJAX request fails
+                      }
+                    });
+                  
+                }
+              </script>
+              
                     <!-- Bootstrap Modal for Adding Visit -->
                     <div class="modal fade" id="addVisitModal{{ patient.id }}" tabindex="-1" aria-labelledby="addVisitModalLabel{{ patient.id }}" aria-hidden="true">
                       <div class="modal-dialog modal-lg">
@@ -274,6 +361,7 @@
         </tbody>
     </table>
 </div>
+
 
 <script>
     function submitForm(checkbox) {

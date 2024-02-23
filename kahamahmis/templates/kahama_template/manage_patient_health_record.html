@@ -13,8 +13,11 @@ Patient - Health Record
 <a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#addPrescriptionModal">
     <i class="fas fa-plus"></i> prescription
 </a>
-<a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#addConsultationModal">
+<a class="btn btn-secondary float-right" type="button" data-toggle="modal" data-target="#addConsultationModal">
     <i class="fas fa-plus"></i> consultation
+</a>
+<a class="btn btn-success float-right" type="button" data-toggle="modal" data-target="#addProcedureModal">
+    <i class="fas fa-plus"></i> Procedure
 </a>
 <!-- Add Import insurance link and modal trigger -->
 {% endblock breadcrumb %}
@@ -187,11 +190,11 @@ Patient - Health Record
                                     <h5 class="panel-title">Orders Request</h5>                                    <!-- Content for Orders Request tab -->
                                     <div class="panel panel-flat">
                                         <div class="panel-body">
-                                            <a class="btn btn-default" href="/Consultations/Register/523678?visit=5dc1365a-3a87-491d-a380-106734e64852">Consultation</a>
-                                            <a class="btn btn-default" href="/Order/Register/523678?visit=5dc1365a-3a87-491d-a380-106734e64852">Laboratory</a>
-                                            <a class="btn btn-default" href="/Imaging/Register/523678?visit=5dc1365a-3a87-491d-a380-106734e64852">Imaging</a>
-                                            <a class="btn btn-default" href="/Procedure/Register/523678?visit=5dc1365a-3a87-491d-a380-106734e64852">Procedure</a>
-                                            <a class="btn btn-default" href="/Physio/Register/523678?visit=5dc1365a-3a87-491d-a380-106734e64852">Physiotherapy</a>
+                                            <a class="btn btn-default" href="#">Consultation</a>
+                                            <a class="btn btn-default" href="#">Laboratory</a>
+                                            <a class="btn btn-default" href="#">Imaging</a>
+                                            <a class="btn btn-default" href="#">Procedure</a>
+                                            <a class="btn btn-default" href="#">Physiotherapy</a>
                                         </div>
                                     </div>
                                 </div>
@@ -230,22 +233,22 @@ Patient - Health Record
                                                 <thead>
                                                     <tr>
                                                         <th>#</th>
-                                                        <th>Code</th>
+                                                        <th>name</th>
                                                         <th>Description</th>
-                                                        <th></th>
+                                                        <th>equipments used</th>
                                                         <th>Amount</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {% for procedure_result in procedure_results %}
+                                                   
                                                     <tr>
-                                                        <td>{{ procedure_result.id }}</td>
-                                                        <td>{{ procedure_result.code }}</td>
-                                                        <td>{{ procedure_result.description }}</td>
-                                                        <td></td> <!-- Add the appropriate content for this column if needed -->
-                                                        <td>{{ procedure_result.amount }}</td>
+                                                        <td>{{ procedure.id }}</td>
+                                                        <td>{{ procedure.name }}</td>
+                                                        <td>{{ procedure.description }}</td>
+                                                        <td>{{ procedure.equipments_used }}</td><!-- Add the appropriate content for this column if needed -->
+                                                        <td>{{ procedure.cost }}</td>
                                                     </tr>
-                                                    {% endfor %}
+                                               
                                                 </tbody>
                                             </table>
                                         </div>
@@ -633,8 +636,7 @@ Patient - Health Record
                             <!-- Doctor selection -->
                             <div class="col-md-4 form-group">
                                 <label for="doctor">Doctor:</label>
-                                <select class="form-control select2bs4" style="width: 100%;" id="doctor" name="doctor" required>
-                                    <option value="">Select Doctor</option>
+                                <select class="form-control select2bs4" style="width: 100%;" id="doctor" name="doctor" required>                                
                                     {% for doctor in doctors %}
                                         <option value="{{ doctor.id }}">{{ doctor.admin.first_name }} {{ doctor.middle_name }} {{ doctor.admin.last_name }}</option>
                                     {% endfor %}
@@ -745,6 +747,141 @@ Patient - Health Record
         });
     }
 </script>
+
+
+
+<!-- HTML structure for the Bootstrap modal form -->
+<div class="modal fade" id="addProcedureModal" tabindex="-1" role="dialog" aria-labelledby="addProcedureModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addProcedureModalLabel">Add Procedure</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form id="addProcedureForm" method="post">
+                {% csrf_token %}
+                <!-- Bootstrap grid system for form layout -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="doctor">Doctor:</label>
+                            <select class="form-control select2bs4" style="width: 100%;" id="doctor" name="doctor" required>                            
+                                {% for doctor in doctors %}
+                                    <option value="{{ doctor.id }}">{{ doctor.admin.first_name }} {{ doctor.middle_name }} {{ doctor.admin.last_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="procedureName">Name:</label>
+                            <input type="text" class="form-control" id="procedureName" name="name" placeholder="Enter procedure name">
+                            <input type="hidden" class="form-control" id="visit_id" name="visit_id" value="{{ visits.id }}">
+                            <input type="hidden" class="form-control" id="patient_id" name="patient_id" value="{{ patient.id }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="startTime">Start Time:</label>
+                            <input type="time" class="form-control" id="startTime" name="start_time">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="endTime">End Time:</label>
+                            <input type="time" class="form-control" id="endTime" name="end_time">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="procedureEquipments">Equipments used:</label>
+                            <input type="text" class="form-control" id="procedureEquipments" name="equipments_used" placeholder="Enter equipments used">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="procedureCost">Cost:</label>
+                            <input type="text" class="form-control" id="procedureCost" name="cost" placeholder="Enter procedure cost">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="procedureDescription">Description:</label>
+                            <textarea class="form-control" id="procedureDescription" name="description" placeholder="Enter procedure description"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group pt-2 float-end">
+                    <div class="row">
+                        <div class="col-md-8"></div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-primary" onclick="submitRemoteProcedure()">Add Procedure</button>
+                        </div>
+                    </div>
+                </div>
+               
+              
+            </form>
+    </div>
+     
+      </div>
+    </div>
+  </div>
+  
+
+  
+ <!-- JavaScript to handle AJAX request and form validation -->
+<script>
+    function submitRemoteProcedure() {
+        var startTimeStr = document.getElementById('startTime').value;
+        var endTimeStr = document.getElementById('endTime').value;
+    
+        // Convert time strings to Date objects
+        var startTime = new Date('2000-01-01T' + startTimeStr);
+        var endTime = new Date('2000-01-01T' + endTimeStr);
+    
+        // Validate start and end times
+        if (startTime >= endTime) {
+            alert('Start time must be greater than end time.');
+            return;
+        }
+    
+        // Get form data
+        var formData = new FormData(document.getElementById('addProcedureForm'));
+    
+        // Make AJAX request
+        $.ajax({
+            url: '{% url "kahamahmis:save_remoteprocedure" %}',  // Replace with your server endpoint
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                if (response.status === 'success') {
+                    // Display success message
+                    $('#addProcedureModal').modal('hide');
+                    location.reload(true);
+                } else {
+                    // Display error message if any
+                    alert(response.message);
+                }
+            },
+            error: function(error) {
+                alert('An error occurred. Please try again.');  // Display a generic error message
+            }
+        });
+    }
+    
+    </script>
+   
 <style>
     /* Reset default margin and padding */
 .navigation {

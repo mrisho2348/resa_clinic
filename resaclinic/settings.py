@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'clinic',
     'centric',
     'kahamahmis',
+    'wkhtmltopdf',
 ]
 
 MIDDLEWARE = [
