@@ -3,9 +3,9 @@ import logging
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.db import IntegrityError
-from clinic.models import Category, Company, ConsultationNotes, Diagnosis, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, PatientVital, Patients, Prescription, Procedure, Reagent, Referral, RemotePatient, RemoteService, Service, Staffs, Supplier
-from clinic.resources import CategoryResource, CompanyResource, ConsultationNotesResource, DiagnosisResource, DiseaseRecodeResource, EquipmentMaintenanceResource, EquipmentResource, HealthIssueResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, PathologyRecordResource, PatientVitalResource, PatientsResource, PrescriptionResource, ProcedureResource, ReagentResource, ReferralResource, RemotePatientResource, RemoteServiceResource, ServiceResource, SupplierResource
-from clinic.forms import ImportCategoryForm, ImportCompanyForm, ImportConsultationNotesForm, ImportDiagnosisForm, ImportDiseaseForm, ImportEquipmentForm, ImportEquipmentMaintenanceForm, ImportHealthIssueForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientVitalForm, ImportPatientsForm, ImportPrescriptionForm, ImportProcedureForm, ImportReagentForm, ImportReferralForm, ImportRemotePatientForm, ImportRemoteServiceForm, ImportServiceForm, ImportSupplierForm
+from clinic.models import Category, RemoteCompany, ConsultationNotes, Country, Diagnosis, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, PatientVital, Patients, Prescription, Procedure, Reagent, Referral, RemotePatient, RemoteService, Service, Staffs, Supplier
+from clinic.resources import CategoryResource, CompanyResource, ConsultationNotesResource, CountryResource, DiagnosisResource, DiseaseRecodeResource, EquipmentMaintenanceResource, EquipmentResource, HealthIssueResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, PathologyRecordResource, PatientVitalResource, PatientsResource, PrescriptionResource, ProcedureResource, ReagentResource, ReferralResource, RemotePatientResource, RemoteServiceResource, ServiceResource, SupplierResource
+from clinic.forms import ImportCategoryForm, ImportCompanyForm, ImportConsultationNotesForm, ImportCountryForm, ImportDiagnosisForm, ImportDiseaseForm, ImportEquipmentForm, ImportEquipmentMaintenanceForm, ImportHealthIssueForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientVitalForm, ImportPatientsForm, ImportPrescriptionForm, ImportProcedureForm, ImportReagentForm, ImportReferralForm, ImportRemotePatientForm, ImportRemoteServiceForm, ImportServiceForm, ImportSupplierForm
 from tablib import Dataset
 logger = logging.getLogger(__name__)
 def import_disease_recode(request):
@@ -288,16 +288,19 @@ def import_companies(request):
                 imported_data = dataset.load(new_companies.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
 
                 for data in imported_data:
-                      company_recode = Company(
+                      company_recode = RemoteCompany(
                         name=data[0],
-                        code=data[1],
-                        category=data[2],
+                        industry=data[1],
+                        sector=data[2],
+                        headquarters=data[3],
+                        Founded=data[4],
+                        Notes=data[5],
                       
                         # Add other fields accordingly
                     )
                       company_recode.save()
 
-                return redirect('manage_company') 
+                return redirect('kahamahmis:manage_company') 
             except Exception as e:
                 logger.error(f"Error adding company: {str(e)}")
                 messages.error(request, f'An error occurred: {e}')
@@ -674,6 +677,37 @@ def import_service_records(request):
         form = ImportServiceForm()
 
     return render(request, 'kahama_template/import_service.html', {'form': form})
+
+def import_country_records(request):
+    if request.method == 'POST':
+        form = ImportCountryForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = CountryResource()
+                new_records = request.FILES['country_records_file']
+
+                # Use tablib to load the imported data
+                dataset = resource.export()
+                imported_data = dataset.load(new_records.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+                
+                for data in imported_data:
+                    try:
+                        country_record = Country.objects.create(
+                            name=data[0],                                        
+                                              
+                        )
+                    except IntegrityError:
+                        messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
+                        continue
+
+                return redirect('kahamahmis:manage_country') 
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportCountryForm()
+
+    return render(request, 'kahama_template/import_country.html', {'form': form})
 
 
 def import_referral_records(request):

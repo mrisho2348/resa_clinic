@@ -5,6 +5,8 @@ from . import views,delete,imports,editView
 
 urlpatterns = [
         path('',views.index, name="home"),
+        path('add_lab_test',views.add_lab_test, name="add_lab_test"),
+        path('manage_country',views.manage_country, name="manage_country"),
         path('add_remote_consultation',views.add_remote_consultation, name="add_remote_consultation"),
         path('save_remote_service',views.save_remote_service, name="save_remote_service"),
         path('individual_visit/<int:patient_id>/',views.individual_visit, name="individual_visit"),
@@ -20,6 +22,13 @@ urlpatterns = [
         path('save_service_requests/',views.save_service_requests, name="save_service_requests"),
         path('save_consultation_notes/',views.save_consultation_notes, name="save_consultation_notes"),
         path('save_remoteconsultation_notes/',views.save_remoteconsultation_notes, name="save_remoteconsultation_notes"),
+        path('save_remotesconsultation_notes//<int:patient_id>/',views.save_remotesconsultation_notes, name="save_remotesconsultation_notes"),
+        path('prescription/<int:patient_id>/<int:visit_id>/<int:consultation_notes_id>/', views.save_prescription, name='save_prescription'),
+        path('laboratory/<int:patient_id>/<int:visit_id>/<int:consultation_notes_id>/', views.save_laboratory, name='save_laboratory'),
+        path('save_remotereferral/<int:patient_id>/<int:visit_id>/<int:consultation_notes_id>/', views.save_remotereferral, name='save_remotereferral'),
+        path('counsel/<int:patient_id>/<int:visit_id>/<int:consultation_notes_id>/', views.save_counsel, name='save_counsel'),
+        path('save_remoteprocedure/<int:patient_id>/<int:visit_id>/<int:consultation_notes_id>/', views.save_remoteprocedure, name='save_remoteprocedure'),
+        path('observation/<int:patient_id>/<int:visit_id>/<int:consultation_notes_id>/', views.save_observation, name='save_observation'),
         path('save_patient_vital/',views.save_patient_vital, name="save_patient_vital"),
         path('save_remotepatient_vital/',views.save_remotepatient_vital, name="save_remotepatient_vital"),
         path('add_prescription/',views.add_prescription, name="add_prescription"),
@@ -44,6 +53,7 @@ urlpatterns = [
         path('GetUserDetails', views.GetUserDetails, name='GetUserDetails'),
         path('add_patient/', views.add_patient, name='add_patient'),
         path('DoLoginKahama', views.DoLoginKahama, name='DoLoginKahama'),
+        path('edit_remote_company/<int:company_id>/', views.edit_remote_company, name='edit_remote_company'),
         path('save_usage_history/', views.save_usage_history, name='save_usage_history'),
         path('add_category/', views.add_category, name='add_category'),
         path('accounts/', include('django.contrib.auth.urls')),  
@@ -53,6 +63,8 @@ urlpatterns = [
         path('resa/page/404',views.page_404, name="page_404"),        
         path('resa/new-consultation',views.add_consultation, name="add_consultation"),
         path('staff_detail/<int:staff_id>/', views.single_staff_detail, name='single_staff_detail'),
+        path('save_patient_visit/<int:patient_id>/', views.save_patient_visit, name='save_patient_visit'),
+        path('save_remotepatient_vitals/<int:patient_id>/', views.save_remotepatient_vitals, name='save_remotepatient_vitals'),
         path('view-patient/<int:patient_id>/', views.view_patient, name='view_patient'),
         path('edit_staff/<str:staff_id>', views.edit_staff, name='edit_staff'),  
         path('edit_staff_save', views.edit_staff_save, name='edit_staff_save'), 
@@ -162,6 +174,7 @@ urlpatterns = [
         path('api/out-of-stock-reagent-count/', views.get_out_of_stock_count_reagent, name='get_out_of_stock_count_reagent'),
         
         # imports urls 
+        path('import_country_records', imports.import_country_records, name='import_country_records'),
         path('resa/import_Import/import_patient_vital_records',imports.import_patient_vital_records, name="import_patient_vital_records"),
         path('resa/import_Import/Inventory/ItemForm_records',imports.import_ImportInventoryItemForm_records, name="import_ImportInventoryItemForm_records"),
         path('resa/ImportExcel_supplier',imports.import_supplier, name="import_supplier"),
@@ -204,6 +217,7 @@ urlpatterns = [
         path('patient-procedure-history/<str:mrn>/view/', views.patient_procedure_history_view, name='patient_procedure_history_view_mrn'), 
         path('edit_medicine/<int:medicine_id>/', editView.edit_medicine, name='edit_medicine'),        
         path('edit_inventory/<int:inventory_id>/', editView.edit_inventory, name='edit_inventory'),
+        
         path('edit_medication_payment/<int:payment_id>/', editView.edit_medication_payment, name='edit_medication_payment'),
         
         

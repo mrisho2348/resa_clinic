@@ -19,6 +19,7 @@ Patient - Health Record
 <a class="btn btn-success float-right" type="button" data-toggle="modal" data-target="#addProcedureModal">
     <i class="fas fa-plus"></i> Procedure
 </a>
+
 <!-- Add Import insurance link and modal trigger -->
 {% endblock breadcrumb %}
 
@@ -202,26 +203,36 @@ Patient - Health Record
                                     <h5 class="panel-title">Lab Result</h5>
                                     <div class="panel panel-flat">                                   
                                         <div class="panel-body">
-                                            <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example3"  style="width:100%">
-                                                <thead>
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>Code</th>
-                                                        <th>Description</th>
-                                                        <th>Amount</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {% for result in lab_results %}
-                                                    <tr>
-                                                        <td>{{ forloop.counter }}</td>
-                                                        <td>{{ result.code }}</td>
-                                                        <td>{{ result.description }}</td>
-                                                        <td>{{ result.amount }}</td>
-                                                    </tr>
-                                                    {% endfor %}
-                                                </tbody>
-                                            </table>
+                                            <div  class="table-responsive">
+                                                <table  class="table table-hover text-nowrap table-bordered table-striped" id="example4">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Lab Number</th>
+                                                            <th>Patient</th>
+                                                            <th>Visit</th>
+                                                            <th>Consultation</th>
+                                                            <th>Diagnosis</th>
+                                                            <th>Test Name</th>
+                                                            <th>Result</th>
+                                                  
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for lab_test in lab_tests %}
+                                                        <tr>
+                                                            <td>{{ lab_test.lab_number }}</td>
+                                                            <td>{{ lab_test.patient.mrn }}</td>
+                                                            <td>{{ lab_test.visit.vst }}</td>
+                                                            <td>{{ lab_test.consultation.consultation_number }}</td>
+                                                            <td>{{ lab_test.diagnosis }}</td>
+                                                            <td>{{ lab_test.test_name }}</td>
+                                                            <td>{{ lab_test.result }}</td>
+                                                 
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -229,28 +240,34 @@ Patient - Health Record
                                     <h5 class="panel-title">Procedures Result</h5>
                                     <div class="panel panel-flat">                                       
                                         <div class="panel-body">
-                                            <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example4"  style="width:100%">
-                                                <thead>
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>name</th>
-                                                        <th>Description</th>
-                                                        <th>equipments used</th>
-                                                        <th>Amount</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                   
-                                                    <tr>
-                                                        <td>{{ procedure.id }}</td>
-                                                        <td>{{ procedure.name }}</td>
-                                                        <td>{{ procedure.description }}</td>
-                                                        <td>{{ procedure.equipments_used }}</td><!-- Add the appropriate content for this column if needed -->
-                                                        <td>{{ procedure.cost }}</td>
-                                                    </tr>
-                                               
-                                                </tbody>
-                                            </table>
+                                            <div class="table-responsive">
+                                                <table class="table table-hover text-nowrap table-bordered table-striped" id="example">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Description</th>
+                                                            <th>Duration Time</th>
+                                                            <th>Equipments Used</th>
+                                                            <th>Cost</th>
+                                                            <th>Created At</th>
+                                                            <th>Updated At</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for procedure in procedures %}
+                                                        <tr>
+                                                            <td>{{ procedure.name }}</td>
+                                                            <td>{{ procedure.description }}</td>
+                                                            <td>{{ procedure.duration_time }}</td>
+                                                            <td>{{ procedure.equipments_used }}</td>
+                                                            <td>{{ procedure.cost }}</td>
+                                                            <td>{{ procedure.created_at }}</td>
+                                                            <td>{{ procedure.updated_at }}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                               </div>
                                         </div>
                                     </div>
                                 </div>
@@ -457,7 +474,7 @@ Patient - Health Record
         </div>
     </div>
 </div>
-
+<a href="{% url 'kahamahmis:generatePDF' patient.id visits.id %}" id="dwnload" class="btn btn-light border text-black-50 shadow-none"><i class="fa fa-download"></i> Download</a> </div>
 <div class="modal fade" id="addPrescriptionModal" tabindex="-1" role="dialog" aria-labelledby="addPrescriptionModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -970,5 +987,6 @@ Patient - Health Record
 /* Add more styles as needed */
 
 </style>
+
 {% include 'kahama_template/datatable.html' %}
 {% endblock main_content %}

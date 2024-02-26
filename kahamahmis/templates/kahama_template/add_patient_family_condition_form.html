@@ -9,54 +9,150 @@
     {% load static %}             
 
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card mt-5">
-                    <div class="card-header" style="background-color: #007bff; color: white; font-weight: bold; border-radius: 10px;">
-                        <h4 style="margin-bottom: 0;">Family Medical History </h4>
-                        <p style="font-size: 14px; margin-bottom: 0;">{{patient.first_name}} {{patient.middle_name}} {{patient.last_name}}</p>
-                    </div>
+        <!-- Patient Information Card -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
                     <div class="card-body">
-                        <form method="post" action="{% url 'save_family_medical_history' patient.id %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="patient_id" value="{{ patient.id }}">
-                            <!-- Medical Condition Information -->
+                        <div class="row" style="font-size:13px;">
+                            <div class="col-md-3"><b>PATIENT: {{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</b></div>
+                            <div class="col-md-3"><b>Age: {{ patient.age }}</b></div>
+                            <div class="col-md-3"><b>SEX: {{ patient.gender }}</b></div>
+                            <div class="col-md-3"><b>FILE NO : {{ patient.mrn }}</b></div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-3"><b>PAYMENT MODE: {{ patient.payment_form }}</b></div>
+                        </div>
+                    </div>    
+                </div>
+            </div>
+        </div>
+
+     <!-- Patient Visit Card -->
+<div class="row justify-content-center mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">Add Patient Visit</div>
+            <div class="card-body">
+                <form id="visitForm" method="post" action="#">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
                             <div class="form-group">
-                                <label for="condition">Condition:</label>
-                                <select class="form-control select2bs4" style="width: 100%;" id="condition" name="condition" required>
-                                    <option value="Allergies">Allergies</option>
-                                    <option value="Asthma">Asthma</option>
-                                    <option value="Lung Disease">Lung Disease</option>
-                                    <option value="Cancer">Cancer</option>
-                                    <option value="Diabetes">Diabetes</option>
-                                    <option value="Hypertension">Hypertension</option>
-                                    <option value="Heart Disease">Heart Disease</option>
+                                <label for="visit_type">Visit Type</label>
+                                <select class="form-control select2bs4" style="width: 100%;" id="visit_type" name="visit_type">
+                                    <option value="Normal">Normal</option>
+                                    <option value="Emergency">Emergency</option>
+                                    <option value="Referral">Referral</option>
+                                    <option value="Follow up">Follow up</option>
                                 </select>
                             </div>
-                            
+                        </div>
+                        <div class="col-md-6">
                             <div class="form-group">
-                                <label for="relationship">Relationship:</label>
-                                <input type="text" class="form-control" id="relationship" name="relationship">
+                                <label class="control-label">Primary Service:</label>
+                                <select class="form-control select2bs4" style="width: 100%;" id="primary_service" name="primary_service">
+                                    <option value="Consultation">Consultation</option>
+                                    <option value="Imaging">Imaging</option>
+                                    <option value="Investigation">Investigation</option>
+                                    <option value="Procedure">Procedure</option>
+                                    <option value="Physiotherapy">Physiotherapy</option>
+                                    <option value="Ambulance">Ambulance</option>
+                                </select>
                             </div>
+                        </div>
+                    </div>
+                    <div id="messageContainer1"></div>
+                    <div id="messageContainer2"></div>
+                    <button type="button" id="saveVisitBtn" class="btn btn-primary btn-block" onclick="saveVisit()">Save Visit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function saveVisit() {
+        var formData = new FormData(document.getElementById("visitForm"));
+        $.ajax({
+            url: "{% url 'kahamahmis:save_patient_visit' patient.id %}",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+            
+                $('#saveVisitBtn').prop('disabled', true);
+                if (response.status === 'success') {
+                        // Display success message in a styled div         
+                $("#messageContainer2").html("<div class='alert alert-success'>" + response.success + "</div>");
+                $('#saveVisitBtn').prop('disabled', true);
+                // Disable the save button
+                 
+                } else {
+                    $("#messageContainer2").html("<div class='alert alert-success'>" + response.message + "</div>");
+                }
+                // Optionally, you can redirect the user to another page
+            
+
+            },
+            error: function(xhr, status, error) {
+                // Display error message in a styled div
+                $('#messageContainer1').html('<div class="alert alert-danger">Error saving visit: ' + error + '</div>');
+            }
+        });
+    }
+</script>
+        
+        <!-- Family Medical History Form -->
+        <div class="row justify-content-center">
+            <div class="col-md-12">
+                <div class="card ">                   
+                    <div class="card-body">
+                        <form method="post" action="{% url 'kahamahmis:save_family_medical_history' patient.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="patient_id" value="{{ patient.id }}">
+                            <!-- Medical Condition Information Table -->
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="family_medical_history_table">
+                                    <thead>
+                                        <tr>
+                                            <th>Condition</th>
+                                            <th>Relationship</th>
+                                            <th>Comments</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <select class="form-control select2bs4" style="width: 100%;" name="condition[]" required>
+                                                    <option value="" selected>Select Condition</option>
+                                                    <option value="Allergies">Allergies</option>
+                                                    <option value="Asthma">Asthma</option>
+                                                    <option value="Lung Disease">Lung Disease</option>
+                                                    <option value="Cancer">Cancer</option>
+                                                    <option value="Diabetes">Diabetes</option>
+                                                    <option value="Hypertension">Hypertension</option>
+                                                    <option value="Heart Disease">Heart Disease</option>
+                                                </select>
+                                            </td>
+                                            <td><input type="text" class="form-control" name="relationship[]"></td>
+                                            <td><textarea class="form-control" name="comments[]" rows="3"></textarea></td>
+                                            <td><button type="button" class="btn btn-danger btn-sm delete-row">Delete</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- Add More Health Record Button -->
                             <div class="form-group">
-                                <label for="comments">Comments:</label>
-                                <textarea class="form-control" id="comments" name="comments" rows="3"></textarea>
+                                <button type="button" class="btn btn-primary" id="add_family_medical_record">Add Family Medical Record</button>
                             </div>
                             <!-- End of Form -->
                             <div class="row mt-3">
-                                <div class="col">
-                                    <button type="submit" name="save_and_continue_add_another_family_record" class="btn btn-primary btn-block">Save & Add More</button>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col">
-                                    <button type="submit" name="save_and_return" class="btn btn-primary btn-block">Save & Return to Patients List</button>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col">
-                                    <a href="{% url 'patients_list' %}" class="btn btn-secondary btn-block">Back to Patients List</a>
-                                </div>
+                                <div class="col-12">
+                                    <button type="submit" name="save_and_continue_add_another_family_record" class="btn btn-primary btn-block">Save & Add continue</button>
+                                </div>                            
+                               
                             </div>
                         </form>
                     </div>
@@ -76,8 +172,39 @@
                                 {% endif %}
                             </div>
                         </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- JavaScript for Adding/Deleting Rows -->
+    <script>
+        // Add Family Medical Record Row
+        $('#add_family_medical_record').click(function () {
+            var newRow = `<tr>
+                            <td>
+                                <select class="form-control select2bs4" style="width: 100%;" name="condition[]" required>
+                                    <option value="" selected>Select Condition</option>
+                                    <option value="Allergies">Allergies</option>
+                                    <option value="Asthma">Asthma</option>
+                                    <option value="Lung Disease">Lung Disease</option>
+                                    <option value="Cancer">Cancer</option>
+                                    <option value="Diabetes">Diabetes</option>
+                                    <option value="Hypertension">Hypertension</option>
+                                    <option value="Heart Disease">Heart Disease</option>
+                                </select>
+                            </td>
+                            <td><input type="text" class="form-control" name="relationship[]"></td>
+                            <td><textarea class="form-control" name="comments[]" rows="3"></textarea></td>
+                            <td><button type="button" class="btn btn-danger btn-sm delete-row">Delete</button></td>
+                        </tr>`;
+            $('#family_medical_history_table tbody').append(newRow);
+        });
+
+        // Delete Family Medical Record Row
+        $(document).on('click', '.delete-row', function () {
+            $(this).closest('tr').remove();
+        });
+    </script>
 {% endblock main_content %}

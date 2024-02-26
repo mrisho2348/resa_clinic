@@ -2,7 +2,7 @@ from datetime import datetime
 import logging
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Company, Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Medicine, Procedure, Referral, Sample, Staffs
+from .models import RemoteCompany, Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Medicine, Procedure, Referral, Sample, Staffs
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db import transaction
@@ -41,6 +41,9 @@ def edit_insurance(request, insurance_id):
             messages.error(request, f'An error occurred: {e}')
 
     return render(request, 'update/edit_insurance.html', {'insurance': insurance})
+
+
+
 
 
 @csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
@@ -239,7 +242,7 @@ def edit_disease_record(request, disease_id):
     return render(request, 'update/edit_disease.html', {'disease': disease})
 
 def edit_company(request, company_id):
-    company = get_object_or_404(Company, pk=company_id)
+    company = get_object_or_404(RemoteCompany, pk=company_id)
 
     if request.method == 'POST':
         try:

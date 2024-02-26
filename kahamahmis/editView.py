@@ -2,7 +2,7 @@ from datetime import datetime
 import logging
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from clinic.models import Company, Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Medicine, Procedure, Referral, Sample, Staffs
+from clinic.models import RemoteCompany, Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Medicine, Procedure, Referral, Sample, Staffs
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db import transaction
@@ -239,19 +239,25 @@ def edit_disease_record(request, disease_id):
     return render(request, 'update/edit_disease.html', {'disease': disease})
 
 def edit_company(request, company_id):
-    company = get_object_or_404(Company, pk=company_id)
+    company = get_object_or_404(RemoteCompany, pk=company_id)
 
     if request.method == 'POST':
         try:
             # Retrieve data from the form
             name = request.POST.get('Name')
-            code = request.POST.get('code')
-            category = request.POST.get('category')
+            industry = request.POST.get('industry')
+            sector = request.POST.get('sector')
+            headquarters = request.POST.get('headquarters')
+            Founded = request.POST.get('Founded')
+            Notes = request.POST.get('Notes')
 
             # Update the Company object
             company.name = name
-            company.code = code
-            company.category = category
+            company.industry = industry
+            company.sector = sector
+            company.headquarters = headquarters
+            company.Founded = Founded
+            company.Notes = Notes
 
             # Save the changes
             company.save()
@@ -262,6 +268,8 @@ def edit_company(request, company_id):
             messages.error(request, f'An error occurred: {e}')
 
     return render(request, 'update/edit_company.html', {'company': company})
+
+
 
 def edit_pathodology(request, pathodology_id):
     pathodology = get_object_or_404(PathodologyRecord, pk=pathodology_id)

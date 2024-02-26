@@ -796,69 +796,97 @@
 
 
 <div class="modal fade" id="companyModal" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-        <div class="modal-header ">
-            <h5 class="modal-title">Add company</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-          </div>
-      <div class="modal-body">
-        <div class="container-fluid">          
-              <form id="companyForm" method="post">
-                <div class=" row">                  
-                  <div class="form-group col-sm-4">
-                    <label for="Name" class="col-sm-1-12 col-form-label">Name</label>
-                    <input type="text" class="form-control" name="Name" id="Name" placeholder="">
-                  </div>
-                  <div class="form-group col-sm-4">
-                    <label for="Code" class="col-sm-1-12 col-form-label">Code</label>
-                    <input type="text" class="form-control" name="Code" id="Code" placeholder="">
-                  </div>
-                  <div class="form-group col-sm-4">
-                    <label for="Category" class="col-sm-1-12 col-form-label">Category</label>
-                    <input type="text" class="form-control" name="Category" id="Category" placeholder="">
-                  </div>
-                </div>              
-                 <div class="form-group row">
-                  <div class="offset-md-6 col-md-6 text-right">
-                    <button type="button" class="btn btn-primary" id="saveCompany">Save and Continue</button>
-                  </div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Company</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <form id="companyForm" method="post">
+                        <div class="row">
+                            <div class="form-group col-sm-4">
+                                <label for="Name" class="col-form-label">Name</label>
+                                <input type="text" class="form-control" name="Name" id="Names" placeholder="Enter company name" required>
+                                <span id="nameError" class="text-danger"></span>
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <label for="Category" class="col-form-label">Industry</label>
+                                <input type="text" class="form-control" name="industry" id="Category" placeholder="Enter company industry">
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <label for="sector" class="col-form-label">Sector</label>
+                                <input type="text" class="form-control" name="sector" id="sector" placeholder="Enter company sector">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-4">
+                                <label for="Headquarters" class="col-form-label">Headquarters</label>
+                                <input type="text" class="form-control" name="headquarters" id="Headquarters" placeholder="Enter company headquarters">
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <label for="Founded" class="col-form-label">Founded</label>
+                                <input type="text" class="form-control" name="Founded" id="Founded" placeholder="Enter company founded">
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <label for="Notes" class="col-form-label">Notes</label>
+                                <input type="text" class="form-control" name="Notes" id="Notes" placeholder="Enter company notes">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="offset-md-6 col-md-6 text-right">
+                                <button type="button" class="btn btn-primary" id="saveCompany">Save and Continue</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-              </form>
-              <script>
-                $(document).ready(function () {
-                    $('#saveCompany').click(function () {
-                        // Capture form data
-                        var formData = $('#companyForm').serialize();
-            
-                        // Send AJAX request
-                        $.ajax({
-                            url: '/add_company/',  // Update with your actual URL
-                            type: 'POST',
-                            data: formData,
-                            success: function (response) {
-                                if (response.success) {
-                                    // Handle success (e.g., close the modal)
-                                    $('#companyModal').modal('hide');
-                                } else {
-                                    // Handle error
-                                    console.error('Failed to save company:', response.error);
-                                }
-                            },
-                            error: function () {
-                                console.error('AJAX request failed');
-                            }
-                        });
-                    });
-                });
-            </script>
+            </div>
         </div>
-      </div>   
     </div>
-  </div>
 </div>
+
+
+<script>
+    $(document).ready(function () {
+        $('#saveCompany').click(function () {
+            // Clear any previous error messages
+            $('#nameError').text('');
+
+            // Validate name field
+            var companyName = $('#Names').val();
+            if (companyName.trim() === '') {
+                $('#nameError').text('Company name is required');
+                return;
+            }
+
+            // Capture form data
+            var formData = $('#companyForm').serialize();
+
+            // Send AJAX request
+            $.ajax({
+                url: '{% url "kahamahmis:add_company" %}', // Update with your actual URL
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    if (response.success) {
+                        // Handle success (e.g., close the modal)
+                        $('#companyModal').modal('hide');
+                    } else {
+                        // Handle error
+                        alert('Failed to save company:', response.error);
+                    }
+                },
+                error: function () {
+                    alert('AJAX request failed');
+                }
+            });
+        });
+    });
+</script>
+
 
 <div class="modal fade" id="pathodologyModal" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
   <div class="modal-dialog" role="document">

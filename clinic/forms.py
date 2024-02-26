@@ -1,6 +1,6 @@
 from django import forms
 
-from clinic.models import Company, DiseaseRecode, InsuranceCompany, PathodologyRecord, Staffs
+from clinic.models import RemoteCompany, DiseaseRecode, InsuranceCompany, PathodologyRecord, Staffs
 from .resources import DiseaseRecodeResource, InsuranceCompanyResource, StaffResources
 from django.core.validators import FileExtensionValidator
 
@@ -144,6 +144,12 @@ class ImportRemotePatientForm(forms.Form):
         validators=[FileExtensionValidator(allowed_extensions=['xlsx', 'xls'])],
         widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.xlsx, .xls'})
     )
+class ImportCountryForm(forms.Form):
+    country_records_file = forms.FileField(
+        label='Choose an Excel file',
+        validators=[FileExtensionValidator(allowed_extensions=['xlsx', 'xls'])],
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.xlsx, .xls'})
+    )
 
 class StaffsForm(forms.ModelForm):
     class Meta:
@@ -162,9 +168,9 @@ class InsuranceCompanyForm(forms.ModelForm):
         # Assign the resource to the form
         resource_class = InsuranceCompanyResource        
 
-class CompanyForm(forms.ModelForm):
+class RemoteCompanyForm(forms.ModelForm):
     class Meta:
-        model = Company
+        model = RemoteCompany
         fields = '__all__'        
         
 class PathologyRecordForm(forms.ModelForm):

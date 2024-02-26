@@ -1,436 +1,304 @@
 {% extends 'kahama_template/base_template.html' %}
 
 {% block title %}
-Patient Visit History
+    Add Patients
 {% endblock title %}
-
-{% block page_title %}
-Patient Visit History
-{% endblock page_title %}
-
 {% block breadcrumb %}
-{% include "kahama_template/modal_form.html" %}
-<a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#addVisitModal">
-    <i class="fas fa-plus"></i> New Visit
-</a>
-<!-- Add Import insurance link and modal trigger -->
 {% endblock breadcrumb %}
-
-
-{% load static %}
 {% block main_content %}
+    {% load static %}             
 
-{% comment %} <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css"> {% endcomment %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-               
-                <div class="card-body">
-                    <div class="row" style="font-size:13px;">
-                        <div class="col-md-3"><b>PATIENT: {{ patient.fullname }} {{ patient.middle_name }}  {{ patient.last_name }}</b></div>
-                        <div class="col-md-3"><b>Age: {{ patient.age }}</b></div>
-                        <div class="col-md-3"><b>SEX: {{ patient.gender }}</b></div>
-                        <div class="col-md-3"><b>FILE NO : {{ patient.mrn }}</b> </div>
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card mt-5">
+                    <div class="card-header">
+                        Patient Information
                     </div>
-                        <div class="row mt-3">
-                            <div class="col-md-3"><b>PAYMENT MODE: {{ patient.payment_form }}</b></div>
-                        </div>
-                </div>           
-            
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="">
-                <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>VST</th>
-                            <th>Visit Type</th>                        
-                            <th>Service</th>              
-                            <th>Visiting date</th>                       
-                            <th>Action</th>              
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for visit in visit_history %}
-                            <tr>
-                                <td>{{ visit.vst }}</td>
-                                <td>{{ visit.get_visit_type_display }}</td>                      
-                                <td>{{ visit.primary_service }}</td>                  
-                                <td>{{ visit.created_at }}</td>
-                                <td>
-                                  <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#editVisitModal{{ visit.id }}"  data-toggle="tooltip" title="Edit">
-                                    <i class="fa fa-edit text-white"></i>
-                                </button>
-                                  <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deletetVisitModal{{ visit.id }}"  data-toggle="tooltip" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                                  <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#addPrescriptionModal{{ visit.id }}"  data-toggle="tooltip" title="Add Prescription">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                             
-                                              <!-- Add more action links as needed -->
-                                <a href="{% url 'patient_health_record_view' visit.patient.id %}" data-toggle="tooltip" title="open">
-                                    <button type="button" class="btn btn-primary btn-sm"><i class="fa fa-eye text-dark"></i></button>
-                                </a>   
-                                              <!-- Add more action links as needed -->
-                                <a href="{% url 'patient_vital_list' visit.patient.id %}" data-toggle="tooltip" title="open">
-                                    <button type="button" class="btn btn-primary btn-sm"><i class="fa fa-eye text-dark"></i></button>
-                                </a>   
-                                    
-                                </td>
-                               
-                                  
-                                
-                                  
-                               
-                                <div class="modal fade" id="deletetVisitModal{{ visit.id }}" tabindex="-1" role="dialog" aria-labelledby="deletetVisitModalLabel{{ item.id }}" aria-hidden="true">
-                                    <div class="modal-dialog" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="deletetVisitModalLabel{{ visit.id }}">Delete Category</h5>
-                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>Are you sure you want to delete this patient visit: <strong>{{ visit }}</strong>?</p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                                <button type="button" class="btn btn-danger" onclick="deletetVisit({{ visit.id }})">Delete</button>
-                                            </div>
-                                        </div>
+                    <div class="card-body">
+                        <form method="post" action="{% url 'patient_info_form' %}">
+                            {% csrf_token %}
+                            <div class="row">
+                                <!-- Basic Information -->
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="first_name">First Name:</label>
+                                        <input type="text" class="form-control" id="first_name" name="first_name" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="middle_name">Middle Name:</label>
+                                        <input type="text" class="form-control" id="middle_name" name="middle_name" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="last_name">Last Name:</label>
+                                        <input type="text" class="form-control" id="last_name" name="last_name" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="gender">Gender:</label>
+                                        <select class="form-control select2bs4" style="width: 100%;" id="gender" name="gender" required>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                           
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="age">Age:</label>
+                                        <select class="form-control select2bs4" style="width: 100%;" id="age" name="age" required>
+                                            {% for age in range_121  %}
+                                                <option value="{{ age }}">{{ age }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
                             
-                                        <script>
-                                            function deletetVisit(patient_visit_id) {
-                                                $.ajax({
-                                                    type: 'POST',
-                                                    url: '/delete_patient_visit/' + patient_visit_id + '/',  // Replace with your URL
-                                                    data: {},
-                                                    success: function (data) {
-                                                        if (data.status === 'success') {
-                                                            $('#deletetVisitModal' + patient_visit_id).modal('hide');
-                                                            location.reload(true);
-                                                            // Refresh the category list or perform any other actions
-                                                        } else {
-                                                            // Handle other status cases if needed
-                                                            alert(data.message);
-                                                        }
-                                                    },
-                                                    error: function (error) {
-                                                        alert(error);
-                                                        // Handle errors if necessary
-                                                    }
-                                                });
-                                            }
-                                        </script>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="age">Date of birth:</label>
+                                        <input type="date" name="dob" id="">
                                     </div>
-                                </div>
-                          
-            
-            
-                                <div class="modal fade" id="editVisitModal{{ visit.id }}" tabindex="-1" aria-labelledby="editVisitModalLabel{{ visit.id }}" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="editVisitModalLabel{{ visit.id }}">Edit Visit</h5>
-                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <form id="editVisitModalForm{{ visit.id }}" method="post">
-                                                    {% csrf_token %}
-                                                    <div class="form-group">
-                                                        <label for="editVisitTypes">Visit Type</label>
-                                                        <select class="form-control select2bs4" style="width: 100%;" id="editVisitTypes{{ visit.id }}" name="visitType">
-                                                            <option value="Normal" {% if visit.visitType == "Normal" %} selected {% endif %}>Normal</option>
-                                                            <option value="Emergency" {% if visit.visitType == "Emergency" %} selected {% endif %}>Emergency</option>
-                                                            <option value="Referral" {% if visit.visitType == "Referral" %} selected {% endif %}>Referral</option>
-                                                            <option value="Follow up" {% if visit.visitType == "Follow up" %} selected {% endif %}>Follow up</option>
-                                                        </select>
-                                                    </div>
-                                                    <input type="hidden" class="form-control" id="patient_id" name="patient_id" value="{{ patient.id }}">
-                                                    <input type="hidden" class="form-control" id="visit_id" name="visit_id" value="{{ visit.id }}">
-                       
-                                                    <div class="form-group">
-                                                        <label class="control-label" id="editprimary_service">Primary Service:</label>
-                                                        <select class="form-control select2bs4" style="width: 100%;" id="editprimary_service" name="primary_service">
-                                                            <option value="Consultation" {% if visit.primary_service == "Consultation" %} selected {% endif %}>Consultation</option>
-                                                            <option value="Imaging" {% if visit.primary_service == "Imaging" %} selected {% endif %}>Imaging</option>
-                                                            <option value="Investigation" {% if visit.primary_service == "Investigation" %} selected {% endif %}>Investigation</option>
-                                                            <option value="Procedure" {% if visit.primary_service == "Procedure" %} selected {% endif %}>Procedure</option>
-                                                            <option value="Physiotherapy" {% if visit.primary_service == "Physiotherapy" %} selected {% endif %}>Physiotherapy</option>
-                                                            <option value="Ambulance" {% if visit.primary_service == "Ambulance" %} selected {% endif %}>Ambulance</option>
-                                                        </select>
-                                                    </div>
-                                                   
-                                                    <div class="form-group pt-2 float-end">
-                                                        <div class="row">
-                                                            <div class="col-md-8"></div>
-                                                            <div class="col-md-4">
-                                                                <button type="submit" class="btn btn-md btn-primary" id="submitBtn">Save and Continue <i class="mdi mdi-forward"></i></button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                   
-                                                </form>
-                                            </div>
-                                      
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="nationality">Nationality:</label>
+                                            <select class="form-control select2bs4" style="width: 100%;" name="nationality" id="nationality">                                   
+                                                <option value="Tanzania">Tanzania</option>
+                                                <option value="Burundi">Burundi</option>
+                                                <option value="Kenya">Kenya</option>
+                                                <option value="Uganda">Uganda</option>
+                                            </select>
                                         </div>
                                     </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="phone">Patient's Phone:</label>
+                                        <input type="tel" class="form-control" id="phone" name="phone" required>
+                                    </div>
                                 </div>
+                            </div>
+                         
+                            <div class="row">
+                           
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="osha_certificate">OSHA Certification:</label>
+                                        <select class="form-control select2bs4" style="width: 100%;" id="osha_certificate" name="osha_certificate" onchange="toggleOshaFields()">
+                                            <option value="0">No</option>
+                                            <option value="1">Yes</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" id="oshaDateField" style="display: none;">
+                                        <label for="date_of_osha_certification">Date of OSHA Certification:</label>
+                                        <input type="date" class="form-control" id="date_of_osha_certification" name="date_of_osha_certification">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="insurance">Patient Insurance Status:</label>
+                                        <select class="form-control select2bs4" style="width: 100%;" id="insurance" name="insurance" onchange="toggleInsuranceFields()">
+                                            <option value="Uninsured">Uninsured</option>
+                                            <option value="Insured">Insured</option>                                            
+                                            <option value="Unknown">Unknown</option>                                            
+                                        </select>
+                                    </div>
+                                    <div class="form-group" id="insuranceFields" style="display: none;">
+                                        <label for="insurance_company">Insurance Company:</label>
+                                        <select class="form-control select2bs4" style="width: 100%;" name="insurance_company" id="insurance_company">
+                                            <option value="">Select Insurance Company</option>
+                                            <option value="NHIF">NHIF</option>
+                                            <option value="Jubilee">Jubilee</option>
+                                            <option value="Strategis">Strategis</option>
+                                            <option value="Assemble">Assembly</option>
+                                            <option value="Britam">Britam</option>
+                                            <option value="International Insurance">Other</option>
+                                            <option value="MO Insurance">Other</option>
+                                            <option value="ISOS">Other</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" id="insuranceNumberField" style="display: none;">
+                                        <label for="insurance_number">Insurance Number:</label>
+                                        <input type="text" class="form-control" id="insurance_number" name="insurance_number">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="emergency_contact_name">Emergency Contact Name:</label>
+                                        <input type="text" class="form-control" id="emergency_contact_name" name="emergency_contact_name" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="emergency_contact_relation">Emergency Contact Relation:</label>
+                                        <select class="form-control select2bs4" style="width: 100%;" id="life_style" name="life_style" required>
+                                            <option value="Spouse">Spouse</option>
+                                            <option value="Friend">Friend</option>
+                                            <option value="Child">Child</option>
+                                            <option value="Healthy Diet">Father</option>
+                                            <option value="Healthy Diet">Mother</option>
+                                            <option value="Healthy Diet">Brother</option>
+                                            <option value="Healthy Diet">Sister</option>
+                                            <option value="Stress Management">Relative</option>
+                                            <option value="Sufficient Sleep">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="emergency_contact_phone">Emergency Contact Phone:</label>
+                                        <input type="tel" class="form-control" id="emergency_contact_phone" name="emergency_contact_phone">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                
+                            
+                                </div>
+                                
+                            </div>
+                            <div class="row">
+                            </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="marital_status">Marital Status:</label>
+                                        <select class="form-control select2bs4" style="width: 100%;" name="marital_status" id="marital_status">
+                                            <option value="single">Single</option>
+                                            <option value="married">Married</option>
+                                            <option value="divorced">Divorced</option>
+                                            <option value="widowed">Widowed</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="nationality">Nationality:</label>
+                                        <select class="form-control select2bs4" style="width: 100%;" name="nationality" id="nationality" required>                                   
+                                         
+                                         {% for country in all_country %}
+                                            <option value="{{country.id}}">{{country.name}}</option>
+                                         {% endfor %}
+                                            
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
                                
-                                <script>
-                                    // Handle form submission using AJAX
-                                    $(document).ready(function () {
-                                        // Assuming you have a loop or iteration for categories, replace "forEach" with your actual loop
-                                        {% for visit in visit_history %}
-                                            $('#editVisitModalForm{{ visit.id }}').submit(function (e) {
-                                                e.preventDefault();
-                                                $.ajax({
-                                                    type: 'POST',
-                                                    url: '{% url "add_remotepatient_visit" %}',  // Replace with your URL
-                                                    data: $('#editVisitModalForm{{ visit.id }}').serialize(),
-                                                    success: function (data) {
-                                                        if (data.status === 'success') {
-                                                            $('#editVisitModal{{ visit.id }}').modal('hide');
-                                                            location.reload(true);
-                                                            // Refresh the category list or perform any other actions
-                                                        } else {
-                                                            // Handle other status cases if needed
-                                                            alert(data.message);
-                                                        }
-                                                    },
-                                                    error: function (error) {
-                                                        alert(error);
-                                                        // Handle errors if necessary
-                                                    }
-                                                });
-                                            });
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="occupation">Occupation:</label>
+                                        <select name="" id="">
+                                            <option value="Driver"></option>
+                                            <option value="Technician"></option>
+                                            <option value="Engineer"></option>
+                                            <option value="Human resources Officer"></option>
+                                            <option value="Procurement Officer"></option>
+                                            <option value="HSE"></option>
+                                            <option value="Administator"></option>
+                                            <option value="Farmer"></option>
+                                            <option value="Health Expert"></option>
+                                            <option value="Manager"></option>
+                                            <option value="Accountant"></option>
+                                            <option value="Casual Labour"></option>
+                                            <option value="Foreman"></option>
+                                            <option value="Operator"></option>
+                                            <option value="ICT expert"></option>
+                                            <option value="Others"></option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="patient_type">Patient Type:</label>
+                                        <select class="form-control select2bs4" style="width: 100%;" id="patient_type" name="patient_type" required>
+                                            <option value="National Staff">National Staff</option>                                         
+                                            <option value="International Staff">International Staff</option>
+                                            <option value="National Visitor">National Visitor</option>
+                                            <option value="International Visitor">International Visitor</option>
+                                            <option value="Unknown Status">Unknown Status</option>
+                                     
+                                        </select>
+                                    </div>
+                                </div>
+                            
+                                
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="company">Patient's Company:</label>
+                                      <select name="" id="" required>
+                                            
+                                         
+                                                
+                                      </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End of Form -->
+                            <div class="row">                              
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-info btn-block"  name="save_continue_health">Save to Continue </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                        <div class="form-row">
+                            <div>
+                                {% if messages %}
+                                    <div class="col-12">
+                                        {% for message in messages %}
+                                            {% if message.tags == 'error' %}
+                                                <div class="alert alert-danger">{{ message }}</div>
+                                            {% elif message.tags == 'success' %}
+                                                <div class="alert alert-primary">{{ message }}</div>
+                                            {% endif %}
                                         {% endfor %}
-                                    });
-                                </script>
-                                
-                                
-                            </tr>
-            
-            
-            
-                        {% endfor %}
-                    </tbody>
-                </table>
-
-                <!-- Updated modal with Bootstrap grid -->
-<div class="modal fade" id="addVisitModal" tabindex="-1" aria-labelledby="addVisitModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addVisitModalLabel">Add Visit</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="addVisitModalForm" method="post">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="visitType">Visit Type</label>
-                        <select class="form-control select2bs4" style="width: 100%;" id="visitTypes" name="visitType">
-                            <option value="Normal">Normal</option>
-                            <option value="Emergency">Emergency</option>
-                            <option value="Referral">Referral</option>
-                            <option value="Follow up">Follow up</option>
-                        </select>
-                    </div>
-                    <input type="hidden" class="form-control" id="patient_id" name="patient_id" value="{{ patient.id }}">
-                    <input type="hidden" class="form-control" id="visit_id" name="visit_id">
-                  
-                    <div class="form-group">
-                        <label class="control-label">Primary Service:</label>
-                        <select class="form-control select2bs4" style="width: 100%;" id="primary_service" name="primary_service">
-                            <option value="Consultation">Consultation</option>
-                            <option value="Imaging">Imaging</option>
-                            <option value="Investigation">Investigation</option>
-                            <option value="Procedure">Procedure</option>
-                            <option value="Physiotherapy">Physiotherapy</option>
-                            <option value="Ambulance">Ambulance</option>
-                        </select>
-                    </div>
-                   
-           
-                   
-                </form>
-            </div>
-            <div class="form-group pt-2 float-end">
-                <div class="row">
-                    <div class="col-md-8"></div>
-                    <div class="col-md-4">
-                        <button type="button" class="btn btn-md btn-primary" onclick="addVisit()">Save and Continue <i class="mdi mdi-forward"></i></button>
-                    </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    function addVisit() {
-        var visitType = $('#visitType').val();
-        var primary_service = $('#primary_service').val();      
-        var patient_id = $('#patient_id').val();
-        var visit_id = $('#visit_id').val();
 
-        $.ajax({
-            type: 'POST',
-            url: '/add_remotepatient_visit/',
-            data: {
-                visitType: visitType,              
-                patient_id: patient_id,
-                visit_id: visit_id,
-                primary_service: primary_service
-            },
-            success: function (data) {
-                if (data.status === 'success') {
-                    $('#addVisitModal').modal('hide');
-                    location.reload(true);
-                } else {
-                    alert(data.message);
-                }
-            },
-            error: function (error) {
-                alert('An error occurred while processing your request.');
+    
+    <script>
+        function toggleInsuranceFields() {
+            var insurance = document.getElementById('insurance').value;
+            var insuranceFields = document.getElementById('insuranceFields');
+            var insuranceNumberField = document.getElementById('insuranceNumberField');
+            if (insurance === 'Insured') {
+                insuranceFields.style.display = 'block';
+                insuranceNumberField.style.display = 'block';
+            } else {
+                insuranceFields.style.display = 'none';
+                insuranceNumberField.style.display = 'none';
             }
-        });
-    }
+        }
 
-  
-</script>
+        function toggleOshaFields() {
+            var oshaCertificate = document.getElementById('osha_certificate').value;
+            var oshaDateField = document.getElementById('oshaDateField');
+            if (oshaCertificate === '1') {
+                oshaDateField.style.display = 'block';
+            } else {
+                oshaDateField.style.display = 'none';
+            }
+        }
+    </script>
+ 
 
-
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="addPrescriptionModal{{ visit.id }}" tabindex="-1" role="dialog" aria-labelledby="addPrescriptionModalLabel{{ visit.id }}" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addPrescriptionModalLabel{{ visit.id }}">Add Prescription</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="addPrescriptionModalForm{{ visit.id }}" method="post">
-                    {% csrf_token %}
-                    <table class="table table-bordered" id="prescriptionTable{{ visit.id }}">
-                        <thead>
-                            <tr>
-                                <th>Drug</th>
-                                <th>Dose</th>
-                                <th>Frequency</th>
-                                <th>Duration</th>
-                                <th>Quantity</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><input type="text" class="form-control" name="drug[]"></td>
-                                <td><input type="text" class="form-control" name="dose[]" value="0"></td>
-                                <td><input type="text" class="form-control" name="frequency[]" value="PRN"></td>
-                                <td><input type="text" class="form-control" name="duration[]" value="0"></td>
-                                <td><input type="text" class="form-control" name="quantity[]" value="1"></td>
-                                <td><button type="button" class="btn btn-danger delete-row">Delete</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <input type="hidden" class="form-control" id="visit_id" name="visit_id" value="{{ visit.id }}">
-                    <button type="button" class="btn btn-success" id="addRow{{ visit.id }}">Add Row</button>
-                    <button type="submit" class="btn btn-primary">Save Prescriptions</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    $(document).ready(function() {
-        // Add row button functionality
-        $('#addRow{{ visit.id }}').click(function() {
-            var newRow = `
-                <tr>
-                    <td><input type="text" class="form-control" name="drug[]"></td>
-                    <td><input type="text" class="form-control" name="dose[]" value="0"></td>
-                    <td><input type="text" class="form-control" name="frequency[]" value="PRN"></td>
-                    <td><input type="text" class="form-control" name="duration[]" value="0"></td>
-                    <td><input type="text" class="form-control" name="quantity[]" value="1"></td>
-                    <td><button type="button" class="btn btn-danger delete-row">Delete</button></td>
-                </tr>`;
-            $('#prescriptionTable{{ visit.id }} tbody').append(newRow);
-        });
-
-        // Delete row button functionality
-        $(document).on('click', '.delete-row', function() {
-            $(this).closest('tr').remove();
-        });
-    });
-</script>
-
-<style>
-    /* styles.css */
-
-/* Add custom styles for the container */
-.container {
-    margin-top: 20px;
-    padding: 20px;
-    background-color: #f0f0f0;
-    border-radius: 10px;
-}
-
-/* Add styles for the card */
-.card {
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Add styles for the table */
-.table {
-    width: 100%;
-}
-
-/* Add styles for table headers */
-.table th {
-    background-color: #007bff;
-    color: #fff;
-}
-
-/* Add styles for table rows */
-.table tbody tr {
-    background-color: #f9f9f9;
-}
-
-/* Add styles for buttons */
-.btn {
-    border-radius: 5px;
-    margin-right: 5px;
-}
-
-/* Add more styles as needed */
-
-</style>
-
-<script>
-    function submitForm(checkbox) {
-        checkbox.form.submit();
-    }
-</script>
-
-{% include 'kahama_template/datatable.html' %}
+                
 {% endblock main_content %}

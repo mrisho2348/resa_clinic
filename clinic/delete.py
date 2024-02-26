@@ -2,7 +2,7 @@
 
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render,get_object_or_404
-from .models import Category, Company, Consultation, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, PatientVisits, PatientVital, Patients, Prescription, Procedure, QualityControl, Reagent, ReagentUsage, Referral, RemotePatient, RemoteService, Sample, Service, Staffs, Supplier, UsageHistory
+from .models import Category, Consultation, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, PatientVisits, PatientVital, Patients, Prescription, Procedure, QualityControl, Reagent, ReagentUsage, Referral, RemoteCompany, RemotePatient, RemoteService, Sample, Service, Staffs, Supplier, UsageHistory
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -121,7 +121,7 @@ def delete_disease_record(request, disease_id):
     return render(request, 'delete/delete_disease_record_confirmation.html', {'record': record})
 
 def delete_company(request, company_id):
-    company = get_object_or_404(Company, pk=company_id)
+    company = get_object_or_404(RemoteCompany, pk=company_id)
 
     if request.method == 'POST':
         try:
@@ -352,6 +352,20 @@ def delete_prescription(request, prescription_id):
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}) 
+    
+
+@csrf_exempt      
+@require_POST    
+def delete_remotecompany(request, company_id):
+    # Your delete logic here
+    try:
+        company = RemoteCompany.objects.get(id=company_id)
+        company.delete()
+        return JsonResponse({'success': True})
+    except RemoteCompany.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Company does not exist'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})    
     
 @csrf_exempt      
 @require_POST

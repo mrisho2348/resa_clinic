@@ -90,14 +90,44 @@ class InsuranceCompany(models.Model):
     objects = models.Manager()
     def __str__(self):
         return self.name
+    
+class LabTest(models.Model):
+    patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE)
+    visit = models.ForeignKey('RemotePatientVisits', on_delete=models.CASCADE)
+    consultation = models.ForeignKey('RemoteConsultationNotes', on_delete=models.CASCADE)
+    diagnosis = models.ForeignKey('Diagnosis', on_delete=models.CASCADE,blank=True, null=True)
+    test_name = models.CharField(max_length=100, verbose_name=_('Test Name'))
+    result = models.TextField(blank=True, verbose_name=_('Test Result'))
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    lab_number = models.CharField(max_length=20, unique=True, verbose_name=_('Lab Number'))
 
-class Company(models.Model):
+    def save(self, *args, **kwargs):
+        if not self.lab_number:
+            last_lab_test = LabTest.objects.order_by('-id').first()
+            if last_lab_test:
+                last_lab_number = int(last_lab_test.lab_number.split('-')[-1])
+                new_lab_number = f"LAB-{last_lab_number + 1:07d}"
+            else:
+                new_lab_number = "LAB-0000001"
+            self.lab_number = new_lab_number
+        super().save(*args, **kwargs)
+
+    objects = models.Manager()
+    # Add more fields as needed
+    
+
+class RemoteCompany(models.Model):
     name = models.CharField(max_length=255)
-    code = models.CharField(max_length=50)
-    category = models.CharField(max_length=100)
+    industry = models.CharField(max_length=50, default="Unspecified", null=True)
+    sector = models.CharField(max_length=50, default="Unspecified", null=True)
+    headquarters = models.CharField(max_length=100, default="Unspecified", null=True)
+    Founded = models.CharField(max_length=10,null=True, default="Unspecified",)
+    Notes = models.TextField(max_length=100, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
+
     def __str__(self):
         return self.name
     
@@ -280,45 +310,31 @@ def generate_for_remote_mrn():
 
 
 class RemotePatient(models.Model):
- 
-
-    INSURANCE_CHOICES = [
-        ('Insured', 'Insured'),
-        ('Uninsured', 'Uninsured')
-    ]
-
     mrn = models.CharField(max_length=20, unique=True, editable=False, verbose_name='MRN')
-    first_name = models.CharField(max_length=100, verbose_name='First Name')
-    middle_name = models.CharField(max_length=100, blank=True, null=True, verbose_name='Middle Name')
-    last_name = models.CharField(max_length=100, verbose_name='Last Name')
-    gender = models.CharField(max_length=10, verbose_name='Gender')
-    age = models.IntegerField(verbose_name='Age')
-    marital_status = models.CharField(max_length=20, blank=True, null=True, verbose_name='Marital Status')
-    nationality = models.CharField(max_length=100, verbose_name='Nationality')
-    tribe = models.CharField(max_length=100, blank=True, null=True, verbose_name='Tribe')
-    patient_type = models.CharField(max_length=100, verbose_name='Patient Type')
-    company = models.CharField(max_length=100, verbose_name='Company')
-    occupation = models.CharField(max_length=100, verbose_name='Occupation')
-    phone = models.CharField(max_length=20, verbose_name='Phone')
-    employee_number = models.CharField(max_length=50, blank=True, null=True, verbose_name='Employee Number')
-    date_of_first_employment = models.DateField(blank=True, null=True, verbose_name='Date of First Employment')
-    longtime_illness = models.CharField(max_length=100, verbose_name='Longtime Illness')
-    longtime_medication = models.CharField(max_length=100, verbose_name='Longtime Medication')
-    osha_certificate = models.BooleanField(default=False, verbose_name='OSHA Certificate')
-    date_of_osha_certification = models.DateField(blank=True, null=True, verbose_name='Date of OSHA Certification')
-    insurance = models.CharField(max_length=100, choices=INSURANCE_CHOICES, verbose_name='Insurance')
-    insurance_company = models.CharField(max_length=100, blank=True, null=True, verbose_name='Insurance Company')
-    insurance_number = models.CharField(max_length=100, blank=True, null=True, verbose_name='Insurance Number')
-    emergency_contact_name = models.CharField(max_length=50, verbose_name='Emergency Contact Name')
-    emergency_contact_relation = models.CharField(max_length=20, verbose_name='Emergency Contact Relation')
-    emergency_contact_phone = models.CharField(max_length=20, verbose_name='Emergency Contact Phone')
-    emergency_contact_mobile = models.CharField(max_length=20, verbose_name='Emergency Contact Mobile')
-    life_style = models.CharField(max_length=100, verbose_name='Lifestyle')
+    first_name = models.CharField(max_length=100)
+    middle_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    gender = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female')])
+    age = models.IntegerField(blank=True, null=True)
+    dob = models.DateField(null=True, blank=True)
+    nationality = models.ForeignKey('Country', on_delete=models.CASCADE) 
+    phone = models.CharField(max_length=20)
+    osha_certificate = models.BooleanField(default=False)
+    date_of_osha_certification = models.DateField(null=True, blank=True)
+    insurance = models.CharField(max_length=20, choices=[('Uninsured', 'Uninsured'), ('Insured', 'Insured'), ('Unknown', 'Unknown')])
+    insurance_company = models.CharField(max_length=100, blank=True, null=True)
+    insurance_number = models.CharField(max_length=100, blank=True, null=True)
+    emergency_contact_name = models.CharField(max_length=100)
+    emergency_contact_relation = models.CharField(max_length=100)
+    emergency_contact_phone = models.CharField(max_length=20)
+    marital_status = models.CharField(max_length=20, choices=[('Single', 'Single'), ('Married', 'Married'), ('Divorced', 'Divorced'), ('Widowed', 'Widowed')],default="Single")
+    occupation = models.CharField(max_length=100, blank=True, null=True)
+    patient_type = models.CharField(max_length=100, blank=True, null=True)
+    company = models.ForeignKey(RemoteCompany, on_delete=models.CASCADE)    
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Created At')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Updated At')
-
     objects = models.Manager()
-
+    
     def save(self, *args, **kwargs):
         # Generate MRN only if it's not provided
         if not self.mrn:
@@ -328,6 +344,11 @@ class RemotePatient(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"   
+
+
+   
+
+    
     
 class PatientHealthCondition(models.Model):
     patient = models.ForeignKey(RemotePatient, on_delete=models.CASCADE, related_name='health_conditions', verbose_name='Patient')    
@@ -362,6 +383,16 @@ class RemoteService(models.Model):
     
     def __str__(self):
         return f"{self.name}-{self.category}"
+    
+    
+class Country(models.Model):
+        name = models.CharField(max_length=100)
+        created_at = models.DateTimeField(auto_now_add=True)
+        updated_at = models.DateTimeField(auto_now=True)
+        objects = models.Manager()        
+    
+        def __str__(self):
+            return f"{self.name}"    
     
 class ServiceRequest(models.Model):
     STATUS_CHOICES = (
@@ -640,8 +671,9 @@ class Procedure(models.Model):
         return f"Procedure: {self.name} for {self.patient}"
 class RemoteProcedure(models.Model):
     patient = models.ForeignKey(RemotePatient, on_delete=models.CASCADE)
-    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True)
     visit = models.ForeignKey(RemotePatientVisits, on_delete=models.CASCADE)
+    consultation = models.ForeignKey(RemoteConsultationNotes, on_delete=models.CASCADE,blank=True, null=True)
     name = models.CharField(max_length=100)
     description = models.TextField()
     duration_time = models.CharField(max_length=50)
@@ -824,6 +856,63 @@ class Referral(models.Model):
     notes = models.TextField(blank=True, null=True, help_text='Additional notes about the referral')
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
+
+    def __str__(self):
+        return f"Referral for {self.patient} to {self.destination_location} at {self.source_location} on {self.referral_date}"   
+    
+    def get_status_class(self):
+        if self.status == 'pending':
+            return 'text-warning'
+        elif self.status == 'accepted':
+            return 'text-success'
+        elif self.status == 'rejected':
+            return 'text-danger'
+        return ''
+
+    def get_status_color(self):
+        if self.status == 'pending':
+            return 'warning'
+        elif self.status == 'accepted':
+            return 'success'
+        elif self.status == 'rejected':
+            return 'danger'
+        return '' 
+    
+class RemoteReferral(models.Model):
+    # Patient who is being referred
+    patient = models.ForeignKey(RemotePatient, on_delete=models.CASCADE)   
+    visit = models.ForeignKey(RemotePatientVisits, on_delete=models.CASCADE,blank=True, null=True)
+    consultation = models.ForeignKey(RemoteConsultationNotes, on_delete=models.CASCADE,blank=True, null=True)
+    # Information about the referral
+    source_location  = models.CharField(max_length=255, help_text='Source location of the patient')
+    destination_location = models.CharField(max_length=255, help_text='Destination location for MedEvac')
+    rfn = models.CharField(max_length=20, unique=True, editable=False)  
+    reason = models.TextField()
+    # Additional details
+    referral_date = models.DateField(auto_now_add=True, help_text='Date when the referral was made')
+    # Status of the referral (e.g., pending, accepted, rejected)
+    REFERRAL_STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+    )
+    status = models.CharField(max_length=20, choices=REFERRAL_STATUS_CHOICES, default='pending')
+    # Additional fields as needed
+    notes = models.TextField(blank=True, null=True, help_text='Additional notes about the referral')
+    updated_at = models.DateTimeField(auto_now=True)
+    def save(self, *args, **kwargs):
+        if not self.rfn:
+            last_referral_no = RemoteReferral.objects.order_by('-id').first()
+            if last_referral_no:
+                last_rfn = int(last_referral_no.rfn.split('-')[-1])
+                new_rfn = f"RFN-{last_rfn + 1:07d}"
+            else:
+                new_rfn = "RFN-0000001"
+            self.rfn = new_rfn
+        super().save(*args, **kwargs)
+
+    objects = models.Manager()
+    # Add more fields as needed
 
     def __str__(self):
         return f"Referral for {self.patient} to {self.destination_location} at {self.source_location} on {self.referral_date}"   

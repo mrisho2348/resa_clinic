@@ -22,7 +22,7 @@ from django.core.mail import send_mail
 from clinic.emailBackEnd import EmailBackend
 from django.core.exceptions import ObjectDoesNotExist
 from clinic.forms import ImportStaffForm
-from clinic.models import Company, Consultation, ContactDetails, CustomUser, DiseaseRecode, InsuranceCompany, Medicine, MedicineInventory, Notification, NotificationMedicine, PathodologyRecord, Patients, Procedure, Staffs
+from clinic.models import RemoteCompany, Consultation, ContactDetails, CustomUser, DiseaseRecode, InsuranceCompany, Medicine, MedicineInventory, Notification, NotificationMedicine, PathodologyRecord, Patients, Procedure, Staffs
 from clinic.resources import StaffResources
 from tablib import Dataset
 from django.views.decorators.http import require_POST
@@ -175,7 +175,7 @@ def add_request(request):
 
 @login_required
 def manage_company(request):
-    companies=Company.objects.all() 
+    companies=RemoteCompany.objects.all() 
     return render(request,"hod_template/manage_company.html",{"companies":companies})
 
 @login_required
@@ -680,23 +680,35 @@ def add_inventory(request):
     if request.method == 'POST':
         try:
             # Retrieve data from the POST request
-            medicine_id = request.POST.get('medicine_id')
-            quantity = request.POST.get('quantity')
-            purchase_date = request.POST.get('purchase_date')
+            medicine_ids = request.POST.getlist('medicine_id[]')
+            quantities = request.POST.getlist('quantity[]')
+            purchase_dates = request.POST.getlist('purchase_date[]')
 
             # Perform basic validation
-            if not medicine_id or not quantity or not purchase_date:
+            if not medicine_ids or not quantities or not purchase_dates:
                 # Handle validation error, redirect or display an error message
                 return redirect('error_page')  # Adjust the URL as needed
 
-            # Convert the quantity to an integer
-            quantity = int(quantity)
+            # Initialize a list to store the inventory instances to be created or updated
+            inventory_instances = []
 
-            # Convert the purchase date to a datetime object
-            purchase_date = datetime.strptime(purchase_date, '%Y-%m-%d').date()
+            # Iterate over each set of data
+            for med_id, qty, date_str in zip(medicine_ids, quantities, purchase_dates):
+                # Convert quantity to an integer
+                qty = int(qty)
 
-            # Call the helper method to update or create the inventory
-            MedicineInventory.update_or_create_inventory(medicine_id, quantity, purchase_date)
+                # Convert purchase date to a datetime object
+                purchase_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+
+                # Create a tuple of medicine ID, quantity, and purchase date
+                inventory_data = (med_id, qty, purchase_date)
+
+                # Append the tuple to the list
+                inventory_instances.append(inventory_data)
+
+            # Call the helper method to update or create the inventory for each row of data
+            for inventory_data in inventory_instances:
+                MedicineInventory.update_or_create_inventory(*inventory_data)
 
             # Perform additional processing if needed
 
@@ -1005,7 +1017,7 @@ def add_company(request):
             category = request.POST.get('Category')
 
             # Save data to the model
-            Company.objects.create(
+            RemoteCompany.objects.create(
                 name=name,
                 code=code,
                 category=category

@@ -271,13 +271,13 @@
                             <p>View Diagnoses</p>
                         </a>
                     </li> {% endcomment %}
-                      {% comment %} <li class="nav-item"> 
-                        {% url 'health_issue_list' as health_issue_list_url %}                    
-                        <a href="{{ health_issue_list_url }}" class="nav-link{% if request.path == health_issue_list_url %} active {% endif %}">                     
+                      <li class="nav-item"> 
+                        {% url 'manage_country' as manage_country %}                    
+                        <a href="{% url 'kahamahmis:manage_country' %}" class="nav-link{% if request.path == manage_country %} active {% endif %}">                     
                             <i class="nav-icon fas fa-heartbeat"></i> <!-- Assuming "fa-heartbeat" represents health issues -->
-                            <p>Health Issues</p> <!-- Updated to a more descriptive name -->
+                            <p>Country</p> <!-- Updated to a more descriptive name -->
                         </a>
-                    </li> {% endcomment %}
+                    </li>
                       
                       {% comment %} <li class="nav-item">  
                         {% url 'equipment_list' as equipment_list_url %}                   

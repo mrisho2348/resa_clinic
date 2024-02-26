@@ -158,7 +158,7 @@ urlpatterns = [
         path('resa/ImportExcel_service',imports.import_service_records, name="import_service_records"),
         path('resa/ImportExcel_disease',imports.import_disease_recode, name="import_disease_recode"),
         path('import-insurance-companies/', imports.import_insurance_companies, name='import_insurance_companies'),
-        path('import_maintenance/', imports.import_maintenance, name='import_maintenance'),
+        path('import_maintenance/', imports.import_maintenance, name='import_maintenance'),        
         path('import_reagent', imports.import_reagent, name='import_reagent'),
         path('import_health_issue', imports.import_health_issue, name='import_health_issue'),
         path('import-diagnosis-records', imports.import_diagnosis_records, name='import_diagnosis_records'),
@@ -191,6 +191,7 @@ urlpatterns = [
         path('patient-procedure-history/<str:mrn>/view/', views.patient_procedure_history_view, name='patient_procedure_history_view_mrn'), 
         path('edit_medicine/<int:medicine_id>/', editView.edit_medicine, name='edit_medicine'),        
         path('edit_inventory/<int:inventory_id>/', editView.edit_inventory, name='edit_inventory'),
+        
         path('edit_medication_payment/<int:payment_id>/', editView.edit_medication_payment, name='edit_medication_payment'),
         
         
@@ -230,6 +231,7 @@ urlpatterns = [
         path('delete_referral/', delete.delete_referral, name='delete_referral'),
         path('delete_qualitycontrol/<int:control_id>/', delete.delete_qualitycontrol, name='delete_qualitycontrol'),
         path('delete_sample/<int:sample_id>/', delete.delete_sample, name='delete_sample'),
+        path('delete_remotecompany/<int:company_id>/', delete.delete_remotecompany, name='delete_remotecompany'),
         path('delete_patient_visit/<int:patient_visit_id>/', delete.delete_patient_visit, name='delete_patient_visit'),
         path('delete_medication_payment/<int:payment_id>/', delete.delete_medication_payment, name='delete_medication_payment'),
 ]
