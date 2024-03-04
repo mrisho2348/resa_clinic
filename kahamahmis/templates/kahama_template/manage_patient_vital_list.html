@@ -21,11 +21,12 @@ Patient Vital Information
 {% block main_content %}
 
 
-<div class="">
+<div class="table-responsive">
     <table class="table table-hover table-condensed text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
         <thead>
             <tr>
                 <th>Vital Number</th>
+                <th>Visit Number</th>
                 <th>Recorded date</th>
                 <th>RR (bpm)</th>
                 <th>PR (bpm)</th>
@@ -33,13 +34,17 @@ Patient Vital Information
                 <th>SPO2 (%)</th>
                 <th>Temperature (°C)</th>
                 <th>GCS</th>
-                <th>AVPU</th>                      
+                <th>AVPU</th> 
+                <th>Date</th>
+                <th>Day</th> <!-- New column for the day of the week -->
+                <th>Time</th>                     
                 <th>Action</th>              
             </tr>
         </thead>
         <tbody>
             {% for vital in patient_vitals %}
                 <tr>
+                    <td>{{ vital.unique_identifier }}</td>
                     <td>{{ vital.visit.vst }}</td>
                     <td>{{ vital.recorded_at}}</td>
                     <td>{{ vital.respiratory_rate }}</td>
@@ -49,6 +54,9 @@ Patient Vital Information
                     <td>{{ vital.temperature }}</td>
                     <td>{{ vital.gcs }}</td>
                     <td>{{ vital.avpu }}</td>
+                    <td>{{ vital.recorded_at|date:"Y-m-d" }}</td> <!-- Display date -->
+                    <td>{{ vital.recorded_at|date:"l" }}</td> <!-- Display day of the week -->
+                    <td>{{ vital.recorded_at|time:"H:i:s" }}</td> <!-- Display time -->
                     <td>
                       <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#editPatientVitalModal{{ vital.id }}"  data-toggle="tooltip" title="Edit">
                         <i class="fa fa-edit text-white"></i>

@@ -72,13 +72,13 @@
                                         </select>
                                     </div>
                                 </div>
-                                <!-- Date of Birth -->
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label for="dob">Date of Birth:</label>
-                                        <input type="date" class="form-control" id="dob" name="dob">
-                                    </div>
+                           <!-- Date of Birth -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="dob">Date of Birth:</label>
+                                    <input type="date" class="form-control" id="dob" name="dob" min="1922-01-01" max="2024-12-31">
                                 </div>
+                            </div>
                             </div>
                             <div class="row">
                                 <!-- Nationality -->
@@ -128,27 +128,34 @@
                                         </select>
                                     </div>
                                 </div>
-                                <!-- Insurance Company -->
-                                <div class="col-md-4">
-                                    <div class="form-group" id="insuranceFields" style="display: none;">
+                                
+                                                            <!-- Insurance Company -->
+                                <div class="col-md-4" id="insuranceCompanyField" style="display: none;">
+                                    <div class="form-group">
                                         <label for="insurance_company">Insurance Company:</label>
-                                        <select class="form-control select2bs4" style="width: 100%;" name="insurance_company" id="insurance_company">
+                                        <select class="form-control select2bs4" style="width: 100%;" name="insurance_company" id="insurance_company" onchange="toggleInsuranceFields()">
                                             <option value="">Select Insurance Company</option>
                                             <option value="NHIF">NHIF</option>
                                             <option value="Jubilee">Jubilee</option>
                                             <option value="Strategis">Strategis</option>
-                                            <option value="Assemble">Assembly</option>
+                                            <option value="Assemble">Assemble</option>
                                             <option value="Britam">Britam</option>
-                                            <option value="International Insurance">Other</option>
-                                            <option value="MO Insurance">Other</option>
-                                            <option value="ISOS">Other</option>
+                                            <option value="ISOS">ISOS</option>
+                                            <option value="International Insurance">International Insurance</option>
                                             <option value="Other">Other</option>
                                         </select>
                                     </div>
                                 </div>
+                                <!-- Additional input field for other insurance company -->
+                                <div class="col-md-4" id="otherInsuranceField" style="display: none;">
+                                    <div class="form-group">
+                                        <label for="other_insurance">Fill Insurance Company:</label>
+                                        <input type="text" class="form-control" id="other_insurance" name="other_insurance">
+                                    </div>
+                                </div>
                                 <!-- Insurance Number -->
-                                <div class="col-md-4">
-                                    <div class="form-group" id="insuranceNumberField" style="display: none;">
+                                <div class="col-md-4" id="insuranceNumberField" style="display: none;">
+                                    <div class="form-group">
                                         <label for="insurance_number">Insurance Number:</label>
                                         <input type="text" class="form-control" id="insurance_number" name="insurance_number">
                                     </div>
@@ -163,24 +170,33 @@
 
                                     </div>
                                 </div>
-                                <!-- Emergency Contact Relation -->
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label for="emergency_contact_relation">Emergency Contact Relation:</label> <span class="error">* </span>
-                                        <select class="form-control select2bs4" style="width: 100%;" id="emergency_contact_relation" name="emergency_contact_relation" required>
-                                            <option value="Spouse">Spouse</option>
-                                            <option value="Friend">Friend</option>
-                                            <option value="Child">Child</option>
-                                            <option value="Father">Father</option>
-                                            <option value="Mother">Mother</option>
-                                            <option value="Brother">Brother</option>
-                                            <option value="Sister">Sister</option>
-                                            <option value="Relative">Relative</option>
-                                            <option value="Other">Other</option>
-                                        </select>
-                                       
-                                    </div>
+                                                        <!-- Emergency Contact Relation -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="emergency_contact_relation">Emergency Contact Relation:</label> <span class="error">* </span>
+                                    <select class="form-control select2bs4" style="width: 100%;" id="emergency_contact_relation" name="emergency_contact_relation" onchange="toggleOtherRelationField(this)" required>
+                                        <option value="Spouse">Spouse</option>
+                                        <option value="Friend">Friend</option>
+                                        <option value="Coworker">Coworker</option>
+                                        <option value="Child">Child</option>
+                                        <option value="Father">Father</option>
+                                        <option value="Mother">Mother</option>
+                                        <option value="Brother">Brother</option>
+                                        <option value="Sister">Sister</option>
+                                        <option value="Relative">Relative</option>
+                                        <option value="Other">Other</option>
+                                    </select>
                                 </div>
+                            </div>
+                            <!-- Additional input field for other relation -->
+                            <div class="col-md-4 other_relation_field" style="display: none;">
+                                <div class="form-group">
+                                    <label for="other_relation">Fill Relation:</label>
+                                    <input type="text" class="form-control" id="other_relation" name="other_relation">
+                                </div>
+                            </div>
+
+                          
                                 <!-- Emergency Contact Phone -->
                                 <div class="col-md-4">
                                     <div class="form-group">
@@ -202,11 +218,11 @@
                                         </select>
                                     </div>
                                 </div>
-                                <!-- Occupation -->
+                                                            <!-- Occupation -->
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="occupation">Occupation:</label>
-                                        <select class="form-control select2bs4" style="width: 100%;" name="occupation" id="occupation">
+                                        <select class="form-control select2bs4" style="width: 100%;" name="occupation" id="occupation" onchange="toggleOtherOccupationField(this)">
                                             <option value="Driver">Driver</option>
                                             <option value="Technician">Technician</option>
                                             <option value="Engineer">Engineer</option>
@@ -222,24 +238,42 @@
                                             <option value="Foreman">Foreman</option>
                                             <option value="Operator">Operator</option>
                                             <option value="ICT Expert">ICT Expert</option>
-                                            <option value="Others">Others</option>
+                                            <option value="Other">Other</option>
                                         </select>
                                     </div>
                                 </div>
-                                <!-- Patient Type -->
+                                <!-- Additional input field for other occupation -->
+                                <div class="col-md-4 other_occupation_field" style="display: none;">
+                                    <div class="form-group">
+                                        <label for="other_occupation">Fill Occupation:</label>
+                                        <input type="text" class="form-control" id="other_occupation" name="other_occupation">
+                                    </div>
+                                </div>
+
+                                
+                               <!-- Patient Type -->
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label for="patient_type">Patient Type:</label>  <span class="error">* </span>
-                                        <select class="form-control select2bs4" style="width: 100%;" id="patient_type" name="patient_type" required>
-                                            <option value="National Staff">National Staff</option>                                         
+                                        <label for="patient_type">Patient Type:</label> <span class="error">* </span>
+                                        <select class="form-control select2bs4" style="width: 100%;" id="patient_type" name="patient_type" onchange="toggleOtherPatientTypeField(this)" required>
+                                            <option value="National Staff">National Staff</option>
                                             <option value="International Staff">International Staff</option>
                                             <option value="National Visitor">National Visitor</option>
                                             <option value="International Visitor">International Visitor</option>
                                             <option value="Unknown Status">Unknown Status</option>
+                                            <option value="Others">Others</option>
                                         </select>
-                                      
                                     </div>
                                 </div>
+                                <!-- Additional input field for other patient type -->
+                                <div class="col-md-4 other_patient_type_field" style="display: none;">
+                                    <div class="form-group">
+                                        <label for="other_patient_type">Fill Patient Type:</label>
+                                        <input type="text" class="form-control" id="other_patient_type" name="other_patient_type">
+                                    </div>
+                                </div>
+
+                               
                             </div>
                             <div class="row">
                                 <!-- Patient's Company -->
@@ -288,20 +322,38 @@
             font-weight: 500t
         }
         </style>
-    <script>
-        function toggleInsuranceFields() {
-            var insurance = document.getElementById('insurance').value;
-            var insuranceFields = document.getElementById('insuranceFields');
-            var insuranceNumberField = document.getElementById('insuranceNumberField');
-            if (insurance === 'Insured') {
-                insuranceFields.style.display = 'block';
-                insuranceNumberField.style.display = 'block';
-            } else {
-                insuranceFields.style.display = 'none';
-                insuranceNumberField.style.display = 'none';
+        <script>
+            function toggleInsuranceFields() {
+                var insurance = document.getElementById('insurance').value;
+                var insuranceCompanyField = document.getElementById('insuranceCompanyField');
+                var otherInsuranceField = document.getElementById('otherInsuranceField');
+                var insuranceNumberField = document.getElementById('insuranceNumberField');
+            
+                if (insurance === 'Insured') {
+                    insuranceCompanyField.style.display = 'block';
+                    insuranceNumberField.style.display = 'block';
+            
+                    // Check if the selected insurance company is "Other"
+                    var selectedInsuranceCompany = document.getElementById('insurance_company').value;
+                    if (selectedInsuranceCompany === 'Other') {
+                        otherInsuranceField.style.display = 'block';
+                    } else {
+                        otherInsuranceField.style.display = 'none';
+                    }
+                } else {
+                    insuranceCompanyField.style.display = 'none';
+                    otherInsuranceField.style.display = 'none';
+                    insuranceNumberField.style.display = 'none';
+                }
             }
-        }
-    
+            
+            // Add an event listener to the insurance company dropdown to call toggleInsuranceFields() whenever the selection changes
+            document.getElementById('insurance_company').addEventListener('change', toggleInsuranceFields);
+            
+                            
+        </script>
+    <script>
+       
         function toggleOshaFields() {
             var oshaCertificate = document.getElementById('osha_certificate').value;
             var oshaDateField = document.getElementById('oshaDateField');
@@ -312,7 +364,7 @@
             }
         }
     </script>
-
+   
     <script>
         // Function to validate the form before submission
         function validateForm(event) {
@@ -369,7 +421,35 @@
             }
         }
     </script>
-    
-    
- 
+    <script>
+        function toggleOtherRelationField(select) {
+            var otherRelationField = document.querySelector('.other_relation_field');
+            if (select.value === 'Other') {
+                otherRelationField.style.display = 'block';
+            } else {
+                otherRelationField.style.display = 'none';
+            }
+        }
+    </script>
+    <script>
+        function toggleOtherPatientTypeField(select) {
+            var otherPatientTypeField = document.querySelector('.other_patient_type_field');
+            if (select.value === 'Others') {
+                otherPatientTypeField.style.display = 'block';
+            } else {
+                otherPatientTypeField.style.display = 'none';
+            }
+        }
+    </script>
+    <script>
+        function toggleOtherOccupationField(select) {
+            var otherOccupationField = document.querySelector('.other_occupation_field');
+            if (select.value === 'Other') {
+                otherOccupationField.style.display = 'block';
+            } else {
+                otherOccupationField.style.display = 'none';
+            }
+        }
+    </script>
+    {% include 'kahama_template/datatable.html' %} 
 {% endblock main_content %}

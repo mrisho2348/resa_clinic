@@ -1,11 +1,12 @@
 {% extends 'kahama_template/base_template.html' %}
 
 {% block title %}
-    Add Remote Patient Vital
+Add  Consultation notes
 {% endblock title %}
 
 {% block breadcrumb %}
 {% include "kahama_template/modal_form.html" %}
+Add  Consultation notes
 {% endblock breadcrumb %}
 
 {% block main_content %}
@@ -88,22 +89,13 @@
                             <div class="container-fluid">
                                 <!-- First row -->
                                 <div class="row">
-                                    <!-- Doctor selection -->
-                                    <div class="col-md-4 form-group">
-                                        <label for="doctor">Doctor:</label>
-                                        <select class="form-control select2bs4" style="width: 100%;" id="doctor" name="doctor" required>
-                                            <option value="">Select Doctor</option>
-                                            {% for doctor in doctors %}
-                                                <option value="{{ doctor.id }}">{{ doctor.admin.first_name }} {{ doctor.middle_name }} {{ doctor.admin.last_name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>                                
-                                    <div class="col-md-4 form-group">
+                                                               
+                                    <div class="col-md-6 form-group">
                                         <label for="chief_complaints">Chief Complaints:</label>
                                         <textarea class="form-control" id="chief_complaints" name="chief_complaints"></textarea>
                                     </div>
                                       <!-- Allergy to medications -->
-                                      <div class="col-md-4 form-group">
+                                      <div class="col-md-6 form-group">
                                         <label for="allergy_to_medications">Allergy to Medications:</label>
                                         <input type="text" class="form-control" id="allergy_to_medications" name="allergy_to_medications">
                                         <input type="hidden" class="form-control" id="notes_id" name="notes_id">
@@ -316,4 +308,6 @@
             });
         }
     </script>
+    
+    {% include 'kahama_template/datatable.html' %}     
 {% endblock main_content %}

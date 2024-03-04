@@ -1,0 +1,140 @@
+{% extends 'kahama_template/base_template.html' %}
+
+{% block title %}
+Edit Surgery History
+{% endblock title %}
+
+
+
+{% block breadcrumb %}
+    <!-- Breadcrumb content can be added here if needed -->
+    Edit Surgery History
+{% endblock breadcrumb %}
+
+{% block main_content %}
+    {% load static %}             
+
+    <div class="container">
+        <!-- Patient Information Card -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row" style="font-size:13px;">
+                            <div class="col-md-3"><b>PATIENT: {{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</b></div>
+                            <div class="col-md-3"><b>Age: {{ patient.age }}</b></div>
+                            <div class="col-md-3"><b>SEX: {{ patient.gender }}</b></div>
+                            <div class="col-md-3"><b>FILE NO : {{ patient.mrn }}</b></div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-3"><b>PAYMENT MODE: {{ patient.payment_form }}</b></div>
+                        </div>
+                    </div>    
+                </div>
+            </div>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="post" action="{% url 'kahamahmis:edit_patient_surgery_history' patient.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="patient_id" value="{{ patient.id }}">
+                            <div class="form-group">
+                                <label for="surgery_history">Does Patient have any surgery history ?</label>
+                                <select class="form-control" id="surgery_history" name="surgery_history">
+                                    <option value="no" {% if not has_surgery_history  %} selected {% endif %}>No</option>
+                                    <option value="yes" {% if has_surgery_history %} selected {% endif %}>Yes</option>
+                                </select>
+                            </div>
+                            <!-- Surgery History Table -->
+                            <div class="table-responsive" id="surgery_history_form_container" {% if patient.has_surgery_history %} style="display: block;" {% else %} style="display: none;" {% endif %}>
+                                <table class="table table-bordered" id="surgery_history_table">
+                                    <thead>
+                                        <tr>
+                                            <th>Surgery Name</th>                                            
+                                            <th>Date of Surgery</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for surgery in surgery_history %}
+                                        <tr>
+                                            <td><input type="text" class="form-control" name="surgery_name_{{ surgery.id }}" value="{{ surgery.surgery_name }}" ></td>
+                                            <td><input type="date" class="form-control" name="date_of_surgery_{{ surgery.id }}" value="{{ surgery.surgery_date|date:'Y-m-d' }}" ></td>
+                                            <td><input type="checkbox" name="delete_record_{{ surgery.id }}"></td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                <!-- Add More Surgery History Button -->
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-primary btn-block" id="add_surgery_history">Add Surgery History</button>
+                                </div>
+                            </div>
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-success btn-block">Save Surgery History</button>
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                        <div class="form-row">
+                            <div>
+                                {% if messages %}
+                                <div class="col-12">
+                                    {% for message in messages %}
+                                    {% if message.tags == 'error' %}
+                                    <div class="alert alert-danger">{{ message }}</div>
+                                    {% elif message.tags == 'success' %}
+                                    <div class="alert alert-primary">{{ message }}</div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+   
+    <script>
+        // Initially show/hide the surgery history entry form based on patient's selection
+        $(document).ready(function() {
+            toggleSurgeryHistoryForm($('#surgery_history').val() === 'yes');
+        });
+    
+        // Event listener for surgery history selection
+        $('#surgery_history').change(function() {
+            toggleSurgeryHistoryForm($(this).val() === 'yes');
+        });
+    
+        // Function to toggle visibility of surgery history form
+        function toggleSurgeryHistoryForm(show) {
+            if (show) {
+                $('#surgery_history_form_container').show();
+            } else {
+                $('#surgery_history_form_container').hide();
+            }
+        }
+    
+        // JavaScript for Adding/Deleting Rows
+        $('#add_surgery_history').click(function() {
+            var newRow = `<tr>
+                                <td><input type="text" class="form-control" name="new_surgery_name[]" ></td>
+                                <td><input type="date" class="form-control" name="new_date_of_surgery[]" ></td>
+                                <td><button type="button" class="btn btn-danger btn-sm delete-row">Delete</button></td>
+                            </tr>`;
+            $('#surgery_history_table tbody').append(newRow);
+        });
+    
+        // Delete Surgery History Row
+        $(document).on('click', '.delete-row', function() {
+            $(this).closest('tr').remove();
+        });
+    </script>
+    
+    {% include 'kahama_template/datatable.html' %}     
+{% endblock main_content %}

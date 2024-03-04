@@ -24,20 +24,7 @@ Patient Visits Reports
             <th>Day</th>
             <th>Full Name</th>
             <th>Age</th>
-            <th>Gender</th>
-            <th>SPO2</th>
-            <th>Temperature</th>
-            <th>Pulse Rate</th>
-            <th>Respiratory Rate</th>
-            <th>blood pressure</th>        
-            <th>gcs</th>
-            <th>avpu</th>
-            <th>Chief Complaints</th>
-            <th>History of Presenting Illness</th>
-            <th>Allergy to Medications</th>
-            <th>Provisional Diagnosis</th>
-            <th>Final Diagnosis</th>
-            <th>Doctor Plan</th>
+            <th>Gender</th>           
             <th>Company</th>
         </tr>
     </thead>
@@ -52,28 +39,7 @@ Patient Visits Reports
             <td>{{ visit.created_at|date:"l" }}</td>
             <td>{{ visit.patient.first_name }} {{ visit.patient.middle_name }} {{ visit.patient.last_name }}</td>
             <td>{{ visit.patient.age }}</td>
-            <td>{{ visit.patient.gender }}</td>
-            <td>{{ visit.remotepatientvital.spo2 }}</td>
-            <td>{{ visit.remotepatientvital.temperature }}</td>
-            <td>{{ visit.remotepatientvital.pulse_rate }}</td>
-            <td>{{ visit.remotepatientvital.respiratory_rate }}</td>
-            <td>{{ visit.remotepatientvital.blood_pressure }}</td>
-            <td>{{ visit.remotepatientvital.gcs }}</td>
-            <td>{{ visit.remotepatientvital.avpu }}</td>
-            <td>{{ visit.remoteconsultationnotes.chief_complaints }}</td>
-            <td>{{ visit.remoteconsultationnotes.history_of_presenting_illness }}</td>
-            <td>{{ visit.remoteconsultationnotes.allergy_to_medications }}</td>
-            <td>
-                {% for diagnosis in visit.remoteconsultationnotes.provisional_diagnosis.all %}
-                    {{ diagnosis.diagnosis_name }}{% if not forloop.last %}, {% endif %}
-                {% endfor %}
-            </td>
-            <td>
-                {% for diagnosis in visit.remoteconsultationnotes.final_diagnosis.all %}
-                    {{ diagnosis.diagnosis_name }}{% if not forloop.last %}, {% endif %}
-                {% endfor %}
-            </td>
-            <td>{{ visit.remoteconsultationnotes.doctor_plan }}</td>
+            <td>{{ visit.patient.gender }}</td>          
             <td>{{ visit.patient.company }}</td>
         </tr>
         {% endfor %}

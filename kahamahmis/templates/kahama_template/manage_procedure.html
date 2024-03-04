@@ -35,8 +35,7 @@ all Procedure
 </div> 
     <table class="table table-hover text-nowrap table-bordered table-striped table-sm" id="example">
         <thead>
-            <tr>
-                <th>Patient ID</th>
+            <tr>                
                 <th>Patient MRN</th>
                 <th>Procedure Name</th>
                 <th>Description</th>
@@ -50,7 +49,6 @@ all Procedure
             <tbody>
                 {% for record in data %}
                     <tr>
-                        <td>{{ record.id }}</td>
                         <td>{{ record.mrn }}</td>  <!-- Use 'fullname' instead of 'name' -->
                         <td>{{ record.procedure_name }}</td>
                         <td>{{ record.procedure_description }}</td>
@@ -59,7 +57,7 @@ all Procedure
                         <td>{{ record.procedure_cost }}</td>
                         <td>
                             <!-- Add more action links as needed -->
-                            <a href="{% url 'patient_procedure_history_view_mrn' record.mrn %}" data-toggle="tooltip" title="View Procedure History">
+                            <a href="{% url 'kahamahmis:patient_procedure_history_view_mrn' record.mrn %}" data-toggle="tooltip" title="View Procedure History">
                                 <button type="button" class="btn btn-primary btn-sm"><i class="fa fa-eye text-dark"></i></button>
                             </a>
                         </td>

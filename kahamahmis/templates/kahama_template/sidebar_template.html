@@ -50,29 +50,30 @@
                               <p>Medicine</p>
                           </a>
                       </li> {% endcomment %}
-                      {% comment %} <li class="nav-item">
-                        {% url 'prescription_list' as prescription_list_url %}
-                        <a href="{{ prescription_list_url }}" class="nav-link{% if request.path == prescription_list_url %} active {% endif %}">
+
+                      <li class="nav-item">
+                        {% url 'kahamahmis:prescription_list' as prescription_list_url %}
+                        <a href="{% url "kahamahmis:prescription_list" %}" class="nav-link{% if request.path == prescription_list_url %} active {% endif %}">
                             <i class="nav-icon fas fa-prescription-bottle"></i>
                             <p>Prescriptions</p>
                         </a>
-                    </li> {% endcomment %}
+                    </li>
 
                       <li class="nav-item">
-                        {% url 'patients_list' as patients_list %}
+                        {% url 'kahamahmis:patients_list' as patients_list %}
                           <a href="{% url "kahamahmis:patients_list" %}" class="nav-link{% if request.path == patients_list %} active {% endif %}">
                               <i class="nav-icon fas fa-users"></i>
                               <p>Patients</p>
                           </a>
                       </li>
              
-                      {% comment %} <li class="nav-item">
-                        {% url 'patient_vital_all_list' as patient_vital_all_list %}
-                        <a href="{% url 'patient_vital_all_list'  %}" class="nav-link{% if request.path == patient_vital_all_list %} active {% endif %}">
+                      <li class="nav-item">
+                        {% url 'kahamahmis:patient_vital_all_list' as patient_vital_all_list %}
+                        <a href="{% url 'kahamahmis:patient_vital_all_list'  %}" class="nav-link{% if request.path == patient_vital_all_list %} active {% endif %}">
                             <i class="nav-icon fas fa-heartbeat"></i> <!-- Font Awesome icon for vital signs -->
                             <p>All Vital Signs</p> <!-- Renamed navigation link -->
                         </a>
-                    </li> {% endcomment %}
+                    </li>
                       {% comment %} <li class="nav-item">
                         {% url 'medicine_inventory' as medicine_inventory %}
                           <a href="{% url "medicine_inventory" %}" class="nav-link{% if request.path == medicine_inventory %} active {% endif %}">
@@ -96,13 +97,14 @@
                             <span id="notification-count" class="badge badge-danger"  title="medicine out of  Stock"></span> <!-- Notification badge -->
                         </a>
                     </li> {% endcomment %}
-                      {% comment %} <li class="nav-item">
-                        {% url 'patient_procedure_view' as patient_procedure_view %}
-                          <a href="{% url "patient_procedure_view" %}" class="nav-link{% if request.path == patient_procedure_view %} active {% endif %}">
+
+                    <li class="nav-item">
+                        {% url 'kahamahmis:patient_procedure_view' as patient_procedure_view %}
+                          <a href="{% url "kahamahmis:patient_procedure_view" %}" class="nav-link{% if request.path == patient_procedure_view %} active {% endif %}">
                             <i class="nav-icon fas fa-hospital"></i>
                               <p>Medical Procedure</p>
                           </a>
-                      </li> {% endcomment %}
+                      </li>
                       {% comment %} <li class="nav-item">
                         {% url 'medication_payments_view' as medication_payments_url %}
                         <a href="{{ medication_payments_url }}" class="nav-link{% if request.path == medication_payments_url %} active {% endif %}">
@@ -141,23 +143,23 @@
                     </li> {% endcomment %}
                     
                     
-                      {% comment %} <li class="nav-item">
-                        {% url 'manage_referral' as manage_referral %}
-                        <a href="{% url 'manage_referral' %}" class="nav-link{% if request.path == manage_referral %} active {% endif %}">
+                   <li class="nav-item">
+                        {% url 'kahamahmis:manage_referral' as manage_referral %}
+                        <a href="{% url 'kahamahmis:manage_referral' %}" class="nav-link{% if request.path == manage_referral %} active {% endif %}">
                             <i class="nav-icon fas fa-handshake"></i>
                             <p>Referral</p>
                         </a>
-                    </li> {% endcomment %}
+                    </li>
                  
                   <li class="nav-item">
-                        {% url 'appointment_list' as appointment_list %}
+                        {% url 'kahamahmis:appointment_list' as appointment_list %}
                           <a href="{% url "kahamahmis:appointment_list" %}" class="nav-link{% if request.path == appointment_list %} active {% endif %}">
                             <i class="nav-icon fas fa-calendar"></i>
-                              <p>All Apointment</p>
+                              <p>All Appointment</p>
                           </a>
                       </li>
                       <li class="nav-item">
-                        {% url 'consultation_notes' as consultation_notes %}
+                        {% url 'kahamahmis:consultation_notes' as consultation_notes %}
                           <a href="{% url "kahamahmis:consultation_notes" %}" class="nav-link{% if request.path == consultation_notes %} active {% endif %}">
                             <i class="nav-icon fas fa-calendar"></i>
                               <p>consultation</p>
@@ -177,14 +179,15 @@
                           </a>
                       </li> {% endcomment %}
                       <li class="nav-item">
-                        {% url 'manage_service' as manage_service %}
+                        {% url 'kahamahmis:manage_service' as manage_service %}
                           <a href="{% url "kahamahmis:manage_service" %}" class="nav-link{% if request.path == manage_service %} active {% endif %}">
                               <i class="nav-icon fas fa-medkit"></i>
                               <p>Services</p>
                           </a>
                       </li>
                       <li class="nav-item">
-                          <a href="{% url "kahamahmis:resa_report" %}" class="nav-link">
+                        {% url 'kahamahmis:resa_report' as resa_report %}
+                          <a href="{% url "kahamahmis:resa_report" %}" class="nav-link{% if request.path == resa_report %} active {% endif %}">
                               <i class="nav-icon fas fa-file-alt"></i>
                               <p>Reports</p>
                           </a>
@@ -203,8 +206,9 @@
                   </a>
                   <ul class="nav nav-treeview">
                       <!-- Insurance Link -->
-                      <li class="nav-item">                    
-                          <a href="{% url "kahamahmis:manage_insurance" %}" class="nav-link">
+                      <li class="nav-item">  
+                        {% url 'kahamahmis:manage_insurance' as manage_insurance %}                  
+                          <a href="{% url "kahamahmis:manage_insurance" %}" class="nav-link{% if request.path == manage_insurance %} active {% endif %}">
                               <i class="nav-icon fas fa-shield-alt"></i>
                               <p>Insurance</p>
                           </a>
@@ -221,44 +225,43 @@
                         <a href="{% url 'supplier_list' %}" class="nav-link{% if request.path == supplier_list_url %} active {% endif %}">
                             <i class="nav-icon fas fa-truck"></i>
                             <p>Suppliers</p>
-                        </a>
-                    </li> {% endcomment %}
-{% comment %} 
+                        </a> {% endcomment %}
+
                     <li class="nav-item"> 
-                        {% url 'inventory_list' as inventory_list_url %}                   
-                        <a href="{% url 'inventory_list' %}" class="nav-link{% if request.path == inventory_list_url %} active {% endif %}">
+                        {% url 'kahamahmis:inventory_list' as inventory_list_url %}                   
+                        <a href="{% url 'kahamahmis:inventory_list' %}" class="nav-link{% if request.path == inventory_list_url %} active {% endif %}">
                             <i class="nav-icon fas fa-box"></i>
                             <p>Inventory</p>
 
                             <span id="minStockNotification" class="badge badge-danger" title="Items Below Minimum Stock Level"></span> <!-- Notification badge -->
                         </a>
-                    </li> {% endcomment %}
-                    {% comment %} <li class="nav-item"> 
-                        {% url 'in_stock_items' as in_stock_items %}                   
-                        <a href="{% url 'in_stock_items' %}" class="nav-link{% if request.path == in_stock_items %} active {% endif %}">
+                    </li>
+                 <li class="nav-item"> 
+                        {% url 'kahamahmis:in_stock_items' as in_stock_items %}                   
+                        <a href="{% url 'kahamahmis:in_stock_items' %}" class="nav-link{% if request.path == in_stock_items %} active {% endif %}">
                             <i class="nav-icon fas fa-box-open"></i>
                             <p>Available Items</p>
                         </a>
-                    </li>                     {% endcomment %}
-                    {% comment %} <li class="nav-item"> 
-                        {% url 'out_of_stock_items' as out_of_stock_items %}                   
-                        <a href="{% url 'out_of_stock_items' %}" class="nav-link{% if request.path == out_of_stock_items %} active {% endif %}">
+                    </li>  
+                 <li class="nav-item"> 
+                        {% url 'kahamahmis:out_of_stock_items' as out_of_stock_items %}                   
+                        <a href="{% url 'kahamahmis:out_of_stock_items' %}" class="nav-link{% if request.path == out_of_stock_items %} active {% endif %}">
                             <i class="nav-icon fas fa-exclamation-triangle"></i>
                             <p>Stock Alerts</p>
                             <span id="outOfStockNotification" class="badge badge-danger"  title="Items out  Stock"></span> <!-- Notification badge -->
                         </a>
-                    </li> {% endcomment %}
-                    {% comment %} <li class="nav-item"> 
-                        {% url 'usage_history_list' as usage_history_list_url %}                   
-                        <a href="{% url 'usage_history_list' %}" class="nav-link{% if request.path == usage_history_list_url %} active {% endif %}">
+                    </li>
+                 <li class="nav-item"> 
+                        {% url 'kahamahmis:usage_history_list' as usage_history_list_url %}                   
+                        <a href="{% url 'kahamahmis:usage_history_list' %}" class="nav-link{% if request.path == usage_history_list_url %} active {% endif %}">
                             <i class="nav-icon fas fa-history"></i>
                             <p>Usage History</p>
                         </a>
-                    </li> {% endcomment %}
+                    </li>
                     
                       <!-- Other Settings Links -->
                       <li class="nav-item"> 
-                        {% url 'manage_disease' as manage_disease %}                    
+                        {% url 'kahamahmis:manage_disease' as manage_disease %}                    
                           <a href="{% url "kahamahmis:manage_disease" %}" class="nav-link{% if request.path == manage_disease %} active {% endif %}">                     
                               <i class="nav-icon fas fa-biohazard"></i>
                               <p>Diseases</p>
@@ -272,67 +275,68 @@
                         </a>
                     </li> {% endcomment %}
                       <li class="nav-item"> 
-                        {% url 'manage_country' as manage_country %}                    
+                        {% url 'kahamahmis:manage_country' as manage_country %}                    
                         <a href="{% url 'kahamahmis:manage_country' %}" class="nav-link{% if request.path == manage_country %} active {% endif %}">                     
                             <i class="nav-icon fas fa-heartbeat"></i> <!-- Assuming "fa-heartbeat" represents health issues -->
                             <p>Country</p> <!-- Updated to a more descriptive name -->
                         </a>
                     </li>
                       
-                      {% comment %} <li class="nav-item">  
-                        {% url 'equipment_list' as equipment_list_url %}                   
-                        <a href="{{ equipment_list_url }}" class="nav-link{% if request.path == equipment_list_url %} active {% endif %}">                     
+                   <li class="nav-item">  
+                        {% url 'kahamahmis:equipment_list' as equipment_list_url %}                   
+                        <a href="{% url 'kahamahmis:equipment_list' %}" class="nav-link{% if request.path == equipment_list_url %} active {% endif %}">                     
                             <i class="nav-icon fas fa-tools"></i> <!-- Assuming "fa-tools" represents equipment -->
                             <p>Equipment Inventory</p> <!-- Renamed to "Equipment Inventory" for better readability -->
                         </a>
-                    </li> {% endcomment %}
-{% comment %} 
+                    </li> 
+
                     <li class="nav-item">  
-                        {% url 'equipment_maintenance_list' as maintenance_list_url %}                   
-                        <a href="{{ maintenance_list_url }}" class="nav-link{% if request.path == maintenance_list_url %} active {% endif %}">                     
+                        {% url 'kahamahmis:equipment_maintenance_list' as maintenance_list_url %}                   
+                        <a href="{% url "kahamahmis:equipment_maintenance_list" %}" class="nav-link{% if request.path == maintenance_list_url %} active {% endif %}">                     
                             <i class="nav-icon fas fa-tools"></i> <!-- Assuming "fa-tools" represents maintenance -->
                             <p>Equipment Maintenance</p> <!-- Renamed to "Equipment Maintenance" for better readability -->
                         </a>
-                    </li> {% endcomment %}
-                    {% comment %} <li class="nav-item">  
-                        {% url 'reagent_list' as reagent_list_url %}                   
-                        <a href="{{ reagent_list_url }}" class="nav-link{% if request.path == reagent_list_url %} active {% endif %}">                     
+                    </li>
+                  <li class="nav-item">  
+                        {% url 'kahamahmis:reagent_list' as reagent_list_url %}                   
+                        <a href="{% url "kahamahmis:reagent_list" %}" class="nav-link{% if request.path == reagent_list_url %} active {% endif %}">                     
                             <i class="nav-icon fas fa-flask"></i> <!-- Assuming "fa-flask" represents reagents -->
                             <p>Reagent Inventory</p> <!-- Renamed to "Reagent Inventory" for better readability -->
                         </a>
-                    </li> {% endcomment %}
-                    {% comment %} <li class="nav-item">  
-                        {% url 'reagent_usage_list' as reagent_usage_list_url %}                   
-                        <a href="{{ reagent_usage_list_url }}" class="nav-link{% if request.path == reagent_usage_list_url %} active {% endif %}">                     
+                    </li>
+                   <li class="nav-item">  
+                        {% url 'kahamahmis:reagent_usage_list' as reagent_usage_list_url %}                   
+                        <a href="{% url "kahamahmis:reagent_usage_list" %}" class="nav-link{% if request.path == reagent_usage_list_url %} active {% endif %}">                     
                             <i class="nav-icon fas fa-vial"></i> <!-- Assuming "fa-vial" represents reagent usage -->
                             <p>Reagent Usage History</p> <!-- Renamed to "Reagent Usage History" for better readability -->
                         </a>
-                    </li> {% endcomment %}
-                    {% comment %} <li class="nav-item">  
-                        {% url 'in_stock_reagent_view' as in_stock_reagent_view_url %}                   
-                        <a href="{{ in_stock_reagent_view_url }}" class="nav-link{% if request.path == in_stock_reagent_view_url %} active {% endif %}">                     
+                    </li>
+                   <li class="nav-item">  
+                        {% url 'kahamahmis:in_stock_reagent_view' as in_stock_reagent_view_url %}                   
+                        <a href="{% url "kahamahmis:in_stock_reagent_view" %}" class="nav-link{% if request.path == in_stock_reagent_view_url %} active {% endif %}">                     
                             <i class="nav-icon fas fa-flask"></i> <!-- Assuming "fa-flask" represents reagents -->
                             <p>Available Reagents</p> <!-- Renamed to "Available Reagents" for better readability -->
                         </a>
-                    </li> {% endcomment %}
-                    {% comment %} <li class="nav-item">  
-                        {% url 'out_of_stock_reagent_view' as out_of_stock_reagent_view_url %}                   
-                        <a href="{{ out_of_stock_reagent_view_url }}" class="nav-link{% if request.path == out_of_stock_reagent_view_url %} active {% endif %}">                     
+                    </li>
+                <li class="nav-item">  
+                        {% url 'kahamahmis:out_of_stock_reagent_view' as out_of_stock_reagent_view_url %}                   
+                        <a href="{% url "kahamahmis:out_of_stock_reagent_view" %}" class="nav-link{% if request.path == out_of_stock_reagent_view_url %} active {% endif %}">                     
                             <i class="nav-icon fas fa-exclamation-circle"></i> <!-- Assuming "fa-exclamation-circle" represents out-of-stock -->
                             <p>Out of Stock Reagents</p> <!-- Renamed to "Out of Stock Reagents" for better readability -->
                             <span id="notification-count-reagent" class="badge badge-danger"  title="reagent out  Stock"></span> <!-- Notification badge -->
                         </a>
-                    </li> {% endcomment %}
-                    {% comment %} <li class="nav-item">  
-                        {% url 'quality_control_list' as quality_control_list_url %}                   
-                        <a href="{{ quality_control_list_url }}" class="nav-link{% if request.path == quality_control_list_url %} active {% endif %}">                     
+                    </li>
+                  <li class="nav-item">  
+                        {% url 'kahamahmis:quality_control_list' as quality_control_list_url %}                   
+                        <a href="{% url "kahamahmis:quality_control_list" %}" class="nav-link{% if request.path == quality_control_list_url %} active {% endif %}">                     
                             <i class="nav-icon fas fa-tasks"></i> <!-- Assuming "fa-tasks" represents quality control -->
                             <p>Quality Control</p> <!-- Updated to a more descriptive name -->
                         </a>
-                    </li> {% endcomment %}
+                    </li>
                     
-                      <li class="nav-item">                    
-                          <a href="{% url "kahamahmis:manage_company" %}" class="nav-link ">
+                      <li class="nav-item"> 
+                        {% url 'kahamahmis:manage_country' as manage_country %}                       
+                          <a href="{% url "kahamahmis:manage_company" %}" class="nav-link{% if request.path == quality_control_list_url %} active {% endif %} ">
                               <i class="nav-icon fas fa-building"></i>
                               <p>Companies</p>
                           </a>
@@ -358,7 +362,7 @@
                       <li class="nav-item"> 
                         {% url 'remoteservice_list' as remoteservice_list %}                    
                           <a href="{% url 'kahamahmis:remoteservice_list' %}" class="nav-link{% if request.path == remoteservice_list %} active {% endif %}">
-                              <i class="nav-icon fas fa-servicestack"></i>
+                              <i class="nav-icon fas fa-medkit"></i>
                               <p>Services</p>
                           </a>
                       </li>

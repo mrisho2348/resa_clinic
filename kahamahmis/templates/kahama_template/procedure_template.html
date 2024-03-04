@@ -87,17 +87,7 @@ Patient procedure
                         {% csrf_token %}
                         <div class="container-fluid">
                             <!-- First row -->
-                            <div class="row">
-                                <!-- Doctor selection -->
-                                <div class="col-md-4 form-group">
-                                    <label for="doctor{{ consultation_notes.id }}">Doctor:</label>
-                                    <select class="form-control select2bs4" style="width: 100%;" id="doctor{{ consultation_notes.id }}" name="doctor" required>
-                                        <option value="">Select Doctor</option>
-                                        {% for doctor in doctors %}
-                                        <option value="{{ doctor.id }}" {% if consultation_notes.doctor.id == doctor.id %} selected {% endif %}>{{ doctor.admin.first_name }} {{ doctor.middle_name }} {{ doctor.admin.last_name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
+                            <div class="row">                            
 
                                   <!-- Doctor plan -->
                                 <div class="col-md-4 form-group">

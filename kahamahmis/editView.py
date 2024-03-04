@@ -2,7 +2,7 @@ from datetime import datetime
 import logging
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from clinic.models import RemoteCompany, Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Medicine, Procedure, Referral, Sample, Staffs
+from clinic.models import RemoteCompany, Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Medicine, Procedure, Referral, RemotePatient, RemoteProcedure, RemoteReferral, Sample, Staffs
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db import transaction
@@ -66,7 +66,7 @@ def edit_procedure(request):
             duration = (datetime.combine(datetime.today(), end_time) - datetime.combine(datetime.today(), start_time)).seconds / 3600
 
             # Update procedure record
-            procedure_record = Procedure.objects.get(id=procedure_id)
+            procedure_record = RemoteProcedure.objects.get(id=procedure_id)
             procedure_record.name = name          
             procedure_record.description = description
             procedure_record.equipments_used = equipments_used
@@ -95,8 +95,8 @@ def edit_referral(request):
             notes = request.POST.get('notes')           
 
             # Update procedure record
-            referral_record = Referral.objects.get(id=referral_id)
-            referral_record.patient = Patients.objects.get(mrn=mrn)        
+            referral_record = RemoteReferral.objects.get(id=referral_id)
+            referral_record.patient = RemotePatient.objects.get(mrn=mrn)        
             referral_record.source_location = source_location
             referral_record.destination_location = destination_location
             referral_record.reason = reason           

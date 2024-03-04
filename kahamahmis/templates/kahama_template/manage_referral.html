@@ -85,7 +85,7 @@
                                                                 <select class="form-control select2bs4" style="width: 100%;" id="patient" name="mrn">
                                                                     {% for patient in patients %}
                                                                         <option value="{{ patient.mrn }}" {% if patient.mrn == referral.patient.mrn %} selected {% endif %}>
-                                                                            {{ patient.fullname }}
+                                                                            {{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}
                                                                         </option>
                                                                     {% endfor %}
                                                                 </select>
@@ -125,7 +125,7 @@
                                     
                                         // Make AJAX request
                                         $.ajax({
-                                            url: '/edit_referral/',  // Replace with your server edit endpoint
+                                            url: '{% url "kahamahmis:edit_referral" %}',  // Replace with your server edit endpoint
                                             type: 'POST',
                                             data: formData,
                                             contentType: false,
@@ -172,7 +172,7 @@
                             function deleteReferral(ReferralId) {
                                 // Make AJAX request for deleting Referral
                                 $.ajax({
-                                    url: '/delete_referral/',  // Replace with your server delete endpoint
+                                    url: '{% url "kahamahmis:delete_referral" %}',  // Replace with your server delete endpoint
                                     type: 'POST',
                                     data: { referral_id: ReferralId },
                                     success: function(response) {
@@ -228,7 +228,7 @@
                                 var newStatus = $('#newStatus').val();
 
                                 $.ajax({
-                                    url: '/change_referral_status/',  // Replace with your server endpoint
+                                    url: '{% url "kahamahmis:change_referral_status" %}',  // Replace with your server endpoint
                                     type: 'POST',
                                     data: {
                                         'referralId': referralId,
@@ -317,7 +317,7 @@
     
         // Make AJAX request
         $.ajax({
-            url: '/save_referral/',  // Replace with your server endpoint
+            url: '{% url "kahamahmis:save_referral" %}',  // Replace with your server endpoint
             type: 'POST',
             data: formData,
             contentType: false,

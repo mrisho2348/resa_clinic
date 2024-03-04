@@ -2,7 +2,7 @@
 
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render,get_object_or_404
-from clinic.models import Category, RemoteCompany, Consultation, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, PatientVisits, PatientVital, Patients, Prescription, Procedure, QualityControl, Reagent, ReagentUsage, Referral, RemotePatient, RemoteService, Sample, Service, Staffs, Supplier, UsageHistory
+from clinic.models import Category, RemoteCompany, Consultation, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, PatientVisits, PatientVital, Patients, Prescription, Procedure, QualityControl, Reagent, ReagentUsage, Referral, RemotePatient, RemoteReferral, RemoteService, Sample, Service, Staffs, Supplier, UsageHistory
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -93,7 +93,7 @@ def delete_referral(request):
             referral_id = request.POST.get('referral_id')
 
             # Delete procedure record
-            referral_record = Referral.objects.get(id=referral_id)
+            referral_record = RemoteReferral.objects.get(id=referral_id)
             referral_record.delete()
 
             return JsonResponse({'success': True, 'message': f'Referral record for {referral_record} deleted successfully.'})

@@ -1,0 +1,424 @@
+{% extends 'kahama_template/base_template.html' %}
+
+{% block title %}
+    Add Remote Patient Vital
+{% endblock title %}
+
+{% block breadcrumb %}
+{% include "kahama_template/modal_form.html" %}
+<!-- Button to open the modal -->
+
+<a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#previousVitalsModal">
+    <i class="fas fa-eye-dropper"></i>  View Vitals
+</a>
+<a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#previousConsultationModal">
+    <i class="fas fa-eye-slash"></i>  View  Notes
+</a>
+
+
+{% endblock breadcrumb %}
+
+{% block main_content %}
+    <div class="container">
+           <!-- Patient Information Card -->
+           <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary-600">
+                        <h5 class="card-title text-center text-uppercase">{{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }} [ AGE: {{ patient.age }} ] - Consultation</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <b>PATIENT: {{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</b>
+                            </div>
+                            <div class="col-md-3">
+                                <b>DOB: 12/07/1975 [ Age: {{ patient.age }} ]</b>
+                            </div>
+                            <div class="col-md-3">
+                                <b>SEX: {{ patient.gender }}</b>
+                            </div>
+                            <div class="col-md-3">
+                                <b>FILE NO: {{ patient.mrn }}</b>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-md-3">
+                                <b>company: {{ patient.company }}</b>
+                            </div>                           
+                                <div class="col-md-3"><b>Visit  number: {{ visit.vst }}</b></div>
+                          
+                        </div>
+                       
+                        <!-- Modal for displaying previous patient vitals -->
+<div class="modal fade" id="previousVitalsModal" tabindex="-1" role="dialog" aria-labelledby="previousVitalsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="previousVitalsModalLabel">Previous Patient Vitals</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Display previous patient vital data in table -->
+          <div class="table-responsive">
+              <table class="table table-hover text-nowrap table-bordered table-striped table-sm display" id="example6" style="width:100%">
+                  <thead>
+                      <tr>
+                          <th>Visit number</th>
+                          <th>Respiratory Rate</th>
+                          <th>Pulse Rate</th>
+                          <th>Blood Pressure</th>
+                          <th>AVPU</th>
+                          <th>SPO2</th>
+                          <th>Temperature</th>
+                          <th>GCS</th>
+                          <th>Date</th>
+                          <th>Day</th> <!-- New column for the day of the week -->
+                          <th>Time</th>
+                          <th>action</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      {% for vital in previous_vitals %}
+                      <tr>
+                          <td>{{ vital.visit.vst }}</td>
+                          <td>{{ vital.respiratory_rate }}</td>
+                          <td>{{ vital.pulse_rate }}</td>
+                          <td>{{ vital.blood_pressure }}</td>
+                          <td>{{ vital.avpu }}</td>
+                          <td>{{ vital.spo2 }}</td>
+                          <td>{{ vital.temperature }}</td>
+                          <td>{{ vital.gcs }}</td>
+                          <!-- Split recorded_at into date, day of the week, and time components -->
+                          <td>{{ vital.recorded_at|date:"Y-m-d" }}</td> <!-- Display date -->
+                          <td>{{ vital.recorded_at|date:"l" }}</td> <!-- Display day of the week -->
+                          <td>{{ vital.recorded_at|time:"H:i:s" }}</td> <!-- Display time -->
+                          <td><a href="#" class="btn btn-info btn-xs btn-labeled" type="button" data-toggle="modal" data-target="#editPatientVitalModal{{vital.id}}"><b><i class="icon-pencil"></i></b> Update</a></td> <!-- Display time -->
+                      </tr>
+                      <div class="modal fade" id="editPatientVitalModal{{vital.id}}" tabindex="-1" role="dialog" aria-labelledby="editPatientVitalModalLabel{{vital.id}}" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editPatientVitalModalLabel">Edit Patient Vital</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="editPatientVitalForm" method="post">
+                                        <!-- Patient ID (hidden input) -->
+                                        <input type="hidden" name="patient_id" id="edit_patient_id" value="{{ patient.id }}">
+                                        <input type="hidden" name="vital_id" id="edit_vital_id" value="{{ vital.id }}">
+                                        <input type="hidden" class="form-control" id="visit_id" name="visit_id" value="{{ visit.id }}">
+                                        
+                                        <div class="row">
+                                            <!-- Column 1 -->
+                                            <div class="col-md-4">
+                                                <div class="mb-3 form-group">
+                                                    <label for="edit_respiratoryRate" class="form-label">Respiratory Rate (bpm)</label>
+                                                    <select class="form-control select2bs4" style="width: 100%;" id="edit_respiratoryRate" name="respiratory_rate">
+                                                        {% for rate in range_51 %}
+                                                            <option value="{{ rate }}" {% if rate == vital.respiratory_rate %} selected {% endif %}>{{ rate }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3 form-group">
+                                                    <label for="edit_pulseRate" class="form-label">Pulse Rate (bpm)</label>
+                                                    <select class="form-control select2bs4" style="width: 100%;" id="edit_pulseRate" name="pulse_rate">
+                                                        {% for rate in range_301 %}
+                                                            <option value="{{ rate }}" {% if rate == vital.pulse_rate %} selected {% endif %}>{{ rate }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <!-- Column 2 -->
+                                            <div class="col-md-4">
+                                                <div class="mb-3 form-group">
+                                                    <label for="edit_bloodPressure" class="form-label">Blood Pressure</label>
+                                                    <input type="text" class="form-control" id="edit_bloodPressure" name="blood_pressure" value="{{ vital.blood_pressure }}">
+                                                </div>
+                                                <div class="mb-3 form-group">
+                                                    <label for="edit_spo2" class="form-label">SPO2 (%)</label>
+                                                    <select class="form-control select2bs4" style="width: 100%;" id="edit_spo2" name="spo2">
+                                                        {% for percentage in range_101 %}
+                                                            <option value="{{ percentage }}" {% if percentage == vital.spo2 %} selected {% endif %}>{{ percentage }}%</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <!-- Column 3 -->
+                                            <div class="col-md-4">
+                                                <div class="mb-3 form-group">
+                                                    <label for="edit_temperature" class="form-label">Temperature (°C)</label>
+                                                    <select class="form-control select2bs4" style="width: 100%;" id="edit_temperature" name="temperature">
+                                                        {% for temp in range_51 %}
+                                                            <option value="{{ temp }}" {% if temp == vital.temperature %} selected {% endif %}>{{ temp }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3 form-group">
+                                                    <label for="edit_gcs" class="form-label">Glasgow Coma Scale</label>
+                                                    <select class="form-control select2bs4" style="width: 100%;" id="edit_gcs" name="gcs">
+                                                        {% for score in range_15 %}
+                                                            <option value="{{ score }}" {% if score == vital.gcs %} selected {% endif %}>{{ score }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3 form-group">
+                                                    <label for="edit_avpu" class="form-label">AVPU Scale</label>
+                                                    <select class="form-control select2bs4" style="width: 100%;" id="edit_avpu" name="avpu">
+                                                        <option value="Alert" {% if vital.avpu == 'Alert' %} selected {% endif %}>Alert</option>
+                                                        <option value="Verbal" {% if vital.avpu == 'Verbal' %} selected {% endif %}>Verbal</option>
+                                                        <option value="Pain" {% if vital.avpu == 'Pain' %} selected {% endif %}>Pain</option>
+                                                        <option value="Unresponsive" {% if vital.avpu == 'Unresponsive' %} selected {% endif %}>Unresponsive</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="col-md-12">
+                                                <button type="button" class="btn btn-primary btn-block" onclick="addRemotePatientVital()">Update Patient Vital</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                      <script>
+                        // Handle form submission using AJAX
+                        function addRemotePatientVital() {
+                            $.ajax({
+                                type: 'POST',
+                                url: '{% url "kahamahmis:save_remotepatient_vital" %}',  // Replace with your URL
+                                data: $('#editPatientVitalForm').serialize(),
+                                success: function (data) {
+                                    if (data.status === 'success') {
+                                        $('#editPatientVitalModal').modal('hide');
+                                        location.reload(true);
+                                        // Refresh the inventory vital list or perform any other actions
+                                    } else {
+                                        // Handle other status cases if needed
+                                        alert(data.message);
+                                    }
+                                },
+                                error: function (error) {
+                                    alert(error);
+                                    // Handle errors if necessary
+                                }
+                            });
+                        }
+                    </script>
+                      {% endfor %}
+                  </tbody>
+              </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+        <div class="row justify-content-center">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">Add  Consultation Notes</div>
+                    <div class="card-body">
+                        <form id="addConsultationForm"  action="{% url 'kahamahmis:save_nextremotesconsultation_notes' patient.id visit.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="container-fluid">
+                                <!-- First row -->
+                                <div class="row">                                                                
+                                    <div class="col-md-6 form-group">
+                                        <label for="chief_complaints">Chief Complaints:</label>
+                                        <textarea class="form-control" id="chief_complaints" name="chief_complaints"></textarea>
+                                    </div>
+                                      <!-- Allergy to medications -->
+                                      <div class="col-md-6 form-group">
+                                        <label for="allergy_to_medications">Allergy to Medications:</label>
+                                        <input type="text" class="form-control" id="allergy_to_medications" name="allergy_to_medications">
+                                        <input type="hidden" class="form-control" id="notes_id" name="notes_id">
+                                    </div>
+                                </div>
+                                <!-- Second row -->
+                                <div class="row">
+                                    <!-- History of presenting illness -->
+                                    <div class="col-md-4 form-group">
+                                        <label for="history_of_presenting_illness">History of Presenting Illness:</label>
+                                        <textarea class="form-control" id="history_of_presenting_illness" name="history_of_presenting_illness"></textarea>
+                                    </div>
+                                    <!-- Physical examination -->
+                                    <div class="col-md-4 form-group">
+                                        <label for="physical_examination">Physical Examination:</label>
+                                        <textarea class="form-control" id="physical_examination" name="physical_examination"></textarea>
+                                    </div>
+                                         <!-- Pathology -->
+                                         <div class="col-md-4 form-group">
+                                            <label for="pathology">Pathology:</label>
+                                            <select class="form-control select2bs4" style="width: 100%;" id="pathology" name="pathology[]" multiple>
+                                                {% for record in pathology_records %}
+                                                    <option value="{{ record.id }}">{{ record.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                </div>
+                                <!-- Third row -->
+                                <div class="row">
+                                    <!-- Provisional diagnosis -->
+                                   <!-- Provisional diagnosis -->
+                                    <div class="col-md-4 form-group">
+                                        <label for="provisional_diagnosis">Provisional Diagnosis:</label>
+                                        <select class="form-control select2bs4" style="width: 100%;" id="provisional_diagnosis" name="provisional_diagnosis[]" multiple>
+                                            <option value="">Select Provisional Diagnosis</option>
+                                            {% for diagnosis in provisional_diagnoses %}
+                                                <option value="{{ diagnosis.id }}">{{ diagnosis.diagnosis_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+        
+                                    <!-- Final diagnosis -->
+                                    <div class="col-md-4 form-group">
+                                        <label for="final_diagnosis">Final Diagnosis:</label>
+                                        <select class="form-control select2bs4" style="width: 100%;" id="final_diagnosis" name="final_diagnosis[]" multiple>
+                                            <option value="">Select Final Diagnosis</option>
+                                            {% for diagnosis in final_diagnoses %}
+                                                <option value="{{ diagnosis.id }}">{{ diagnosis.diagnosis_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                      <!-- Doctor plan -->
+                                      <div class="col-md-4 form-group">
+                                        <label for="doctor_plan">Doctor Plan:</label>
+                                        <select class="form-control select2bs4" style="width: 100%;" id="doctor_plan" name="doctor_plan">
+                                            <option value="">Select Doctor Plan</option>
+                                            <option value="Prescription">Prescription</option>
+                                            <option value="Laboratory">Laboratory</option>
+                                            <option value="Referral">Referral</option>
+                                            <option value="Counsel">Counsel</option>
+                                            <option value="Procedure">Procedure</option>
+                                            <option value="Observation">Observation</option>
+                                        </select>
+                                    </div>
+                             
+                                </div>
+                             
+                            </div>
+                            <div class="card-footer">
+                                {% if messages %}
+                                    <div class="row">
+                                        <div class="col-12">
+                                            {% for message in messages %}
+                                                {% if message.tags == 'error' %}
+                                                    <div class="alert alert-danger">{{ message }}</div>
+                                                {% elif message.tags == 'success' %}
+                                                    <div class="alert alert-primary">{{ message }}</div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <!-- Submit button -->
+                            <div class="form-row">
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-primary btn-block" >save & continue</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="previousConsultationModal" tabindex="-1" role="dialog" aria-labelledby="previousConsultationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="previousConsultationModalLabel">Previous Consultation Notes</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Card inside modal -->
+          <div class="card">
+            <div class="card-body">
+              <!-- Table inside card -->
+            <div class="table-responsive">
+                <table  class="table table-hover text-nowrap table-bordered table-striped table-sm display" id="example5" style="width:100%">
+                    <thead>
+                      <tr>
+                        <th scope="col">Visit number</th>
+                        <th scope="col">Consultation Number</th>                  
+                         <th scope="col">Chief Complaints</th>
+                        <th scope="col">History of Presenting Illness</th>
+                        <th scope="col">physical examination</th>                     
+                        <th scope="col">Allergy to medications</th>
+                        <th scope="col">Provisional diagnosis</th>
+                        <th scope="col">Final diagnosis</th>
+                        <th scope="col">Pathology</th>
+                        <th scope="col">Doctor plan</th>
+                        <th>Date</th>
+                        <th>Day</th> <!-- New column for the day of the week -->
+                        <th>Time</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for notes in consultation_notes_previous %}
+                      <tr>
+                        <td>{{ notes.visit.vst }}</td>
+                        <td>{{ notes.consultation_number }}</td>                  
+                         <td>{{ notes.chief_complaints }}</td>
+                         <td>{{ notes.physical_examination }}</td> 
+                        <td>{{ notes.history_of_presenting_illness }}</td>
+                        <td>{{ notes.allergy_to_medications }}</td>
+                        <td>  <ul class="list-group">
+                            {% for diagnosis in notes.provisional_diagnosis.all %}
+                            <li class="list-group-item">{{ diagnosis.diagnosis_name }}</li>
+                            {% endfor %}
+                        </ul></td>
+                        <td>  <ul class="list-group">
+                            {% for diagnosis in notes.final_diagnosis.all %}
+                            <li class="list-group-item">{{ diagnosis.diagnosis_name }}</li>
+                            {% endfor %}
+                        </ul></td>
+                        <td>  <ul class="list-group">
+                            {% for path in notes.pathology.all %}
+                            <li class="list-group-item">{{ path.name }}</li>
+                            {% endfor %}
+                        </ul></td>
+                        <td>{{ notes.doctor_plan }}</td>
+                          <!-- Split recorded_at into date, day of the week, and time components -->
+                        <td>{{ notes.created_at|date:"Y-m-d" }}</td> <!-- Display date -->
+                        <td>{{ notes.created_at|date:"l" }}</td> <!-- Display day of the week -->
+                        <td>{{ notes.created_at|time:"H:i:s" }}</td> <!-- Display time -->
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+            </div>
+              <!-- End of table -->
+            </div>
+          </div>
+          <!-- End of card -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+      
+  {% include 'kahama_template/datatable.html' %}
+{% endblock main_content %}

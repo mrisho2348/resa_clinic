@@ -10,9 +10,9 @@ Prescription List
 
 {% block breadcrumb %}
 {% include "kahama_template/modal_form.html" %}
-<a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#addPrescriptionModal">
+{% comment %} <a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#addPrescriptionModal">
     <i class="fas fa-plus"></i> New Prescription
-</a>
+</a> {% endcomment %}
 <!-- Add Import insurance link and modal trigger -->
 <a class="btn btn-success float-right mr-2" href="{% url 'import_prescription_records' %}">
   <i class="fas fa-file-import"></i> Import Prescription
@@ -76,10 +76,7 @@ Prescription List
                     <td>{{ prescription.quantity_used }}</td>
                     <td>{{ prescription.total_price }}</td>
                     <td>{{ prescription.created_at }}</td>
-                    <td>
-                      <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#editPrescriptionModal{{ prescription.id }}"  data-toggle="tooltip" title="Edit">
-                        <i class="fa fa-edit text-white"></i>
-                    </button>
+                    <td>                     
                       <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deletePrescriptionModal{{ prescription.id }}"  data-toggle="tooltip" title="Delete">
                         <i class="fas fa-trash"></i>
                     </button>    
@@ -317,7 +314,124 @@ Prescription List
         });
     }
 </script>
-  
+
+<div class="modal fade" id="addPrescriptionModal" tabindex="-1" role="dialog" aria-labelledby="addPrescriptionModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="addPrescriptionModalLabel">Add Prescription for visit {{ visits.vst }} and patient {{ patient }}</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <form id="addPrescriptionModalForm{{ visit.id }}" method="post">
+                  {% csrf_token %}
+                  <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="prescriptionTable{{ visit.id }}">
+                      <thead>
+                          <tr>
+                              <th>Drug</th>
+                              <th>Dose</th>
+                              <th>Frequency</th>
+                              <th>Duration</th>
+                              <th>Quantity</th>
+                              <th></th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr>
+                            <select class="form-control select2bs4" style="width: 100%;" id="patient_id" name="patient_id" required>
+                              <option value="">Select Patient</option>
+                              {% for patient in patients %}
+                                <option value="{{ patient.id }}">{{ patient.fullname }}</option>
+                              {% endfor %}
+                            </select>
+                              <td> <select class="form-control select2bs4" style="width: 100%;" id="medicine" name="medicine[]" required>
+                                  <option value="">Select Medicine</option>
+                                  {% for medicine in medicines %}
+                                    <option value="{{ medicine.id }}" {% if medicine.id == prescription.medicine.id  %} selected {% endif %}>{{ medicine.name }}</option>
+                                  {% endfor %}
+                                </select></td>
+                              <td><input type="text" class="form-control" name="dose[]" value="0"></td>
+                              <td><select class="form-control select2bs4" style="width: 100%;" id="frequency" name="frequency[]">                                
+                                      <option value="PRN">PRN</option>
+                                      <option value="QID">QID</option>
+                                      <option value="TID">TID</option>
+                                      <option value="BID">BID</option>
+                                      <option value="STAT">STAT</option>
+                                      <option value="OD">OD</option>                                    
+                              </select></td></td>
+                              <td> <select class="form-control select2bs4" style="width: 100%;" id="duration" name="duration[]">
+                                  {% for rate in range_31 %}
+                                      <option value="{{ rate }}">{{ rate }}</option>
+                                  {% endfor %}
+                              </select></td>
+                              <td><input type="text" class="form-control" name="quantity[]" value="1"></td>
+                              <td><button type="button" class="btn btn-danger delete-row">Delete</button></td>
+                          </tr>
+                      </tbody>
+                  </table>
+                  <input type="hidden" class="form-control" id="visit_id" name="visit_id" value="{{ visits.id }}">                  
+                  <button type="button" class="btn btn-success" id="addRow{{ visit.id }}">Add Row</button>
+                  <button type="button" class="btn btn-primary"  onclick="addPrescription()">Save Prescriptions</button>
+              </form>
+          </div>
+      </div>
+  </div>
+</div>
+<script>
+  $(document).ready(function() {
+      // Add row button functionality
+      $('#addRow{{ visit.id }}').click(function() {
+          var newRow = `
+              <tr>
+                <select class="form-control select2bs4" style="width: 100%;" id="patient" name="patient" required>
+                  <option value="">Select Patient</option>
+                  {% for patient in patients %}
+                    <option value="{{ patient.id }}">{{ patient.fullname }}</option>
+                  {% endfor %}
+                </select>
+                  <td> <select class="form-control select2bs4" style="width: 100%;" id="medicine" name="medicine[]" required>
+                      <option value="">Select Medicine</option>
+                      {% for medicine in medicines %}
+                        <option value="{{ medicine.id }}" {% if medicine.id == prescription.medicine.id  %} selected {% endif %}>{{ medicine.name }}</option>
+                      {% endfor %}
+                    </select></td>
+                  <td><input type="text" class="form-control" name="dose[]" value="0"></td>
+                  <td><select class="form-control select2bs4" style="width: 100%;" id="frequency" name="frequency[]">                                
+                      <option value="PRN">PRN</option>
+                      <option value="QID">QID</option>
+                      <option value="TID">TID</option>
+                      <option value="BID">BID</option>
+                      <option value="STAT">STAT</option>
+                      <option value="OD">OD</option>                                    
+              </select></td></td>
+              <td> <select class="form-control select2bs4" style="width: 100%;" id="duration" name="duration[]">
+                  {% for rate in range_31 %}
+                      <option value="{{ rate }}">{{ rate }}</option>
+                  {% endfor %}
+              </select></td>
+                  <td><input type="text" class="form-control" name="quantity[]" value="1"></td>
+                  <td><button type="button" class="btn btn-danger delete-row">Delete</button></td>
+              </tr>`;
+          $('#prescriptionTable{{ visit.id }} tbody').append(newRow);
+      });
+
+      // Delete row button functionality
+      $(document).on('click', '.delete-row', function() {
+          $(this).closest('tr').remove();
+      });
+
+      // Trigger modal only when button is clicked
+      $('.add-prescription').click(function() {
+          var visitId = $(this).data('visit-id');
+          $('#addPrescriptionModal' + visitId).modal('show');
+      });
+  });
+</script>
+
+
+
 <script>
     function submitForm(checkbox) {
         checkbox.form.submit();

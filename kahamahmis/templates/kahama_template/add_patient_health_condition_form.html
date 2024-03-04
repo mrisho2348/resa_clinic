@@ -4,12 +4,11 @@
     Patient Health
 {% endblock title %}
 
-{% block page_title %}
-    Add Patient Health Record
-{% endblock page_title %}
+
 
 {% block breadcrumb %}
     <!-- Breadcrumb content can be added here if needed -->
+    Add Patient Health Record
 {% endblock breadcrumb %}
 
 {% block main_content %}
@@ -43,23 +42,28 @@
                         <form method="post" action="{% url 'kahamahmis:save_patient_health_condition' patient.id %}">
                             {% csrf_token %}
                             <input type="hidden" name="patient_id" value="{{ patient.id }}">
-                            
+                            <div class="form-group">
+                                <label for="chronic_illness">Does Patient have chronic illness?</label>
+                                <select class="form-control" id="chronic_illness" name="chronic_illness">                                 
+                                    <option value="no">No</option>
+                                    <option value="yes">Yes</option>
+                                </select>
+                            </div>
                             <!-- Health Condition Table -->
-                            <div class="table-responsive">
+                            <div class="table-responsive"   id="health_condition_form_container">
                                 <table class="table table-bordered" id="health_condition_table">
                                     <thead>
                                         <tr>
-                                            <th>Health Condition</th>
-                                            <th>Health Condition Notes</th>
+                                            <th>chronic illness</th>
+                                            <th>chronic illness Notes</th>
                                             <th></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
                                             <td>
-                                                <select class="form-control select2bs4" style="width: 100%;" name="health_condition[]" required>
-                                                    <option value=""  selected>Select Health Condition</option>
-                                                    <option value="Allergies">Allergies</option>
+                                                <select class="form-control select2bs4" style="width: 100%;" name="health_condition[]" >
+                                                    <option value=""  selected>Select Health Condition</option>                                                  
                                                     <option value="Eye Condition">Eye Condition</option>
                                                     <option value="Ear, Nose, Throat">Ear, Nose, Throat</option>
                                                     <option value="Respiratory Conditions">Respiratory Conditions</option>
@@ -75,15 +79,13 @@
                                         </tr>
                                     </tbody>
                                 </table>
-                            </div>
-                            
-                            <!-- Add More Health Record Button -->
+                                    <!-- Add More Health Record Button -->
                             <div class="form-group">
                                 <button type="button" class="btn btn-primary btn-block" id="add_health_record">Add Health Record</button>
                             </div>
-                            
-                            <!-- Submit Button -->
-                            <button type="submit" class="btn btn-success btn-block">Save Health Records</button>
+                            </div>                          
+                                      <!-- Submit Button -->
+                            <button type="submit" class="btn btn-success btn-block">Save To continue</button>
                         </form>
                     </div>
                     <div class="card-footer">
@@ -108,6 +110,27 @@
         </div>
     </div>
     
+    <script>
+        // Initially hide the health condition entry form
+        $('#health_condition_form_container').hide();
+    
+        // Event listener for chronic illness selection
+        $('#chronic_illness').change(function() {
+            if($(this).val() === 'yes') {
+                // Show the health condition entry form if the patient has chronic illness
+                $('#health_condition_form_container').show();
+            } else {
+                // Hide the health condition entry form if the patient doesn't have chronic illness
+                $('#health_condition_form_container').hide();
+            }
+        });
+      // Add event listener to the form for submission
+      $('form').submit(function() {
+        // Ensure that the form is submitted even if the option selected is "No"
+        return true;
+    });
+        // JavaScript for Adding/Deleting Rows (if needed)
+    </script>
     <!-- JavaScript for Adding/Deleting Rows -->
     <script>
         // Add Health Record Row
@@ -115,8 +138,7 @@
             var newRow = `<tr>
                             <td>
                                 <select class="form-control select2bs4" style="width: 100%;" name="health_condition[]" required>
-                                    <option value=""  selected>Select Health Condition</option>
-                                    <option value="Allergies">Allergies</option>
+                                    <option value=""  selected>Select Health Condition</option>                                  
                                     <option value="Eye Condition">Eye Condition</option>
                                     <option value="Ear, Nose, Throat">Ear, Nose, Throat</option>
                                     <option value="Respiratory Conditions">Respiratory Conditions</option>
@@ -138,4 +160,6 @@
             $(this).closest('tr').remove();
         });
     </script>
+    
+    {% include 'kahama_template/datatable.html' %}     
 {% endblock main_content %}

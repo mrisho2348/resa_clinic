@@ -131,6 +131,37 @@ class RemoteCompany(models.Model):
     def __str__(self):
         return self.name
     
+class PatientMedicationAllergy(models.Model):
+    patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE, related_name='medication_allergies')
+    medicine_name = models.CharField(max_length=100)
+    reaction = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.medicine_name} - {self.reaction}"
+    
+class PatientSurgery(models.Model):
+    patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE)
+    surgery_name = models.CharField(max_length=100,blank=True, null=True)
+    surgery_date = models.DateField(blank=True, null=True)   
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+    def __str__(self):
+        return f"{self.surgery_name} - {self.surgery_date}"  
+    
+class PatientLifestyleBehavior(models.Model):
+    patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE)
+    weekly_exercise_frequency = models.CharField(max_length=100)    
+    smoking = models.BooleanField(default=False)
+    alcohol_consumption = models.BooleanField(default=False)    
+    healthy_diet = models.BooleanField(default=False)
+    stress_management = models.BooleanField(default=False)
+    sufficient_sleep = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.patient} - {self.behavior_name}"
 
 class Service(models.Model):
     covarage = models.CharField(max_length=200, blank=True, null=True)
@@ -323,13 +354,17 @@ class RemotePatient(models.Model):
     date_of_osha_certification = models.DateField(null=True, blank=True)
     insurance = models.CharField(max_length=20, choices=[('Uninsured', 'Uninsured'), ('Insured', 'Insured'), ('Unknown', 'Unknown')])
     insurance_company = models.CharField(max_length=100, blank=True, null=True)
+    other_insurance_company = models.CharField(max_length=100, blank=True, null=True)
     insurance_number = models.CharField(max_length=100, blank=True, null=True)
     emergency_contact_name = models.CharField(max_length=100)
-    emergency_contact_relation = models.CharField(max_length=100)
+    emergency_contact_relation = models.CharField(max_length=100, blank=True, null=True)
+    other_emergency_contact_relation = models.CharField(max_length=100,blank=True, null=True)
     emergency_contact_phone = models.CharField(max_length=20)
     marital_status = models.CharField(max_length=20, choices=[('Single', 'Single'), ('Married', 'Married'), ('Divorced', 'Divorced'), ('Widowed', 'Widowed')],default="Single")
     occupation = models.CharField(max_length=100, blank=True, null=True)
+    other_occupation = models.CharField(max_length=100, blank=True, null=True)
     patient_type = models.CharField(max_length=100, blank=True, null=True)
+    other_patient_type = models.CharField(max_length=100, blank=True, null=True)
     company = models.ForeignKey(RemoteCompany, on_delete=models.CASCADE)    
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Created At')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Updated At')
@@ -443,7 +478,7 @@ class PatientVital(models.Model):
     
 class RemotePatientVital(models.Model):
     patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE)
-    visit = models.OneToOneField('RemotePatientVisits', on_delete=models.CASCADE)  
+    visit = models.ForeignKey('RemotePatientVisits', on_delete=models.CASCADE)  
     recorded_at = models.DateTimeField(auto_now_add=True)
     respiratory_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Respiratory rate in breaths per minute")
     pulse_rate = models.PositiveIntegerField(null=True, blank=True, help_text="Pulse rate in beats per minute")
@@ -568,7 +603,7 @@ def generate_consultation_number():
 class RemoteConsultationNotes(models.Model):
     doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE)
     patient = models.ForeignKey(RemotePatient, on_delete=models.CASCADE)
-    visit = models.OneToOneField('RemotePatientVisits', on_delete=models.CASCADE)  
+    visit = models.ForeignKey('RemotePatientVisits', on_delete=models.CASCADE)  
     chief_complaints = models.TextField(null=True, blank=True)
     history_of_presenting_illness = models.TextField(null=True, blank=True)
     consultation_number = models.CharField(max_length=20, unique=True)

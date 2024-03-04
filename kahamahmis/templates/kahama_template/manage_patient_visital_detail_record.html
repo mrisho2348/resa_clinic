@@ -261,56 +261,138 @@ Patient Details
                     <h2 class="card-title">Assessment Data</h2>
                 </div>
                 <div class="card-body">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Assessment Date</th>
-                                <th>Vital Name</th>
-                                <th>Result</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% if vital %}
-                            <tr>
-                                <td>{{ vital.recorded_at }}</td>
-                                <td>BLOOD PRESSURE</td>
-                                <td>{{ vital.blood_pressure }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ vital.recorded_at }}</td>
-                                <td>HEART RATE</td>
-                                <td>{{ vital.pulse_rate }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ vital.recorded_at }}</td>
-                                <td>RESPIRATORY RATE</td>
-                                <td>{{ vital.respiratory_rate }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ vital.recorded_at }}</td>
-                                <td>OXYGEN SATURATION(SP02)</td>
-                                <td>{{ vital.spo2 }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ vital.recorded_at }}</td>
-                                <td>GCS</td>
-                                <td>{{ vital.gcs }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ vital.recorded_at }}</td>
-                                <td>WEIGHT</td>
-                                <td>{{ vital.avpu }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ vital.recorded_at }}</td>
-                                <td>TEMPERATURE</td>
-                                <td>{{ vital.temperature }}</td>
-                            </tr>
-                            {% else %}
-                            no vital record 
-                            {% endif %}
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-hover text-nowrap table-bordered table-striped table-sm display" id="example6" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Visit number</th>
+                                    <th>Respiratory Rate</th>
+                                    <th>Pulse Rate</th>
+                                    <th>Blood Pressure</th>
+                                    <th>AVPU</th>
+                                    <th>SPO2</th>
+                                    <th>Temperature</th>
+                                    <th>GCS</th>
+                                    <th>Date</th>
+                                    <th>Day</th> <!-- New column for the day of the week -->
+                                    <th>Time</th>                                                           
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vital in previous_vitals %}
+                                <tr>
+                                    <td>{{ vital.visit.vst }}</td>
+                                    <td>{{ vital.respiratory_rate }}</td>
+                                    <td>{{ vital.pulse_rate }}</td>
+                                    <td>{{ vital.blood_pressure }}</td>
+                                    <td>{{ vital.avpu }}</td>
+                                    <td>{{ vital.spo2 }}</td>
+                                    <td>{{ vital.temperature }}</td>
+                                    <td>{{ vital.gcs }}</td>
+                                    <!-- Split recorded_at into date, day of the week, and time components -->
+                                    <td>{{ vital.recorded_at|date:"Y-m-d" }}</td> <!-- Display date -->
+                                    <td>{{ vital.recorded_at|date:"l" }}</td> <!-- Display day of the week -->
+                                    <td>{{ vital.recorded_at|time:"H:i:s" }}</td><!-- Display time -->
+                                    
+                                </tr>
+                               
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                       </div>
+                </div>
+            </div>
+        </div>
+    </div>
+     {% endif %}
+
+
+     
+     {% if procedures %}
+     <div class="row mt-5">
+        <div class="col-12">
+            <div class="card assessment-data-card">
+                <div class="card-header bg-dark text-white">
+                    <h2 class="card-title">Procedure Data</h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover text-nowrap table-bordered table-striped" id="example">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Duration Time</th>
+                                    <th>Equipments Used</th>
+                                    <th>Cost</th>
+                                    <th>Date</th>
+                                    <th>Day</th> <!-- New column for the day of the week -->
+                                    <th>Time</th>  
+                                    <th>Updated At</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for procedure in procedures %}
+                                <tr>
+                                    <td>{{ procedure.name }}</td>
+                                    <td>{{ procedure.description }}</td>
+                                    <td>{{ procedure.duration_time }}</td>
+                                    <td>{{ procedure.equipments_used }}</td>
+                                    <td>{{ procedure.cost }}</td>
+                                    <td>{{ procedure.created_at|date:"Y-m-d" }}</td> <!-- Display date -->
+                                    <td>{{ procedure.created_at|date:"l" }}</td> <!-- Display day of the week -->
+                                    <td>{{ procedure.created_at|time:"H:i:s" }}</td><!-- Display time -->
+                                    <td>{{ procedure.updated_at }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                       </div>
+                </div>
+            </div>
+        </div>
+    </div>
+     {% endif %}
+
+
+     {% if lab_tests %}
+     <div class="row mt-5">
+        <div class="col-12">
+            <div class="card assessment-data-card">
+                <div class="card-header bg-dark text-white">
+                    <h2 class="card-title">Lab Result Data</h2>
+                </div>
+                <div class="card-body">
+                    <div  class="table-responsive">
+                        <table  class="table table-hover text-nowrap table-bordered table-striped" id="example1">
+                            <thead>
+                                <tr>
+                                    <th>Lab Number</th>
+                                    <th>Patient</th>
+                                    <th>Visit</th>
+                                    <th>Consultation</th>
+                                    <th>Diagnosis</th>
+                                    <th>Test Name</th>
+                                    <th>Result</th>
+                          
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lab_test in lab_tests %}
+                                <tr>
+                                    <td>{{ lab_test.lab_number }}</td>
+                                    <td>{{ lab_test.patient.mrn }}</td>
+                                    <td>{{ lab_test.visit.vst }}</td>
+                                    <td>{{ lab_test.consultation.consultation_number }}</td>
+                                    <td>{{ lab_test.diagnosis }}</td>
+                                    <td>{{ lab_test.test_name }}</td>
+                                    <td>{{ lab_test.result }}</td>
+                         
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

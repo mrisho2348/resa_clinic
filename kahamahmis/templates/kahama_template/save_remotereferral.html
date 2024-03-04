@@ -85,26 +85,15 @@ Patient Referral
                         {% csrf_token %}
                         <div class="container-fluid">
                             <!-- First row -->
-                            <div class="row">
-                                <!-- Doctor selection -->
-                                <div class="col-md-4 form-group">
-                                    <label for="doctor{{ consultation_notes.id }}">Doctor:</label>
-                                    <select class="form-control select2bs4" style="width: 100%;" id="doctor{{ consultation_notes.id }}" name="doctor" required>
-                                        <option value="">Select Doctor</option>
-                                        {% for doctor in doctors %}
-                                        <option value="{{ doctor.id }}" {% if consultation_notes.doctor.id == doctor.id %} selected {% endif %}>{{ doctor.admin.first_name }} {{ doctor.middle_name }} {{ doctor.admin.last_name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-
+                            <div class="row">                             
                                   <!-- Doctor plan -->
-                                <div class="col-md-4 form-group">
+                                <div class="col-md-6 form-group">
                                     <label for="doctor_plan{{ consultation_notes.id }}">Doctor Plan:</label>
                                     <textarea class="form-control" id="doctor_plan{{ consultation_notes.id }}" name="doctor_plan">{{ consultation_notes.doctor_plan }}</textarea>
                                 </div>
 
                                 <!-- Chief complaints -->
-                                <div class="col-md-4 form-group">
+                                <div class="col-md-6 form-group">
                                     <label for="chief_complaints{{ consultation_notes.id }}">Chief Complaints:</label>
                                     <textarea class="form-control" id="chief_complaints{{ consultation_notes.id }}" name="chief_complaints">{{ consultation_notes.chief_complaints }}</textarea>
                                 </div>

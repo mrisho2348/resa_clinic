@@ -1,64 +1,102 @@
 {% extends 'kahama_template/base_template.html' %}
 
 {% block title %}
-Patient Health
+   Update Patient Health
 {% endblock title %}
 
+
 {% block breadcrumb %}
+    <!-- Breadcrumb content can be added here if needed -->
+    Update Patient Health Record
 {% endblock breadcrumb %}
 
 {% block main_content %}
     {% load static %}             
 
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card mt-5">
-                    <div class="card-header" style="background-color: #007bff; color: white; font-weight: bold; border-radius: 10px;">
-                        <h4 style="margin-bottom: 0;">Edit Patient Health Condition</h4>
-                        <p style="font-size: 14px; margin-bottom: 0;">{{ patient.first_name }} {{ patient.middle_name }} {{ patient.last_name }}</p>
-                    </div>
+        <!-- Patient Information Card -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
                     <div class="card-body">
-                        <form method="post" action="{% url 'health_info_edit' patient.id %}">
+                        <div class="row" style="font-size:13px;">
+                            <div class="col-md-3"><b>PATIENT: {{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</b></div>
+                            <div class="col-md-3"><b>Age: {{ patient.age }}</b></div>
+                            <div class="col-md-3"><b>SEX: {{ patient.gender }}</b></div>
+                            <div class="col-md-3"><b>FILE NO : {{ patient.mrn }}</b></div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-3"><b>PAYMENT MODE: {{ patient.payment_form }}</b></div>
+                        </div>
+                    </div>    
+                </div>
+            </div>
+        </div>
+        
+        <!-- Health Condition Entry Form -->
+        <div class="row justify-content-cente">
+            <div class="col-md-12">
+                <div class="card">                    
+                    <div class="card-body">
+                        <form method="post" action="{% url 'kahamahmis:health_info_edit' patient.id %}">
                             {% csrf_token %}
-                            <!-- Hidden Field for Patient ID -->
                             <input type="hidden" name="patient_id" value="{{ patient.id }}">
-                            <!-- Health Condition Information -->
+                                <!-- Chronic Illness Selection -->
+                                <div class="form-group">
+                                    <label for="chronic_illness">Does Patient have chronic illness?</label>
+                                    <select class="form-control" id="chronic_illness" name="chronic_illness">                                 
+                                        <option value="no" {% if not patient_health_records %} selected {% endif %}>No</option>
+                                        <option value="yes" {% if patient_health_records %} selected {% endif %}>Yes</option>
+                                    </select>
+                                </div>
+                            <!-- Health Condition Table -->
+                            <div class="table-responsive" id="health_condition_form_container">
+                                <table class="table table-bordered" id="health_condition_table">
+                                    <thead>
+                                        <tr>
+                                            <th>chronic illness</th>
+                                            <th>chronic illness Notes</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for health_record in patient_health_records %}
+                                        <tr>
+                                            <td>
+                                                <input type="hidden" name="record_ids[]" value="{{ health_record.id }}">
+                                                <select class="form-control select2bs4" style="width: 100%;" name="health_condition_{{ health_record.id }}" required>
+                                                    <option value="" {% if health_record.health_condition == "" %} selected {% endif %}>Select Health Condition</option>
+                                                    <option value="Allergies" {% if health_record.health_condition == "Allergies" %} selected {% endif %}>Allergies</option>
+                                                    <option value="Eye Condition" {% if health_record.health_condition == "Eye Condition" %} selected {% endif %}>Eye Condition</option>
+                                                    <option value="Ear, Nose, Throat" {% if health_record.health_condition == "Ear, Nose, Throat" %} selected {% endif %}>Ear, Nose, Throat</option>
+                                                    <option value="Respiratory Conditions" {% if health_record.health_condition == "Respiratory Conditions" %} selected {% endif %}>Respiratory Conditions</option>
+                                                    <option value="Cardiovascular Conditions" {% if health_record.health_condition == "Cardiovascular Conditions" %} selected {% endif %}>Cardiovascular Conditions</option>
+                                                    <option value="Urinary, Kidney, or Prostate Conditions" {% if health_record.health_condition == "Urinary, Kidney, or Prostate Conditions" %} selected {% endif %}>Urinary, Kidney, or Prostate Conditions</option>
+                                                    <option value="Stomach or Bowel Conditions" {% if health_record.health_condition == "Stomach or Bowel Conditions" %} selected {% endif %}>Stomach or Bowel Conditions</option>
+                                                    <option value="Musculoskeletal Conditions" {% if health_record.health_condition == "Musculoskeletal Conditions" %} selected {% endif %}>Musculoskeletal Conditions</option>
+                                                    <option value="Neurological/Psychiatric Conditions" {% if health_record.health_condition == "Neurological/Psychiatric Conditions" %} selected {% endif %}>Neurological/Psychiatric Conditions</option>
+                                                </select>
+                                            </td>
+                                            <td><textarea class="form-control" name="health_condition_notes_{{ health_record.id }}" cols="30" rows="2">{{ health_record.health_condition_notes }}</textarea></td>
+                                            <td>
+                                                <!-- Checkbox for record deletion -->
+                                             <input type="checkbox" name="delete_record_{{ health_record.id }}">
+                                            </td>
+                     
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                  <!-- Add More Health Record Button -->
                             <div class="form-group">
-                                <label for="health_condition"> Health Condition:</label>
-                                <select class="form-control select2bs4" style="width: 100%;" id="health_condition" name="health_condition" required>
-                                    <option value="" disabled>Select Health Condition</option>
-                                    <option value="Allergies" {% if initial_data.health_condition == 'Allergies' %} selected {% endif %}>Allergies</option>
-                                    <option value="Eye Condition" {% if initial_data.health_condition == 'Eye Condition' %} selected {% endif %}>Eye Condition</option>
-                                    <option value="Ear, Nose, Throat" {% if initial_data.health_condition == 'Ear, Nose, Throat' %} selected {% endif %}>Ear, Nose, Throat</option>
-                                    <option value="Respiratory Conditions" {% if initial_data.health_condition == 'Respiratory Conditions' %} selected {% endif %}>Respiratory Conditions</option>
-                                    <option value="Cardiovascular Conditions" {% if initial_data.health_condition == 'Cardiovascular Conditions' %} selected {% endif %}>Cardiovascular Conditions</option>
-                                    <option value="Urinary, Kidney, or Prostate Conditions" {% if initial_data.health_condition == 'Urinary, Kidney, or Prostate Conditions' %} selected {% endif %}>Urinary, Kidney, or Prostate Conditions</option>
-                                    <option value="Stomach or Bowel Conditions" {% if initial_data.health_condition == 'Stomach or Bowel Conditions' %} selected {% endif %}>Stomach or Bowel Conditions</option>
-                                    <option value="Musculoskeletal Conditions" {% if initial_data.health_condition == 'Musculoskeletal Conditions' %} selected {% endif %}>Musculoskeletal Conditions</option>
-                                    <option value="Neurological/Psychiatric Conditions" {% if initial_data.health_condition == 'Neurological/Psychiatric Conditions' %} selected {% endif %}>Neurological/Psychiatric Conditions</option>
-                                    <!-- Add more options for other health conditions as needed -->
-                                </select>
+                                <button type="button" class="btn btn-primary btn-block" id="add_health_record" name="add_more_records">Add Health Record</button>
+                            </div>
                             </div>
                             
-                            
-                            <div class="form-group">
-                                <label for="health_condition_notes">Health Condition Notes:</label>
-                                <textarea class="form-control" id="health_condition_notes" name="health_condition_notes" cols="2">{{ initial_data.health_condition_notes }}</textarea>
-                            </div>
-                            <!-- End of Form -->
-                            <div class="row mt-3">
-                                <div class="col">
-                                    <button type="submit" name="save_and_continue_add_another_health_record" class="btn btn-primary btn-block">Save & Add More</button>
-                                </div>
-                                <div class="col">
-                                    <button type="submit" name="save_and_return" class="btn btn-primary btn-block">Save & Return to Patients List</button>
-                                </div>
-                                <div class="col">
-                                    <button type="submit" name="save_and_continue_family_health" class="btn btn-success btn-block">Save & Continue Editing Family Health Information</button>
-                                </div>
-                            </div>
                           
+                            
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-success btn-block" name="save_and_continue_family_health">Save change Health Records</button>
                         </form>
                     </div>
                     <div class="card-footer">
@@ -77,8 +115,71 @@ Patient Health
                                 {% endif %}
                             </div>
                         </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+  
+    
+    <script>
+        // Initially hide the health condition entry form
+        $(document).ready(function() {
+            if ($('#chronic_illness').val() === 'yes') {
+                $('#health_condition_form_container').show();
+            } else {
+                $('#health_condition_form_container').hide();
+            }
+        });
+    
+        // Event listener for chronic illness selection
+        $('#chronic_illness').change(function() {
+            if ($(this).val() === 'yes') {
+                // Show the health condition entry form if the patient has chronic illness
+                $('#health_condition_form_container').show();
+            } else {
+                // Hide the health condition entry form if the patient doesn't have chronic illness
+                $('#health_condition_form_container').hide();
+            }
+        });
+    
+        // Add event listener to the form for submission
+        $('form').submit(function() {
+            // Ensure that the form is submitted even if the option selected is "No"
+            return true;
+        });
+    
+        // JavaScript for Adding/Deleting Rows (if needed)
+    </script>
+    
+<script>
+    // Add Health Record Row
+    $('#add_health_record').click(function () {
+        var newRow = `<tr>
+                        <td>
+                            <select class="form-control select2bs4" style="width: 100%;" name="new_health_condition[]" required>
+                                <option value=""  selected>Select Health Condition</option>
+                                <option value="Allergies">Allergies</option>
+                                <option value="Eye Condition">Eye Condition</option>
+                                <option value="Ear, Nose, Throat">Ear, Nose, Throat</option>
+                                <option value="Respiratory Conditions">Respiratory Conditions</option>
+                                <option value="Cardiovascular Conditions">Cardiovascular Conditions</option>
+                                <option value="Urinary, Kidney, or Prostate Conditions">Urinary, Kidney, or Prostate Conditions</option>
+                                <option value="Stomach or Bowel Conditions">Stomach or Bowel Conditions</option>
+                                <option value="Musculoskeletal Conditions">Musculoskeletal Conditions</option>
+                                <option value="Neurological/Psychiatric Conditions">Neurological/Psychiatric Conditions</option>
+                            </select>
+                        </td>
+                        <td><textarea class="form-control" name="new_health_condition_notes[]" cols="30" rows="2"></textarea></td>
+                        <td><button type="button" class="btn btn-danger btn-sm delete-row">Delete</button></td>
+                    </tr>`;
+        $('#health_condition_table tbody').append(newRow);
+    });
+
+    // Delete Health Record Row
+    $(document).on('click', '.delete-row', function () {
+        $(this).closest('tr').remove();
+    });
+</script>
+{% include 'kahama_template/datatable.html' %} 
 {% endblock main_content %}

@@ -1,81 +1,111 @@
 {% extends 'kahama_template/base_template.html' %}
 
 {% block title %}
-    Edit Family Medical History
+   Update Family Medical History
 {% endblock title %}
-
 {% block breadcrumb %}
+Update Family Medical History
 {% endblock breadcrumb %}
-
 {% block main_content %}
     {% load static %}             
 
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card mt-5">
-                    <div class="card-header" style="background-color: #007bff; color: white; font-weight: bold; border-radius: 10px;">
-                        <h4 style="margin-bottom: 0;">Edit Family Medical History</h4>
-                        <p style="font-size: 14px; margin-bottom: 0;">{{ patient.first_name }} {{ patient.middle_name }} {{ patient.last_name }}</p>
-                    </div>
+        <!-- Patient Information Card -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
                     <div class="card-body">
-                        <form method="post" action="{% url 'family_health_info_edit' patient.id %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="patient_id" value="{{ patient.id }}">
-                            <!-- Medical Condition Information -->
-                            <div class="form-group">
-                                <label for="condition">Condition:</label>
-                                <select class="form-control select2bs4" style="width: 100%;" id="condition" name="condition" required>
-                                    <option value="Allergies" {% if family_medical_history.condition == 'Allergies' %} selected {% endif %}>Allergies</option>
-                                    <option value="Asthma" {% if family_medical_history.condition == 'Asthma' %} selected {% endif %}>Asthma</option>
-                                    <option value="Lung Disease" {% if family_medical_history.condition == 'Lung Disease' %} selected {% endif %}>Lung Disease</option>
-                                    <option value="Cancer" {% if family_medical_history.condition == 'Cancer' %} selected {% endif %}>Cancer</option>
-                                    <option value="Diabetes" {% if family_medical_history.condition == 'Diabetes' %} selected {% endif %}>Diabetes</option>
-                                    <option value="Hypertension" {% if family_medical_history.condition == 'Hypertension' %} selected {% endif %}>Hypertension</option>
-                                    <option value="Heart Disease" {% if family_medical_history.condition == 'Heart Disease' %} selected {% endif %}>Heart Disease</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="relationship">Relationship:</label>
-                                <input type="text" class="form-control" id="relationship" name="relationship" value="{{ family_medical_history.relationship }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="comments">Comments:</label>
-                                <textarea class="form-control" id="comments" name="comments" rows="3">{{ family_medical_history.comments }}</textarea>
-                            </div>
-                            <!-- End of Form -->
-                            <div class="row mt-3">
-                                <div class="col">
-                                    <button type="submit" name="save_and_continue_add_another_family_record" class="btn btn-primary btn-block">Save & Add More</button>
+                        <div class="row" style="font-size:13px;">
+                            <div class="col-md-3"><b>PATIENT: {{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</b></div>
+                            <div class="col-md-3"><b>Age: {{ patient.age }}</b></div>
+                            <div class="col-md-3"><b>SEX: {{ patient.gender }}</b></div>
+                            <div class="col-md-3"><b>FILE NO : {{ patient.mrn }}</b></div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-3"><b>PAYMENT MODE: {{ patient.payment_form }}</b></div>
+                        </div>
+                    </div>    
+                </div>
+            </div>
+        </div>
+
+
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <form method="post" action="{% url 'kahamahmis:family_health_info_edit' patient.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="patient_id" value="{{ patient.id }}">
+                                <div class="form-group">
+                                    <label for="family_medical_history">family medical history</label>
+                                    <select class="form-control" id="family_medical_history" name="family_medical_history">
+                                        <option value="no" {% if not family_medical_history  %} selected {% endif %}>No</option>
+                                        <option value="yes" {% if family_medical_history %} selected {% endif %}>Yes</option>
+                                    </select>
                                 </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col">
-                                    <button type="submit" name="save_and_return" class="btn btn-primary btn-block">Save & Return to Patients List</button>
+                                <!-- Family Medical History Table -->
+                                <div class="table-responsive" id="family_medical_history_form_container" {% if patient.has_family_medical_history %} style="display: block;" {% else %} style="display: none;" {% endif %}>
+                                    <table class="table table-bordered" id="family_medical_history_table">
+                                        <thead>
+                                            <tr>
+                                                <th>Condition</th>
+                                                <th>Relationship</th>
+                                                <th>Comments</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for record in family_medical_history %}
+                                            <tr>
+                                                <td>
+                                                    <select class="form-control select2bs4" style="width: 100%;" name="condition_{{ record.id }}">
+                                                        <option value="" selected>Select Condition</option>
+                                                        <option value="Allergies" {% if record.condition == 'Allergies' %} selected {% endif %}>Allergies</option>
+                                                        <option value="Asthma" {% if record.condition == 'Asthma' %} selected {% endif %}>Asthma</option>
+                                                        <option value="Lung Disease" {% if record.condition == 'Lung Disease' %} selected {% endif %}>Lung Disease</option>
+                                                        <option value="Cancer" {% if record.condition == 'Cancer' %} selected {% endif %}>Cancer</option>
+                                                        <option value="Diabetes" {% if record.condition == 'Diabetes' %} selected {% endif %}>Diabetes</option>
+                                                        <option value="Hypertension" {% if record.condition == 'Hypertension' %} selected {% endif %}>Hypertension</option>
+                                                        <option value="Heart Disease" {% if record.condition == 'Heart Disease' %} selected {% endif %}>Heart Disease</option>
+                                                    </select>
+                                                </td>
+                                                <td><input type="text" class="form-control" name="relationship_{{ record.id }}" value="{{ record.relationship }}"></td>
+                                                <td><textarea class="form-control" name="comments_{{ record.id }}" rows="3">{{ record.comments }}</textarea></td>
+                                                <td><input type="checkbox" name="delete_record_{{ record.id }}"></td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                    <!-- Add More Family Medical History Button -->
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-primary btn-block" id="add_family_medical_record">Add Family Medical Record</button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col">
-                                    <a href="{% url 'patients_list' %}" class="btn btn-secondary btn-block">Back to Patients List</a>
+                                <!-- Submit Button -->
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <button type="submit" name="save_and_continue_add_another_family_record" class="btn btn-primary btn-block">Save &  continue</button>
+                                    </div>
                                 </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="card-footer">
-                        <div class="form-row">
-                            <div>
-                                {% if messages %}
+                            </form>
+                        </div>
+                        <div class="card-footer">
+                            <div class="form-row">
+                                <div>
+                                    {% if messages %}
                                     <div class="col-12">
                                         {% for message in messages %}
-                                            {% if message.tags == 'error' %}
-                                                <div class="alert alert-danger">{{ message }}</div>
-                                            {% elif message.tags == 'success' %}
-                                                <div class="alert alert-primary">{{ message }}</div>
-                                            {% endif %}
+                                        {% if message.tags == 'error' %}
+                                        <div class="alert alert-danger">{{ message }}</div>
+                                        {% elif message.tags == 'success' %}
+                                        <div class="alert alert-primary">{{ message }}</div>
+                                        {% endif %}
                                         {% endfor %}
                                     </div>
-                                {% endif %}
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -83,4 +113,54 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Initially show/hide the family medical history form based on patient's selection
+        $(document).ready(function() {
+            toggleFamilyMedicalHistoryForm($('#family_medical_history').val() === 'yes');
+        });
+    
+        // Event listener for family medical history selection
+        $('#family_medical_history').change(function() {
+            toggleFamilyMedicalHistoryForm($(this).val() === 'yes');
+        });
+    
+        // Function to toggle visibility of family medical history form
+        function toggleFamilyMedicalHistoryForm(show) {
+            if (show) {
+                $('#family_medical_history_form_container').show();
+            } else {
+                $('#family_medical_history_form_container').hide();
+            }
+        }
+    
+        // JavaScript for Adding/Deleting Rows
+        // Add Family Medical Record Row
+        $('#add_family_medical_record').click(function () {
+            var newRow = `<tr>
+                            <td>
+                                <select class="form-control select2bs4" style="width: 100%;" name="new_condition[]" required>
+                                    <option value="" selected>Select Condition</option>
+                                    <option value="Allergies">Allergies</option>
+                                    <option value="Asthma">Asthma</option>
+                                    <option value="Lung Disease">Lung Disease</option>
+                                    <option value="Cancer">Cancer</option>
+                                    <option value="Diabetes">Diabetes</option>
+                                    <option value="Hypertension">Hypertension</option>
+                                    <option value="Heart Disease">Heart Disease</option>
+                                </select>
+                            </td>
+                            <td><input type="text" class="form-control" name="new_relationship[]"></td>
+                            <td><textarea class="form-control" name="new_comments[]" rows="3"></textarea></td>
+                            <td><button type="button" class="btn btn-danger btn-sm delete-row">Delete</button></td>
+                        </tr>`;
+            $('#family_medical_history_table tbody').append(newRow);
+        });
+    
+        // Delete Family Medical Record Row
+        $(document).on('click', '.delete-row', function () {
+            $(this).closest('tr').remove();
+        });
+    </script>
+    {% include 'kahama_template/datatable.html' %}    
 {% endblock main_content %}

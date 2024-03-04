@@ -13,12 +13,17 @@ Patient - Health Record
 <a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#addPrescriptionModal">
     <i class="fas fa-plus"></i> prescription
 </a>
-<a class="btn btn-secondary float-right" type="button" data-toggle="modal" data-target="#addConsultationModal">
+
+    <a href="{% url 'kahamahmis:patients_list' %}" class="btn btn-success float-right">
+        <i class="fas fa-arrow-left"></i> Back to Patient List
+    </a>
+
+{% comment %} <a class="btn btn-secondary float-right" type="button" data-toggle="modal" data-target="#addConsultationModal">
     <i class="fas fa-plus"></i> consultation
 </a>
 <a class="btn btn-success float-right" type="button" data-toggle="modal" data-target="#addProcedureModal">
     <i class="fas fa-plus"></i> Procedure
-</a>
+</a> {% endcomment %}
 
 <!-- Add Import insurance link and modal trigger -->
 {% endblock breadcrumb %}
@@ -107,52 +112,45 @@ Patient - Health Record
                                                                                             
                                                 <div class="tab-content">
                                                     <div class="tab-pane active" id="left-icon-tab1">
-                                                        <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example1"  style="width:100%">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>ASSESMENT DATE</th>
-                                                                    <th>VITAL NAME</th>
-                                                                    <th>RESULT</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                <tr>
-                                                                    <td>{{ vital.recorded_at }}</td>
-                                                                    <td>BLOOD PRESSURE</td>
-                                                                    <td>{{ vital.blood_pressure }}</td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td>{{ vital.recorded_at }}</td>
-                                                                    <td>HEART RATE</td>
-                                                                    <td>{{ vital.pulse_rate }}</td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td>{{ vital.recorded_at }}</td>
-                                                                    <td>RESPIRATORY RATE</td>
-                                                                    <td>{{ vital.respiratory_rate }}</td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td>{{ vital.recorded_at }}</td>
-                                                                    <td>OXYGEN SATURATION(SP02)</td>
-                                                                    <td>{{ vital.spo2 }}</td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td>{{ vital.recorded_at }}</td>
-                                                                    <td>GCS</td>
-                                                                    <td>{{ vital.gcs }}</td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td>{{ vital.recorded_at }}</td>
-                                                                    <td>WEIGHT</td>
-                                                                    <td>{{ vital.avpu }}</td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td>{{ vital.recorded_at }}</td>
-                                                                    <td>TEMPERATURE</td>
-                                                                    <td>{{ vital.temperature }}</td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
+                                                        <div class="table-responsive">
+                                                            <table class="table table-hover text-nowrap table-bordered table-striped table-sm display" id="example6" style="width:100%">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Visit number</th>
+                                                                        <th>Respiratory Rate</th>
+                                                                        <th>Pulse Rate</th>
+                                                                        <th>Blood Pressure</th>
+                                                                        <th>AVPU</th>
+                                                                        <th>SPO2</th>
+                                                                        <th>Temperature</th>
+                                                                        <th>GCS</th>
+                                                                        <th>Date</th>
+                                                                        <th>Day</th> <!-- New column for the day of the week -->
+                                                                        <th>Time</th>                                                           
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for vital in previous_vitals %}
+                                                                    <tr>
+                                                                        <td>{{ vital.visit.vst }}</td>
+                                                                        <td>{{ vital.respiratory_rate }}</td>
+                                                                        <td>{{ vital.pulse_rate }}</td>
+                                                                        <td>{{ vital.blood_pressure }}</td>
+                                                                        <td>{{ vital.avpu }}</td>
+                                                                        <td>{{ vital.spo2 }}</td>
+                                                                        <td>{{ vital.temperature }}</td>
+                                                                        <td>{{ vital.gcs }}</td>
+                                                                        <!-- Split recorded_at into date, day of the week, and time components -->
+                                                                        <td>{{ vital.recorded_at|date:"Y-m-d" }}</td> <!-- Display date -->
+                                                                        <td>{{ vital.recorded_at|date:"l" }}</td> <!-- Display day of the week -->
+                                                                        <td>{{ vital.recorded_at|time:"H:i:s" }}</td><!-- Display time -->
+                                                                        
+                                                                    </tr>
+                                                                   
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                           </div>
                                                     </div>
                                 
                                                     <div class="tab-pane" id="left-icon-tab2">

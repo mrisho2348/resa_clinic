@@ -26,7 +26,7 @@
         
    
 
-<div class="">
+<div class="table-responsive">
     <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
         <thead>
             <tr>
@@ -59,7 +59,7 @@
                     <button  class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#addConsultationModal{{ patient.id }}"  data-toggle="tooltip" title="Appointment">
                         <i class="fa fa-calendar-alt text-dark"></i>
                     </button>  
-                    <a href="{% url 'patient_info_form_edit' patient_id=patient.id %}" data-toggle="tooltip" title="Edit patient">
+                    <a href="{% url 'kahamahmis:patient_info_form_edit' patient_id=patient.id %}" data-toggle="tooltip" title="Edit patient">
                         <button type="button" class="btn btn-secondary btn-sm"><i class="fa fa-edit text-white"></i></button>
                     </a>
                     <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteRemotePatientModal{{ patient.id }}"  data-toggle="tooltip" title="Delete">
@@ -250,66 +250,93 @@
          
                   
 
-<!-- Modal -->
-<div class="modal fade" id="patientDetailsModal{{ patient.id }}" tabindex="-1" aria-labelledby="patientDetailsModalLabel{{ patient.id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="patientDetailsModalLabel{{ patient.id }}">Patient Details</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="row">
-            <div class="col-md-6">
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title">Personal Information</h5>
-                  <p class="card-text">MRN: {{ patient.mrn }}</p>
-                  <p class="card-text">Name: {{ patient.first_name }} {{ patient.last_name }}</p>
-                  <p class="card-text">Gender: {{ patient.gender }}</p>
-                  <!-- Add more personal details here -->
+                  <div class="modal fade" id="patientDetailsModal{{ patient.id }}" tabindex="-1" aria-labelledby="patientDetailsModalLabel{{ patient.id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title" id="patientDetailsModalLabel{{ patient.id }}">Patient Details</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body custom-modal-body">
+                                <div class="row">                    
+                                    <div class="col-md-12">
+                                        <div class="card border-primary">
+                                            <div class="card-body">
+                                                <h5 class="card-title text-primary">Personal Information</h5>
+                                                <ul class="list-unstyled custom-list">
+                                                    <br>
+                                                    <li><strong>MRN:</strong> {{ patient.mrn }}</li>
+                                                    <li><strong>Name:</strong> {{ patient.first_name }} {{ patient.middle_name }} {{ patient.last_name }}</li>
+                                                    <li><strong>Gender:</strong> {{ patient.gender }}</li>
+                                                    <li><strong>Age:</strong> {{ patient.age }}</li>
+                                                    <li><strong>Date of Birth:</strong> {{ patient.dob }}</li>
+                                                    <li><strong>Nationality:</strong> {{ patient.nationality }}</li>
+                                                    <li><strong>Phone:</strong> {{ patient.phone }}</li>
+                                                    <li><strong>Emergency Contact:</strong> {{ patient.emergency_contact_name }}</li>
+                                                    <li><strong>Emergency Contact Relation:</strong> {{ patient.emergency_contact_relation }}</li>
+                                                    <li><strong>Emergency Contact Phone:</strong> {{ patient.emergency_contact_phone }}</li>
+                                                    <li><strong>Marital Status:</strong> {{ patient.marital_status }}</li>
+                                                    <li><strong>Occupation:</strong> {{ patient.occupation }}</li>
+                                                    <li><strong>Patient Type:</strong> {{ patient.patient_type }}</li>
+                                                    <li><strong>OSHA Certificate:</strong> {% if patient.osha_certificate %} Yes {% else %} No {% endif %}</li>
+                                                    <li><strong>Date of OSHA Certification:</strong> {{ patient.date_of_osha_certification }}</li>
+                                                    <li><strong>Insurance:</strong> {{ patient.insurance }}</li>
+                                                    <li><strong>Insurance Company:</strong> {{ patient.insurance_company }}</li>
+                                                    <li><strong>Insurance Number:</strong> {{ patient.insurance_number }}</li>
+                                                </ul>
+                                                <!-- Add more personal details here -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="card border-success">
+                                            <div class="card-body">
+                                                <h5 class="card-title text-success">Medical Information</h5>
+                                                <br>
+                                                {% for health_condition in patient.health_conditions.all %}
+                                                    <p class="card-text"><strong>Condition:</strong> {{ health_condition.health_condition }}</p>
+                                                    <p class="card-text"><strong>Notes:</strong> {{ health_condition.health_condition_notes }}</p>
+                                                {% endfor %}
+                                                
+                                                <!-- Display family medical history -->
+                                                <h5 class="card-title text-success">Family Medical History</h5>
+                                                {% for family_history in patient.family_medical_history.all %}
+                                                    <p class="card-text"><strong>Condition:</strong> {{ family_history.condition }}</p>
+                                                    <p class="card-text"><strong>Relationship:</strong> {{ family_history.relationship }}</p>
+                                                    <p class="card-text"><strong>Comments:</strong> {{ family_history.comments }}</p>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card border-info">
+                                            <div class="card-body">
+                                                <h5 class="card-title text-info">Insurance Information</h5>
+                                                <br>
+                                                <ul class="list-unstyled custom-list">
+                                                    <li><strong>Insurance:</strong> {{ patient.insurance }}</li>
+                                                    <li><strong>Insurance Company:</strong> {{ patient.insurance_company }}</li>
+                                                    <li><strong>Insurance Number:</strong> {{ patient.insurance_number }}</li>
+                                                    <!-- Add more insurance details here -->
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Add more rows and columns for additional patient details -->
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title">Contact Information</h5>
-                  <p class="card-text">Phone: {{ patient.phone }}</p>
-                  <p class="card-text">Emergency Contact: {{ patient.emergency_contact_name }}</p>
-                  <!-- Add more contact details here -->
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="row mt-3">
-            <div class="col-md-6">
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title">Medical Information</h5>
-                  <!-- Add medical details here -->
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title">Insurance Information</h5>
-                  <!-- Add insurance details here -->
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- Add more rows and columns for additional patient details -->
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
+                
+
  
 
 

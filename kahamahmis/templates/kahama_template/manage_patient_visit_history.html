@@ -65,9 +65,12 @@ Patient Visit History
                                   <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#editVisitModal{{ visit.id }}"  data-toggle="tooltip" title="Edit">
                                     <i class="fa fa-edit text-white"></i>
                                 </button>
-                                  <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#addRemotePatientVitalModal{{ visit.id }}"  data-toggle="tooltip" title="add vital">
+                                  {% comment %} <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#addRemotePatientVitalModal{{ visit.id }}"  data-toggle="tooltip" title="add vital">
                                     <i class="fa fa-plus text-white"></i>
-                                </button>
+                                </button> {% endcomment %}
+                                <a href="{% url 'kahamahmis:save_nextremotepatient_vitals' visit.patient.id visit.id %}" data-toggle="tooltip" title="Add vital for that visit">
+                                    <button type="button" class="btn btn-success border btn-sm"><i class="fa fa-plus text-white"></i></button>
+                                </a>  
                                   <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deletetVisitModal{{ visit.id }}"  data-toggle="tooltip" title="Delete">
                                     <i class="fas fa-trash"></i>
                                 </button>
