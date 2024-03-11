@@ -23,6 +23,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('clinic.urls')),
     path('resa/', include('centric.urls')),
+    path('reception/', include('resaclinic.receptionist_urls')),
+    path('doctor/', include('resaclinic.doctor_urls')),
+    path('nurse/', include('resaclinic.nurse_urls')),
+    path('accounts/', include('django.contrib.auth.urls')), 
     path('kahama/', include(('kahamahmis.urls', 'kahamahmis'), namespace='kahamahmis')),
 ]
 if settings.DEBUG:

@@ -1,6 +1,8 @@
 
 from django.urls import include, path
 
+from clinic import DoctorView, LabTechnicianView, NurseView, PharmacistView, PhysiotherapistView, ReceptionistView
+
 from . import views,delete,imports,editView
 
 urlpatterns = [
@@ -19,6 +21,7 @@ urlpatterns = [
         path('save_patient_vital/',views.save_patient_vital, name="save_patient_vital"),
         path('add_prescription/',views.add_prescription, name="add_prescription"),
 
+        path('save_edited_patient/',views.save_edited_patient, name="save_edited_patient"),
         path('add_patient_visit/',views.add_patient_visit, name="add_patient_visit"),
         path('add_health_issue',views.add_health_issue, name="add_health_issue"),
         path('resa/dashboard',views.dashboard, name="dashboard"),
@@ -97,11 +100,14 @@ urlpatterns = [
         # path('resa/remotemanage_patient/', views.remotemanage_patient, name='remotemanage_patient'),
         path('patients/', views.patients_list, name='patients_list'),
         path('diagnosis/', views.diagnosis_list, name='diagnosis_list'),
+        path('save_remotepatient_vital/', views.save_remotepatient_vital, name='save_remotepatient_vital'),
+        path('save_remoteconsultation_notes/', views.save_remoteconsultation_notes, name='save_remoteconsultation_notes'),
         path('consultation-notes/', views.consultation_notes_view, name='consultation_notes'),
         path('resa/patient_vital_all_listt/', views.patient_vital_all_list, name='patient_vital_all_list'),
         path('resa/reagent-usage-list/', views.reagent_usage_list, name='reagent_usage_list'),
         path('resa/equipment-maintenance-list/', views.equipment_maintenance_list, name='equipment_maintenance_list'),
         path('resa/equipment-list/', views.equipment_list, name='equipment_list'),
+        path('patient_consultation_detail/<int:patient_id>/', views.patient_consultation_detail, name='patient_consultation_detail'),
         path('patient_vital_list/<int:patient_id>/', views.patient_vital_list, name='patient_vital_list'),
         path('patient_health_record_view/<int:patient_id>/', views.patient_health_record_view, name='patient_health_record_view'),
         path('patient_visit_history/<int:patient_id>/', views.patient_visit_history_view, name='patient_visit_history_view'),
@@ -209,6 +215,7 @@ urlpatterns = [
         path('delete_medicine/<int:medicine_id>/', delete.delete_medicine, name='delete_medicine'),
         path('disease-records/<int:disease_id>/delete/', delete.delete_disease_record, name='delete_disease_record'),
         path('delete_supplier/<int:supplier_id>/', delete.delete_supplier, name='delete_supplier'),
+        path('delete_patient/<int:patient_id>/', delete.delete_patient, name='delete_patient'),
         path('delete_equipment/<int:equipment_id>/', delete.delete_equipment, name='delete_equipment'),
         path('delete_inventory/<int:item_id>/', delete.delete_inventory, name='delete_inventory'),
         path('delete_category/<int:category_id>/', delete.delete_category, name='delete_category'),
@@ -234,4 +241,6 @@ urlpatterns = [
         path('delete_remotecompany/<int:company_id>/', delete.delete_remotecompany, name='delete_remotecompany'),
         path('delete_patient_visit/<int:patient_visit_id>/', delete.delete_patient_visit, name='delete_patient_visit'),
         path('delete_medication_payment/<int:payment_id>/', delete.delete_medication_payment, name='delete_medication_payment'),
+ 
+        
 ]

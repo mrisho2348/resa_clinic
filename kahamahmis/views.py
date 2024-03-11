@@ -34,9 +34,7 @@ from django.template.loader import render_to_string
 from wkhtmltopdf.views import PDFTemplateResponse
 from clinic.models import Category, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, Diagnosis, Equipment, EquipmentMaintenance, FamilyMedicalHistory, HealthIssue, InventoryItem, MedicationPayment, PathologyDiagnosticTest, PatientDisease, PatientHealthCondition, PatientVisits, PatientVital, Prescription, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, RemotePatient, RemotePatientVisits, Sample, Service, Supplier, UsageHistory
 
-# Create your views here.
-def index(request):
-    return render(request,"index.html")
+
 
 @login_required
 def kahama_dashboard(request):
@@ -130,6 +128,7 @@ def page_404(request):
 
 def ShowLoginKahama(request):  
   return render(request,'kahama_template/login.html')
+
 def DoLoginKahama(request):
     if request.method != "POST":
         return HttpResponse("<h2>Method Not allowed</h2>")
@@ -142,9 +141,9 @@ def DoLoginKahama(request):
 
             login(request, user)
             if user.user_type == "1":
-                return HttpResponseRedirect(reverse("kahamahmis:kahama_dashboard"))
+                return HttpResponseRedirect(reverse("kahamahmis:dashboard"))
             elif user.user_type == "2":
-                return HttpResponseRedirect(reverse("kahamahmis:kahama_dashboard"))             
+                return HttpResponseRedirect(reverse("kahamahmis:dashboard"))             
             else:
                 return HttpResponseRedirect(reverse("kahamahmis:kahama"))
         else:

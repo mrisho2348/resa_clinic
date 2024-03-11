@@ -50,6 +50,21 @@ def delete_medicine(request, medicine_id):
         # Handle any exception or error during deletion
         return JsonResponse({'success': False, 'message': str(e)})
     
+@csrf_exempt
+@require_POST
+def delete_patient(request, patient_id):
+    # Get the medicine object or return 404 if not found
+    patient = get_object_or_404(Patients, id=patient_id)
+
+    try:
+        # Delete the medicine
+        patient.delete()
+        message = f"Medicine '{patient.name}' deleted successfully."
+        return JsonResponse({'success': True, 'message': message})
+    except Exception as e:
+        # Handle any exception or error during deletion
+        return JsonResponse({'success': False, 'message': str(e)})
+    
 def delete_insurance(request, insurance_id):
     insurance = get_object_or_404(InsuranceCompany, pk=insurance_id)
 

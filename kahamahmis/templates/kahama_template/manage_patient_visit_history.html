@@ -74,6 +74,7 @@ Patient Visit History
                                   <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deletetVisitModal{{ visit.id }}"  data-toggle="tooltip" title="Delete">
                                     <i class="fas fa-trash"></i>
                                 </button>
+                              
                              
                                               <!-- Add more action links as needed -->
                                 <a href="{% url 'kahamahmis:patient_health_record_view' visit.patient.id visit.id %}" data-toggle="tooltip" title="open health record">

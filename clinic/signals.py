@@ -2,7 +2,7 @@
 
 from django.db.models.signals import post_save,pre_save
 from django.dispatch import receiver
-from .models import InventoryItem, MedicationPayment, MedicineInventory, Prescription, Reagent, ReagentUsage, RemotePrescription, UsageHistory
+from .models import Consultation, ConsultationNotification, InventoryItem, MedicationPayment, MedicineInventory, Prescription, Reagent, ReagentUsage, RemotePrescription, UsageHistory
 from django.db.models import F
 from django.db import models
 
@@ -13,6 +13,16 @@ def update_inventory(sender, instance, **kwargs):
         MedicineInventory.objects.filter(medicine=instance.medicine).update(remain_quantity=F('remain_quantity') - instance.quantity)
         
 
+
+@receiver(post_save, sender=Consultation)
+def create_consultation_notification(sender, instance, created, **kwargs):
+    if created:
+        # Create a ConsultationNotification object for the newly created Consultation
+        ConsultationNotification.objects.create(
+            consultation=instance,
+            doctor=instance.doctor,
+            is_read=False  # Default to unread
+        )
 @receiver(post_save, sender=MedicineInventory)
 def update_total_payment(sender, instance, created, **kwargs):
     if created:

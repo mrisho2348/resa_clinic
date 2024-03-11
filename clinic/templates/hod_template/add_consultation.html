@@ -70,7 +70,13 @@ Add Consultation
                                             <input type="date" id="date_of_consultation" name="date_of_consultation" class="form-control">
                                           </div>
                                         </div>
-                          
+                                        <div class="col-md-4">
+                                          <!-- Description input -->
+                                      <div class="form-group">
+                                          <label for="description{{ patient.id }}">Description:</label>
+                                          <textarea id="description{{ patient.id }}" name="description" rows="2" class="form-control"></textarea>
+                                      </div>
+                                  </div>
                                         <!-- Time inputs for start and end times -->
                                         <div class="row">
                                           <div class="col-md-6">

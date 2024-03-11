@@ -1,0 +1,56 @@
+{% extends 'receptionist_template/base_template.html' %}
+
+{% block title %}
+Vehicle Ambulance Details
+{% endblock title %}
+
+{% block page_title %}
+Vehicle Ambulance Details
+{% endblock page_title %}
+
+{% block breadcrumb %}
+{% include "receptionist_template/modal_form.html" %}
+{% endblock breadcrumb %}
+
+{% block main_content %}
+<div class="table-responsive">
+    <table  class="table table-hover text-nowrap table-bordered table-striped table-sm" id="example">
+        <thead>
+            <tr>
+                <th>Vehicle Type</th>
+                <th>Activities</th>
+                <th>Cost</th>
+                <th>Ambulance Type</th>
+                <th>Organization</th>
+                <th>Contact Person</th>
+                <th>Contact Phone</th>
+                <th>Location</th>
+                <th>Duration</th>
+                <th>Days</th>
+                <th>Payment Mode</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vehicle in vehicles %}
+            <tr>
+                <td>{{ vehicle.vehicle_type }}</td>
+                <td>{{ vehicle.activities }}</td>
+                <td>{{ vehicle.cost }}</td>
+                <td>{{ vehicle.ambulance_type }}</td>
+                <td>{{ vehicle.organization }}</td>
+                <td>{{ vehicle.contact_person }}</td>
+                <td>{{ vehicle.contact_phone }}</td>
+                <td>{{ vehicle.location }}</td>
+                <td>{{ vehicle.duration }}</td>
+                <td>{{ vehicle.days }}</td>
+                <td>{{ vehicle.payment_mode }}</td>
+                <td><a href="{% url 'vehicle_detail' vehicle.id %}">View Details</a></td> <!-- Link to view more details -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include 'receptionist_template/datatable.html' %}
+{% endblock main_content %}

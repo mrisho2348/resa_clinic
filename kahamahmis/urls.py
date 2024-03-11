@@ -3,8 +3,7 @@ from django.urls import include, path
 
 from . import views,delete,imports,editView
 
-urlpatterns = [
-        path('',views.index, name="home"),
+urlpatterns = [      
         path('get_patient_data_by_company',views.get_patient_data_by_company, name="get_patient_data_by_company"),
         path('get_gender_yearly_data',views.get_gender_yearly_data, name="get_gender_yearly_data"),
         path('get_gender_monthly_data',views.get_gender_monthly_data, name="get_gender_monthly_data"),
@@ -56,7 +55,7 @@ urlpatterns = [
         path('add_remoteprescription/',views.add_remoteprescription, name="add_remoteprescription"),
         path('add_patient_visit/',views.add_patient_visit, name="add_patient_visit"),
         path('add_health_issue',views.add_health_issue, name="add_health_issue"),
-        path('resa/dashboard',views.kahama_dashboard, name="kahama_dashboard"),
+        path('resa/dashboard',views.kahama_dashboard, name="dashboard"),
         path('fetch_model_data/', views.fetch_model_data, name='fetch_model_data'),
         path('resa/ImportExcel',views.import_staff, name="import_staff"),      
         path('pathology_diagnostic_test_save/', views.pathology_diagnostic_test_save, name='pathology_diagnostic_test_save'),

@@ -28,8 +28,8 @@
           <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
               <!-- Home Section -->
               <li class="nav-item">
-                  {% url 'kahama_dashboard' as kahama_dashboard %}
-                  <a href="{% url "kahamahmis:kahama_dashboard" %}" class="nav-link {% if request.path == kahama_dashboard %} active {% endif %}">
+                  {% url 'dashboard' as dashboard %}
+                  <a href="{% url "kahamahmis:dashboard" %}" class="nav-link {% if request.path == dashboard %} active {% endif %}">
                       <i class="nav-icon fas fa-th"></i>
                       <p>HOME</p>
                   </a>
