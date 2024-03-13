@@ -422,7 +422,7 @@ Patient Vital Information
     function addPatientVital() {
         $.ajax({
             type: 'POST',
-            url: '{% url "save_patient_vital" %}',  // Replace with your URL
+            url: '{% url "receptionist_save_patient_vital" %}',  // Replace with your URL
             data: $('#addPatientVitalForm').serialize(),
             success: function(response) {
                 if (response.status === 'success') {  

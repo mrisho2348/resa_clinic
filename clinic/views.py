@@ -71,7 +71,7 @@ def DoLogin(request):
 
             login(request, user)
             if user.user_type == "1":
-                return HttpResponseRedirect(reverse("dashboard"))
+                return HttpResponseRedirect(reverse("clinic:dashboard"))
             elif user.user_type == "2":
                 # Assuming staff user is always associated with Staffs model
                 staff = Staffs.objects.get(admin=user)
@@ -112,7 +112,7 @@ def GetUserDetails(request):
   
 def logout_user(request):
   logout(request)
-  return HttpResponseRedirect(reverse("home"))
+  return HttpResponseRedirect(reverse("clinic:home"))
     
 class ContactFormView(SuccessMessageMixin, FormView):
     template_name = 'contact_form.html'
@@ -1638,7 +1638,7 @@ def save_consultation_fee(request):
 def save_service_data(request):
     if request.method == 'POST':
         service_id = request.POST.get('service_id')
-        covarage = request.POST.get('covarage')
+        coverage = request.POST.get('covarage')
         department = request.POST.get('department')
         type_service = request.POST.get('typeService')
         name = request.POST.get('serviceName')
@@ -1653,7 +1653,7 @@ def save_service_data(request):
                 # Creating a new service
                 service = Service()
 
-            service.covarage = covarage
+            service.coverage = coverage
             service.department = department
             service.type_service = type_service
             service.name = name
@@ -1661,7 +1661,7 @@ def save_service_data(request):
             service.cost = cost
             service.save()
 
-            return redirect('manage_service')
+            return redirect('clinic:manage_service')
         except Exception as e:
             return HttpResponseBadRequest(f"Error: {str(e)}") 
 

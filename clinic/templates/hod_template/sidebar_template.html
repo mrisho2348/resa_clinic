@@ -29,7 +29,7 @@
               <!-- Home Section -->
               <li class="nav-item">
                   {% url 'dashboard' as admin_home %}
-                  <a href="{% url "dashboard" %}" class="nav-link {% if request.path == admin_home %} active {% endif %}">
+                  <a href="{% url "clinic:dashboard" %}" class="nav-link {% if request.path == admin_home %} active {% endif %}">
                       <i class="nav-icon fas fa-th"></i>
                       <p>HOME</p>
                   </a>
@@ -44,8 +44,8 @@
                   <ul class="nav nav-treeview">
                       <!-- Dashboard Link -->
                       <li class="nav-item">
-                        {% url 'medicine_list' as medicine_list %}
-                          <a href="{% url "medicine_list" %}" class="nav-link{% if request.path == medicine_list %} active {% endif %}">                           
+                        {% url 'clinic:medicine_list' as medicine_list %}
+                          <a href="{% url "clinic:medicine_list" %}" class="nav-link{% if request.path == medicine_list %} active {% endif %}">                           
                             <i class="nav-icon fas fa-pills"></i>
                               <p>Medicine</p>
                           </a>
@@ -60,16 +60,16 @@
                     
                       <!-- Other Clinic Links -->
                       <li class="nav-item">
-                        {% url 'manage_patient' as manage_patient %}
-                          <a href="{% url "manage_patient" %}" class="nav-link{% if request.path == manage_patient %} active {% endif %}">
+                        {% url 'clinic:manage_patient' as manage_patient %}
+                          <a href="{% url "clinic:manage_patient" %}" class="nav-link{% if request.path == manage_patient %} active {% endif %}">
                               <i class="nav-icon fas fa-users"></i>
                               <p>Patients</p>
                           </a>
                       </li>
                       <!-- Other Clinic Links -->
                       <li class="nav-item">
-                        {% url 'patients_list' as patients_list %}
-                          <a href="{% url "patients_list" %}" class="nav-link{% if request.path == patients_list %} active {% endif %}">
+                        {% url 'clinic:patients_list' as patients_list %}
+                          <a href="{% url "clinic:patients_list" %}" class="nav-link{% if request.path == patients_list %} active {% endif %}">
                               <i class="nav-icon fas fa-users"></i>
                               <p>Remote Patients</p>
                           </a>
@@ -82,15 +82,15 @@
                           </a>
                       </li> {% endcomment %}
                       <li class="nav-item">
-                        {% url 'patient_vital_all_list' as patient_vital_all_list %}
-                        <a href="{% url 'patient_vital_all_list'  %}" class="nav-link{% if request.path == patient_vital_all_list %} active {% endif %}">
+                        {% url 'clinic:patient_vital_all_list' as patient_vital_all_list %}
+                        <a href="{% url 'clinic:patient_vital_all_list'  %}" class="nav-link{% if request.path == patient_vital_all_list %} active {% endif %}">
                             <i class="nav-icon fas fa-heartbeat"></i> <!-- Font Awesome icon for vital signs -->
                             <p>All Vital Signs</p> <!-- Renamed navigation link -->
                         </a>
                     </li>
                       <li class="nav-item">
-                        {% url 'medicine_inventory' as medicine_inventory %}
-                          <a href="{% url "medicine_inventory" %}" class="nav-link{% if request.path == medicine_inventory %} active {% endif %}">
+                        {% url 'clinic:medicine_inventory' as medicine_inventory %}
+                          <a href="{% url "clinic:medicine_inventory" %}" class="nav-link{% if request.path == medicine_inventory %} active {% endif %}">
                             <i class="nav-icon fas fa-pills"></i>
                               <p>Medical Inventoory</p>
                           </a>
@@ -112,8 +112,8 @@
                         </a>
                     </li>
                       <li class="nav-item">
-                        {% url 'patient_procedure_view' as patient_procedure_view %}
-                          <a href="{% url "patient_procedure_view" %}" class="nav-link{% if request.path == patient_procedure_view %} active {% endif %}">
+                        {% url 'clinic:patient_procedure_view' as patient_procedure_view %}
+                          <a href="{% url "clinic:patient_procedure_view" %}" class="nav-link{% if request.path == patient_procedure_view %} active {% endif %}">
                             <i class="nav-icon fas fa-hospital"></i>
                               <p>Medical Procedure</p>
                           </a>
@@ -157,49 +157,49 @@
                     
                     
                       <li class="nav-item">
-                        {% url 'manage_referral' as manage_referral %}
-                        <a href="{% url 'manage_referral' %}" class="nav-link{% if request.path == manage_referral %} active {% endif %}">
+                        {% url 'clinic:manage_referral' as manage_referral %}
+                        <a href="{% url 'clinic:manage_referral' %}" class="nav-link{% if request.path == manage_referral %} active {% endif %}">
                             <i class="nav-icon fas fa-handshake"></i>
                             <p>Referral</p>
                         </a>
                     </li>
                  
                       <li class="nav-item">
-                        {% url 'appointment_list' as appointment_list %}
-                          <a href="{% url "appointment_list" %}" class="nav-link{% if request.path == appointment_list %} active {% endif %}">
+                        {% url 'clinic:appointment_list' as appointment_list %}
+                          <a href="{% url "clinic:appointment_list" %}" class="nav-link{% if request.path == appointment_list %} active {% endif %}">
                             <i class="nav-icon fas fa-calendar"></i>
                               <p>Consultations</p>
                           </a>
                       </li>
                       <li class="nav-item">
-                        {% url 'consultation_notes' as consultation_notes %}
-                          <a href="{% url "consultation_notes" %}" class="nav-link{% if request.path == consultation_notes %} active {% endif %}">
+                        {% url 'clinic:consultation_notes' as consultation_notes %}
+                          <a href="{% url "clinic:consultation_notes" %}" class="nav-link{% if request.path == consultation_notes %} active {% endif %}">
                             <i class="nav-icon fas fa-calendar"></i>
                               <p>consultation notes</p>
                           </a>
                       </li>
                       <li class="nav-item">
-                        {% url 'consultation_fee_list' as consultation_fee_list %}
-                          <a href="{% url "consultation_fee_list" %}" class="nav-link{% if request.path == consultation_fee_list %} active {% endif %}">
+                        {% url 'clinic:consultation_fee_list' as consultation_fee_list %}
+                          <a href="{% url "clinic:consultation_fee_list" %}" class="nav-link{% if request.path == consultation_fee_list %} active {% endif %}">
                             <i class="nav-icon fas fa-money-bill-wave"></i>
                               <p>Consultation Fees</p>
                           </a>
                       </li>
                       <li class="nav-item">
-                          <a href="{% url "add_request" %}" class="nav-link">
+                          <a href="{% url "clinic:add_request" %}" class="nav-link">
                               <i class="nav-icon fas fa-stethoscope"></i>
                               <p>request</p>
                           </a>
                       </li>
                       <li class="nav-item">
-                        {% url 'manage_service' as manage_service %}
-                          <a href="{% url "manage_service" %}" class="nav-link{% if request.path == manage_service %} active {% endif %}">
+                        {% url 'clinic:manage_service' as manage_service %}
+                          <a href="{% url "clinic:manage_service" %}" class="nav-link{% if request.path == manage_service %} active {% endif %}">
                               <i class="nav-icon fas fa-medkit"></i>
                               <p>Services</p>
                           </a>
                       </li>
                       <li class="nav-item">
-                          <a href="{% url "resa_report" %}" class="nav-link">
+                          <a href="{% url "clinic:resa_report" %}" class="nav-link">
                               <i class="nav-icon fas fa-file-alt"></i>
                               <p>Reports</p>
                           </a>
@@ -219,29 +219,29 @@
                   <ul class="nav nav-treeview">
                       <!-- Insurance Link -->
                       <li class="nav-item">                    
-                          <a href="{% url "manage_insurance" %}" class="nav-link">
+                          <a href="{% url "clinic:manage_insurance" %}" class="nav-link">
                               <i class="nav-icon fas fa-shield-alt"></i>
                               <p>Insurance</p>
                           </a>
                       </li>
                       <li class="nav-item"> 
-                        {% url 'category_list' as category_list_url %}                   
-                        <a href="{% url 'category_list' %}" class="nav-link{% if request.path == category_list_url %} active {% endif %}">
+                        {% url 'clinic:category_list' as category_list_url %}                   
+                        <a href="{% url 'clinic:category_list' %}" class="nav-link{% if request.path == category_list_url %} active {% endif %}">
                             <i class="nav-icon fas fa-list"></i>
                             <p>Manage Categories</p>
                         </a>
                     </li>
                     <li class="nav-item"> 
-                        {% url 'supplier_list' as supplier_list_url %}                   
-                        <a href="{% url 'supplier_list' %}" class="nav-link{% if request.path == supplier_list_url %} active {% endif %}">
+                        {% url 'clinic:supplier_list' as supplier_list_url %}                   
+                        <a href="{% url 'clinic:supplier_list' %}" class="nav-link{% if request.path == supplier_list_url %} active {% endif %}">
                             <i class="nav-icon fas fa-truck"></i>
                             <p>Suppliers</p>
                         </a>
                     </li>
 
                     <li class="nav-item"> 
-                        {% url 'inventory_list' as inventory_list_url %}                   
-                        <a href="{% url 'inventory_list' %}" class="nav-link{% if request.path == inventory_list_url %} active {% endif %}">
+                        {% url 'clinic:inventory_list' as inventory_list_url %}                   
+                        <a href="{% url 'clinic:inventory_list' %}" class="nav-link{% if request.path == inventory_list_url %} active {% endif %}">
                             <i class="nav-icon fas fa-box"></i>
                             <p>Inventory</p>
 
@@ -249,23 +249,23 @@
                         </a>
                     </li>
                     <li class="nav-item"> 
-                        {% url 'in_stock_items' as in_stock_items %}                   
-                        <a href="{% url 'in_stock_items' %}" class="nav-link{% if request.path == in_stock_items %} active {% endif %}">
+                        {% url 'clinic:in_stock_items' as in_stock_items %}                   
+                        <a href="{% url 'clinic:in_stock_items' %}" class="nav-link{% if request.path == in_stock_items %} active {% endif %}">
                             <i class="nav-icon fas fa-box-open"></i>
                             <p>Available Items</p>
                         </a>
                     </li>                    
                     <li class="nav-item"> 
-                        {% url 'out_of_stock_items' as out_of_stock_items %}                   
-                        <a href="{% url 'out_of_stock_items' %}" class="nav-link{% if request.path == out_of_stock_items %} active {% endif %}">
+                        {% url 'clinic:out_of_stock_items' as out_of_stock_items %}                   
+                        <a href="{% url 'clinic:out_of_stock_items' %}" class="nav-link{% if request.path == out_of_stock_items %} active {% endif %}">
                             <i class="nav-icon fas fa-exclamation-triangle"></i>
                             <p>Stock Alerts</p>
                             <span id="outOfStockNotification" class="badge badge-danger"  title="Items out  Stock"></span> <!-- Notification badge -->
                         </a>
                     </li>
                     <li class="nav-item"> 
-                        {% url 'usage_history_list' as usage_history_list_url %}                   
-                        <a href="{% url 'usage_history_list' %}" class="nav-link{% if request.path == usage_history_list_url %} active {% endif %}">
+                        {% url 'clinic:usage_history_list' as usage_history_list_url %}                   
+                        <a href="{% url 'clinic:usage_history_list' %}" class="nav-link{% if request.path == usage_history_list_url %} active {% endif %}">
                             <i class="nav-icon fas fa-history"></i>
                             <p>Usage History</p>
                         </a>
@@ -273,8 +273,8 @@
                     
                       <!-- Other Settings Links -->
                       <li class="nav-item"> 
-                        {% url 'manage_disease' as manage_disease %}                    
-                          <a href="{% url "manage_disease" %}" class="nav-link{% if request.path == manage_disease %} active {% endif %}">                     
+                        {% url 'clinic:manage_disease' as manage_disease %}                    
+                          <a href="{% url "clinic:manage_disease" %}" class="nav-link{% if request.path == manage_disease %} active {% endif %}">                     
                               <i class="nav-icon fas fa-biohazard"></i>
                               <p>Diseases</p>
                           </a>
@@ -347,19 +347,19 @@
                     </li>
                     
                       <li class="nav-item">                    
-                          <a href="{% url "manage_company" %}" class="nav-link ">
+                          <a href="{% url "clinic:manage_company" %}" class="nav-link ">
                               <i class="nav-icon fas fa-building"></i>
                               <p>Companies</p>
                           </a>
                       </li>
                       <li class="nav-item">                   
-                          <a href="{% url "manage_pathodology" %}" class="nav-link ">
+                          <a href="{% url "clinic:manage_pathodology" %}" class="nav-link ">
                               <i class="nav-icon fas fa-vial"></i>
                               <p>Pathology</p>
                           </a>
                       </li>
                       <li class="nav-item">                   
-                          <a href="{% url "manage_staff" %}" class="nav-link">
+                          <a href="{% url "clinic:manage_staff" %}" class="nav-link">
                               <i class="nav-icon fas fa-users"></i>
                               <p>Staffs</p>
                           </a>

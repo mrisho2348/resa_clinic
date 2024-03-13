@@ -203,7 +203,7 @@
 
                             // Send AJAX request to the server
                             $.ajax({
-                                url: '/add_patient/',
+                                url: '{% url "receptionist_add_patient" %}',
                                 method: 'POST',
                                 data: formData,
                                 success: function (response) {

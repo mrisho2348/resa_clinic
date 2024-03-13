@@ -4,16 +4,13 @@ import json
 from django.utils import timezone
 import logging
 import pdfkit
-from django.db import models
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import logout,login
 from django.http import Http404, HttpResponse, HttpResponseBadRequest,HttpResponseRedirect
-from django.template import loader
 from django.shortcuts import render
 from django.urls import reverse
 from django.db.models import F
-from django.views.decorators.csrf import csrf_protect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
@@ -30,8 +27,6 @@ from tablib import Dataset
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import OuterRef, Subquery
-from django.template.loader import render_to_string
-from wkhtmltopdf.views import PDFTemplateResponse
 from clinic.models import Category, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, Diagnosis, Equipment, EquipmentMaintenance, FamilyMedicalHistory, HealthIssue, InventoryItem, MedicationPayment, PathologyDiagnosticTest, PatientDisease, PatientHealthCondition, PatientVisits, PatientVital, Prescription, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, RemotePatient, RemotePatientVisits, Sample, Service, Supplier, UsageHistory
 
 
@@ -326,77 +321,7 @@ def reports_patients(request):
     context = {'patients':patients_report}
     return render(request,"kahama_template/reports_patients.html",context)
 
-#---------------------------AJAX FUNCTIONS -------------------------------
-"""
-@csrf_exempt
-@api_view(['POST'])
-def add_remote_user(request,format=None):
 
-    Add a remote user to the database from the Kahama system.
-    This is called by the Kahama system when it adds a new patient or staff member.
-    The request should contain JSON data with fields: firstname, lastname and id.
-    If successful, returns an HttpResponse with status code 201 (Created).
-    Otherwise, returns an HttpResponse with appropriate error status code.
-    
-    if request.method == 'POST':
-        try:
-            # Get the json data from the POST request
-            data = JSONParser().parse(request)
-            
-            # Create a new instance of the model using the validated data
-            user = RemoteUser(**data)
-            
-            # Save the object to the database
-            user.save()
-                        
-            # Return a response that the resource was created successfully
-            return Response(status=status.HTTP_201_CREATED)
-    
-        except Exception as e:
-            print("Error in adding user: ",e)
-            # Return a response that there was an error creating the resource
-            return Response({'error':'There was an error adding this user.'},status=status.HTTP_400_BAD_REQUEST)
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
-# @api_view(['GET','PUT'])
-def get_or_update_remote_user(request,pk,format=None):
-    
-    Retrieve or update a user's information.
-    GET /users/id : Returns a User object with the given id.
-              If no such user exists, returns HTTP 404 Not Found.
-    PUT /users/id : Update the user's information.
-              The request should contain JSON data with fields: firstname, lastname and id.
-              If successful, returns an HttpResponse with status code 200 (OK).
-              Otherwise, returns an HttpResponse with appropriate error status code.
-    
-try:
-        # Check for a GET request
-        if request.method=='GET':
-            # Try to retrieve the user with the provided id
-            user = RemoteUser.objects.get(id=pk)
-            
-            # Serialize the user and return it as a JsonResponse
-            serializer = UserSerializer(user)
-            return JsonResponse(serializer.data, safe=False)
-        
-        elif request.method=='PUT':
-            # Validate the received data against the UserSerializer
-            serializer = UserSerializer(RemoteUser.objects.get(id=pk),data=request.DATA,partial=True)
-            serializer.is_valid(raise_exception=True)
-            
-            # Perform the actual save of the updated user
-            serializer.object.save()
-            
-            # Return a success message
-            return Response(serializer.data,status=status.HTTP_200_OK)
-        
-        else:
-            return Response({"error":"Invalid request method"},status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    
-    except RemoteUser.DoesNotExist:
-        return Response({"error": "No user found with id "+str(pk)},status=status.HTTP_404_NOT_FOUND)
-        """
 
 @login_required
 def reports_service(request):

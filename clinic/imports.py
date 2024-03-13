@@ -28,7 +28,7 @@ def import_disease_recode(request):
                     )
                     disease_recode.save()
 
-                return redirect('manage_disease') 
+                return redirect('clinic:manage_disease') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
         else:
@@ -62,7 +62,7 @@ def import_insurance_companies(request):
                     )
                      insurance_recode.save()
 
-                return redirect('manage_insurance') 
+                return redirect('clinic:manage_insurance') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -90,7 +90,7 @@ def import_category(request):
                     )
                      category_recode.save()
 
-                return redirect('category_list') 
+                return redirect('clinic:category_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -122,7 +122,7 @@ def import_supplier(request):
                     )
                      supplier_record.save()
 
-                return redirect('supplier_list') 
+                return redirect('clinic:supplier_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -156,7 +156,7 @@ def import_equipment(request):
                     )
                      equipment_record.save()
 
-                return redirect('equipment_list') 
+                return redirect('clinic:equipment_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -190,7 +190,7 @@ def import_maintenance(request):
                     )
                      maintenance_record.save()
 
-                return redirect('equipment_maintenance_list') 
+                return redirect('clinic:equipment_maintenance_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -228,7 +228,7 @@ def import_reagent(request):
                     )
                      reagent_record.save()
 
-                return redirect('reagent_list') 
+                return redirect('clinic:reagent_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -265,7 +265,7 @@ def import_health_issue(request):
                     )
                      health_record.save()
 
-                return redirect('health_issue_list') 
+                return redirect('clinic:health_issue_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -297,7 +297,7 @@ def import_companies(request):
                     )
                       company_recode.save()
 
-                return redirect('manage_company') 
+                return redirect('clinic:manage_company') 
             except Exception as e:
                 logger.error(f"Error adding company: {str(e)}")
                 messages.error(request, f'An error occurred: {e}')
@@ -329,7 +329,7 @@ def import_pathology_records(request):
                     )
                      pathodology_recode.save()
 
-                return redirect('manage_pathodology') 
+                return redirect('clinic:manage_pathodology') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -370,7 +370,7 @@ def import_ImportInventoryItemForm_records(request):
                     )
                      pathodology_recode.save()
 
-                return redirect('inventory_list') 
+                return redirect('clinic:inventory_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -404,7 +404,7 @@ def import_prescription_records(request):
                        )
                      prescription_record.save()
 
-                return redirect('prescription_list') 
+                return redirect('clinic:prescription_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -439,7 +439,7 @@ def import_patient_vital_records(request):
                        )
                      patient_vital_record.save()
 
-                return redirect('patient_vital_all_list') 
+                return redirect('clinic:patient_vital_all_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -477,7 +477,7 @@ def import_consultation_notes_records(request):
                        )
                      consultation_notes_record.save()
 
-                return redirect('consultation_notes') 
+                return redirect('clinic:consultation_notes') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -507,7 +507,7 @@ def import_diagnosis_records(request):
                        )
                      diagnosis_record.save()
 
-                return redirect('diagnosis_list') 
+                return redirect('clinic:diagnosis_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -546,7 +546,7 @@ def import_patient_records(request):
                         messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
                         continue
 
-                return redirect('manage_patient') 
+                return redirect('clinic:manage_patient') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -570,19 +570,19 @@ def import_service_records(request):
                 
                 for data in imported_data:
                     try:
-                        service_record = Service.objects.create(
-                            department=data[1],
-                            type_service=data[0],                     
-                            name=data[2],                     
-                            description=data[3],                     
-                            cost=data[4],                     
+                        service_record = Service.objects.create(                         
+                            type_service=data[1],                     
+                            name=data[0],                     
+                            description=data[4],                     
+                            cost=data[2],                     
+                            coverage=data[3],                     
                                               
                         )
                     except IntegrityError:
                         messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
                         continue
 
-                return redirect('manage_service') 
+                return redirect('clinic:manage_service') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -618,7 +618,7 @@ def import_referral_records(request):
                         messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
                         continue
 
-                return redirect('manage_referral') 
+                return redirect('clinic:manage_referral') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -654,7 +654,7 @@ def import_procedure_records(request):
                         messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
                         continue
 
-                return redirect('patient_procedure_view') 
+                return redirect('clinic:patient_procedure_view') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -693,7 +693,7 @@ def import_medicine_records(request):
                         messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
                         continue
 
-                return redirect('medicine_list') 
+                return redirect('clinic:medicine_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 

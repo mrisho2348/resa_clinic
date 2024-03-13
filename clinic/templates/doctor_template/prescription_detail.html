@@ -66,36 +66,43 @@ Prescription List
     </div>
     <div class="row">
         <div class="col-md-12">
-            <div class="table-responsive">
-                <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example5"  style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Drug</th>                                                      
-                            <th>Dose</th>
-                            <th>Frequency</th>
-                            <th>Duration</th>
-                            <th>Quantity</th>
-                            <th>Unit Price</th>
-                            <th>Total Price</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for prescription in prescriptions %}
-                        <tr>
-                            <td>{{ prescription.id }}</td>
-                            <td>{{ prescription.medicine.name }}</td>
-                            <td>{{ prescription.dose }}</td>                                                       
-                            <td>{{ prescription.frequency }}</td>
-                            <td>{{ prescription.duration }}</td>
-                            <td>{{ prescription.quantity_used }}</td>
-                            <td>{{ prescription.medicine.unit_price }}</td>
-                            <td>{{ prescription.total_price }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+           <div class="card">
+                <div class="card-header">
+                    <h4 class="header-title text-center mt-0 mb-1 text-uppercase">  {{ patient.first_name }} Prescription</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example5"  style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Was Recorded By</th>
+                                    <th>Drug</th>                                                      
+                                    <th>Dose</th>
+                                    <th>Frequency</th>
+                                    <th>Duration</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th>Total Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for prescription in prescriptions %}
+                                <tr>
+                                    <td>{{ prescription.entered_by.admin.first_name }} {{ prescription.entered_by.admin.middle_name }}  {{ prescription.entered_by.admin.last_name }}</td>                                
+                                    <td>{{ prescription.medicine.name }}</td>
+                                    <td>{{ prescription.dose }}</td>                                                       
+                                    <td>{{ prescription.frequency }}</td>
+                                    <td>{{ prescription.duration }}</td>
+                                    <td>{{ prescription.quantity_used }}</td>
+                                    <td>{{ prescription.medicine.unit_price }}</td>
+                                    <td>{{ prescription.total_price }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+           </div>
         </div>
     </div>
     

@@ -28,8 +28,8 @@
           <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
               <!-- Home Section -->
               <li class="nav-item">
-                  {% url 'dashboard' as admin_home %}
-                  <a href="{% url "dashboard" %}" class="nav-link {% if request.path == admin_home %} active {% endif %}">
+                  {% url 'receptionist_dashboard' as admin_home %}
+                  <a href="{% url "receptionist_dashboard" %}" class="nav-link {% if request.path == admin_home %} active {% endif %}">
                       <i class="nav-icon fas fa-th"></i>
                       <p>HOME</p>
                   </a>

@@ -2,7 +2,7 @@
 {% extends 'doctor_template/base_template.html' %}
 {% load static %}
 {% block title %}
-ADMIN HOME
+DOCTOR HOME
 {% endblock title %}
 {% block main_content %}
 {% include "doctor_template/modal_form.html" %}
@@ -14,7 +14,7 @@ ADMIN HOME
                 <!-- Small box for appointments -->
                 <div class="small-box bg-info">
                     <div class="inner">
-                        <h3>1</h3>
+                        <h3>{{total_consultations}}</h3>
                         <p>ALL APPOINTMENTS</p>
                     </div>
                     <div class="icon">
@@ -40,8 +40,8 @@ ADMIN HOME
                 <!-- Small box for doctors -->
                 <div class="small-box bg-warning">
                     <div class="inner">
-                        <h3>6</h3>
-                        <p>DOCTORS</p>
+                        <h3>{{patients_appointed}}</h3>
+                        <p>Patients Appointed To me</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-user-md"></i> <!-- Replaced icon -->

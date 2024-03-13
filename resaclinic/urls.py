@@ -21,7 +21,7 @@ from resaclinic import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('clinic.urls')),
+    path('',  include(('clinic.urls', 'clinic'), namespace='clinic')),
     path('resa/', include('centric.urls')),
     path('reception/', include('resaclinic.receptionist_urls')),
     path('doctor/', include('resaclinic.doctor_urls')),

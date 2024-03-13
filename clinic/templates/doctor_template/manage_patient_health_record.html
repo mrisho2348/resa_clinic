@@ -10,11 +10,7 @@ Patient - Health Record
 
 {% block breadcrumb %}
 {% include "doctor_template/modal_form.html" %}
-<a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#addPrescriptionModal">
-    <i class="fas fa-plus"></i> prescription
-</a>
-
-    <a href="{% url 'kahamahmis:patients_list' %}" class="btn btn-success float-right">
+    <a href="{% url 'manage_patient' %}" class="btn btn-success float-right" type="button">
         <i class="fas fa-arrow-left"></i> Back to Patient List
     </a>
 
@@ -70,19 +66,30 @@ Patient - Health Record
             <div class="row">
                 <div class="col-md-12">
                     <div class="card">
+                       
                         <div class="card-body">
-                            <div class="card-body">
-                                <div class="row" style="font-size:13px;">
-                                    <div class="col-md-3"><b>PATIENT: {{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</b></div>
-                                    <div class="col-md-3"><b>Age: {{ patient.age }}</b></div>
-                                    <div class="col-md-3"><b>SEX: {{ patient.gender }}</b></div>
-                                    <div class="col-md-3"><b>FILE NO : {{ patient.mrn }}</b> </div>
+                            <div class="row" style="font-size:13px;">
+                                <div class="col-md-3 text-uppercase"><b>PATIENT: {{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</b></div>
+                                <div class="col-md-3 text-uppercase"><b>DOB: {{ patient.dob|date:'Y-m-d' }} [ Age: {% if patient.dob %}
+                                    <script>
+                                        var dob = new Date("{{ patient.dob|date:'Y-m-d' }}");
+                                        var now = new Date();
+                                        var ageMilliseconds = now - dob;
+                                        var ageSeconds = ageMilliseconds / 1000;
+                                        var ageYears = Math.floor(ageSeconds / (365.25 * 24 * 60 * 60));
+                                        document.write(ageYears + ' years');
+                                    </script>
+                                    {% else %}
+                                    {{ patient.age }}
+                                    {% endif %}]</b></div>
+                                <div class="col-md-3 text-uppercase" ><b>SEX: {{ patient.gender }}</b></div>
+                                <div class="col-md-3 text-uppercase"><b>FILE NO : {{ patient.mrn }}</b> </div>
+                            </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-3 text-uppercase"><b>PAYMENT MODE: {{ patient.payment_form }}</b></div>
                                 </div>
-                                    <div class="row mt-3">
-                                        <div class="col-md-3"><b>PAYMENT MODE: {{ patient.payment_form }}</b></div>
-                                    </div>
-                            </div>    
-                        </div>
+                        </div>        
+                    
                     </div>
                 </div>
             </div>
@@ -198,8 +205,7 @@ Patient - Health Record
                                                 <table  class="table table-hover text-nowrap table-bordered table-striped" id="example4">
                                                     <thead>
                                                         <tr>
-                                                            <th>Lab Number</th>
-                                                            <th>Patient</th>
+                                                            <th>Lab Number</th>                                                        
                                                             <th>Visit</th>
                                                             <th>Consultation</th>
                                                             <th>Diagnosis</th>
@@ -211,8 +217,7 @@ Patient - Health Record
                                                     <tbody>
                                                         {% for lab_test in lab_tests %}
                                                         <tr>
-                                                            <td>{{ lab_test.lab_number }}</td>
-                                                            <td>{{ lab_test.patient.mrn }}</td>
+                                                            <td>{{ lab_test.lab_number }}</td>                                                         
                                                             <td>{{ lab_test.visit.vst }}</td>
                                                             <td>{{ lab_test.consultation.consultation_number }}</td>
                                                             <td>{{ lab_test.diagnosis }}</td>
@@ -305,92 +310,69 @@ Patient - Health Record
                                         <div class="panel-body">
                                             <div class="card">
                                                 <div class="card-body">
-                                                    <form id="editConsultationForm{{ consultation_notes.id }}" method="post" >
+                                                    <form id="editConsultationForm" method="post" >
                                                         {% csrf_token %}
                                                         <div class="container-fluid">
                                                             <!-- First row -->
                                                             <div class="row">
-                                                                <!-- Doctor selection -->
-                                                                <div class="col-md-4 form-group">
-                                                                    <label for="doctor{{ consultation_notes.id }}">Doctor:</label>
-                                                                    <select class="form-control select2bs4" style="width: 100%;" id="doctor{{ consultation_notes.id }}" name="doctor" required>
-                                                                        <option value="">Select Doctor</option>
-                                                                        {% for doctor in doctors %}
-                                                                        <option value="{{ doctor.id }}" {% if consultation_notes.doctor.id == doctor.id %} selected {% endif %}>{{ doctor.admin.first_name }} {{ doctor.middle_name }} {{ doctor.admin.last_name }}</option>
-                                                                        {% endfor %}
-                                                                    </select>
-                                                                </div>
-                            
-                                                                  <!-- Doctor plan -->
-                                                                <div class="col-md-4 form-group">
-                                                                    <label for="doctor_plan{{ consultation_notes.id }}">Doctor Plan:</label>
-                                                                    <textarea class="form-control" id="doctor_plan{{ consultation_notes.id }}" name="doctor_plan">{{ consultation_notes.doctor_plan }}</textarea>
-                                                                </div>
-                            
+                                                                <!-- Physical examination -->
+                                                                <div class="col-md-6 form-group">
+                                                                    <label for="physical_examination{{ consultation_notes.id }}">Physical Examination:</label>
+                                                                    <textarea class="form-control" id="physical_examination{{ consultation_notes.id }}" name="physical_examination">{{ consultation_notes.physical_examination }}</textarea>
+                                                                </div>                                                             
                                                                 <!-- Chief complaints -->
-                                                                <div class="col-md-4 form-group">
+                                                                <div class="col-md-6 form-group">
                                                                     <label for="chief_complaints{{ consultation_notes.id }}">Chief Complaints:</label>
                                                                     <textarea class="form-control" id="chief_complaints{{ consultation_notes.id }}" name="chief_complaints">{{ consultation_notes.chief_complaints }}</textarea>
                                                                 </div>
                                                             </div>
+                                                            <!-- Hidden fields -->
                                                             <input type="hidden" class="form-control" id="visit_id" name="visit_id" value="{{ visits.id }}">
                                                             <input type="hidden" class="form-control" id="patient_id" name="patient_id" value="{{ patient.id }}">
-                                                            <!-- Fourth row -->
                                                             <!-- Second row -->
                                                             <div class="row">
                                                                 <!-- History of presenting illness -->
-                                                                <div class="col-md-4 form-group">
+                                                                <div class="col-md-6 form-group">
                                                                     <label for="history_of_presenting_illness{{ consultation_notes.id }}">History of Presenting Illness:</label>
                                                                     <textarea class="form-control" id="history_of_presenting_illness{{ consultation_notes.id }}" name="history_of_presenting_illness">{{ consultation_notes.history_of_presenting_illness }}</textarea>
-                                                                </div>
-                            
-                                                                <!-- Physical examination -->
-                                                                <div class="col-md-4 form-group">
-                                                                    <label for="physical_examination{{ consultation_notes.id }}">Physical Examination:</label>
-                                                                    <textarea class="form-control" id="physical_examination{{ consultation_notes.id }}" name="physical_examination">{{ consultation_notes.physical_examination }}</textarea>
-                                                                </div>
-                            
+                                                                </div>                           
                                                                 <!-- Allergy to medications -->
-                                                                <div class="col-md-4 form-group">
+                                                                <div class="col-md-6 form-group">
                                                                     <label for="allergy_to_medications{{ consultation_notes.id }}">Allergy to Medications:</label>
                                                                     <input type="text" class="form-control" id="allergy_to_medications{{ consultation_notes.id }}" name="allergy_to_medications" value="{{ consultation_notes.allergy_to_medications }}">
                                                                     <input type="hidden" class="form-control" id="notes_id{{ consultation_notes.id }}" name="notes_id" value="{{ consultation_notes.id }}">
                                                                 </div>
                                                             </div>
-                            
                                                             <!-- Third row -->
                                                             <div class="row">
                                                                 <!-- Provisional diagnosis -->
                                                                 <div class="col-md-4 form-group">
                                                                     <label for="provisional_diagnosis{{ consultation_notes.id }}">Provisional Diagnosis:</label>
-                                                                    <select class="form-control select2bs4" style="width: 100%;" id="provisional_diagnosis{{ consultation_notes.id }}" name="provisional_diagnosis" multiple>
+                                                                    <select class="form-control select2bs4" style="width: 100%;" id="provisional_diagnosis{{ consultation_notes.id }}" name="provisional_diagnosis[]" multiple>
                                                                         {% for diagnosis in provisional_diagnoses %}
                                                                         <option value="{{ diagnosis.id }}" {% if diagnosis in consultation_notes.provisional_diagnosis.all %} selected {% endif %}>{{ diagnosis.diagnosis_name }}</option>
                                                                         {% endfor %}
                                                                     </select>
                                                                 </div>
-                            
                                                                 <!-- Final diagnosis -->
                                                                 <div class="col-md-4 form-group">
                                                                     <label for="final_diagnosis{{ consultation_notes.id }}">Final Diagnosis:</label>
-                                                                    <select class="form-control select2bs4" style="width: 100%;" id="final_diagnosis{{ consultation_notes.id }}" name="final_diagnosis" multiple>
+                                                                    <select class="form-control select2bs4" style="width: 100%;" id="final_diagnosis{{ consultation_notes.id }}" name="final_diagnosis[]" multiple>
                                                                         {% for diagnosis in final_diagnoses %}
                                                                         <option value="{{ diagnosis.id }}" {% if diagnosis in consultation_notes.final_diagnosis.all %} selected {% endif %}>{{ diagnosis.diagnosis_name }}</option>
                                                                         {% endfor %}
                                                                     </select>
                                                                 </div>
-                            
                                                                 <!-- Pathology -->
                                                                 <div class="col-md-4 form-group">
                                                                     <label for="pathology{{ consultation_notes.id }}">Pathology:</label>
-                                                                    <select class="form-control select2bs4" style="width: 100%;" id="pathology{{ consultation_notes.id }}" name="pathology" multiple>
+                                                                    <select class="form-control select2bs4" style="width: 100%;" id="pathology{{ consultation_notes.id }}" name="pathology[]" multiple>
                                                                         {% for record in pathology_records %}
                                                                         <option value="{{ record.id }}" {% if record in consultation_notes.pathology.all %} selected {% endif %}>{{ record.name }}</option>
                                                                         {% endfor %}
                                                                     </select>
                                                                 </div>
                                                             </div>
-                            
                                                             <!-- Fourth row -->
                                                             <div class="row">
                                                                 <!-- Doctor plan -->
@@ -400,63 +382,55 @@ Patient - Health Record
                                                                 </div>
                                                             </div>
                                                         </div>
-                            
                                                         <!-- Submit button -->
                                                         <div class="form-row">
                                                             <div class="col-md-12">
-                                                                <button type="button" class="btn btn-primary float-lg-right" onclick="editConsultationNotes({{ consultation_notes.id }})">Update Consultation</button>
+                                                                <div id="ProcedureResponse"></div>  
+                                                            </div>
+                                                        </div>
+                                                        <!-- Submit button -->
+                                                        <div class="form-row">
+                                                            <div class="col-md-12">
+                                                                <button type="button" class="btn btn-primary float-lg-right" onclick="editConsultationNotes()">Update Consultation</button>
                                                             </div>
                                                         </div>
                                                     </form>
                                                 </div>
                                             </div>
-                                            
                                         </div>
                                     </div>
                                 </div>
                                 <script>
-                                    function editConsultationNotes(consultationId) {
-                                        var formId = "#editConsultationForm" + consultationId;
+                                    function editConsultationNotes() {
+                                        var formId = "#editConsultationForm";
                                         var formData = $(formId).serialize();
+                                        
+                                        console.log("Form Data:", formData); // Log form data to the console for debugging
                                         
                                         $.ajax({
                                             type: 'POST',
-                                            url:'{% url "kahamahmis:save_remoteconsultation_notes" %}', // Replace 'your_server_url_here' with your actual server-side endpoint
+                                            url:'{% url "save_remoteconsultation_notes" %}', // Replace 'your_server_url_here' with your actual server-side endpoint
                                             data: formData,
                                             success: function(response) {
-                                                if (data.status === 'success') {                                                   
-                                                    location.reload(true);
-                                                    // Refresh the inventory item list or perform any other actions
+                                                if (response.status === 'success') {  
+                                                    $('#ProcedureResponse').html('<div class="alert alert-success">' + response.message + '</div>'); 
+                                                    location.reload(true);                                              
+                                            
                                                 } else {
-                                                    // Handle other status cases if needed
-                                                    alert(data.message);
+                                                    // Handle other message cases if needed
+                                                    $('#ProcedureResponse').html('<div class="alert alert-danger">' + response.message + '</div>');                                               
                                                 }
                                             },
                                             error: function(xhr, status, error) {
+                                                // Log any errors to the console
+                                                console.error(xhr, status, error);
                                                 // Handle error response
-                                                alert(xhr.responseText);
+                                                $('#ProcedureResponse').html('<div class="alert alert-danger">An error occurred while processing your request. Please try again later.</div>');                                               
                                             }
                                         });
                                     }
                                 </script>
-                                <!-- Modal for viewing notes -->
-                                {% for consultation in consultations %}
-                                <div class="modal fade" id="notes_modal_{{ consultation.id }}">
-                                    <div class="modal-dialog modal-lg">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h4 class="modal-title">Consultation Notes</h4>
-                                                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>{{ consultation.notes }}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                {% endfor %}
                                 
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -465,156 +439,9 @@ Patient - Health Record
         </div>
     </div>
 </div>
-<a href="{% url 'kahamahmis:generatePDF' patient.id visits.id %}" id="dwnload" class="btn btn-light border text-black-50 shadow-none"><i class="fa fa-download"></i> Download</a> </div>
-<div class="modal fade" id="addPrescriptionModal" tabindex="-1" role="dialog" aria-labelledby="addPrescriptionModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addPrescriptionModalLabel">Add Prescription for visit {{ visits.vst }} and patient {{ patient }}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="addPrescriptionModalForm{{ visit.id }}" method="post">
-                    {% csrf_token %}
-                    <table class="table table-bordered" id="prescriptionTable{{ visit.id }}">
-                        <thead>
-                            <tr>
-                                <th>Drug</th>
-                                <th>Dose</th>
-                                <th>Frequency</th>
-                                <th>Duration</th>
-                                <th>Quantity</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td> <select class="form-control select2bs4" style="width: 100%;" id="medicine" name="medicine[]" required>
-                                    <option value="">Select Medicine</option>
-                                    {% for medicine in medicines %}
-                                      <option value="{{ medicine.id }}" {% if medicine.id == prescription.medicine.id  %} selected {% endif %}>{{ medicine.name }}</option>
-                                    {% endfor %}
-                                  </select></td>
-                                <td><input type="text" class="form-control" name="dose[]" value="0"></td>
-                                <td><select class="form-control select2bs4" style="width: 100%;" id="frequency" name="frequency[]">                                
-                                        <option value="PRN">PRN</option>
-                                        <option value="QID">QID</option>
-                                        <option value="TID">TID</option>
-                                        <option value="BID">BID</option>
-                                        <option value="STAT">STAT</option>
-                                        <option value="OD">OD</option>                                    
-                                </select></td></td>
-                                <td> <select class="form-control select2bs4" style="width: 100%;" id="duration" name="duration[]">
-                                    {% for rate in range_31 %}
-                                        <option value="{{ rate }}">{{ rate }}</option>
-                                    {% endfor %}
-                                </select></td>
-                                <td><input type="text" class="form-control" name="quantity[]" value="1"></td>
-                                <td><button type="button" class="btn btn-danger delete-row">Delete</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <input type="hidden" class="form-control" id="visit_id" name="visit_id" value="{{ visits.id }}">
-                    <input type="hidden" class="form-control" id="patient_id" name="patient_id" value="{{ patient.id }}">
-                    <button type="button" class="btn btn-success" id="addRow{{ visit.id }}">Add Row</button>
-                    <button type="button" class="btn btn-primary"  onclick="addPrescription()">Save Prescriptions</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-<script>
-    $(document).ready(function() {
-        // Add row button functionality
-        $('#addRow{{ visit.id }}').click(function() {
-            var newRow = `
-                <tr>
-                    <td> <select class="form-control select2bs4" style="width: 100%;" id="medicine" name="medicine[]" required>
-                        <option value="">Select Medicine</option>
-                        {% for medicine in medicines %}
-                          <option value="{{ medicine.id }}" {% if medicine.id == prescription.medicine.id  %} selected {% endif %}>{{ medicine.name }}</option>
-                        {% endfor %}
-                      </select></td>
-                    <td><input type="text" class="form-control" name="dose[]" value="0"></td>
-                    <td><select class="form-control select2bs4" style="width: 100%;" id="frequency" name="frequency[]">                                
-                        <option value="PRN">PRN</option>
-                        <option value="QID">QID</option>
-                        <option value="TID">TID</option>
-                        <option value="BID">BID</option>
-                        <option value="STAT">STAT</option>
-                        <option value="OD">OD</option>                                    
-                </select></td></td>
-                <td> <select class="form-control select2bs4" style="width: 100%;" id="duration" name="duration[]">
-                    {% for rate in range_31 %}
-                        <option value="{{ rate }}">{{ rate }}</option>
-                    {% endfor %}
-                </select></td>
-                    <td><input type="text" class="form-control" name="quantity[]" value="1"></td>
-                    <td><button type="button" class="btn btn-danger delete-row">Delete</button></td>
-                </tr>`;
-            $('#prescriptionTable{{ visit.id }} tbody').append(newRow);
-        });
 
-        // Delete row button functionality
-        $(document).on('click', '.delete-row', function() {
-            $(this).closest('tr').remove();
-        });
 
-        // Trigger modal only when button is clicked
-        $('.add-prescription').click(function() {
-            var visitId = $(this).data('visit-id');
-            $('#addPrescriptionModal' + visitId).modal('show');
-        });
-    });
-</script>
 
-<script>
-    // Handle form submission using AJAX
-    function addPrescription() {
-        $.ajax({
-            type: 'POST',
-            url: '{% url "kahamahmis:add_remoteprescription" %}',  // Replace with your URL
-            data: $('#addPrescriptionModalForm').serialize(),
-            success: function (data) {
-                if (data.status === 'success') {
-                    $('#addPrescriptionModal').modal('hide');
-                    location.reload(true);
-                    // Refresh the inventory item list or perform any other actions
-                } else {
-                    // Handle other status cases if needed
-                    alert(data.message);
-                }
-            },
-            error: function (error) {
-                alert(error);
-                // Handle errors if necessary
-            }
-        });
-    }
-</script>
-
-<script>
-    function collapsePanel() {
-        // Code to handle collapse action
-        console.log("Panel collapsed");
-        // You can add your specific logic here
-    }
-    
-    function reloadPanel() {
-        // Code to handle reload action
-        console.log("Panel reloaded");
-        // You can add your specific logic here
-    }
-    
-    function closePanel() {
-        // Code to handle close action
-        console.log("Panel closed");
-        // You can add your specific logic here
-    }
-    
-</script>
 
 <script>
     $(document).ready(function() {
@@ -629,266 +456,9 @@ Patient - Health Record
     });
 </script>
 
-<div class="modal fade" id="addConsultationModal" tabindex="-1" aria-labelledby="addConsultationModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-teal-800">
-                <h3 class="modal-title text-center text-uppercase">Add Consultationt {{ visits.vst }} and patient {{ patient }}</h3>
-                <button type="button" class="close" data-dismiss="modal">×</button>
-            </div>
-            <div class="modal-body">
-                <form id="addConsultationForm">
-                    <div class="container-fluid">
-                        <!-- First row -->
-                        <div class="row">
-                            <!-- Doctor selection -->
-                            <div class="col-md-4 form-group">
-                                <label for="doctor">Doctor:</label>
-                                <select class="form-control select2bs4" style="width: 100%;" id="doctor" name="doctor" required>                                
-                                    {% for doctor in doctors %}
-                                        <option value="{{ doctor.id }}">{{ doctor.admin.first_name }} {{ doctor.middle_name }} {{ doctor.admin.last_name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <!-- Patient selection -->
-                            <div class="col-md-4 form-group">
-                                <label for="doctor_plan">Doctor Plan:</label>
-                                <textarea class="form-control" id="doctor_plan" name="doctor_plan"></textarea>
-                            </div>
-                            <!-- Chief complaints -->
-                            <div class="col-md-4 form-group">
-                                <label for="chief_complaints">Chief Complaints:</label>
-                                <textarea class="form-control" id="chief_complaints" name="chief_complaints"></textarea>
-                            </div>
-                        </div>
-                        <!-- Second row -->
-                        <div class="row">
-                            <!-- History of presenting illness -->
-                            <div class="col-md-4 form-group">
-                                <label for="history_of_presenting_illness">History of Presenting Illness:</label>
-                                <textarea class="form-control" id="history_of_presenting_illness" name="history_of_presenting_illness"></textarea>
-                            </div>
-                            <!-- Physical examination -->
-                            <div class="col-md-4 form-group">
-                                <label for="physical_examination">Physical Examination:</label>
-                                <textarea class="form-control" id="physical_examination" name="physical_examination"></textarea>
-                            </div>
-                            <!-- Allergy to medications -->
-                            <div class="col-md-4 form-group">
-                                <label for="allergy_to_medications">Allergy to Medications:</label>
-                                <input type="text" class="form-control" id="allergy_to_medications" name="allergy_to_medications">
-                                <input type="hidden" class="form-control" id="notes_id" name="notes_id">
-                            </div>
-                        </div>
-                        <!-- Third row -->
-                        <div class="row">
-                            <!-- Provisional diagnosis -->
-                           <!-- Provisional diagnosis -->
-                            <div class="col-md-4 form-group">
-                                <label for="provisional_diagnosis">Provisional Diagnosis:</label>
-                                <select class="form-control select2bs4" style="width: 100%;" id="provisional_diagnosis" name="provisional_diagnosis" multiple>
-                                    <option value="">Select Provisional Diagnosis</option>
-                                    {% for diagnosis in provisional_diagnoses %}
-                                        <option value="{{ diagnosis.id }}">{{ diagnosis.diagnosis_name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                            <!-- Final diagnosis -->
-                            <div class="col-md-4 form-group">
-                                <label for="final_diagnosis">Final Diagnosis:</label>
-                                <select class="form-control select2bs4" style="width: 100%;" id="final_diagnosis" name="final_diagnosis" multiple>
-                                    <option value="">Select Final Diagnosis</option>
-                                    {% for diagnosis in final_diagnoses %}
-                                        <option value="{{ diagnosis.id }}">{{ diagnosis.diagnosis_name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                            <!-- Pathology -->
-                            <div class="col-md-4 form-group">
-                                <label for="pathology">Pathology:</label>
-                                <select class="form-control select2bs4" style="width: 100%;" id="pathology" name="pathology" multiple>
-                                    {% for record in pathology_records %}
-                                        <option value="{{ record.id }}">{{ record.name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <input type="hidden" class="form-control" id="visit_id" name="visit_id" value="{{ visits.id }}">
-                        <input type="hidden" class="form-control" id="patient_id" name="patient_id" value="{{ patient.id }}">
-                        <!-- Fourth row -->
-                   
-                    </div>
-                    <!-- Submit button -->
-                    <div class="form-row">
-                        <div class="col-md-12">
-                            <button type="button" class="btn btn-primary float-lg-right" onclick="addConsultationNotes()">Add Consultation</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-<script>
-    // Handle form submission using AJAX
-    function addConsultationNotes() {
-        $.ajax({
-            type: 'POST',
-            url: '{% url "kahamahmis:save_remoteconsultation_notes" %}',  // Replace with your URL
-            data: $('#addConsultationForm').serialize(),
-            success: function (data) {
-                if (data.status === 'success') {
-                    $('#addConsultationModal').modal('hide');
-                    location.reload(true);
-                    // Refresh the inventory item list or perform any other actions
-                } else {
-                    // Handle other status cases if needed
-                    alert(data.message);
-                }
-            },
-            error: function (error) {
-                alert(error);
-                // Handle errors if necessary
-            }
-        });
-    }
-</script>
 
 
 
-<!-- HTML structure for the Bootstrap modal form -->
-<div class="modal fade" id="addProcedureModal" tabindex="-1" role="dialog" aria-labelledby="addProcedureModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addProcedureModalLabel">Add Procedure</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-            <form id="addProcedureForm" method="post">
-                {% csrf_token %}
-                <!-- Bootstrap grid system for form layout -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="doctor">Doctor:</label>
-                            <select class="form-control select2bs4" style="width: 100%;" id="doctor" name="doctor" required>                            
-                                {% for doctor in doctors %}
-                                    <option value="{{ doctor.id }}">{{ doctor.admin.first_name }} {{ doctor.middle_name }} {{ doctor.admin.last_name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="procedureName">Name:</label>
-                            <input type="text" class="form-control" id="procedureName" name="name" placeholder="Enter procedure name">
-                            <input type="hidden" class="form-control" id="visit_id" name="visit_id" value="{{ visits.id }}">
-                            <input type="hidden" class="form-control" id="patient_id" name="patient_id" value="{{ patient.id }}">
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="startTime">Start Time:</label>
-                            <input type="time" class="form-control" id="startTime" name="start_time">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="endTime">End Time:</label>
-                            <input type="time" class="form-control" id="endTime" name="end_time">
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="procedureEquipments">Equipments used:</label>
-                            <input type="text" class="form-control" id="procedureEquipments" name="equipments_used" placeholder="Enter equipments used">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="procedureCost">Cost:</label>
-                            <input type="text" class="form-control" id="procedureCost" name="cost" placeholder="Enter procedure cost">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="procedureDescription">Description:</label>
-                            <textarea class="form-control" id="procedureDescription" name="description" placeholder="Enter procedure description"></textarea>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-group pt-2 float-end">
-                    <div class="row">
-                        <div class="col-md-8"></div>
-                        <div class="col-md-4">
-                            <button type="button" class="btn btn-primary" onclick="submitRemoteProcedure()">Add Procedure</button>
-                        </div>
-                    </div>
-                </div>
-               
-              
-            </form>
-    </div>
-     
-      </div>
-    </div>
-  </div>
-  
-
-  
- <!-- JavaScript to handle AJAX request and form validation -->
-<script>
-    function submitRemoteProcedure() {
-        var startTimeStr = document.getElementById('startTime').value;
-        var endTimeStr = document.getElementById('endTime').value;
-    
-        // Convert time strings to Date objects
-        var startTime = new Date('2000-01-01T' + startTimeStr);
-        var endTime = new Date('2000-01-01T' + endTimeStr);
-    
-        // Validate start and end times
-        if (startTime >= endTime) {
-            alert('Start time must be greater than end time.');
-            return;
-        }
-    
-        // Get form data
-        var formData = new FormData(document.getElementById('addProcedureForm'));
-    
-        // Make AJAX request
-        $.ajax({
-            url: '{% url "kahamahmis:save_remoteprocedure" %}',  // Replace with your server endpoint
-            type: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function(response) {
-                if (response.status === 'success') {
-                    // Display success message
-                    $('#addProcedureModal').modal('hide');
-                    location.reload(true);
-                } else {
-                    // Display error message if any
-                    alert(response.message);
-                }
-            },
-            error: function(error) {
-                alert('An error occurred. Please try again.');  // Display a generic error message
-            }
-        });
-    }
-    
-    </script>
    
 <style>
     /* Reset default margin and padding */

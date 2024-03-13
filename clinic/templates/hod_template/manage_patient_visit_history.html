@@ -85,11 +85,11 @@ Patient Visit History
                                 </button>
                              
                                               <!-- Add more action links as needed -->
-                                <a href="{% url 'patient_health_record_view' visit.patient.id %}" data-toggle="tooltip" title="open health record">
+                                <a href="{% url 'clinic:patient_health_record_view' visit.patient.id %}" data-toggle="tooltip" title="open health record">
                                     <button type="button" class="btn btn-secondary btn-sm"><i class="fa fa-eye text-dark"></i></button>
                                 </a>   
                                               <!-- Add more action links as needed -->
-                                <a href="{% url 'patient_vital_list' visit.patient.id %}" data-toggle="tooltip" title="open">
+                                <a href="{% url 'clinic:patient_vital_list' visit.patient.id %}" data-toggle="tooltip" title="open">
                                     <button type="button" class="btn btn-success btn-sm"><i class="fa fa-eye text-dark"></i></button>
                                 </a>   
                                     
@@ -235,7 +235,7 @@ Patient Visit History
                                                 e.preventDefault();
                                                 $.ajax({
                                                     type: 'POST',
-                                                    url: '{% url "add_patient_visit" %}',  // Replace with your URL
+                                                    url: '{% url "clinic:add_patient_visit" %}',  // Replace with your URL
                                                     data: $('#editVisitModalForm{{ visit.id }}').serialize(),
                                                     success: function (data) {
                                                         if (data.status === 'success') {
@@ -347,7 +347,7 @@ Patient Visit History
 
         $.ajax({
             type: 'POST',
-            url: '/add_patient_visit/',
+            url: '{% url "clinic:add_patient_visit" %}',
             data: {
                 visitType: visitType,
                 insuranceName: insuranceName,

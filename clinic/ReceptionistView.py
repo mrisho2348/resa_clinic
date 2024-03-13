@@ -101,7 +101,7 @@ def save_patient_vital(request):
         # Retrieve the corresponding InventoryItem
         patient = Patients.objects.get(id=patient_id)
         visit = PatientVisits.objects.get(id=visit_id)
-       
+        recorded_by = request.user.staff
               
 
 
@@ -116,6 +116,7 @@ def save_patient_vital(request):
          
 
         # Update or set values for other fields
+        vital.recorded_by = recorded_by
         vital.respiratory_rate = respiratory_rate
         vital.visit = visit
         vital.pulse_rate = pulse_rate
@@ -809,49 +810,6 @@ def patient_consultation_detail(request, patient_id):
         return render(request, '404.html', {'error_message': str(e)})    
     
 
-    
-
-@csrf_exempt
-@require_POST
-def save_remotepatient_vital(request):
-    try:
-        # Extract data from the request
-        vital_id = request.POST.get('vital_id')
-        patient_id = request.POST.get('patient_id')       
-        respiratory_rate = request.POST.get('respiratory_rate')
-        pulse_rate = request.POST.get('pulse_rate')
-        blood_pressure = request.POST.get('blood_pressure')
-        spo2 = request.POST.get('spo2')
-        temperature = request.POST.get('temperature')
-        gcs = request.POST.get('gcs')
-        avpu = request.POST.get('avpu')
-
-        # Retrieve the corresponding InventoryItem
-        patient = Patients.objects.get(id=patient_id)
-    
-        # Check if the usageHistoryId is provided for editing
-        if vital_id:
-            # Editing existing usage history
-            vital = PatientVital.objects.get(pk=vital_id)
-          
-        else:
-            # Creating new usage history
-            vital = PatientVital()
-       
-        vital.respiratory_rate = respiratory_rate
-        vital.pulse_rate = pulse_rate
-        vital.blood_pressure = blood_pressure
-        vital.spo2 = spo2
-        vital.gcs = gcs
-        vital.temperature = temperature
-        vital.avpu = avpu
-        vital.patient = patient
-        vital.save()
-
-        return JsonResponse({'status': 'success'})
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)})    
-    
 @csrf_exempt
 @require_POST
 def add_prescription(request):
@@ -930,13 +888,16 @@ def generate_prescription_id():
 def add_patient_visit(request):
     try:
         visit_id = request.POST.get('visit_id')
-        visitType = request.POST.get('visitType')        
+        print(visit_id)    
+        visitType = request.POST.get('visitType')  
+        print(visitType)      
         insuranceName = request.POST.get('insuranceName')
         insuranceNumber = request.POST.get('insuranceNumber')
         verificationCode = request.POST.get('verificationCode')
         visitReason = request.POST.get('visitReason')
-        patient_id = request.POST.get('patient_id')    
-        referral_number = request.POST.get('visitReason')    
+        patient_id = request.POST.get('patient_id')  
+        print(patient_id)  
+        referral_number = request.POST.get('referral_number')    
         primary_service = request.POST.get('primary_service')  
         
         patient = Patients.objects.get(pk=patient_id)
@@ -958,23 +919,23 @@ def add_patient_visit(request):
             vst = generate_vst() 
             
             visit = PatientVisits(
-            patient=patient,
-            visit_type=visitType,
-            vst=vst,
-            primary_service=primary_service,
-            insurance_name=insuranceName,
-            insurance_number=insuranceNumber,
-            authorization_code=verificationCode,
-            visit_reason=visitReason,
-            referral_number=referral_number
-                          
-               
+                patient=patient,
+                visit_type=visitType,
+                vst=vst,
+                primary_service=primary_service,
+                insurance_name=insuranceName,
+                insurance_number=insuranceNumber,
+                authorization_code=verificationCode,
+                visit_reason=visitReason,
+                referral_number=referral_number
             )
             visit.save()
 
-        return JsonResponse({'status': 'success'})
+        return JsonResponse({'status': 'success','message':'visit added successfully'})
+    except Patients.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Invalid patient ID.'})
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}) 
+        return JsonResponse({'status': 'error', 'message': str(e)})
     
 
 def generate_vst():

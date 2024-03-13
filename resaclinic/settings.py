@@ -89,9 +89,9 @@ DATABASES = {
         # 'NAME': BASE_DIR / 'db.sqlite3',
         'ENGINE':'django.db.backends.mysql',
         'NAME':'resagroup',
-        'USER':'resa',
-        'PASSWORD':'resa1234',            
-        'HOST':'resamedicalgroup.crm2gzptg2rt.us-east-1.rds.amazonaws.com',
+        'USER':'root',
+        'PASSWORD':'m2r3i4s8',            
+        'HOST':'localhost',
         'PORT':'3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",

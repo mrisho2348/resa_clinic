@@ -17,11 +17,11 @@ class LoginCheckMiddleWare(MiddlewareMixin):
 
         # Allow access to login/logout pages and authentication-related views
         if (request.path == reverse("login") or
-            request.path == reverse("DoLogin") or
+            request.path == reverse("clinic:DoLogin") or
             request.path == reverse("kahamahmis:kahama") or
             request.path == reverse("kahamahmis:DoLoginKahama") or
-            request.path == reverse("home") or
-            request.path == reverse("logout_user") or
+            request.path == reverse("clinic:home") or
+            request.path == reverse("clinic:logout_user") or
             modulename.startswith("django.contrib.auth.views")):
             return None
         
@@ -42,6 +42,7 @@ class LoginCheckMiddleWare(MiddlewareMixin):
                             "clinic.views",
                             "clinic.delete",
                             "clinic.editView",                         
+                            "clinic.imports",                         
                             "django.views.static",
                            
                         ]
@@ -108,7 +109,7 @@ class LoginCheckMiddleWare(MiddlewareMixin):
                                 # Redirect to corresponding dashboard based on role
                                 return redirect(dashboard_url)
                     else:
-                        return HttpResponseRedirect(reverse("home"))        
+                        return HttpResponseRedirect(reverse("clinic:home"))        
             
         # Redirect to the landing page if the user is not authenticated
-        return HttpResponseRedirect(reverse("home"))
+        return HttpResponseRedirect(reverse("clinic:home"))

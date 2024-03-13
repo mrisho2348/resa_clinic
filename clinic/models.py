@@ -164,7 +164,7 @@ class PatientLifestyleBehavior(models.Model):
         return f"{self.patient} - {self.behavior_name}"
 
 class Service(models.Model):
-    covarage = models.CharField(max_length=200, blank=True, null=True)
+    coverage = models.CharField(max_length=200, blank=True, null=True)
     department = models.CharField(max_length=200, blank=True, null=True)
     type_service = models.CharField(max_length=200, blank=True, null=True)
     name = models.CharField(max_length=255)
@@ -454,6 +454,7 @@ class ServiceRequest(models.Model):
 class PatientVital(models.Model):
     patient = models.ForeignKey('Patients', on_delete=models.CASCADE)
     visit = models.ForeignKey('PatientVisits', on_delete=models.CASCADE,blank=True, null=True) 
+    recorded_by = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True) 
     recorded_at = models.DateTimeField(auto_now_add=True)
     respiratory_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Respiratory rate in breaths per minute")
     pulse_rate = models.PositiveIntegerField(null=True, blank=True, help_text="Pulse rate in beats per minute")
@@ -698,14 +699,31 @@ class Payment(models.Model):
     def __str__(self):
         return f"Payment of {self.amount} {self.payment_type} for {self.patient}"
 
+class ImagingRecord(models.Model):
+    patient = models.ForeignKey('Patients', on_delete=models.CASCADE)
+    visit = models.ForeignKey('PatientVisits', on_delete=models.CASCADE)
+    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True) 
+    imaging= models.ForeignKey(Service, on_delete=models.CASCADE,blank=True, null=True) 
+    order_date = models.DateField(null=True, blank=True)
+    description = models.TextField(blank=True, null=True)
+    image = models.ImageField(upload_to='imaging_records/', null=True, blank=True)
+    cost = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+    def __str__(self):
+        return f"Imaging Record for {self.patient} - {self.imaging_type} ({self.imaging_date})"
+
 class Procedure(models.Model):
     patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
     visit = models.ForeignKey(PatientVisits, on_delete=models.CASCADE,blank=True, null=True) 
-    name = models.CharField(max_length=100)
-    description = models.TextField()
-    duration_time = models.CharField(max_length=50)
+    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True) 
+    name = models.ForeignKey(Service, on_delete=models.CASCADE,blank=True, null=True) 
+    description = models.TextField(blank=True, null=True)  
+    order_date = models.DateField(null=True, blank=True)     
     equipments_used = models.CharField(max_length=255)
-    procedure_number = models.CharField(max_length=20, unique=True, default='PR-0000000')  # Unique procedure number
+    procedure_number = models.CharField(max_length=20, unique=True)  # Unique procedure number
     cost = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -718,13 +736,13 @@ class Procedure(models.Model):
         
         # Generate and set the appointment number if it's not already set
         if not self.procedure_number:
-            last_procedure = Consultation.objects.order_by('-id').first()  # Get the last appointment
+            last_procedure = Procedure.objects.order_by('-id').first()  # Get the last appointment
             if last_procedure:
                 last_number = int(last_procedure.procedure_number.split('-')[-1])
             else:
                 last_number = 0
             new_number = last_number + 1
-            self.procedure_number = f"APT-{new_number:07}"  # Format the appointment number
+            self.procedure_number = f"PR-{new_number:07}"  # Format the appointment number
         super().save(*args, **kwargs)  # Call the original save method
         
         
@@ -1171,8 +1189,7 @@ class Prescription(models.Model):
     patient = models.ForeignKey('Patients', on_delete=models.CASCADE)
     entered_by = models.ForeignKey('Staffs', on_delete=models.CASCADE,blank=True, null=True)
     medicine = models.ForeignKey('Medicine', on_delete=models.CASCADE)  # Link with Medicine model
-    visit = models.ForeignKey(PatientVisits, on_delete=models.CASCADE,blank=True, null=True)  # Link with Medicine model
-    prs_no = models.CharField(max_length=20, unique=True, editable=False)    
+    visit = models.ForeignKey(PatientVisits, on_delete=models.CASCADE,blank=True, null=True) # Link with Medicine model
     dose = models.CharField(max_length=50)
     frequency = models.CharField(max_length=50)
     duration = models.CharField(max_length=50)
@@ -1180,7 +1197,6 @@ class Prescription(models.Model):
     total_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)    
-
     def __str__(self):
         return f"{self.patient.first_name} - {self.medicine.name}"  # Accessing drug's name   
     
@@ -1212,11 +1228,7 @@ def generate_remoteprescription_id():
     new_prescription_id = last_sample_number + 1
     return f"PRS-{new_prescription_id:07d}"   
       
-def generate_prescription_id():
-    last_prescription = Prescription.objects.last()
-    last_sample_number = int(last_prescription.prs_no.split('-')[-1]) if last_prescription else 0
-    new_prescription_id = last_sample_number + 1
-    return f"PRS-{new_prescription_id:07d}"         
+     
 # Now, the additional model
 class PathologyDiagnosticTest(models.Model):
     pathology_record = models.ForeignKey(PathodologyRecord, on_delete=models.CASCADE, related_name='diagnostic_tests')

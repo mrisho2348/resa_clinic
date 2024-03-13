@@ -6,7 +6,8 @@ from clinic import  ReceptionistView, editView, imports
 
 
 urlpatterns = [
-        path('receptionist_dashboard/', ReceptionistView.receptionist_dashboard, name='receptionist_receptionist_dashboard'),    
+        path('receptionist_dashboard/', ReceptionistView.receptionist_dashboard, name='receptionist_dashboard'),    
+        path('add_patient/', ReceptionistView.add_patient, name='receptionist_add_patient'),    
         path('vehicle_ambulance_view/',ReceptionistView.vehicle_ambulance_view, name="receptionist_vehicle_ambulance_view"),
         path('vehicle_detail/<int:vehicle_id>/',ReceptionistView.vehicle_detail, name="receptionist_vehicle_detail"),
         path('ambulance_order_detail/<int:order_id>/', ReceptionistView.ambulance_order_detail, name='receptionist_ambulance_order_detail'),        
@@ -21,8 +22,7 @@ urlpatterns = [
         path('staff_detail/<int:staff_id>/', ReceptionistView.single_staff_detail, name='receptionist_single_staff_detail'),
         path('view-patient/<int:patient_id>/', ReceptionistView.view_patient, name='receptionist_view_patient'),  
         path('save_service_data/',ReceptionistView.save_service_data, name="receptionist_save_service_data"),      
-        path('get_item_quantity/',ReceptionistView.get_item_quantity, name="receptionist_get_item_quantity"),
-        path('save_remotepatient_vital/', ReceptionistView.save_remotepatient_vital, name='receptionist_save_remotepatient_vital'),
+        path('get_item_quantity/',ReceptionistView.get_item_quantity, name="receptionist_get_item_quantity"),        
         path('resa/patient_vital_all_listt/', ReceptionistView.patient_vital_all_list, name='receptionist_patient_vital_all_list'),
         path('patient_consultation_detail/<int:patient_id>/', ReceptionistView.patient_consultation_detail, name='receptionist_patient_consultation_detail'),
         path('patient_vital_list/<int:patient_id>/', ReceptionistView.patient_vital_list, name='receptionist_patient_vital_list'),
