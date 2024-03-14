@@ -15,7 +15,7 @@ from django.db.models import Q
 from clinic.models import  Consultation,  DiseaseRecode, Medicine, Notification,  PathodologyRecord, Patients, Procedure, Staffs
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
-from .models import ConsultationFee, ConsultationNotes, ConsultationNotification, Country, Diagnosis,Diagnosis,HealthIssue, ImagingRecord, InventoryItem, LabTest, PatientVisits, PatientVital, Prescription, Procedure, Patients, Referral,Service
+from .models import ConsultationFee, ConsultationNotes, ConsultationNotification, Counseling, Country, Diagnosis,Diagnosis,HealthIssue, ImagingRecord, InventoryItem, LabTest, LaboratoryOrder, PatientVisits, PatientVital, Prescription, Procedure, Patients, Referral,Service
 
 @login_required
 def doctor_dashboard(request):
@@ -71,11 +71,20 @@ def manage_consultation(request):
 
 @login_required
 def manage_pathodology(request):
-    pathodology_records=PathodologyRecord.objects.all() 
-    disease_records=DiseaseRecode.objects.all() 
+    doctor = request.user.staff
+    pathodology_records=ImagingRecord.objects.filter(doctor=doctor)     
     return render(request,"doctor_template/manage_pathodology.html",{
         "pathodology_records":pathodology_records,
-        "disease_records":disease_records,
+       
+        })
+    
+@login_required
+def manage_laboratory(request):
+    doctor = request.user.staff
+    lab_records=LaboratoryOrder.objects.filter(doctor=doctor)     
+    return render(request,"doctor_template/manage_lab_result.html",{
+        "lab_records":lab_records,
+       
         })
 
 
@@ -373,36 +382,80 @@ def save_procedure(request):
 
 
 
-@csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
+@csrf_exempt
 def save_referral(request):
     if request.method == 'POST':
         try:
-            mrn = request.POST.get('mrn')            
-            source_location = request.POST.get('source_location')
+            referral_id = request.POST.get('referral_id')  # Check if referral ID is provided
+            visit_id = request.POST.get('visit_id')
+            patient_id = request.POST.get('patient_id')      
             destination_location = request.POST.get('destination_location')
             reason = request.POST.get('reason')
-            notes = request.POST.get('notes')       
+            doctor = request.user.staff 
 
-
-            # Save procedure record
-            referral_record = Referral.objects.create(
-                patient=Patients.objects.get(mrn=mrn),
-                source_location=source_location,
-                destination_location=destination_location,
-                reason=reason,
-                notes=notes,
-       
-            )
-
-            return JsonResponse({'success': True, 'message': f'Referral record for {referral_record} saved successfully.'})
+            if referral_id:  # If referral ID is provided, update existing referral record
+                referral_record = Referral.objects.get(id=referral_id)
+                referral_record.destination_location = destination_location
+                referral_record.reason = reason
+                referral_record.save()
+                return JsonResponse({'success': True, 'message': f'{referral_record} updated successfully.'})
+            else:  # If no referral ID is provided, create a new referral record
+                referral_record = Referral.objects.create(
+                    patient_id=patient_id,
+                    visit_id=visit_id,
+                    doctor=doctor,
+                    destination_location=destination_location,
+                    reason=reason,
+                )
+                return JsonResponse({'success': True, 'message': f'{referral_record} saved successfully.'})
         except Patients.DoesNotExist:
             return JsonResponse({'success': False, 'message': 'Invalid patient ID.'})
+        except Referral.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid referral ID.'})
         except IntegrityError:
             return JsonResponse({'success': False, 'message': 'Duplicate entry. Referral record not saved.'})
         except Exception as e:
             return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
-
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+
+@csrf_exempt
+def save_counseling(request):
+    if request.method == 'POST':
+        try:
+            counsel_id = request.POST.get('counsel_id')  # Check if referral ID is provided
+            visit_id = request.POST.get('visit_id')
+            patient_id = request.POST.get('patient_id')      
+            counseling_topic = request.POST.get('counseling_topic')      
+            counseling_description = request.POST.get('counseling_description')            
+            counselor = request.user.staff 
+
+            if counsel_id:  # If referral ID is provided, update existing referral record
+                counseling_record = Counseling.objects.get(id=counsel_id)
+                counseling_record.counseling_topic = counseling_topic              
+                counseling_record.counseling_description = counseling_description              
+                counseling_record.save()
+                return JsonResponse({'success': True, 'message': f'{counseling_record} updated successfully.'})
+            else:  # If no referral ID is provided, create a new referral record
+                counseling_record = Counseling.objects.create(
+                    patient_id=patient_id,
+                    visit_id=visit_id,
+                    counselor=counselor,
+                    topic=counseling_topic,
+                    description=counseling_description,
+               
+                )
+                return JsonResponse({'success': True, 'message': f'{counseling_record} saved successfully.'})
+        except Patients.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid patient ID.'})
+        except Counseling.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid referral ID.'})
+        except IntegrityError:
+            return JsonResponse({'success': False, 'message': 'Duplicate entry. Counseling record not saved.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
 
 @csrf_exempt
 def change_referral_status(request):
@@ -862,7 +915,7 @@ def save_remotesconsultation_notes(request, patient_id, visit_id):
             redirect_url = {
                 'Prescription': reverse('save_prescription', args=[patient_id, visit_id]),
                 'Laboratory': reverse('save_laboratory', args=[patient_id, visit_id]),
-                'Referral': reverse('save_remotereferral', args=[patient_id, visit_id]),
+                'Referral': reverse('patient_consultation_detail', args=[patient_id, visit_id]),
                 'Counsel': reverse('patient_consultation_detail', args=[patient_id, visit_id]),
                 'Procedure': reverse('save_remoteprocedure', args=[patient_id, visit_id]),
                 'Observation': reverse('save_observation', args=[patient_id, visit_id]),
@@ -920,6 +973,28 @@ def save_remoteprocedure(request, patient_id, visit_id):
         # Handle other exceptions if necessary
         return render(request, '404.html', {'error_message': str(e)})
     
+@csrf_exempt    
+def get_patient_details(request, patient_id):
+    try:
+        patient = Patients.objects.get(id=patient_id)
+        # Fetching services based on coverage and type
+        if patient.payment_form == 'insurance':
+            # If patient's payment form is insurance, fetch services with matching coverage
+            remote_service = Service.objects.filter(
+                type_service='procedure',
+                coverage=patient.payment_form
+            ).values('id', 'name')
+        else:
+            # If payment form is cash, fetch all services of type procedure
+            remote_service = Service.objects.filter(
+                type_service='procedure'
+            ).values('id', 'name')
+        print(remote_service)
+        return JsonResponse({'success': True, 'patient': patient, 'remote_service': list(remote_service)})
+    except Patients.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Patient not found'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
 
 def get_procedure_cost(request):
     if request.method == 'GET':
@@ -1247,9 +1322,9 @@ def save_laboratory(request, patient_id, visit_id):
         except PatientVisits.DoesNotExist:
             visit_history = None
         try:
-            imaging_records = ImagingRecord.objects.filter(patient_id=patient_id, visit_id=visit_id,doctor_id=doctor)
-        except ImagingRecord.DoesNotExist:
-            imaging_records = None
+            Investigation = LaboratoryOrder.objects.filter(patient_id=patient_id, visit_id=visit_id,doctor_id=doctor)
+        except LaboratoryOrder.DoesNotExist:
+            Investigation = None
 
         prescriptions = Prescription.objects.filter(patient=patient_id, visit=visit_id)
 
@@ -1274,13 +1349,13 @@ def save_laboratory(request, patient_id, visit_id):
 
         # Calculate total amount from all procedures
         total_procedure_cost = procedures.aggregate(Sum('cost'))['cost__sum']
-        total_imaging_cost = imaging_records.aggregate(Sum('cost'))['cost__sum']
+        total_imaging_cost = Investigation.aggregate(Sum('cost'))['cost__sum']
         return render(request, 'doctor_template/laboratory_template.html', {
             'visit_history': visit_history,
             'patient': patient,
             'prescriptions': prescriptions,
             'total_price': total_price,
-            'imaging_records': imaging_records,
+            'Investigation': Investigation,
             'procedures': procedures,
             'remote_service': remote_service,
             'total_procedure_cost': total_procedure_cost,
@@ -1288,7 +1363,50 @@ def save_laboratory(request, patient_id, visit_id):
         })
     except Exception as e:
         # Handle other exceptions if necessary
-        return render(request, '404.html', {'error_message': str(e)})             
+        return render(request, '404.html', {'error_message': str(e)})    
+    
+@csrf_exempt
+def add_investigation(request):
+    if request.method == 'POST':
+        try:
+            # Assuming your form fields are named appropriately in your template
+            patient_id = request.POST.get('patient_id')
+            doctor = request.user.staff
+            visit_id = request.POST.get('visit_id')
+            investigation_names = request.POST.getlist('investigation_name[]')
+            descriptions = request.POST.getlist('description[]')            
+            costs = request.POST.getlist('cost[]')
+            order_date = request.POST.get('order_date')
+
+            # Loop through the submitted data and create LaboratoryOrder objects
+            for i in range(len(investigation_names)):
+                investigation_record = LaboratoryOrder.objects.create(
+                    patient_id=patient_id,
+                    visit_id=visit_id,
+                    order_date=order_date,
+                    doctor=doctor,
+                    name_id=investigation_names[i],
+                    description=descriptions[i],                 
+                    cost=costs[i],
+                    # Set other fields as needed
+                )
+                # Save the LaboratoryOrder record to the database
+                investigation_record.save()
+
+            # Assuming the LaboratoryOrder records were successfully saved
+            return JsonResponse({'status': 'success', 'message': 'Laboratory records saved successfully'})
+        except IntegrityError as e:
+            # Handle integrity errors, such as unique constraint violations
+            return JsonResponse({'status': 'error', 'message': 'Integrity error occurred: ' + str(e)})
+        except Exception as e:
+            # Handle other unexpected errors
+            return JsonResponse({'status': 'error', 'message': 'An error occurred: ' + str(e)})
+    else:
+        # If the request method is not POST, return an error response
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}) 
+    
+       
+             
 @csrf_exempt
 @require_POST
 def save_remoteconsultation_notes(request):
@@ -1570,73 +1688,58 @@ def patient_visit_history_view(request, patient_id):
 
 
 
+@login_required
 def patient_health_record_view(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
-        visits = PatientVisits.objects.get(id=visit_id)
-        visit_history = PatientVisits.objects.filter(patient_id=patient_id)
+        doctor = request.user.staff
+        visits = PatientVisits.objects.get(id=visit_id,patient_id=patient_id)        
         prescriptions = Prescription.objects.filter(patient=patient_id, visit=visit_id)
         try:
-            consultation_notes = ConsultationNotes.objects.filter(patient_id=patient_id, visit=visit_id).order_by('-created_at').first()
+            consultation_notes = ConsultationNotes.objects.filter(patient_id=patient_id, visit=visit_id ,doctor_id=doctor).order_by('-created_at').first()
         except ConsultationNotes.DoesNotExist:
-            consultation_notes = None
-         
+            consultation_notes = None         
         try:
-            previous_vitals = PatientVital.objects.filter(patient=patient_id,visit=visit_id).order_by('-recorded_at')
+            previous_vitals = PatientVital.objects.filter(patient=patient_id,visit=visit_id, recorded_by=doctor).order_by('-recorded_at')
         except PatientVital.DoesNotExist:
-            previous_vitals = None   
-             
+            previous_vitals = None           
         try:
-            consultation_notes_previous  = ConsultationNotes.objects.filter(patient=patient_id).order_by('-created_at')
-        except ConsultationNotes.DoesNotExist:
-            consultation_notes_previous  = None   
-             
-        try:
-            vital = PatientVital.objects.filter(patient=patient_id, visit=visit_id)
-        except PatientVital.DoesNotExist:
-            vital = None
-            
-        try:
-            procedures = Procedure.objects.filter(patient=patient_id, visit=visit_id)            
+            procedures = Procedure.objects.filter(patient=patient_id, visit=visit_id,doctor=doctor)            
         except Procedure.DoesNotExist:
-            procedures = None
-          
+            procedures = None          
         try:
-            lab_tests = LabTest.objects.filter(patient=patient_id, visit=visit_id)
-        except LabTest.DoesNotExist:
-            lab_tests = None    
-     
-        pathology_records = PathodologyRecord.objects.all()  # Fetch all consultation notes from the database
-        doctors = Staffs.objects.filter(role='doctor')
+            lab_tests = LaboratoryOrder.objects.filter(patient=patient_id, visit=visit_id,doctor=doctor)
+        except LaboratoryOrder.DoesNotExist:
+            lab_tests = None  
+        total_price = sum(prescription.total_price for prescription in prescriptions)   
+        patient = Patients.objects.get(id=patient_id)
+           # Calculate total amount from all procedures
+        try:
+            imaging_records = ImagingRecord.objects.filter(patient_id=patient_id, visit_id=visit_id,doctor=doctor)
+        except ImagingRecord.DoesNotExist:
+            imaging_records = None
+               
+        total_procedure_cost = procedures.aggregate(Sum('cost'))['cost__sum']
+        total_imaging_cost = imaging_records.aggregate(Sum('cost'))['cost__sum']
+        lab_tests_cost = lab_tests.aggregate(Sum('cost'))['cost__sum']    
         provisional_diagnoses = Diagnosis.objects.all()
         final_diagnoses = Diagnosis.objects.all()
-
-        total_price = sum(prescription.total_price for prescription in prescriptions)
-        range_31 = range(31)
-        current_date = timezone.now().date()
-        patient = Patients.objects.get(id=patient_id)
-
-        medicines = Medicine.objects.filter(
-            medicineinventory__remain_quantity__gt=0,  # Inventory level greater than zero
-            expiration_date__gt=current_date  # Not expired
-        ).distinct()
-
+        pathology_records = PathodologyRecord.objects.all()
         return render(request, 'doctor_template/manage_patient_health_record.html', {
-            'visit_history': visit_history,
+           
+            'provisional_diagnoses': provisional_diagnoses,
+            'final_diagnoses': final_diagnoses,
+            'pathology_records': pathology_records,
             'patient': patient,
-            'visits': visits,
-            'range_31': range_31,
-            'medicines': medicines,
+            'visit': visits,          
+            'lab_tests_cost': lab_tests_cost,
+            'total_procedure_cost': total_procedure_cost,
+            'total_imaging_cost': total_imaging_cost,
             'prescriptions': prescriptions,
             'total_price': total_price,
-            'consultation_notes': consultation_notes,
-            'pathology_records': pathology_records,
-            'doctors': doctors,
-            'consultation_notes_previous': consultation_notes_previous,
-            'provisional_diagnoses': provisional_diagnoses,
-            'previous_vitals': previous_vitals,
-            'final_diagnoses': final_diagnoses,
-            'vital': vital,
+            'consultation_notes': consultation_notes,      
+            'previous_vitals': previous_vitals,          
+            'imaging_records': imaging_records,          
             'lab_tests': lab_tests,
             'procedures': procedures,
       

@@ -19,6 +19,7 @@ urlpatterns = [
         path('save_edited_patient/',DoctorView.save_edited_patient, name="save_edited_patient"),
         path('add_patient_visit/',DoctorView.add_patient_visit, name="add_patient_visit"),
         path('fetch_model_data/', DoctorView.fetch_model_data, name='fetch_model_data'),
+        path('manage_laboratory/', DoctorView.manage_laboratory, name='manage_laboratory'),
         path('save_consultation_data/', DoctorView.save_consultation_data, name='save_consultation_data'),
         path('save_consultation_fee/', DoctorView.save_consultation_fee, name='save_consultation_fee'),
         path('add_pathodology_record/', DoctorView.add_pathodology_record, name='add_pathodology_record'),
@@ -33,6 +34,9 @@ urlpatterns = [
           
         # manage urls      
         path('get-procedure-cost/', DoctorView.get_procedure_cost, name='get_procedure_cost'),   
+        path('get_patient_details/<int:patient_id>/', DoctorView.get_patient_details, name='get_patient_details'),
+        path('save_counseling/', DoctorView.save_counseling, name='save_counseling'),
+        path('add_investigation/', DoctorView.add_investigation, name='add_investigation'),
         path('add_imaging/', DoctorView.add_imaging, name='add_imaging'),
         path('add_procedure/', DoctorView.add_procedure, name='add_procedure'),
         path('add_remoteprescription/', DoctorView.add_remoteprescription, name='add_remoteprescription'),

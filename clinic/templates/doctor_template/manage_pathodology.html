@@ -1,53 +1,52 @@
 {% extends 'doctor_template/base_template.html' %}
 {% block title %}
-Pathology
+Radiology
 {% endblock title %}
-
-{% block page_title %}
-Pathology
-{% endblock page_title %}
-
 {% block breadcrumb %}
 {% include "doctor_template/modal_form.html" %}
- 
-    <a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#pathodologyModal">
-        <i class="fas fa-plus"></i>Add
-    </a>
-    <a class="btn btn-success float-right mr-2" href="{% url 'import_pathology_records' %}">
-        <i class="fas fa-file-import"></i> Import 
-      </a>
+Radiology
     {% load static %}
 {% endblock breadcrumb %}
 {% block main_content %}
-<div class="">
-    <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Related Diseases</th> <!-- New added field -->
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="pathology-record-table-body">
-            {% for pathodology in pathodology_records %}
-                <tr>
-                    <td>{{ pathodology.name }}</td>
-                    <td>{{ pathodology.description }}</td>
-                    <td>
-                        {% for disease in pathodology.related_diseases.all %}
-                            {{ disease.disease_name }}
-                            {% if not forloop.last %}, {% endif %}
-                        {% endfor %}
-                    </td>
-                    <td>
-                        <a href="{% url 'edit_pathodology' pathodology.id %}" class="btn btn-info">Edit</a>
-                        <a href="{% url 'delete_pathodology' pathodology.id %}" class="btn btn-danger">Delete</a>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="header-title text-center mt-0 mb-1 text-uppercase">Radiology</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table  class="table table-hover text-nowrap table-bordered table-striped" id="example4">
+                            <thead>
+                              <tr>
+                                <th>Patient</th>
+                                <th>Image Name</th>
+                                <th>Description</th>                           
+                                <th>Cost</th>
+                                <th>Date</th> <!-- New column -->
+                                <!-- Add more columns as needed -->
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {% for record in pathodology_records %}
+                              <tr>
+                                <td>{{ record.patient.first_name }} {{ record.patient.middle_name }}  {{ record.patient.last_name }}</td> 
+                                <td>{{ record.imaging.name }}</td>
+                                <td>{{ record.description }}</td>                            
+                                <td>{{ record.cost }}</td>
+                                <td>{{ record.created_at|date:"F d, Y" }}</td> <!-- Display date -->
+                                <!-- Add more columns as needed -->
+                              </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 

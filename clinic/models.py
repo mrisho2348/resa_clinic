@@ -744,6 +744,35 @@ class Procedure(models.Model):
             new_number = last_number + 1
             self.procedure_number = f"PR-{new_number:07}"  # Format the appointment number
         super().save(*args, **kwargs)  # Call the original save method
+class LaboratoryOrder(models.Model):
+    patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
+    visit = models.ForeignKey(PatientVisits, on_delete=models.CASCADE,blank=True, null=True) 
+    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True) 
+    name = models.ForeignKey(Service, on_delete=models.CASCADE,blank=True, null=True) 
+    description = models.TextField(blank=True, null=True)  
+    order_date = models.DateField(null=True, blank=True)  
+    result = models.TextField(blank=True, verbose_name=_('Test Result'))
+    lab_number = models.CharField(max_length=20, unique=True)  # Unique procedure number
+    cost = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+    def __str__(self):
+        return f"LaboratoryOrder: {self.name} for {self.patient}"
+    
+    def save(self, *args, **kwargs):  
+        
+        # Generate and set the appointment number if it's not already set
+        if not self.lab_number:
+            last_lab_number = LaboratoryOrder.objects.order_by('-id').first()  # Get the last appointment
+            if last_lab_number:
+                last_number = int(last_lab_number.lab_number.split('-')[-1])
+            else:
+                last_number = 0
+            new_number = last_number + 1
+            self.lab_number = f"LAB-{new_number:07}"  # Format the appointment number
+        super().save(*args, **kwargs)  # Call the original save method
         
         
 class AmbulanceOrder(models.Model):
@@ -994,8 +1023,10 @@ class Notification(models.Model):
 class Referral(models.Model):
     # Patient who is being referred
     patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
+    visit = models.ForeignKey(PatientVisits, on_delete=models.CASCADE,blank=True, null=True) 
+    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True) 
     # Information about the referral
-    source_location  = models.CharField(max_length=255, help_text='Source location of the patient')
+    source_location  = models.CharField(max_length=255, help_text='Source location of the patient',default="resa medical hospital")
     destination_location = models.CharField(max_length=255, help_text='Destination location for MedEvac')
     reason = models.TextField()
     # Additional details
@@ -1032,7 +1063,18 @@ class Referral(models.Model):
         elif self.status == 'rejected':
             return 'danger'
         return '' 
-    
+  
+class Counseling(models.Model):
+    topic = models.CharField(max_length=100)
+    description = models.TextField()
+    patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
+    visit = models.ForeignKey(PatientVisits, on_delete=models.CASCADE,blank=True, null=True) 
+    counselor = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True) 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.topic    
 class RemoteReferral(models.Model):
     # Patient who is being referred
     patient = models.ForeignKey(RemotePatient, on_delete=models.CASCADE)   

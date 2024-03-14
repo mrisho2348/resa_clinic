@@ -1,4 +1,4 @@
-{% extends 'doctor_template/base_template.html' %}
+{% extends 'receptionist_template/base_template.html' %}
 
 {% block title %}
 Patient - Health Record
@@ -9,7 +9,7 @@ Patient - Health Record
 {% endblock page_title %}
 
 {% block breadcrumb %}
-{% include "doctor_template/modal_form.html" %}
+{% include "receptionist_template/modal_form.html" %}
     <a href="{% url 'manage_patient' %}" class="btn btn-success float-right" type="button">
         <i class="fas fa-arrow-left"></i> Back to Patient List
     </a>
@@ -248,8 +248,9 @@ Patient - Health Record
                                                                     <table  class="table table-hover text-nowrap table-bordered table-striped" id="example4">
                                                                         <thead>
                                                                             <tr>
-                                                                                <th>Lab Number</th>                                                        
-                                                                                <th>Visit</th>                                       
+                                                                                <th>Doctor</th>                                                        
+                                                                                <th>Lab Number</th>                                                       
+                                                                                                                  
                                                                                 <th>Test Name</th>
                                                                                 <th>Description</th>
                                                                                 <th>Order Date</th>
@@ -258,10 +259,11 @@ Patient - Health Record
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
-                                                                            {% for order in lab_tests %}
+                                                                            {% for order in lab_results %}
                                                                             <tr>
-                                                                                <td>{{ order.lab_number }}</td>                                                          
-                                                                                <td>{{ order.visit }}</td>                                                           
+                                                                                <td>{{ order.doctor }}</td>                                                        
+                                                                                <td>{{ order.lab_number }}</td>                                                        
+                                                                                                                                      
                                                                                 <td>{{ order.name }}</td>
                                                                                 <td>{{ order.description }}</td>
                                                                                 <td>{{ order.order_date }}</td>
@@ -295,25 +297,27 @@ Patient - Health Record
                                                                     <table class="table table-hover text-nowrap table-bordered table-striped" id="example">
                                                                         <thead>
                                                                             <tr>
+                                                                                <th>Doctor</th>
                                                                                 <th>Name</th>
                                                                                 <th>Description</th>
                                                                                 <th>Duration Time</th>
                                                                                 <th>Equipments Used</th>
                                                                                 <th>Cost</th>
                                                                                 <th>Created At</th>
-                                                                                <th>Updated At</th>
+                                                                     
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
                                                                             {% for procedure in procedures %}
                                                                             <tr>
+                                                                                <td>{{ procedure.doctor }}</td>
                                                                                 <td>{{ procedure.name }}</td>
                                                                                 <td>{{ procedure.description }}</td>
                                                                                 <td>{{ procedure.duration_time }}</td>
                                                                                 <td>{{ procedure.equipments_used }}</td>
                                                                                 <td>{{ procedure.cost }}</td>
                                                                                 <td>{{ procedure.created_at }}</td>
-                                                                                <td>{{ procedure.updated_at }}</td>
+                                                                            
                                                                             </tr>
                                                                             {% endfor %}
                                                                         </tbody>
@@ -339,34 +343,36 @@ Patient - Health Record
                                                                 <h5 class="header-title text-center mt-0 mb-1 text-uppercase">Prescription and total amount <span style="background-color: red;">{{total_price}}</span></h5>
                                                             </div>
                                                             <div class="card-body">
-                                                                <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example5"  style="width:100%">
-                                                                    <thead>
-                                                                        <tr>
-                                                                            <th>#</th>
-                                                                            <th>Drug</th>                                                      
-                                                                            <th>Dose</th>
-                                                                            <th>Frequency</th>
-                                                                            <th>Duration</th>
-                                                                            <th>Quantity</th>
-                                                                            <th>Unit Price</th>
-                                                                            <th>Total Price</th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        {% for prescription in prescriptions %}
-                                                                        <tr>
-                                                                            <td>{{ prescription.id }}</td>
-                                                                            <td>{{ prescription.medicine.name }}</td>
-                                                                            <td>{{ prescription.dose }}</td>                                                       
-                                                                            <td>{{ prescription.frequency }}</td>
-                                                                            <td>{{ prescription.duration }}</td>
-                                                                            <td>{{ prescription.quantity_used }}</td>
-                                                                            <td>{{ prescription.medicine.unit_price }}</td>
-                                                                            <td>{{ prescription.total_price }}</td>
-                                                                        </tr>
-                                                                        {% endfor %}
-                                                                    </tbody>
-                                                                </table>
+                                                                <div class="table-responsive">
+                                                                    <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example5"  style="width:100%">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Prescriber</th>
+                                                                                <th>Drug</th>                                                      
+                                                                                <th>Dose</th>
+                                                                                <th>Frequency</th>
+                                                                                <th>Duration</th>
+                                                                                <th>Quantity</th>
+                                                                                <th>Unit Price</th>
+                                                                                <th>Total Price</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            {% for prescription in prescriptions %}
+                                                                            <tr>
+                                                                                <td>{{ prescription.entered_by }}</td>
+                                                                                <td>{{ prescription.medicine.name }}</td>
+                                                                                <td>{{ prescription.dose }}</td>                                                       
+                                                                                <td>{{ prescription.frequency }}</td>
+                                                                                <td>{{ prescription.duration }}</td>
+                                                                                <td>{{ prescription.quantity_used }}</td>
+                                                                                <td>{{ prescription.medicine.unit_price }}</td>
+                                                                                <td>{{ prescription.total_price }}</td>
+                                                                            </tr>
+                                                                            {% endfor %}
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -391,6 +397,7 @@ Patient - Health Record
                                                                     <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example7"  style="width:100%">
                                                                         <thead>
                                                                             <tr>                                                 
+                                                                                <th>Doctor</th>
                                                                                 <th>Image Name</th>
                                                                                 <th>Description</th>                           
                                                                                 <th>Cost</th>
@@ -401,6 +408,7 @@ Patient - Health Record
                                                                         <tbody>
                                                                             {% for record in imaging_records %}
                                                                             <tr>                                               
+                                                                                <td>{{ record.doctor }}</td>
                                                                                 <td>{{ record.imaging.name }}</td>
                                                                                 <td>{{ record.description }}</td>                            
                                                                                 <td>{{ record.cost }}</td>
@@ -491,6 +499,11 @@ Patient - Health Record
                                                                     <label for="doctor_plan{{ consultation_notes.id }}">Doctor Plan:</label>
                                                                     <textarea class="form-control" id="doctor_plan{{ consultation_notes.id }}" name="doctor_plan"  readonly>{{ consultation_notes.doctor_plan }}</textarea>
                                                                 </div>
+                                                                
+                                                            </div>
+                                                            <!-- Doctor plan -->
+                                                            <div class="">
+                                                                <p>Consultated by: <strong>{{consultation_notes.doctor}}</strong></p>
                                                             </div>
                                                         </div>                                                                                                            
                                                     </form>
@@ -618,5 +631,5 @@ Patient - Health Record
 
 </style>
 
-{% include 'doctor_template/datatable.html' %}
+{% include 'receptionist_template/datatable.html' %}
 {% endblock main_content %}

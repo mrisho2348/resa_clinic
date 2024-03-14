@@ -62,13 +62,13 @@ New Lab Order - Request
                     <h4 class="header-title text-center mt-0 mb-1 text-uppercase"> Add New Lab Order </h4>
                 </div>
                 <div class="card-body">
-                    <form id="addImagingForm" method="post" enctype="multipart/form-data">
+                    <form id="addInvestigationForm" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="table-responsive">
-                            <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm display" id="imagingTable{{ visit.id }}">
+                            <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm display" id="investigationTable{{ visit.id }}">
                                 <thead>
                                     <tr>
-                                        <th>Imaging Name</th>
+                                        <th>Investigation Name</th>
                                         <th>Description</th>                                   
                                         <th>Cost</th>
                                         <th></th>
@@ -77,14 +77,14 @@ New Lab Order - Request
                                 <tbody>
                                     <tr>
                                         <td>
-                                            <select class="form-control select2bs4 imaging-name" style="width: 100%;" name="imaging_name[]" required>
-                                                <option value="">Select Imaging</option>
-                                                {% for imaging in remote_service %}
-                                                    <option value="{{ imaging.id }}">{{ imaging.name }}</option>
+                                            <select class="form-control select2bs4 investigation-name" style="width: 100%;" name="investigation_name[]" required>
+                                                <option value="">Select Investigation</option>
+                                                {% for lab in remote_service %}
+                                                    <option value="{{ lab.id }}">{{ lab.name }}</option>
                                                 {% endfor %}
                                             </select>
                                         </td>
-                                        <td><input type="text" class="form-control description" name="description[]" placeholder="Enter imaging description"></td>                                       
+                                        <td><input type="text" class="form-control description" name="description[]" placeholder="Enter investigation description"></td>                                       
                                         <td><input type="text" class="form-control cost" name="cost[]" readonly></td>
                                         <td><button type="button" class="btn btn-danger delete-row">Delete</button></td>
                                     </tr>
@@ -107,14 +107,14 @@ New Lab Order - Request
                         </div>
                         <div class="row">
                             <div class="col-md-12">
-                                <div id="imagingResponse"></div>
+                                <div id="investigationResponse"></div>
                             </div>
                         </div>
                         <input type="hidden" class="form-control" id="visit_id{{ visit.id }}" name="visit_id" value="{{ visit_history.id }}">
                         <input type="hidden" class="form-control" id="patient_id{{ visit.id }}" name="patient_id" value="{{ patient.id }}">
                         <!-- Save Procedure button -->
                         <div class="form-group mt-3">
-                            <button type="button" class="btn btn-info btn-block" id="addRow{{ visit.id }}"><i class="fa fa-plus-square" aria-hidden="true"></i> Add Imaging</button>
+                            <button type="button" class="btn btn-info btn-block" id="addRow{{ visit.id }}"><i class="fa fa-plus-square" aria-hidden="true"></i> Add Investigation</button>
                         </div>
                         <div class="row">
                             <div class="col-md-6">
@@ -132,7 +132,7 @@ New Lab Order - Request
                             </div>                            
                            </div>
                         <div class="form-group">
-                            <button type="button" class="btn btn-primary btn-block" onclick="addImaging()">Save Imaging</button>
+                            <button type="button" class="btn btn-primary btn-block" onclick="addImaging()">Save investigation</button>
                         </div>
                     </form>
                 </div>
@@ -147,18 +147,18 @@ New Lab Order - Request
                 var newRow = `
                     <tr>
                         <td>
-                            <select class="form-control select2bs4 imaging-name" style="width: 100%;" name="imaging_name[]" required>
-                                <option value="">Select Procedure</option>
-                                {% for imaging in remote_service %}
-                                    <option value="{{ imaging.id }}">{{ imaging.name }}</option>
+                            <select class="form-control select2bs4 investigation-name" style="width: 100%;" name="investigation_name[]" required>
+                                <option value="">Select Investigation</option>
+                                {% for lab in remote_service %}
+                                    <option value="{{ lab.id }}">{{ lab.name }}</option>
                                 {% endfor %}
                             </select>
                         </td>
-                        <td><input type="text" class="form-control description" name="description[]" placeholder="Enter imaging description"></td>                       
+                        <td><input type="text" class="form-control description" name="description[]" placeholder="Enter investigation description"></td>                       
                         <td><input type="text" class="form-control cost" name="cost[]" readonly></td>
                         <td><button type="button" class="btn btn-danger delete-row">Delete</button></td>
                     </tr>`;
-                $('#imagingTable{{ visit.id }} tbody').append(newRow);
+                $('#investigationTable{{ visit.id }} tbody').append(newRow);
             });
     
             // Delete row button functionality
@@ -168,7 +168,7 @@ New Lab Order - Request
             });
     
                         // Fetch cost when procedure name is selected
-                $(document).on('change', '.imaging-name', function() {
+                $(document).on('change', '.investigation-name', function() {
                     var selectedProcedureId = $(this).val();
                     var row = $(this).closest('tr');
                     $.ajax({
@@ -187,7 +187,7 @@ New Lab Order - Request
             // Function to update total cost
             function updateTotalCost{{ visit.id }}() {
                 var totalCost = 0;
-                $('#imagingTable{{ visit.id }} tbody tr').each(function() {
+                $('#investigationTable{{ visit.id }} tbody tr').each(function() {
                     var cost = parseFloat($(this).find('.cost').val());
                     if (!isNaN(cost)) {
                         totalCost += cost;
@@ -201,18 +201,18 @@ New Lab Order - Request
         function addImaging() {
             $.ajax({
                 type: 'POST',
-                url: '{% url "add_imaging" %}',
-                data: $('#addImagingForm').serialize(),
+                url: '{% url "add_investigation" %}',
+                data: $('#addInvestigationForm').serialize(),
                 success: function(response) {
                     if (response.status === 'success') {
-                        $('#imagingResponse').html('<div class="alert alert-success">' + response.message + '</div>');
-                        
+                        $('#investigationResponse').html('<div class="alert alert-success">' + response.message + '</div>');
+                            location.reload(true);
                     } else {
-                        $('#imagingResponse').html('<div class="alert alert-danger">' + response.message + '</div>');
+                        $('#investigationResponse').html('<div class="alert alert-danger">' + response.message + '</div>');
                     }
                 },
                 error: function(xhr, status, error) {
-                    $('#imagingResponse').html('<div class="alert alert-danger">' + xhr.responseText + '</div>');
+                    $('#investigationResponse').html('<div class="alert alert-danger">' + xhr.responseText + '</div>');
                 }
             });
         }
@@ -225,7 +225,7 @@ New Lab Order - Request
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-            <h5 class="modal-title text-center text-uppercase" id="prescriptionModalLabel">Imaging Total cost: <span style="background-color: red;">{{ total_imaging_cost }}</span></h5>
+            <h5 class="modal-title text-center text-uppercase" id="prescriptionModalLabel">Investigation Total cost: <span style="background-color: red;">{{ total_imaging_cost }}</span></h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
@@ -237,7 +237,7 @@ New Lab Order - Request
                     <table  class="table table-hover text-nowrap table-bordered table-striped" id="example4">
                         <thead>
                           <tr>
-                            <th>Image Name</th>
+                            <th>Investigation Name</th>
                             <th>Description</th>                           
                             <th>Cost</th>
                             <th>Date</th> <!-- New column -->
@@ -245,9 +245,9 @@ New Lab Order - Request
                           </tr>
                         </thead>
                         <tbody>
-                          {% for record in imaging_records %}
+                          {% for record in Investigation %}
                           <tr>
-                            <td>{{ record.imaging.name }}</td>
+                            <td>{{ record.name.name }}</td>
                             <td>{{ record.description }}</td>                            
                             <td>{{ record.cost }}</td>
                             <td>{{ record.created_at|date:"F d, Y" }}</td> <!-- Display date -->

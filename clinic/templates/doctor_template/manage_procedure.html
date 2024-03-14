@@ -25,8 +25,7 @@ all Procedure
                                 <th>Patient ID</th>
                                 <th>Patient MRN</th>
                                 <th>Procedure Name</th>
-                                <th>Description</th>
-                                <th>Duration</th>
+                                <th>Description</th>                             
                                 <th>Equipments</th>
                                 <th>PCost</th>
                                 <th>Action</th>
@@ -37,10 +36,9 @@ all Procedure
                                 {% for record in data %}
                                     <tr>
                                         <td>{{ record.id }}</td>
-                                        <td>{{ record.patient.first_name }} {{ record.patient.middle_name }}  {{ record.patient.last_name }}</td> <!-- Use 'fullname' instead of 'name' -->
+                                        <td>{{ record.patient.first_name }} {{ record.patient.middle_name }}  {{ record.patient.last_name }}</td> 
                                         <td>{{ record.name }}</td>
-                                        <td>{{ record.description }}</td>
-                                        <td>{{ record.duration_time }}</td>
+                                        <td>{{ record.description }}</td>                                      
                                         <td>{{ record.equipments_used }}</td>
                                         <td>{{ record.cost }}</td>
                                         <td>                                          
@@ -67,7 +65,12 @@ all Procedure
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="procedureName">Name:</label>
-                                                        <input type="text" class="form-control" id="procedureName" name="name" placeholder="Enter procedure name"  value="{{ record.name }}">
+                                                        <select class="form-control select2bs4 procedure-name" style="width: 100%;" name="procedure_name[]" required>
+                                                            <option value="">Select Procedure</option>
+                                                            {% for procedure in remote_service %}
+                                                                <option value="{{ procedure.id }}">{{ procedure.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
                                                     </div>
                                                 </div>
                                                 
@@ -76,32 +79,25 @@ all Procedure
                                                         <label for="procedureDescription">Description:</label>
                                                         <textarea class="form-control" id="procedureDescription" name="description" placeholder="Enter procedure description" > {{ record.description }}</textarea>
                                                     </div>
-                                                </div>
-                                                
+                                                </div>                                                
                                             </div>                                          
-                                            <input type="hidden" class="form-control" id="procedure_id" name="procedure_id" value="{{ record.id }}">
-                                            <div class="row">
+                                            <div class="row">                                               
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="startTime">Start Time:</label>
-                                                        <input type="time" class="form-control" id="startTime" name="start_time">
+                                                        <label for="procedureEquipments">Equipments used:</label>
+                                                        <input type="text" class="form-control" id="procedureEquipments" name="equipments_used" placeholder="Enter equipments used"  value="{{ record.equipments_used }}">
                                                     </div>
-                                                </div>
-                                                <div class="col-md-6">
+                                                </div>                                                
+                                                <div class="col-md-6">                                                   
                                                     <div class="form-group">
-                                                        <label for="endTime">End Time:</label>
-                                                        <input type="time" class="form-control" id="endTime" name="end_time">
-                                                    </div>
-                                                </div>
-                                            </div>                                           
-                                            <div class="form-group">
-                                                <label for="procedureEquipments">Equipments used:</label>
-                                                <input type="text" class="form-control" id="procedureEquipments" name="equipments_used" placeholder="Enter equipments used"  value="{{ record.equipments_used }}">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="procedureCost">Cost:</label>
-                                                <input type="text" class="form-control" id="procedureCost" name="cost" placeholder="Enter procedure cost" value="{{ record.cost }}">
-                                            </div>    
+                                                        <label for="procedureCost">Cost:</label>
+                                                        <input type="text" class="form-control" id="procedureCost" name="cost" placeholder="Enter procedure cost" value="{{ record.cost }}">
+                                                    </div>  
+                                                </div>                                                
+                                            </div>                                          
+                                            <input type="hidden" class="form-control" id="procedure_id" name="procedure_id" value="{{ record.id }}">                                                                                    
+                                            <input type="hidden" class="form-control" id="patient_id" name="patient_id" value="{{ record.patient.id }}">                                                                                    
+                                           
                                             <div class="form-row">
                                                 <div class="col-md-12">
                                                     <div id="ProcedureResponse"></div>  
@@ -118,23 +114,11 @@ all Procedure
                             </div>
                         </div>
                             
-
+                         
                             
                             <!-- JavaScript to handle AJAX request and form validation -->
                             <script>
-                                function submitProcedure() {
-                                    var startTimeStr = document.getElementById('startTime').value;
-                                    var endTimeStr = document.getElementById('endTime').value;
-                                
-                                    // Convert time strings to Date objects
-                                    var startTime = new Date('2000-01-01T' + startTimeStr);
-                                    var endTime = new Date('2000-01-01T' + endTimeStr);
-                                
-                                    // Validate start and end times
-                                    if (startTime >= endTime) {
-                                        alert('Start time must be greater than end time.');
-                                        return;
-                                    }
+                                function submitProcedure() {                                  
                                 
                                     // Get form data
                                     var formData = new FormData(document.getElementById('addProcedureForm'));
@@ -177,7 +161,33 @@ all Procedure
     </div>
 </div>
 
-
+<script>
+    // Fetch patient details and update select field options
+    function fetchPatientDetails(patientId) {
+        $.ajax({
+            url: '/get_patient_details/' + patientId + '/',  // Replace with your server endpoint for fetching patient details
+            type: 'GET',
+            success: function(response) {
+                // Update select field options based on patient's payment form
+                var remoteServiceOptions = '';
+                response.remote_service.forEach(function(procedure) {
+                    remoteServiceOptions += '<option value="' + procedure.id + '">' + procedure.name + '</option>';
+                });
+                $('.procedure-name').html('<option value="">Select Procedure</option>' + remoteServiceOptions);
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+    }
+    
+    // Call fetchPatientDetails function when the document is ready
+    $(document).ready(function() {
+        // Initialize fetchPatientDetails function for the first row
+        var firstPatientId = $('.table tbody tr:first').find('.patient-id').text();
+        fetchPatientDetails(firstPatientId);
+    });
+    </script>
 
 
 {% include 'doctor_template/datatable.html' %}

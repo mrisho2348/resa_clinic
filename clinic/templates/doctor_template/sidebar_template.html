@@ -94,20 +94,19 @@
                             <i class="nav-icon fas fa-calendar"></i>
                               <p>consultation</p>
                           </a>
-                      </li>
+                      </li>                 
                       <li class="nav-item">
-                        {% url 'consultation_fee_list' as consultation_fee_list %}
-                          <a href="{% url "consultation_fee_list" %}" class="nav-link{% if request.path == consultation_fee_list %} active {% endif %}">
-                            <i class="nav-icon fas fa-money-bill-wave"></i>
-                              <p>Consultation Fees</p>
-                          </a>
-                      </li>
-                    
-                    
-                      <li class="nav-item">                   
-                        <a href="{% url "manage_pathodology" %}" class="nav-link ">
+                        {% url 'manage_laboratory' as manage_laboratory %}
+                        <a href="{% url "manage_laboratory" %}" class="nav-link{% if request.path == manage_laboratory %} active {% endif %}">
+                            <i class="nav-icon fas fa-flask"></i> <!-- Correct Font Awesome icon -->
+                            <p>Manage Laboratories</p> <!-- More descriptive name -->
+                        </a>
+                    </li>              
+                      <li class="nav-item">  
+                        {% url 'manage_pathodology' as manage_pathodology %}                 
+                        <a href="{% url "manage_pathodology" %}" class="nav-link{% if request.path == manage_pathodology %} active {% endif %}">
                             <i class="nav-icon fas fa-vial"></i>
-                            <p>Pathology</p>
+                            <p>Radiology</p>
                         </a>
                     </li>     
                   </ul>

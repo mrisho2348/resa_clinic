@@ -11,7 +11,7 @@ from django.http import JsonResponse
 from clinic.models import Consultation,  Medicine,Notification,PathodologyRecord, Patients, Procedure, Staffs
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
-from .models import AmbulanceOrder,ConsultationNotes, Country, Diagnosis, Diagnosis,InventoryItem, LabTest, PatientVisits, PatientVital, Prescription, Referral,Service, Vehicle
+from .models import AmbulanceOrder,ConsultationNotes, Country, Diagnosis, Diagnosis, ImagingRecord,InventoryItem, LabTest, LaboratoryOrder, PatientVisits, PatientVital, Prescription, Referral,Service, Vehicle
 from django.db.models import Sum
 # Create your views here.
 
@@ -239,10 +239,18 @@ def patient_health_record(request, patient_id, visit_id):
             procedures = None
           
         try:
-            lab_tests = LabTest.objects.filter(patient=patient_id, visit=visit_id)
-        except LabTest.DoesNotExist:
-            lab_tests = None    
-     
+            lab_results = LaboratoryOrder.objects.filter(patient=patient_id, visit=visit_id)
+        except LaboratoryOrder.DoesNotExist:
+            lab_results = None  
+
+        try:
+            imaging_records = ImagingRecord.objects.filter(patient_id=patient_id, visit_id=visit_id)
+        except ImagingRecord.DoesNotExist:
+            imaging_records = None
+        
+        total_procedure_cost = procedures.aggregate(Sum('cost'))['cost__sum']
+        total_imaging_cost = imaging_records.aggregate(Sum('cost'))['cost__sum']
+        lab_tests_cost = lab_results.aggregate(Sum('cost'))['cost__sum']      
         pathology_records = PathodologyRecord.objects.all()  # Fetch all consultation notes from the database
         doctors = Staffs.objects.filter(role='doctor')
         provisional_diagnoses = Diagnosis.objects.all()
@@ -258,12 +266,16 @@ def patient_health_record(request, patient_id, visit_id):
             expiration_date__gt=current_date  # Not expired
         ).distinct()
 
-        return render(request, 'receptionist_template/manage_patitent_health_record.html', {
+        return render(request, 'receptionist_template/manage_patient_health_record.html', {
             'visit_history': visit_history,
             'patient': patient,
-            'visits': visits,
+            'visit': visits,
             'range_31': range_31,
             'medicines': medicines,
+            'total_procedure_cost': total_procedure_cost,
+            'total_imaging_cost': total_imaging_cost,
+            'lab_tests_cost': lab_tests_cost,
+            'imaging_records': imaging_records,
             'prescriptions': prescriptions,
             'total_price': total_price,
             'consultation_notes': consultation_notes,
@@ -274,7 +286,7 @@ def patient_health_record(request, patient_id, visit_id):
             'previous_vitals': previous_vitals,
             'final_diagnoses': final_diagnoses,
             'vital': vital,
-            'lab_tests': lab_tests,
+            'lab_results': lab_results,
             'procedures': procedures,
       
         })

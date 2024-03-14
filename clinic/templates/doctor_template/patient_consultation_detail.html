@@ -193,8 +193,18 @@ Patient Consultation
                                 </button>
                             </div>                        
                             <div class="col-md-3">
+                                <a class="btn btn-primary" type="button" data-toggle="modal" data-target="#counselingModal">
+                                    <i class="fas fa-plus"></i> Counselling
+                                </a>
+                            </div>                        
+                            <div class="col-md-3">
                                 <a href="{% url 'manage_patient' %}" class="btn btn-success">
                                     <i class="fas fa-arrow-left"></i> Back to Patient List
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a class="btn btn-primary" type="button" data-toggle="modal" data-target="#addReferralModal">
+                                    <i class="fas fa-plus"></i>  Refer Patient
                                 </a>
                             </div>
                             
@@ -208,6 +218,52 @@ Patient Consultation
 </div>
 
 
+
+  
+  <!-- Counseling Modal -->
+  <div class="modal fade" id="counselingModal" tabindex="-1" role="dialog" aria-labelledby="counselingModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="counselingModalLabel">Counseling Modal</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Form fields for counseling details -->
+          <form id="counselingForm" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="counselingTopic">Counseling Topic</label>
+              <input type="text" class="form-control" id="counselingTopic" name="counseling_topic" placeholder="Enter counseling topic">
+              <input type="hidden" class="form-control" id="visit" name="visit_id" value="{{ visit_history.id }}">
+              <input type="hidden" class="form-control" id="patient_id" name="patient_id" value="{{ patient.id }}">
+            </div>
+            <div class="form-group">
+              <label for="counselingDescription">Counseling Description</label>
+              <textarea class="form-control" id="counselingDescription" rows="3" name="counseling_description" placeholder="Enter counseling description"></textarea>
+            </div>
+        
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div id="CounselResponse">
+
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="saveCounseling()">Save Counseling</button>
+        </div>
+      </div>
+    </form>
+    </div>
+  </div>
+  
+  
+  
 
 
 <div class="modal fade" id="editPatientVitalModal" tabindex="-1" aria-labelledby="patientVitalModalLabel" aria-hidden="true">
@@ -340,6 +396,83 @@ Patient Consultation
 </script>
 
 
+<div class="modal fade" id="addReferralModal" tabindex="-1" role="dialog" aria-labelledby="addReferralModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addReferralModalLabel">Add Referral</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addReferralForm" method="post">
+                    {% csrf_token %}
+                    <div class="form-row">                    
+                      
+                        <div class="form-group col-md-4">
+                            <label for="destination_location">Destination Location</label>
+                            <input type="text" class="form-control" id="destination_location" name="destination_location" required>
+                            <input type="hidden" class="form-control" id="visit_id{{ visit.id }}" name="visit_id" value="{{ visit_history.id }}">
+                            <input type="hidden" class="form-control" id="patient_id{{ visit.id }}" name="patient_id" value="{{ patient.id }}">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="reason">Reason</label>
+                            <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
+                        </div> 
+                    </div>                  
+                   <div class="row">
+                    <div class="col-md-12">
+                        <div id="ReferralResponse">
+
+                        </div>
+                    </div>
+                   </div>
+                   <div class="row">
+                    <div class="col-md-12">
+                        <button type="button" class="btn btn-primary btn-block" onclick="submitReferral()">Add Referral</button>
+                    </div>
+                   </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+  
+
+  
+ <!-- JavaScript to handle AJAX request and form validation -->
+<script>
+                // Function to handle submission of referral form
+                function submitReferral() {      
+                    // Get form data
+                    var formData = new FormData(document.getElementById('addReferralForm'));    
+                    
+                    // Make AJAX request to the server endpoint
+                    $.ajax({
+                        url: '{% url "save_referral" %}',  // Replace with your server endpoint
+                        type: 'POST',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function(response) {
+                            // Handle success response
+                            if (response.success) {  
+                                $('#ReferralResponse').html('<div class="alert alert-success">' + response.message + '</div>');                                                            
+                            } else {
+                                // Handle other status cases if needed
+                                $('#ReferralResponse').html('<div class="alert alert-danger">' + response.message + '</div>');                                               
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            // Handle error response
+                            $('#ReferralResponse').html('<div class="alert alert-danger">' + xhr.responseText + '</div>');                                               
+                        }
+                    });
+                }
+                    
+    </script>
 
 <style>
     /* Reset default margin and padding */

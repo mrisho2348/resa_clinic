@@ -4,40 +4,51 @@
 all Procedure    
 {% endblock title %}
 
-{% block page_title %}
-all Procedure    
-{% endblock page_title %}
 
 {% block breadcrumb %}
 {% include "receptionist_template/modal_form.html" %}
+all Procedure  
 {% endblock breadcrumb %}
 
 {% block main_content %}
-<div class="table-responsive">
-    <table class="table table-hover text-nowrap table-bordered table-striped table-sm" id="example">
-        <thead>
-            <tr>
-                <th>Procedure Number</th>
-                <th>Patient</th>
-                <th>Payment Mode</th>
-                <th>Order date</th>              
-                <th>Action</th>              
-            </tr>
-        </thead>
-        <tbody>
-            {% for record in data %}
-            <tr>
-                <td>{{ record.procedure_number }}</td>
-                <td>{{ record.patient.first_name }} {{ record.patient.middle_name }} {{ record.patient.last_name }}</td>
-                <td>{{ record.patient.payment_form }}</td>
-                <td>{{ record.created_at }}</td>
-                <td>
-                    <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#procedureDetailModal{{ record.id }}">View Details</button>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="container">
+    <div class="row">
+        <div class="col-md">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="header-title text-center mt-0 mb-1 text-uppercase">all Procedure </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover text-nowrap table-bordered table-striped table-sm" id="example">
+                            <thead>
+                                <tr>
+                                    <th>Procedure Number</th>
+                                    <th>Patient</th>
+                                    <th>Payment Mode</th>
+                                    <th>Order date</th>              
+                                    <th>Action</th>              
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in data %}
+                                <tr>
+                                    <td>{{ record.procedure_number }}</td>
+                                    <td>{{ record.patient.first_name }} {{ record.patient.middle_name }} {{ record.patient.last_name }}</td>
+                                    <td>{{ record.patient.payment_form }}</td>
+                                    <td>{{ record.created_at }}</td>
+                                    <td>
+                                        <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#procedureDetailModal{{ record.id }}">View Details</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Bootstrap modal for procedure details -->
