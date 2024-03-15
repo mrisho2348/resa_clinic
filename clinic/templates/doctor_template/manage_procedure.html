@@ -12,31 +12,30 @@ all Procedure
 
 <div class="container">
     <div class="row">
-       <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h4 class="header-title text-center mt-0 mb-1 text-uppercase"> all Procedure  </h4>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">                    
-                    <table class="table table-hover text-nowrap table-bordered table-striped table-sm" id="example">
-                        <thead>
-                            <tr>
-                                <th>Patient ID</th>
-                                <th>Patient MRN</th>
-                                <th>Procedure Name</th>
-                                <th>Description</th>                             
-                                <th>Equipments</th>
-                                <th>PCost</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <!-- Update the patient name field in your table -->
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="header-title text-center mt-0 mb-1 text-uppercase">All Procedures</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">                    
+                        <table class="table table-hover text-nowrap table-bordered table-striped table-sm" id="example">
+                            <thead>
+                                <tr>
+                                    <th>Patient ID</th>
+                                    <th>Patient MRN</th>
+                                    <th>Procedure Name</th>
+                                    <th>Description</th>                             
+                                    <th>Equipments</th>
+                                    <th>Cost</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
                             <tbody>
                                 {% for record in data %}
                                     <tr>
                                         <td>{{ record.id }}</td>
-                                        <td>{{ record.patient.first_name }} {{ record.patient.middle_name }}  {{ record.patient.last_name }}</td> 
+                                        <td>{{ record.patient.first_name }} {{ record.patient.middle_name }} {{ record.patient.last_name }}</td>
                                         <td>{{ record.name }}</td>
                                         <td>{{ record.description }}</td>                                      
                                         <td>{{ record.equipments_used }}</td>
@@ -47,147 +46,80 @@ all Procedure
                                             </a>
                                         </td>
                                     </tr>
-                                                 <!-- HTML structure for the Bootstrap modal form -->
-                            <div class="modal fade" id="EditProcedureModal{{ record.id }}" tabindex="-1" role="dialog" aria-labelledby="EditProcedureModalLabel{{ record.id }}" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                    <h5 class="modal-title" id="EditProcedureModalLabel{{ record.id }}">Add Procedure</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form id="EditProcedureForm" method="post">
-                                            {% csrf_token %}
-                                            <!-- Bootstrap grid system for form layout -->
-                                            <div class="row">                                               
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label for="procedureName">Name:</label>
-                                                        <select class="form-control select2bs4 procedure-name" style="width: 100%;" name="procedure_name[]" required>
-                                                            <option value="">Select Procedure</option>
-                                                            {% for procedure in remote_service %}
-                                                                <option value="{{ procedure.id }}">{{ procedure.name }}</option>
-                                                            {% endfor %}
-                                                        </select>
-                                                    </div>
+                                    <!-- Modal form for editing procedure -->
+                                    <div class="modal fade" id="EditProcedureModal{{ record.id }}" tabindex="-1" role="dialog" aria-labelledby="EditProcedureModalLabel{{ record.id }}" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="header-title text-center mt-0 mb-1 text-uppercase" id="EditProcedureModalLabel{{ record.id }}">Add Result for {{ record.name }}</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
                                                 </div>
-                                                
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label for="procedureDescription">Description:</label>
-                                                        <textarea class="form-control" id="procedureDescription" name="description" placeholder="Enter procedure description" > {{ record.description }}</textarea>
-                                                    </div>
-                                                </div>                                                
-                                            </div>                                          
-                                            <div class="row">                                               
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label for="procedureEquipments">Equipments used:</label>
-                                                        <input type="text" class="form-control" id="procedureEquipments" name="equipments_used" placeholder="Enter equipments used"  value="{{ record.equipments_used }}">
-                                                    </div>
-                                                </div>                                                
-                                                <div class="col-md-6">                                                   
-                                                    <div class="form-group">
-                                                        <label for="procedureCost">Cost:</label>
-                                                        <input type="text" class="form-control" id="procedureCost" name="cost" placeholder="Enter procedure cost" value="{{ record.cost }}">
-                                                    </div>  
-                                                </div>                                                
-                                            </div>                                          
-                                            <input type="hidden" class="form-control" id="procedure_id" name="procedure_id" value="{{ record.id }}">                                                                                    
-                                            <input type="hidden" class="form-control" id="patient_id" name="patient_id" value="{{ record.patient.id }}">                                                                                    
-                                           
-                                            <div class="form-row">
-                                                <div class="col-md-12">
-                                                    <div id="ProcedureResponse"></div>  
-                                                </div>
+                                                <div class="modal-body">
+                                                    <form id="EditProcedureForm" method="post">
+                                                        {% csrf_token %}
+                                                        <div class="row">
+                                                            <div class="col-md-12">
+                                                                <div class="form-group">
+                                                                    <label for="procedureResult">Result:</label>
+                                                                    <textarea class="form-control" id="procedureResult" name="result" placeholder="Enter procedure Result">{{ record.result }}</textarea>
+                                                                    <input type="hidden" class="form-control" id="procedure_id" name="procedure_id" value="{{ record.id }}">
+                                                                </div>
+                                                            </div>                                                
+                                                        </div>                                         
+                                                        <div class="form-row">
+                                                            <div class="col-md-12">
+                                                                <div id="ProcedureResponse"></div>  
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-row">
+                                                            <div class="col-md-12">
+                                                                <button type="button" class="btn btn-primary btn-block" onclick="submitProcedure()">Edit Procedure</button> 
+                                                            </div>
+                                                        </div>                                           
+                                                    </form>
+                                                </div>                                
                                             </div>
-                                            <div class="form-row">
-                                                <div class="col-md-12">
-                                                    <button type="button" class="btn btn-primary btn-block" onclick="submitProcedure()">Edit Procedure</button> 
-                                                </div>
-                                            </div>                                           
-                                        </form>
-                                    </div>                                
-                                </div>
-                            </div>
-                        </div>
-                            
-                         
-                            
-                            <!-- JavaScript to handle AJAX request and form validation -->
-                            <script>
-                                function submitProcedure() {                                  
-                                
-                                    // Get form data
-                                    var formData = new FormData(document.getElementById('addProcedureForm'));
-                                
-                                    // Make AJAX request
-                                    $.ajax({
-                                        url: '{% url "save_procedure" %}',  // Replace with your server endpoint
-                                        type: 'POST',
-                                        data: formData,
-                                        contentType: false,
-                                        processData: false,
-                                        success: function(response) {
-                                            if (response.success) {  
-                                                $('#ProcedureResponse').html('<div class="alert alert-success">' + response.message + '</div>'); 
-                                                location.reload(true);                                              
-                                        
-                                            } else {
-                                                // Handle other message cases if needed
-                                                $('#ProcedureResponse').html('<div class="alert alert-danger">' + response.message + '</div>');                                               
-                                            }
-                                        },
-                                        error: function(xhr, status, error) {
-                                            // Log any errors to the console
-                                            console.error(xhr, status, error);
-                                            // Handle error response
-                                            $('#ProcedureResponse').html('<div class="alert alert-danger">An error occurred while processing your request. Please try again later.</div>');                                               
+                                        </div>
+                                    </div>
+                                    <!-- JavaScript to handle AJAX request and form validation -->
+                                    <script>
+                                        function submitProcedure() {                                  
+                                            var formData = new FormData(document.getElementById('EditProcedureForm'));
+                                            $.ajax({
+                                                url: '{% url "save_procedure" %}',
+                                                type: 'POST',
+                                                data: formData,
+                                                contentType: false,
+                                                processData: false,
+                                                success: function(response) {
+                                                    if (response.success) {  
+                                                        $('#ProcedureResponse').html('<div class="alert alert-success">' + response.message + '</div>'); 
+                                                        location.reload(true);                                              
+                                                    } else {
+                                                        $('#ProcedureResponse').html('<div class="alert alert-danger">' + response.message + '</div>');                                               
+                                                    }
+                                                },
+                                                error: function(xhr, status, error) {
+                                                    $('#ProcedureResponse').html('<div class="alert alert-danger">An error occurred while processing your request. Please try again later.</div>');                                               
+                                                }
+                                            });
                                         }
-                                    });
-                                }
-                                
-                                </script>   
-                   
-                  {% endfor %}
+                                    </script>
+                                {% endfor %}
                             </tbody>
-                    </table>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-       </div>
     </div>
 </div>
 
-<script>
-    // Fetch patient details and update select field options
-    function fetchPatientDetails(patientId) {
-        $.ajax({
-            url: '/get_patient_details/' + patientId + '/',  // Replace with your server endpoint for fetching patient details
-            type: 'GET',
-            success: function(response) {
-                // Update select field options based on patient's payment form
-                var remoteServiceOptions = '';
-                response.remote_service.forEach(function(procedure) {
-                    remoteServiceOptions += '<option value="' + procedure.id + '">' + procedure.name + '</option>';
-                });
-                $('.procedure-name').html('<option value="">Select Procedure</option>' + remoteServiceOptions);
-            },
-            error: function(xhr, status, error) {
-                console.error(xhr.responseText);
-            }
-        });
-    }
-    
-    // Call fetchPatientDetails function when the document is ready
-    $(document).ready(function() {
-        // Initialize fetchPatientDetails function for the first row
-        var firstPatientId = $('.table tbody tr:first').find('.patient-id').text();
-        fetchPatientDetails(firstPatientId);
-    });
-    </script>
+
+
+
 
 
 {% include 'doctor_template/datatable.html' %}

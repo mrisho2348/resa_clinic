@@ -50,6 +50,25 @@ Patient Visit History
     </div>
     <div class="row">
         <div class="col-md-12">
+            <div class="form-row">
+                <div>
+                    {% if messages %}
+                    <div class="col-12">
+                        {% for message in messages %}
+                        {% if message.tags == 'error' %}
+                        <div class="alert alert-danger">{{ message }}</div>
+                        {% elif message.tags == 'success' %}
+                        <div class="alert alert-primary">{{ message }}</div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
            <div class="card">
                 <div class="card-header">
                     <h3  class="header-title text-center mt-0 mb-1  text-uppercase"> {{ patient.first_name }} Visit history</h3>
@@ -156,7 +175,7 @@ Patient Visit History
                                                         </button>
                                                     </div>
                                                     <div class="modal-body">
-                                                        <form id="editVisitModalForm{{ visit.id }}" method="post">
+                                                        <form id="editVisitModalForm{{ visit.id }}" method="post"  action="{% url 'receptionist_add_patient_visit' %}">
                                                             {% csrf_token %}
                                                             <div class="form-group">
                                                                 <label for="editVisitTypes">Visit Type</label>
@@ -236,38 +255,7 @@ Patient Visit History
                                         
                                             
                                             });
-                                        </script>
-                                        <script>
-                                            // Handle form submission using AJAX
-                                            $(document).ready(function () {
-                                                // Assuming you have a loop or iteration for categories, replace "forEach" with your actual loop
-                                                {% for visit in visit_history %}
-                                                    $('#editVisitModalForm{{ visit.id }}').submit(function (e) {
-                                                        e.preventDefault();
-                                                        $.ajax({
-                                                            type: 'POST',
-                                                            url: '{% url "receptionist_add_patient_visit" %}',  // Replace with your URL
-                                                            data: $('#editVisitModalForm{{ visit.id }}').serialize(),
-                                                            success: function(response) {
-                                                                if (response.status === 'success') {  
-                                                                    $('#MessageContainer').html('<div class="alert alert-success">' + response.message + '</div>');   
-                                                                    location.reload(true)                                            
-                                                            
-                                                                } else {
-                                                                    // Handle other status cases if needed
-                                                                    $('#MessageContainer').html('<div class="alert alert-danger">' + response.message + '</div>');                                               
-                                                                }
-                                                            },
-                                                            error: function(error) {
-                                                              
-                                                                // Display error message
-                                                                $('#MessageContainer').html('<div class="alert alert-danger" role="alert">Failed to create an appointment</div>');
-                                                            }
-                                                        });
-                                                    });
-                                                {% endfor %}
-                                            });
-                                        </script>
+                                        </script>                                      
                                         
                                         
                                     </tr>
@@ -410,7 +398,7 @@ Patient Visit History
                                                 </button>
                                             </div>
                                             <div class="modal-body">
-                                                <form id="addVisitModalForm" method="post">
+                                                <form id="addVisitModalForm" method="post" action="{% url 'receptionist_add_patient_visit' %}">
                                                     {% csrf_token %}
                                                     <div class="form-group">
                                                         <label for="visitType">Visit Type</label>
@@ -460,7 +448,7 @@ Patient Visit History
                                                         <div class="row">
                                                             <div class="col-md-8"></div>
                                                             <div class="col-md-4">
-                                                                <button type="button" class="btn btn-md btn-primary" onclick="addVisit()">Save and Continue <i class="mdi mdi-forward"></i></button>
+                                                                <button type="submit" class="btn btn-md btn-primary">Save and Continue <i class="mdi mdi-forward"></i></button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -470,52 +458,7 @@ Patient Visit History
                                     </div>
                                 </div>
         
-                                <script>
-                                    function addVisit() {
-                                        var visitType = $('#visitType').val();
-                                        var primary_service = $('#primary_service').val();
-                                        var insuranceName = $('#insuranceName').val();
-                                        var insuranceNumber = $('#insuranceNumber').val();
-                                        var verificationCode = $('#verificationCode').val();
-                                        var visitReason = $('#visitReasonText').val();
-                                        var referralNumber = $('#referralNumberText').val();
-                                        var patient_id = $('#patient_id').val();
-                                     
-        
-                                        $.ajax({
-                                            type: 'POST',
-                                            url: '{% url "receptionist_add_patient_visit" %}',
-                                            data: {
-                                                visitType: visitType,
-                                                insuranceName: insuranceName,
-                                                insuranceNumber: insuranceNumber,
-                                                verificationCode: verificationCode,
-                                                visitReason: visitReason,
-                                                referralNumber: referralNumber,
-                                                patient_id: patient_id,                                           
-                                                primary_service: primary_service
-                                            },
-                                            success: function(response) {
-                                                if (response.status === 'success') {  
-                                                    $('#ProcedureResponse').html('<div class="alert alert-success">' + response.message + '</div>'); 
-                                                    location.reload(true);                                              
-                                            
-                                                } else {
-                                                    // Handle other message cases if needed
-                                                    $('#ProcedureResponse').html('<div class="alert alert-danger">' + response.message + '</div>');                                               
-                                                }
-                                            },
-                                            error: function(xhr, status, error) {
-                                                // Log any errors to the console
-                                                console.error(xhr, status, error);
-                                                // Handle error response
-                                                $('#ProcedureResponse').html('<div class="alert alert-danger">An error occurred while processing your request. Please try again later.</div>');                                               
-                                            }
-                                        });
-                                    }
-        
-                                
-                                </script>
+                               
         
                             <script>
                                 $(document).ready(function () {

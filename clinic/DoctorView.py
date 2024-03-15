@@ -316,71 +316,90 @@ def patient_procedure_history_view(request, mrn):
 def save_procedure(request):
     if request.method == 'POST':
         try:
-            # Extract data from the request
-            name = request.POST.get('name')
-            visit_id = request.POST.get('visit_id')
-            patient_id = request.POST.get('patient_id')
+            # Extract data from the POST request
             procedure_id = request.POST.get('procedure_id')
-            start_time_str = request.POST.get('start_time')
-            end_time_str = request.POST.get('end_time')
-            description = request.POST.get('description')
-            equipments_used = request.POST.get('equipments_used')
-            cost = request.POST.get('cost')
+            result = request.POST.get('result')         
             doctor = request.user.staff
 
-            # Validate start and end times
-            start_time = datetime.strptime(start_time_str, '%H:%M').time()
-            end_time = datetime.strptime(end_time_str, '%H:%M').time()
-
-            if start_time >= end_time:
-                return JsonResponse({'success': False, 'message': 'Start time must be greater than end time.'})
-
-            # Calculate duration in hours
-            duration = (datetime.combine(datetime.today(), end_time) - datetime.combine(datetime.today(), start_time)).seconds / 3600
-
-            # Check if procedure ID is provided
+            # Check if the procedure ID is provided
             if procedure_id:
-                # If procedure ID is provided, check if the procedure exists
+                # Retrieve the procedure record if it exists
                 try:
                     procedure_record = Procedure.objects.get(id=procedure_id)
                 except Procedure.DoesNotExist:
-                    return JsonResponse({'success': False, 'message': 'Invalid procedure ID.'})
+                    return JsonResponse({'success': False, 'message': 'The provided procedure ID is invalid.'})                
 
-                # Update existing procedure record
-                procedure_record.name = name       
-                procedure_record.description = description
-                procedure_record.duration = duration
-                procedure_record.equipments_used = equipments_used
-                procedure_record.cost = cost
-                procedure_record.duration_time = duration
+                # Update the procedure record with the new data
+                procedure_record.result = result
+                procedure_record.doctor = doctor              
+
+                # Save the updated procedure record
                 procedure_record.save()
 
-                return JsonResponse({'success': True, 'message': f'Procedure record for {procedure_record.name} updated successfully.'})
-            else:
-                # Create new procedure record
-                patient = Patients.objects.get(id=patient_id)
-                visit = PatientVisits.objects.get(id=visit_id)
-
-                procedure_record = Procedure.objects.create(
-                    patient=patient,
-                    visit=visit,
-                    doctor=doctor,
-                    name=name,
-                    description=description,                 
-                    duration_time=duration,
-                    equipments_used=equipments_used,
-                    cost=cost
-                )
-
-                return JsonResponse({'success': True, 'message': f'Procedure record for {procedure_record.name} saved successfully.'})
+                return JsonResponse({'success': True, 'message': f'The procedure record for "{procedure_record.name}" has been updated successfully.'})
+        
         except Patients.DoesNotExist:
-            return JsonResponse({'success': False, 'message': 'Invalid patient ID.'})
+            return JsonResponse({'success': False, 'message': 'The provided patient ID is invalid.'})
         except Exception as e:
             return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
 
-    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+    return JsonResponse({'success': False, 'message': 'Invalid request method. This endpoint only accepts POST requests.'})
 
 
+@csrf_exempt
+def save_radiology(request):
+    if request.method == 'POST':
+        try:
+            # Extract data from the POST request
+            radiology_id = request.POST.get('radiology_id')
+            result = request.POST.get('result')         
+            doctor = request.user.staff
+
+            # Check if the radiology_record ID is provided
+            if radiology_id:
+                # Retrieve the procedure record if it exists
+                try:
+                    radiology_record = ImagingRecord.objects.get(id=radiology_id)
+                except Procedure.DoesNotExist:
+                    return JsonResponse({'success': False, 'message': 'The provided radiology ID is invalid.'})                
+
+                # Update the radiology_record record with the new data
+                radiology_record.result = result
+                radiology_record.doctor = doctor              
+
+                # Save the updated radiology_record record
+                radiology_record.save()
+
+                return JsonResponse({'success': True, 'message': f'The radiology record for "{radiology_record.imaging.name}" has been updated successfully.'})
+        
+        except Patients.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'The provided patient ID is invalid.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method. This endpoint only accepts POST requests.'})
+
+
+def generate_invoice_bill(request,  record_id):
+    # Retrieve the patient and visit objects based on IDs
+    try:
+        patient = Patients.objects.all()
+        visit = PatientVisits.objects.all()
+    except Patients.DoesNotExist:
+        # Handle if patient doesn't exist
+        # You can return an error page or redirect to another view
+        return render(request, '404.html', {'message': 'Patient not found'})
+    except PatientVisits.DoesNotExist:
+        # Handle if visit doesn't exist
+        # You can return an error page or redirect to another view
+        return render(request, '404.html', {'message': 'Visit not found'})
+
+    # Pass the patient and visit objects to the template
+    context = {
+        'patient': patient,
+        'visit': visit,
+    }
+    return render(request, 'doctor_template/invoice_bill.html', context)
 
 @csrf_exempt
 def save_referral(request):

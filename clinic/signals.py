@@ -2,7 +2,7 @@
 
 from django.db.models.signals import post_save,pre_save
 from django.dispatch import receiver
-from .models import Consultation, ConsultationNotification, InventoryItem, MedicationPayment, MedicineInventory, Prescription, Reagent, ReagentUsage, RemotePrescription, UsageHistory
+from .models import AmbulanceOrder, Consultation, ConsultationNotification, ConsultationOrder, ImagingRecord, InventoryItem, LaboratoryOrder, MedicationPayment, MedicineInventory, Order, Prescription, Procedure, Reagent, ReagentUsage, RemotePrescription, UsageHistory
 from django.db.models import F
 from django.db import models
 
@@ -90,4 +90,65 @@ def update_medicine_inventory_prescription(sender, instance, created, **kwargs):
         except MedicineInventory.DoesNotExist:
             # Handle if medicine inventory does not exist
             pass    
+    
+    
+@receiver(post_save, sender=ImagingRecord)
+def create_imaging_order(sender, instance, created, **kwargs):
+    if created:
+        Order.objects.create(
+            order_date=instance.order_date,
+            order_type=instance.imaging.name,
+            patient=instance.patient,
+            visit=instance.visit,
+            added_by=instance.data_recorder,
+            cost=instance.cost,
+        )
+
+@receiver(post_save, sender=ConsultationOrder)
+def create_consultation_order(sender, instance, created, **kwargs):
+    if created:
+        Order.objects.create(
+            order_date=instance.order_date,
+            order_type=instance.consultation.name,
+            patient=instance.patient,
+            visit=instance.visit,
+            added_by=instance.data_recorder,
+            cost=instance.cost,
+        )
+
+@receiver(post_save, sender=Procedure)
+def create_procedure_order(sender, instance, created, **kwargs):
+    if created:
+        Order.objects.create(
+            order_date=instance.order_date,
+            order_type=instance.name.name,
+            patient=instance.patient,
+            visit=instance.visit,
+            added_by=instance.data_recorder,
+            cost=instance.cost,
+        )
+
+@receiver(post_save, sender=LaboratoryOrder)
+def create_laboratory_order(sender, instance, created, **kwargs):
+    if created:
+        Order.objects.create(
+            order_date=instance.order_date,
+            order_type=instance.name.name,
+            patient=instance.patient,
+             visit=instance.visit,
+            added_by=instance.data_recorder,
+            cost=instance.cost,
+        )
+
+@receiver(post_save, sender=AmbulanceOrder)
+def create_ambulance_order(sender, instance, created, **kwargs):
+    if created:
+        Order.objects.create(
+            order_date=instance.order_date,
+            order_type='Ambulance',
+            patient=instance.patient,
+            visit=instance.visit,
+            added_by=instance.data_recorder,
+            cost=instance.cost,
+        )
     

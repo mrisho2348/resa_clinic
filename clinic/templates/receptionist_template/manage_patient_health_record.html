@@ -224,11 +224,10 @@ Patient - Health Record
                                     <h5 class="panel-title">Orders Request</h5>                                    <!-- Content for Orders Request tab -->
                                     <div class="panel panel-flat">
                                         <div class="panel-body">
-                                            <a class="btn btn-default" href="{% url 'patient_consultation_detail' patient.id visit.id %}">Consultation</a>
-                                            <a class="btn btn-default" href="{% url 'save_laboratory' patient.id visit.id %}">Laboratory</a>
-                                            <a class="btn btn-default" href="{% url 'save_observation' patient.id visit.id %}">Imaging</a>
-                                            <a class="btn btn-default" href="{% url 'save_remoteprocedure' patient.id visit.id %}">Procedure</a>
-                                            <a class="btn btn-default" href="{% url 'save_prescription' patient.id visit.id %}">Prescription</a>
+                                            <a class="btn btn-default" href="{% url 'receptionist_patient_consultation_detail' patient.id visit.id %}">Consultation</a>
+                                            <a class="btn btn-default" href="{% url 'receptionist_save_laboratory' patient.id visit.id %}">Laboratory</a>
+                                            <a class="btn btn-default" href="{% url 'receptionist_save_observation' patient.id visit.id %}">Imaging</a>
+                                            <a class="btn btn-default" href="{% url 'receptionist_save_remoteprocedure' patient.id visit.id %}">Procedure</a>
                                             <a class="btn btn-default" href="#">Physiotherapy</a>
                                         </div>
                                     </div>

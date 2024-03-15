@@ -6,6 +6,19 @@ from clinic import  ReceptionistView, editView, imports
 
 
 urlpatterns = [
+        path('save_prescription/<int:patient_id>/<int:visit_id>/', ReceptionistView.save_prescription, name='receptionist_save_prescription'),
+        path('save_laboratory/<int:patient_id>/<int:visit_id>/', ReceptionistView.save_laboratory, name='receptionist_save_laboratory'),
+        path('save_remotereferral/<int:patient_id>/<int:visit_id>/', ReceptionistView.save_remotereferral, name='receptionist_save_remotereferral'),
+        path('save_remoteprocedure/<int:patient_id>/<int:visit_id>/', ReceptionistView.save_remoteprocedure, name='receptionist_save_remoteprocedure'),
+        path('save_observation/<int:patient_id>/<int:visit_id>/', ReceptionistView.save_observation, name='receptionist_save_observation'),
+        path('add_investigation/', ReceptionistView.add_investigation, name='receptionist_add_investigation'),
+        path('add_imaging/', ReceptionistView.add_imaging, name='receptionist_add_imaging'),
+        path('update_payment_status/', ReceptionistView.update_payment_status, name='update_payment_status'),
+        path('invoice/<int:order_id>/', ReceptionistView.generate_invoice_bill, name='receptionist_generate_invoice_bill'),
+        path('prescriptions/<str:visit_number>/<int:patient_id>/', ReceptionistView.prescription_detail, name='receptionist_prescription_detail'),
+        path('add_consultation/', ReceptionistView.add_consultation, name='receptionist_add_consultation'),
+        path('add_procedure/', ReceptionistView.add_procedure, name='receptionist_add_procedure'),
+        path('get-procedure-cost/', ReceptionistView.get_procedure_cost, name='receptionist_get_procedure_cost'),   
         path('receptionist_dashboard/', ReceptionistView.receptionist_dashboard, name='receptionist_dashboard'),    
         path('add_patient/', ReceptionistView.add_patient, name='receptionist_add_patient'),    
         path('vehicle_ambulance_view/',ReceptionistView.vehicle_ambulance_view, name="receptionist_vehicle_ambulance_view"),
@@ -24,7 +37,7 @@ urlpatterns = [
         path('save_service_data/',ReceptionistView.save_service_data, name="receptionist_save_service_data"),      
         path('get_item_quantity/',ReceptionistView.get_item_quantity, name="receptionist_get_item_quantity"),        
         path('resa/patient_vital_all_listt/', ReceptionistView.patient_vital_all_list, name='receptionist_patient_vital_all_list'),
-        path('patient_consultation_detail/<int:patient_id>/', ReceptionistView.patient_consultation_detail, name='receptionist_patient_consultation_detail'),
+        path('patient_consultation_detail/<int:patient_id>/<int:visit_id>/', ReceptionistView.patient_consultation_detail, name='receptionist_patient_consultation_detail'),
         path('patient_vital_list/<int:patient_id>/', ReceptionistView.patient_vital_list, name='receptionist_patient_vital_list'),
         path('patient_health_record/<int:patient_id>/<int:visit_id>/', ReceptionistView.patient_health_record, name='receptionist_patient_health_record'),
         path('patient_vital_visit_list/<int:patient_id>/<int:visit_id>/', ReceptionistView.patient_vital_visit_list, name='receptionist_patient_vital_visit_list'),
@@ -40,6 +53,7 @@ urlpatterns = [
         path('generate-bill/<int:procedure_id>/', ReceptionistView.generate_billing, name='receptionist_generate_billing'),
         path('save_procedure/', ReceptionistView.save_procedure, name='receptionist_save_procedure'),
         path('save_referral/', ReceptionistView.save_referral, name='receptionist_save_referral'),
+        path('all_orders_view/', ReceptionistView.all_orders_view, name='receptionist_all_orders_view'),
         path('change_referral_status/', ReceptionistView.change_referral_status, name='receptionist_change_referral_status'),       
         # imports urls 
         

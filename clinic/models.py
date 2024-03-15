@@ -307,7 +307,12 @@ class Patients(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.last_name
+    # Concatenate first name, middle name (if exists), and last name
+        full_name = self.first_name
+        if self.middle_name:
+            full_name += ' ' + self.middle_name
+        full_name += ' ' + self.last_name
+        return full_name
 
 
 
@@ -703,9 +708,11 @@ class ImagingRecord(models.Model):
     patient = models.ForeignKey('Patients', on_delete=models.CASCADE)
     visit = models.ForeignKey('PatientVisits', on_delete=models.CASCADE)
     doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True) 
+    data_recorder = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True,related_name='data_recorder') 
     imaging= models.ForeignKey(Service, on_delete=models.CASCADE,blank=True, null=True) 
     order_date = models.DateField(null=True, blank=True)
     description = models.TextField(blank=True, null=True)
+    result = models.TextField(null=True, blank=True)   
     image = models.ImageField(upload_to='imaging_records/', null=True, blank=True)
     cost = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -714,14 +721,31 @@ class ImagingRecord(models.Model):
 
     def __str__(self):
         return f"Imaging Record for {self.patient} - {self.imaging_type} ({self.imaging_date})"
+    
+class ConsultationOrder(models.Model):
+    patient = models.ForeignKey('Patients', on_delete=models.CASCADE)
+    visit = models.ForeignKey('PatientVisits', on_delete=models.CASCADE)
+    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True) 
+    data_recorder = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True,related_name='consultation_data_recorder') 
+    consultation= models.ForeignKey(Service, on_delete=models.CASCADE,blank=True, null=True) 
+    order_date = models.DateField(null=True, blank=True)
+    description = models.TextField(blank=True, null=True)   
+    cost = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+    def __str__(self):
+        return f"Consultation Order for {self.patient} - {self.imaging_type} ({self.imaging_date})"
 
 class Procedure(models.Model):
     patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
     visit = models.ForeignKey(PatientVisits, on_delete=models.CASCADE,blank=True, null=True) 
     doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True) 
+    data_recorder = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True,related_name='procedure_data_recorder') 
     name = models.ForeignKey(Service, on_delete=models.CASCADE,blank=True, null=True) 
     description = models.TextField(blank=True, null=True)  
     order_date = models.DateField(null=True, blank=True)     
+    result = models.TextField(null=True, blank=True)     
     equipments_used = models.CharField(max_length=255)
     procedure_number = models.CharField(max_length=20, unique=True)  # Unique procedure number
     cost = models.DecimalField(max_digits=10, decimal_places=2)
@@ -744,10 +768,12 @@ class Procedure(models.Model):
             new_number = last_number + 1
             self.procedure_number = f"PR-{new_number:07}"  # Format the appointment number
         super().save(*args, **kwargs)  # Call the original save method
+        
 class LaboratoryOrder(models.Model):
     patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
     visit = models.ForeignKey(PatientVisits, on_delete=models.CASCADE,blank=True, null=True) 
     doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True) 
+    data_recorder = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True,related_name='lab_data_recorder') 
     name = models.ForeignKey(Service, on_delete=models.CASCADE,blank=True, null=True) 
     description = models.TextField(blank=True, null=True)  
     order_date = models.DateField(null=True, blank=True)  
@@ -778,6 +804,7 @@ class LaboratoryOrder(models.Model):
 class AmbulanceOrder(models.Model):
     patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
     visit = models.ForeignKey(PatientVisits, on_delete=models.CASCADE, blank=True, null=True) 
+    data_recorder = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True,related_name='ambulance_data_recorder') 
     service = models.CharField(max_length=100)
     from_location = models.CharField(max_length=100)
     to_location = models.CharField(max_length=100)
@@ -919,6 +946,38 @@ def generate_sample_id():
     last_sample_number = int(last_sample.sample_id.split('-')[-1]) if last_sample else 0
     new_sample_number = last_sample_number + 1
     return f"SMP-{new_sample_number:05d}"    
+
+class Order(models.Model):
+
+    ORDER_STATUS = [
+        ('Paid', 'Paid'),
+        ('Unpaid', 'Unpaid'),
+    ]
+
+    ORDER_NUMBER_PREFIX = 'ORD'  # Prefix for the order number
+
+    order_date = models.DateField(default=timezone.now, null=True, blank=True)
+    order_type =  models.TextField(blank=True, null=True)
+    patient = models.ForeignKey('Patients', on_delete=models.CASCADE)
+    visit = models.ForeignKey(PatientVisits, on_delete=models.CASCADE,blank=True, null=True)
+    added_by = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True)
+    cost = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=100, choices=ORDER_STATUS, default='Unpaid')
+    order_number = models.CharField(max_length=12, unique=True)
+
+    def __str__(self):
+        return f"{self.order_type} Order for {self.patient}"
+
+    def save(self, *args, **kwargs):
+        if not self.order_number:
+            last_order = Order.objects.order_by('-id').first()
+            if last_order:
+                last_number = int(last_order.order_number.split('-')[-1])  # Extract the numeric part
+            else:
+                last_number = 0
+            new_number = last_number + 1
+            self.order_number = f"{self.ORDER_NUMBER_PREFIX}-{new_number:07}"  # Format the order number
+        super().save(*args, **kwargs)
     
 class Consultation(models.Model):
     doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE, related_name='doctor_consultations')

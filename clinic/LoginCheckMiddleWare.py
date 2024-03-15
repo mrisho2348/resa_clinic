@@ -79,7 +79,10 @@ class LoginCheckMiddleWare(MiddlewareMixin):
                             role = staff.role.lower()
                             # Define allowed views and corresponding dashboard for each role
                             if role == "receptionist":
-                                allowed_views = ["clinic.ReceptionistView"]
+                                allowed_views = [
+                                    "clinic.ReceptionistView",
+                                    "clinic.delete",
+                                                 ]
                                 dashboard_url = "receptionist_dashboard"
                             elif role == "doctor":
                                 allowed_views = ["clinic.DoctorView"]

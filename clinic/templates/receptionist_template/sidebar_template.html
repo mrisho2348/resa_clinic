@@ -67,6 +67,13 @@
                             <p>Ambulance Orders</p>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        {% url 'receptionist_all_orders_view' as receptionist_all_orders_view %}
+                        <a href="{% url "receptionist_all_orders_view" %}" class="nav-link{% if request.path == receptionist_all_orders_view %} active {% endif %}">
+                            <i class="nav-icon fas fa-list"></i> <!-- Updated with the correct Font Awesome icon class -->
+                            <p>Billing Orders</p> <!-- Renamed to a more attractive name -->
+                        </a>
+                    </li>
                       <li class="nav-item">
                         {% url 'receptionist_vehicle_ambulance_view' as vehicle_ambulance_view %}
                         <a href="{% url 'receptionist_vehicle_ambulance_view' %}" class="nav-link{% if request.path == vehicle_ambulance_view %} active {% endif %}">

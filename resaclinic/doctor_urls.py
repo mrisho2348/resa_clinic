@@ -66,9 +66,11 @@ urlpatterns = [
         path('confirm_meeting/<int:appointment_id>/', DoctorView.confirm_meeting, name='confirm_meeting'),
         path('generate-bill/<int:procedure_id>/', DoctorView.generate_billing, name='generate_billing'),
         path('edit_meeting/<int:appointment_id>/', DoctorView.edit_meeting, name='edit_meeting'), 
+        path('save_radiology/', DoctorView.save_radiology, name='save_radiology'),
         path('save_procedure/', DoctorView.save_procedure, name='save_procedure'),
         path('save_referral/', DoctorView.save_referral, name='save_referral'),  
         path('change_referral_status/', DoctorView.change_referral_status, name='change_referral_status'), 
+        path('invoice/<int:record_id>/', DoctorView.generate_invoice_bill, name='generate_invoice_bill'),
         
         # imports urls 
         path('resa/import_Import/import_patient_vital_records',imports.import_patient_vital_records, name="import_patient_vital_records"),      
