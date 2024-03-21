@@ -231,12 +231,12 @@ def edit_disease_record(request, disease_id):
             disease.save()
 
             messages.success(request, 'Disease details updated successfully!')
-            return redirect('manage_disease')  # Replace 'your_redirect_url' with the appropriate URL name
+            return redirect('kahamahmis:manage_disease')  # Replace 'your_redirect_url' with the appropriate URL name
 
         except Exception as e:
             messages.error(request, f'An error occurred: {e}')
 
-    return render(request, 'update/edit_disease.html', {'disease': disease})
+    return render(request, 'kahamaUpdate/edit_disease.html', {'disease': disease})
 
 def edit_company(request, company_id):
     company = get_object_or_404(RemoteCompany, pk=company_id)

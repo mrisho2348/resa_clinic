@@ -2,7 +2,7 @@
 
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render,get_object_or_404
-from clinic.models import Category, RemoteCompany, Consultation, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, PatientVisits, PatientVital, Patients, Prescription, Procedure, QualityControl, Reagent, ReagentUsage, Referral, RemotePatient, RemoteReferral, RemoteService, Sample, Service, Staffs, Supplier, UsageHistory
+from clinic.models import Category, HealthRecord, RemoteCompany, Consultation, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, PatientVisits, PatientVital, Patients, Prescription, Procedure, QualityControl, Reagent, ReagentUsage, Referral, RemotePatient, RemoteReferral, RemoteService, Sample, Service, Staffs, Supplier, UsageHistory
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -113,12 +113,12 @@ def delete_disease_record(request, disease_id):
             # Delete the DiseaseRecode object
             record.delete()
             messages.success(request, 'Disease record deleted successfully!')
-            return redirect('manage_disease')  # Replace with the appropriate URL name
+            return redirect('kahamahmis:manage_disease')  # Replace with the appropriate URL name
 
         except Exception as e:
             messages.error(request, f'An error occurred: {e}')
 
-    return render(request, 'delete/delete_disease_record_confirmation.html', {'record': record})
+    return render(request, 'kahamaDelete/delete_disease_record_confirmation.html', {'record': record})
 
 def delete_company(request, company_id):
     company = get_object_or_404(RemoteCompany, pk=company_id)
@@ -289,6 +289,7 @@ def delete_supplier(request, supplier_id):
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})  
+
       
 @csrf_exempt      
 @require_POST

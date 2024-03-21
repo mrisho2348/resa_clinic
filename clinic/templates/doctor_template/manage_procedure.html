@@ -32,7 +32,7 @@ all Procedure
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for record in data %}
+                                {% for record in procedures %}
                                     <tr>
                                         <td>{{ record.id }}</td>
                                         <td>{{ record.patient.first_name }} {{ record.patient.middle_name }} {{ record.patient.last_name }}</td>

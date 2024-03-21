@@ -1,5 +1,5 @@
 from import_export import resources
-from .models import Category, RemoteCompany, ConsultationNotes, Country, Diagnosis, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, PatientVital, Patients, Prescription, Procedure, Reagent, Referral, RemotePatient, RemoteService, Service, Staffs, Supplier
+from .models import Category, HealthRecord, RemoteCompany, ConsultationNotes, Country, Diagnosis, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, PatientVital, Patients, Prescription, Procedure, Reagent, Referral, RemotePatient, RemoteService, Service, Staffs, Supplier
 
 class StaffResources(resources.ModelResource):
     class Meta:
@@ -79,3 +79,6 @@ class RemotePatientResource(resources.ModelResource):
 class CountryResource(resources.ModelResource):
     class Meta:
         model = Country
+class HealthRecordResource(resources.ModelResource):
+    class Meta:
+        model = HealthRecord

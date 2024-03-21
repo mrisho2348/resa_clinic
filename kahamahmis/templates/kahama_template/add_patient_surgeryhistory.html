@@ -43,7 +43,7 @@ Surgery History
                             {% csrf_token %}
                             <input type="hidden" name="patient_id" value="{{ patient.id }}">
                             <div class="form-group">
-                                <label for="surgery_history">Does Patient have any surgery history ?</label>
+                                <label for="surgery_history">Does the patient have any history of surgery ?</label>
                                 <select class="form-control" id="surgery_history" name="surgery_history">
                                     <option value="no">No</option>
                                     <option value="yes">Yes</option>
@@ -54,26 +54,26 @@ Surgery History
                                 <table class="table table-bordered" id="surgery_history_table">
                                     <thead>
                                         <tr>
-                                            <th>Surgery Name</th>                                          
-                                            <th>Date of Surgery</th>
+                                            <th>Name of surgery Name</th>                                          
+                                            <th>Provide details (if any)</th>
                                             <th></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
                                             <td><input type="text" class="form-control" name="surgery_name[]" ></td>                                        
-                                            <td><input type="date" class="form-control" name="date_of_surgery[]" ></td>
+                                            <td><input type="text" class="form-control" name="date_of_surgery[]" ></td>
                                             <td><button type="button" class="btn btn-danger btn-sm delete-row">Delete</button></td>
                                         </tr>
                                     </tbody>
                                 </table>
                                 <!-- Add More Surgery History Button -->
                                 <div class="form-group">
-                                    <button type="button" class="btn btn-primary btn-block" id="add_surgery_history">Add Surgery History</button>
+                                    <button type="button" class="btn btn-primary btn-block" id="add_surgery_history">Add another surgical history</button>
                                 </div>
                             </div>
                             <!-- Submit Button -->
-                            <button type="submit" class="btn btn-success btn-block">Save Surgery History</button>
+                            <button type="submit" class="btn btn-success btn-block">Save to proceed </button>
                         </form>
                     </div>
                     <div class="card-footer">
@@ -118,7 +118,7 @@ Surgery History
         $('#add_surgery_history').click(function() {
             var newRow = `<tr>
                                 <td><input type="text" class="form-control" name="surgery_name[]" ></td>                             
-                                <td><input type="date" class="form-control" name="date_of_surgery[]" ></td>
+                                <td><input type="text" class="form-control" name="date_of_surgery[]" ></td>
                                 <td><button type="button" class="btn btn-danger btn-sm delete-row">Delete</button></td>
                             </tr>`;
             $('#surgery_history_table tbody').append(newRow);

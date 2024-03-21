@@ -25,40 +25,39 @@ Consultation
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="header-title text-center mt-0 mb-1 text-uppercase">Consultation</h5>
+                        <h5 class="header-title text-center mt-0 mb-1 text-uppercase">Consultation Order</h5>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
                                 <thead>
-                                    <tr>      
-                                        <th>Name</th>
-                                        <th>Payment mode</th>                            
-                                        <th>Order date</th>                            
-                                        <th>Action</th>              
+                                    <tr>
+                                        <th>Order Number</th>                               
+                                        <th>Ordered By</th>                               
+                                        <th>Patient</th>                              
+                                        <th>Order Date</th>
+                                        <th>Actions</th> <!-- Add a column for actions -->
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for patient in patient_records %}
+                                    {% for order in orders %}
                                         <tr>
-                                            <td>{{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</td>   
-                                            <td>{{ patient.payment_form }}</td>               
-                                             <td>{{ patient.created_at }}</td>
+                                            <td>{{ order.order_number }}</td>                                  
+                                            <td>{{ order.added_by }}</td>                                  
+                                            <td>{{ order.patient }}
+                                                <p><strong>{{ order.patient.payment_form }}</strong></p>
+                                            </td>
+                                            <td>{{ order.order_date }}</td>
                                              <td>
-                                                <a class="btn btn-info btn-xs btn-labeled" data-toggle="modal" data-target="#processModal{{ patient.id }}">
-                                                    <i class="fas fa-cogs"></i> Process
+                                                <a href="{% url 'patient_visit_history_view' order.patient.id %}" data-toggle="tooltip" title="open visit History"   class="btn btn-secondary btn-sm" >
+                                                    <i class="fa fa-eye text-dark"></i>
+                                                </a> 
+                                                <a href="{% url 'patient_consultation_detail' order.patient.id  order.visit.id  %}"  class="btn btn-success btn-sm" data-toggle="tooltip" title="Add Consultation notes">                                                     
+                                                    <i class="fas fa-plus-square"></i>
                                                 </a>
-                                                <a class="btn btn-primary btn-labeled" data-toggle="modal" data-target="#profileModal{{ patient.id }}">
-                                                    <i class="fas fa-user"></i> Profile
-                                                </a>
-                                            </td>  
-                                  
-                                        
-                                        </tr>
-                        
-                        
-                        
-                                    {% endfor %}
+                                            </td>                                 
+                                        </tr>                      
+                                {% endfor %}
                                 </tbody>
                             </table>
                         </div>

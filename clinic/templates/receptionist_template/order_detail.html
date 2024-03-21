@@ -24,6 +24,7 @@ Order Details
                                 <tr>
                                     <th>Order Number</th>
                                     <th>Order Type</th>
+                                    <th>Order To</th>
                                     <th>Patient</th>
                                     <th>Cost</th>
                                     <th>Status</th>
@@ -36,6 +37,9 @@ Order Details
                                 <tr>
                                     <td>{{ order.order_number }}</td>
                                     <td>{{ order.order_type }}</td>
+                                    <td>{{ order.doctor }}
+                                        <p><strong>{{ order.doctor.role }}</strong></p>
+                                    </td>
                                     <td>{{ order.patient }}
                                         <p>{{ order.patient.payment_form }}</p>
                                     </td>
@@ -58,42 +62,41 @@ Order Details
                                         <button type="button" class="btn btn-success btn-sm"><i class="fa fa-eye text-dark"></i></button>  
                                                                                 <!-- Modal -->
                                         </a>                                        
-                                        <div class="modal fade" id="editStatusModal{{ order.id }}" tabindex="-1" role="dialog" aria-labelledby="editStatusModal{{ order.id }}Label" aria-hidden="true">
+                                        <div class="modal fade" id="editStatusModal{{ order.id }}" tabindex="-1" role="dialog" aria-labelledby="editStatusModalLabel{{ order.id }}" aria-hidden="true">
                                             <div class="modal-dialog" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title" id="editStatusModal{{ order.id }}Label">Edit Payment Status</h5>
+                                                        <h5 class="modal-title" id="editStatusModalLabel{{ order.id }}"> Payment Status for {{ order.order_type }} order</h5>
                                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                             <span aria-hidden="true">&times;</span>
                                                         </button>
                                                     </div>
                                                     <div class="modal-body">
                                                         <!-- Form to update payment status -->
-                                                        <div id="statusUpdateResponse"></div> <!-- Container for displaying response -->
+                                                        <div id="statusUpdateResponse{{ order.id }}"></div> <!-- Unique container for displaying response -->
                                                         <div class="form-group">
-                                                            <label for="paymentStatus">Payment Status</label>
-                                                            <select class="form-control" id="paymentStatus" name="payment_status">
+                                                            <label for="paymentStatus{{ order.id }}">Payment Status</label>
+                                                            <select class="form-control" id="paymentStatus{{ order.id }}" name="payment_status">
                                                                 <option value="Paid">Paid</option>
                                                                 <option value="Unpaid">Unpaid</option>
                                                             </select>
                                                         </div>
-                                                        <input type="hidden" id="orderId" value="{{ order.id }}">
-                                                        <button type="button" class="btn btn-primary" onclick="updatePaymentStatus()">Pay</button>
+                                                        <input type="hidden" id="orderId{{ order.id }}" value="{{ order.id }}">
+                                                        <button type="button" class="btn btn-primary" onclick="updatePaymentStatus('{{ order.id }}')">Pay</button> <!-- Pass order ID as argument -->
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </td>
+                                        
                                 </tr>
                                 <script>
-                                    function updatePaymentStatus() {
-                                        var orderId = document.getElementById('orderId').value;
-                                        var paymentStatus = document.getElementById('paymentStatus').value;
-                                
+                                    function updatePaymentStatus(orderId) {
+                                        var paymentStatus = document.getElementById('paymentStatus' + orderId).value; // Get payment status based on order ID
+                                    
                                         // Send Ajax request
                                         $.ajax({
                                             type: 'POST',
-                                            url: '{% url 'update_payment_status' %}', // URL for updating payment status
+                                            url: '{% url 'update_orderpayment_status' %}', // URL for updating payment status
                                             data: {
                                                 'order_id': orderId,
                                                 'payment_status': paymentStatus,
@@ -101,12 +104,12 @@ Order Details
                                             },
                                             success: function(response) {
                                                 // Display response in the container
-                                                $('#statusUpdateResponse').html('<div class="alert alert-success">' + response.message + '</div>');
+                                                $('#statusUpdateResponse' + orderId).html('<div class="alert alert-success">' + response.message + '</div>');
                                                 location.reload(true)
                                             },
                                             error: function(response) {
                                                 // Display error message if request fails
-                                                $('#statusUpdateResponse').html('<div class="alert alert-danger">Failed to update status.</div>');
+                                                $('#statusUpdateResponse' + orderId).html('<div class="alert alert-danger">Failed to update status.</div>');
                                             }
                                         });
                                     }

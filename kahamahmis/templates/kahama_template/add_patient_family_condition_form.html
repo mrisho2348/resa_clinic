@@ -39,10 +39,11 @@ Add Family Medical History
                                 {% csrf_token %}
                                 <input type="hidden" name="patient_id" value="{{ patient.id }}">
                                 <div class="form-group">
-                                    <label for="family_medical_history">family medical history</label>
+                                    <label for="family_medical_history">Does the patient have significant family medical history?</label>
                                     <select class="form-control" id="family_medical_history" name="family_medical_history">                                 
                                         <option value="no">No</option>
                                         <option value="yes">Yes</option>
+                                        <option value="unknown">unknown</option>
                                     </select>
                                 </div>
                                 <!-- Medical Condition Information Table -->
@@ -52,7 +53,7 @@ Add Family Medical History
                                             <tr>
                                                 <th>Condition</th>
                                                 <th>Relationship</th>
-                                                <th>Comments</th>
+                                                <th>Provide details (if any)</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
@@ -62,15 +63,30 @@ Add Family Medical History
                                                     <select class="form-control select2bs4" style="width: 100%;" name="condition[]" >
                                                         <option value="" selected>Select Condition</option>
                                                         <option value="Allergies">Allergies</option>
-                                                        <option value="Asthma">Asthma</option>
-                                                        <option value="Lung Disease">Lung Disease</option>
+                                                        <option value="Asthma">Asthma</option>                                                       
                                                         <option value="Cancer">Cancer</option>
                                                         <option value="Diabetes">Diabetes</option>
                                                         <option value="Hypertension">Hypertension</option>
-                                                        <option value="Heart Disease">Heart Disease</option>
+                                                        <option value="Heart Disease">Stroke</option>
+                                                        <option value="Heart Disease">Myocardial infarction</option>
+                                                        <option value="Heart Disease">Spondylosis</option>
+                                                        <option value="Heart Disease">Obesity</option>
+                                                        <option value="Heart Disease">Others</option>
                                                     </select>
                                                 </td>
-                                                <td><input type="text" class="form-control" name="relationship[]"></td>
+                                                <td><select class="form-control select2bs4" style="width: 100%;" id="condition" name="condition[]"  >                                             
+                                                    
+                                                    
+                                                    <option value="Father">Father</option>
+                                                    <option value="Mother">Mother</option>
+                                                    <option value="Brother">Brother</option>
+                                                    <option value="Sister">Sister</option>
+                                                    <option value="Relative">Uncle</option>
+                                                    <option value="Relative">Aunt</option>
+                                                    <option value="Father">Grandfather</option>
+                                                    <option value="Father">Grandmother</option>
+                                                    <option value="Other">Other</option>
+                                                </select></td>
                                                 <td><textarea class="form-control" name="comments[]" rows="3"></textarea></td>
                                                 <td><button type="button" class="btn btn-danger btn-sm delete-row">Delete</button></td>
                                             </tr>
@@ -78,7 +94,7 @@ Add Family Medical History
                                     </table>
                                     <!-- Add More Health Record Button -->
                                     <div class="form-group">
-                                        <button type="button" class="btn btn-primary" id="add_family_medical_record">Add Family Medical Record</button>
+                                        <button type="button" class="btn btn-primary btn-block" id="add_family_medical_record">Add another significant family medical history</button>
                                     </div>
                                 </div>
                                 <!-- End of Form -->
@@ -144,7 +160,19 @@ Add Family Medical History
                                 <option value="Heart Disease">Heart Disease</option>
                             </select>
                         </td>
-                        <td><input type="text" class="form-control" name="relationship[]"></td>
+                        <td><select class="form-control select2bs4" style="width: 100%;" id="condition" name="condition[]"  >                                             
+                                                    
+                                                    
+                            <option value="Father">Father</option>
+                            <option value="Mother">Mother</option>
+                            <option value="Brother">Brother</option>
+                            <option value="Sister">Sister</option>
+                            <option value="Relative">Uncle</option>
+                            <option value="Relative">Aunt</option>
+                            <option value="Father">Grandfather</option>
+                            <option value="Father">Grandmother</option>
+                            <option value="Other">Other</option>
+                        </select></td>
                         <td><textarea class="form-control" name="comments[]" rows="3"></textarea></td>
                         <td><button type="button" class="btn btn-danger btn-sm delete-row">Delete</button></td>
                     </tr>`;

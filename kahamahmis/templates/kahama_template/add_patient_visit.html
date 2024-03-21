@@ -41,25 +41,18 @@ Add visit
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="visit_type">Visit Type</label>
-                                <select class="form-control select2bs4" style="width: 100%;" id="visit_type" name="visit_type">
-                                    <option value="Normal">Normal</option>
-                                    <option value="Emergency">Emergency</option>
-                                    <option value="Referral">Referral</option>
-                                    <option value="Follow up">Follow up</option>
+                                <select class="form-control select2bs4" style="width: 100%;" id="visit_type" name="visit_type"  required>
+                                    <option value=""></option>
+                                    <option value="Normal" {% if latest_visit.visit_type == 'Normal' %} selected {% endif %}>Normal</option>
+                                    <option value="Emergency" {% if latest_visit.visit_type == 'Emergency' %} selected {% endif %}>Emergency</option>
+                                    <option value="Follow up" {% if latest_visit.visit_type == 'Follow up' %} selected {% endif %}>Follow up</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="control-label">Primary Service:</label>
-                                <select class="form-control select2bs4" style="width: 100%;" id="primary_service" name="primary_service">
-                                    <option value="Consultation">Consultation</option>
-                                    <option value="Imaging">Imaging</option>
-                                    <option value="Investigation">Investigation</option>
-                                    <option value="Procedure">Procedure</option>
-                                    <option value="Physiotherapy">Physiotherapy</option>
-                                    <option value="Ambulance">Ambulance</option>
-                                </select>
+                                <label class="control-label">Consultation:</label>                               
+                               <input type="text" class="form-control"  id="primary_service" name="primary_service" value="Consultation" readonly>                                   
                             </div>
                         </div>
                     </div>

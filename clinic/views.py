@@ -87,7 +87,7 @@ def DoLogin(request):
                 elif role == "physiotherapist":
                     return redirect("physiotherapist_dashboard")
                 elif role == "labtechnician":
-                    return redirect("lab_technician_dashboard")
+                    return redirect("labtechnician_dashboard")
                 elif role == "pharmacist":
                     return redirect("pharmacist_dashboard")
                 elif role == "receptionist":
@@ -357,7 +357,7 @@ def update_staff_status(request):
                 staff.is_active = True
             else:
                 messages.error(request, 'Invalid request')
-                return redirect('manage_staff')  # Make sure 'manage_staffs' is the name of your staff list URL
+                return redirect('clinic:manage_staff')  # Make sure 'manage_staffs' is the name of your staff list URL
 
             staff.save()
             messages.success(request, 'Status updated successfully')
@@ -367,7 +367,7 @@ def update_staff_status(request):
         messages.error(request, f'An error occurred: {str(e)}')
 
     # Redirect back to the staff list page
-    return redirect('manage_staff')  # Make sure 'manage_staffs' is the name of your staff list URL
+    return redirect('clinic:manage_staff')  # Make sure 'manage_staffs' is the name of your staff list URL
 
 def update_equipment_status(request):
     try:
@@ -386,7 +386,7 @@ def update_equipment_status(request):
                 equipment.is_active = True
             else:
                 messages.error(request, 'Invalid request')
-                return redirect('equipment_list')  # Make sure 'manage_staffs' is the name of your staff list URL
+                return redirect('clinic:equipment_list')  # Make sure 'manage_staffs' is the name of your staff list URL
 
             equipment.save()
             messages.success(request, 'equipment updated successfully')
@@ -396,7 +396,7 @@ def update_equipment_status(request):
         messages.error(request, f'An error occurred: {str(e)}')
 
     # Redirect back to the staff list page
-    return redirect('equipment_list')  # Make sure 'manage_staffs' is the name of your staff list URL
+    return redirect('clinic:equipment_list')  # Make sure 'manage_staffs' is the name of your staff list URL
 
 def edit_staff(request, staff_id):
     # Check if the staff with the given ID exists, or return a 404 page
@@ -413,14 +413,14 @@ def edit_staff_save(request):
             staff_id = request.session.get('staff_id')
             if staff_id is None:
                 messages.error(request, "Staff ID not found")
-                return redirect("manage_staff")
+                return redirect("clinic:manage_staff")
 
             # Retrieve the staff instance from the database
             try:
                 staff = Staffs.objects.get(id=staff_id)
             except ObjectDoesNotExist:
                 messages.error(request, "Staff not found")
-                return redirect("manage_staff")
+                return redirect("clinic:manage_staff")
 
             # Extract the form data
             first_name = request.POST.get('firstName')
@@ -451,11 +451,11 @@ def edit_staff_save(request):
 
             # Assuming the URL name for the next editing form is "qualification_form"
             messages.success(request, "Staff details updated successfully.")
-            return redirect("manage_staff")
+            return redirect("clinic:manage_staff")
         except Exception as e:
             messages.error(request, f"Error updating staff details: {str(e)}")
 
-    return redirect("edit_staff",staff_id=staff_id)
+    return redirect("clinic:edit_staff",staff_id=staff_id)
 
 
 
@@ -512,7 +512,7 @@ def appointment_view(request, patient_id):
             )
 
             messages.success(request, "Appointment created successfully.")
-            return redirect('appointment_view', patient_id=patient_id)
+            return redirect('clinic:appointment_view', patient_id=patient_id)
 
         # If the request is not a POST, handle the GET request
         patient = get_object_or_404(Patients, id=patient_id)
@@ -528,7 +528,7 @@ def appointment_view(request, patient_id):
     except IntegrityError as e:
         # Handle integrity error (e.g., duplicate entry)
         messages.error(request, f"Error creating appointment: {str(e)}")
-        return redirect('appointment_view', patient_id=patient_id)
+        return redirect('clinic:appointment_view', patient_id=patient_id)
     except Exception as e:
         # Handle other exceptions
         messages.error(request, f"An unexpected error occurred: {str(e)}")
@@ -625,7 +625,7 @@ def confirm_meeting(request, appointment_id):
         # Handle IntegrityError (e.g., database constraint violation)
         messages.error(request, f"Error confirming meeting: {str(e)}")
 
-    return redirect('appointment_list')  # Adjust the URL name based on your actual URL structure
+    return redirect('clinic:appointment_list')  # Adjust the URL name based on your actual URL structure
 
 def edit_meeting(request, appointment_id):
     try:
@@ -644,7 +644,7 @@ def edit_meeting(request, appointment_id):
     except Exception as e:
         messages.error(request, f"Error editing meeting time: {str(e)}")
 
-    return redirect('appointment_list')
+    return redirect('clinic:appointment_list')
 
 @login_required
 def medicine_list(request):
@@ -743,15 +743,15 @@ def add_inventory(request):
             # Perform additional processing if needed
 
             # Redirect to a success page or the medicine details page
-            return redirect('medicine_inventory')  # Adjust the URL as needed
+            return redirect('clinic:medicine_inventory')  # Adjust the URL as needed
 
         except (ValueError, TypeError):
             # Handle invalid data types, redirect or display an error message
-            return redirect('medicine_list')  # Adjust the URL as needed
+            return redirect('clinic:medicine_list')  # Adjust the URL as needed
 
     else:
         # Handle non-POST requests, redirect or display an error message
-        return redirect('medicine_list')  # Adjust the URL as needed
+        return redirect('clinic:medicine_list')  # Adjust the URL as needed
     
 def medicine_inventory_list(request):
     # Retrieve all medicine inventories
@@ -1409,7 +1409,7 @@ def save_diagnostic_test(request):
                diagnostic_test.health_issues.set(health_issues_ids)
 
             # Redirect to a success page or another appropriate URL
-            return redirect('diagnostic_tests')  # Adjust the URL as needed
+            return redirect('clinic:diagnostic_tests')  # Adjust the URL as needed
 
         except Exception as e:
             print(f"ERROR: {str(e)}")
@@ -1454,7 +1454,7 @@ def save_sample(request):
             sample.save()
 
             # Redirect to a success page or another appropriate URL
-            return redirect('sample_list')  # Adjust the URL as needed
+            return redirect('clinic:sample_list')  # Adjust the URL as needed
 
         except Exception as e:
             print(f"ERROR: {str(e)}")
@@ -1509,7 +1509,7 @@ def save_patient_disease(request):
 
             # You can include additional logic here if needed
 
-            return redirect('patient_diseases_view') 
+            return redirect('clinic:patient_diseases_view') 
         except Exception as e:
             print(f"ERROR: {str(e)}")
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
@@ -1547,7 +1547,7 @@ def pathology_diagnostic_test_save(request):
             )
 
             # Optionally, you can perform additional actions or redirect to another page
-            return redirect('pathology_diagnostic_test_list') 
+            return redirect('clinic:pathology_diagnostic_test_list') 
 
         except Exception as e:
             # Handle exceptions (e.g., invalid data, database errors)
@@ -1587,7 +1587,7 @@ def save_consultation_data(request):
             
         )
 
-        return redirect('appointment_list')
+        return redirect('clinic:appointment_list')
     except Exception as e:
         return HttpResponseBadRequest(f"Error: {str(e)}")
 
@@ -1629,7 +1629,7 @@ def save_consultation_fee(request):
         )
 
         # Return a JsonResponse to indicate success
-        return redirect('consultation_fee_list') 
+        return redirect('clinic:consultation_fee_list') 
     except Exception as e:
         # Return a JsonResponse with an error message
         return HttpResponseBadRequest(f"Error: {str(e)}")  

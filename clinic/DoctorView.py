@@ -2,6 +2,7 @@ from datetime import  datetime
 from django.utils import timezone
 import logging
 from django.urls import reverse
+from django.db.models import F
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import  HttpResponseBadRequest
@@ -15,7 +16,7 @@ from django.db.models import Q
 from clinic.models import  Consultation,  DiseaseRecode, Medicine, Notification,  PathodologyRecord, Patients, Procedure, Staffs
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
-from .models import ConsultationFee, ConsultationNotes, ConsultationNotification, Counseling, Country, Diagnosis,Diagnosis,HealthIssue, ImagingRecord, InventoryItem, LabTest, LaboratoryOrder, PatientVisits, PatientVital, Prescription, Procedure, Patients, Referral,Service
+from .models import ConsultationFee, ConsultationNotes, ConsultationNotification, ConsultationOrder, Counseling, Country, Diagnosis,Diagnosis,HealthIssue, ImagingRecord, InventoryItem, LabTest, LaboratoryOrder, Order, PatientVisits, PatientVital, Prescription, Procedure, Patients, Referral,Service
 
 @login_required
 def doctor_dashboard(request):
@@ -69,22 +70,15 @@ def manage_consultation(request):
     }
     return render(request,"doctor_template/manage_consultation.html",context)
 
-@login_required
-def manage_pathodology(request):
-    doctor = request.user.staff
-    pathodology_records=ImagingRecord.objects.filter(doctor=doctor)     
-    return render(request,"doctor_template/manage_pathodology.html",{
-        "pathodology_records":pathodology_records,
-       
-        })
     
 @login_required
 def manage_laboratory(request):
     doctor = request.user.staff
-    lab_records=LaboratoryOrder.objects.filter(doctor=doctor)     
+    lab_records=LaboratoryOrder.objects.filter(doctor=doctor)  
+    orders = Order.objects.filter(order_type__in=[lab_record.imaging.name for lab_record in lab_records], is_read=True)          
     return render(request,"doctor_template/manage_lab_result.html",{
-        "lab_records":lab_records,
-       
+        "orders":orders,       
+        "lab_records":lab_records,       
         })
 
 
@@ -285,22 +279,8 @@ def edit_meeting(request, appointment_id):
 
     return redirect('appointment_list')
 
-
-
-
-@login_required
-def patient_procedure_view(request):
-    template_name = 'doctor_template/manage_procedure.html'
-    doctor = request.user.staff
-    # Query to retrieve the latest procedure record for each patient
-    procedures = Procedure.objects.filter(doctor=doctor).order_by('-created_at')
-    return render(request, template_name, {'data': procedures})
-
-
-
 def patient_procedure_history_view(request, mrn):
-    patient = get_object_or_404(Patients, mrn=mrn)
-    
+    patient = get_object_or_404(Patients, mrn=mrn)    
     # Retrieve all procedures for the specific patient
     procedures = Procedure.objects.filter(patient=patient)
     
@@ -380,26 +360,16 @@ def save_radiology(request):
     return JsonResponse({'success': False, 'message': 'Invalid request method. This endpoint only accepts POST requests.'})
 
 
-def generate_invoice_bill(request,  record_id):
+def generate_invoice_bill(request,  order_id):
     # Retrieve the patient and visit objects based on IDs
-    try:
-        patient = Patients.objects.all()
-        visit = PatientVisits.objects.all()
-    except Patients.DoesNotExist:
-        # Handle if patient doesn't exist
-        # You can return an error page or redirect to another view
-        return render(request, '404.html', {'message': 'Patient not found'})
-    except PatientVisits.DoesNotExist:
-        # Handle if visit doesn't exist
-        # You can return an error page or redirect to another view
-        return render(request, '404.html', {'message': 'Visit not found'})
-
-    # Pass the patient and visit objects to the template
+    
+    order = Order.objects.get(id=order_id)
+     
     context = {
-        'patient': patient,
-        'visit': visit,
+        'order': order,
+       
     }
-    return render(request, 'doctor_template/invoice_bill.html', context)
+    return render(request, 'receptionist_template/invoice_bill.html', context)
 
 @csrf_exempt
 def save_referral(request):
@@ -1779,8 +1749,19 @@ def prescription_list(request):
     # Retrieve all prescriptions with related patient and visit
     prescriptions = Prescription.objects.select_related('patient', 'visit')
 
-    # Group prescriptions by visit and calculate total price for each visit
-    visit_total_prices = prescriptions.values('visit__vst', 'visit__patient__first_name','visit__created_at', 'visit__patient__id', 'visit__patient__middle_name', 'visit__patient__last_name').annotate(total_price=Sum('total_price'))
+    visit_total_prices = prescriptions.values(
+    'visit__vst', 
+    'visit__patient__first_name',
+    'visit__created_at', 
+    'visit__patient__id', 
+    'visit__patient__middle_name', 
+    'visit__patient__last_name'
+).annotate(
+    total_price=Sum('total_price'),
+    verified=F('verified'),  # Access verified field directly from Prescription
+    issued=F('issued'),      # Access issued field directly from Prescription
+    status=F('status'),      # Access status field directly from Prescription
+)
     
     # Retrieve medicines with inventory levels not equal to zero or greater than zero, and not expired
     medicines = Medicine.objects.filter(
@@ -1802,7 +1783,15 @@ def prescription_list(request):
 def prescription_detail(request, visit_number, patient_id):
     patient = Patients.objects.get(id=patient_id)
     prescriptions = Prescription.objects.filter(visit__vst=visit_number, visit__patient__id=patient_id)
-    context = {'patient': patient, 'prescriptions': prescriptions}
+    prescriber = None
+    if prescriptions.exists():
+        prescriber = prescriptions.first().entered_by
+    context = {
+        'patient': patient, 
+        'prescriptions': prescriptions,
+        'prescriber': prescriber,
+        'visit_number': visit_number,
+        }
     return render(request, "doctor_template/prescription_detail.html", context)
 
   
@@ -1902,29 +1891,109 @@ def save_patient_vital(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
     
-def consultation_notes_view(request):
-    consultation_notes = ConsultationNotes.objects.all()  
-    pathology_records = PathodologyRecord.objects.all()# Fetch all consultation notes from the database
+@login_required
+def consultation_notes_view(request):   
+    # Retrieve the current logged-in doctor
+    current_doctor = request.user.staff    
+    # Retrieve all ConsultationOrder instances for the current doctor
+    consultation_orders = ConsultationOrder.objects.filter(doctor=current_doctor).order_by('-order_date')     
+    # Retrieve all related orders for the ConsultationOrder instances
+    orders = Order.objects.filter(order_type__in=[consultation.consultation.name for consultation in consultation_orders], is_read=True)    
+    # Render the template with the fetched orders
+    return render(request, 'doctor_template/manage_consultation_notes.html', {'orders': orders})
+
+@login_required
+def new_consultation_order(request):   
+    # Retrieve the current logged-in doctor
+    current_doctor = request.user.staff   
+    current_date = timezone.now().date() 
+    # Retrieve all ConsultationOrder instances for the current doctor
+    consultation_orders = ConsultationOrder.objects.filter(doctor=current_doctor).order_by('-order_date')     
+    # Retrieve all unread orders for the ConsultationOrder instances
+    unread_orders = Order.objects.filter(order_type__in=[consultation.consultation.name for consultation in consultation_orders], is_read=True, order_date=current_date)    
+    # Mark the retrieved unread orders as read
+    orders = unread_orders 
+    unread_orders.update(is_read=True)    
+    # Render the template with the fetched unread orders
+    return render(request, 'doctor_template/new_consultation_order.html', {'orders': orders})
+
+
+def fetch_order_counts_view(request):
+    # Retrieve the current logged-in doctor
+    current_doctor = request.user.staff
+    consultation_orders = ConsultationOrder.objects.filter(doctor=current_doctor)  
+    current_date = timezone.now().date()  
+    # Retrieve the counts of unread and read orders for the current doctor
+    unread_count = Order.objects.filter(order_type__in=[consultation.consultation.name for consultation in consultation_orders], order_date=current_date).count()
+    read_count = Order.objects.filter(order_type__in=[consultation.consultation.name for consultation in consultation_orders], is_read=True).count()    
+    # Return the counts as JSON response
+    return JsonResponse({'unread_count': unread_count, 'read_count': read_count})
+
+def fetch_radiology_order_counts_view(request):
+    # Retrieve the current logged-in doctor
+    current_doctor = request.user.staff
+    pathodology_records=ImagingRecord.objects.filter(doctor=current_doctor) 
+    current_date = timezone.now().date()   
+    # Retrieve the counts of unread and read orders for the current doctor
+    unread_count = Order.objects.filter(order_type__in=[pathology.imaging.name for pathology in pathodology_records],order_date=current_date) .count()
+    read_count = Order.objects.filter(order_type__in=[pathology.imaging.name for pathology in pathodology_records], is_read=True) .count()    
+    # Return the counts as JSON response
+    return JsonResponse({'unread_count': unread_count, 'read_count': read_count})
+
+def fetch_procedure_order_counts_view(request):
+    # Retrieve the current logged-in doctor
+    current_doctor = request.user.staff
+    procedures = Procedure.objects.filter(doctor=current_doctor)
+    current_date = timezone.now().date() 
+    # Retrieve the counts of unread and read orders for the current doctor
+    unread_count = Order.objects.filter(order_type__in=[procedure.name.name for procedure in procedures], order_date=current_date).count()
     
-    doctors = Staffs.objects.filter(role='doctor')
-    provisional_diagnoses = Diagnosis.objects.all()
-    final_diagnoses = Diagnosis.objects.all()
-    patient_records=Patients.objects.all().order_by('-created_at') 
-    range_121 = range(1, 121)
-    all_country = Country.objects.all()
-    doctors=Staffs.objects.filter(role='doctor')
-    return render(request, 'doctor_template/manage_consultation_notes.html', {
-        'consultation_notes': consultation_notes,
-        'pathology_records': pathology_records,
-        'provisional_diagnoses': provisional_diagnoses,
-        'final_diagnoses': final_diagnoses,
-        'patient_records': patient_records,
-        'doctors': doctors,
-        'range_121': range_121,
-        'all_country': all_country,
-        })    
+    read_count = Order.objects.filter(order_type__in=[procedure.name.name for procedure in procedures], is_read=True).count()    
+    # Return the counts as JSON response
+    return JsonResponse({'unread_count': unread_count, 'read_count': read_count})
 
+@login_required
+def manage_pathodology(request):
+    doctor = request.user.staff
+    pathodology_records=ImagingRecord.objects.filter(doctor=doctor).order_by('-order_date')   
+    orders = Order.objects.filter(order_type__in=[pathology.imaging.name for pathology in pathodology_records], is_read=True)       
+    return render(request,"doctor_template/manage_pathodology.html",{
+        "pathodology_records":pathodology_records,       
+        }) 
+    
+@login_required
+def new_radiology_order(request):
+    doctor = request.user.staff
+    current_date = timezone.now().date() 
+    pathodology_records=ImagingRecord.objects.filter(doctor=doctor).order_by('-order_date')   
+    unread_orders = Order.objects.filter(order_type__in=[pathology.imaging.name for pathology in pathodology_records], is_read=True, order_date=current_date) 
+    orders = unread_orders   
+    unread_orders.update(is_read=True)     
+    return render(request,"doctor_template/new_radiology_order.html",{
+        "orders":orders,       
+        }) 
+    
+@login_required
+def patient_procedure_view(request):
+    template_name = 'doctor_template/manage_procedure.html'
+    doctor = request.user.staff
+    # Query to retrieve the latest procedure record for each patient
+    procedures = Procedure.objects.filter(doctor=doctor).order_by('-order_date')      
+    return render(request, template_name, {'procedures': procedures})
 
+@login_required
+def new_procedure_order(request):
+    template_name = 'doctor_template/new_procedure_order.html'
+    doctor = request.user.staff
+    current_date = timezone.now().date() 
+    # Query to retrieve the latest procedure record for each patient
+    procedures = Procedure.objects.filter(doctor=doctor).order_by('-order_date')    
+    unread_orders = Order.objects.filter(order_type__in=[procedure.name.name for procedure in procedures], is_read=True, order_date=current_date) 
+    print(unread_orders)
+    orders = unread_orders 
+    unread_orders.update(is_read=True)         
+    return render(request, template_name, {'orders': orders})
+    
 @csrf_exempt
 @require_POST
 def save_consultation_notes(request):

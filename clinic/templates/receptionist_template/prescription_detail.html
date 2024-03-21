@@ -39,9 +39,9 @@ Prescription List
             <div class="card">
                
                 <div class="card-body">
-                    <div class="row" style="font-size:13px;">
-                        <div class="col-md-3"><b>PATIENT: {{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</b></div>
-                        <div class="col-md-3"><b>DOB: {{ patient.dob|date:'Y-m-d' }} [ Age: {% if patient.dob %}
+                    <div class="row text-uppercase"" style="font-size:13px;">
+                        <div class="col-md-3">PATIENT: <b>{{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</b></div>
+                        <div class="col-md-3">DOB: <b>{{ patient.dob|date:'Y-m-d' }} [ Age: {% if patient.dob %}
                             <script>
                                 var dob = new Date("{{ patient.dob|date:'Y-m-d' }}");
                                 var now = new Date();
@@ -53,11 +53,13 @@ Prescription List
                             {% else %}
                             {{ patient.age }}
                             {% endif %}]</b></div>
-                        <div class="col-md-3"><b>SEX: {{ patient.gender }}</b></div>
-                        <div class="col-md-3"><b>FILE NO : {{ patient.mrn }}</b> </div>
+                        <div class="col-md-3">SEX: <b>{{ patient.gender }}</b></div>
+                        <div class="col-md-3">FILE NO : <b>{{ patient.mrn }}</b> </div>
                     </div>
                         <div class="row mt-3">
-                            <div class="col-md-3"><b>PAYMENT MODE: {{ patient.payment_form }}</b></div>
+                            <div class="col-md-3">PAYMENT MODE: <b>{{ patient.payment_form }}</b></div>
+                            <div class="col-md-3">VISIT NUMBER: <b>{{ visit_number }}</b></div>
+                            <div class="col-md-6">PRESCRIBED BY: <b>{{prescriber.role}} - {{ prescriber }}</b></div>
                         </div>
                 </div>           
             
@@ -74,8 +76,7 @@ Prescription List
                     <div class="table-responsive">
                         <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example5"  style="width:100%">
                             <thead>
-                                <tr>
-                                    <th>Was Recorded By</th>
+                                <tr>                                  
                                     <th>Drug</th>                                                      
                                     <th>Dose</th>
                                     <th>Frequency</th>
@@ -87,8 +88,7 @@ Prescription List
                             </thead>
                             <tbody>
                                 {% for prescription in prescriptions %}
-                                <tr>
-                                    <td>{{ prescription.entered_by.admin.first_name }} {{ prescription.entered_by.admin.middle_name }}  {{ prescription.entered_by.admin.last_name }}</td>                                
+                                <tr>                                                             
                                     <td>{{ prescription.medicine.name }}</td>
                                     <td>{{ prescription.dose }}</td>                                                       
                                     <td>{{ prescription.frequency }}</td>
@@ -104,10 +104,122 @@ Prescription List
                 </div>
            </div>
         </div>
+    </div>   
+
+     <!-- Action Buttons -->
+<div class="row mt-3">
+    <div class="col-md-12">
+        <div class="">
+           <div class="row">
+            <div class="col-md-4">
+                <!-- Verify Button -->
+                {% if verification_status %}
+                    {% if verification_status == 'verified' %}
+                        <button class="btn btn-danger btn-block" onclick="toggleVerification('{{ visit_number }}', 'unverify')">Unverify</button>
+                    {% else %}
+                        <button class="btn btn-success btn-block" onclick="toggleVerification('{{ visit_number }}', 'verify')">Verify</button>
+                    {% endif %}
+                {% endif %}
+            </div>
+            <div class="col-md-4">
+                {% if issued_status  and verification_status == 'verified' %}
+                    {% if issued_status == 'issued' %}
+                        <button class="btn btn-danger btn-block" onclick="toggleIssued('{{ visit_number }}', 'unissue')">Unissue</button>
+                    {% else %}
+                        <button class="btn btn-primary btn-block" onclick="toggleIssued('{{ visit_number }}', 'issue')">Issue</button>
+                    {% endif %}
+                {% endif %}
+            </div>
+            <div class="col-md-4">                
+                {% if payment_status and verification_status == 'verified' and issued_status == 'issued' %}
+                    {% if payment_status == 'Paid' %}
+                        <button class="btn btn-danger btn-block" onclick="togglePayment('{{ visit_number }}', 'unpay')">Unpay</button>
+                    {% else %}
+                        <button class="btn btn-info btn-block" onclick="togglePayment('{{ visit_number }}', 'pay')">Pay</button>
+                    {% endif %}
+                {% endif %}
+            </div>
+            
+           </div>           
+         </div>
     </div>
-    
 </div>
 
+</div>
+
+<script>
+
+// Function to toggle verification status
+function toggleVerification(visitNumber, action) {
+    var url = action === 'verify' ? '{% url "receptionist_verify_prescriptions" %}' : '{% url "receptionist_unverify_prescriptions" %}';
+    
+    // Perform AJAX request to toggle verification status
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: { visit_number: visitNumber },
+        success: function(response) {
+            // Handle success response
+            alert('Prescriptions verification status updated successfully.');
+            // Optionally, reload the page or update the UI
+            location.reload(); // Reload the page to reflect changes
+        },
+        error: function(xhr, status, error) {
+            // Handle error response
+            console.error('Error toggling verification status:', error);
+            alert('Error toggling verification status. Please try again.');
+        }
+    });
+}
+
+// Function to toggle issue status
+function toggleIssued(visitNumber, action) {
+    var url = action === 'issue' ? '{% url "receptionist_issue_prescriptions" %}' : '{% url "receptionist_unissue_prescriptions" %}';
+    
+    // Perform AJAX request to toggle issue status
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: { visit_number: visitNumber },
+        success: function(response) {
+            // Handle success response
+            alert('Prescriptions issue status updated successfully.');
+            // Optionally, reload the page or update the UI
+            location.reload(); // Reload the page to reflect changes
+        },
+        error: function(xhr, status, error) {
+            // Handle error response
+            console.error('Error toggling issue status:', error);
+            alert('Error toggling issue status. Please try again.');
+        }
+    });
+}
+
+// Function to toggle payment status
+function togglePayment(visitNumber, action) {
+    var url = action === 'pay' ? '{% url "receptionist_pay_prescriptions" %}' : '{% url "receptionist_unpay_prescriptions" %}';
+    
+    // Perform AJAX request to toggle payment status
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: { visit_number: visitNumber },
+        success: function(response) {
+            // Handle success response
+            alert('Prescriptions payment status updated successfully.');
+            // Optionally, reload the page or update the UI
+            location.reload(); // Reload the page to reflect changes
+        },
+        error: function(xhr, status, error) {
+            // Handle error response
+            console.error('Error toggling payment status:', error);
+            alert('Error toggling payment status. Please try again.');
+        }
+    });
+}
+
+
+</script>
 
 {% include 'hod_template/datatable.html' %}
 {% endblock main_content %}

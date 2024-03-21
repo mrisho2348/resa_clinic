@@ -8,10 +8,16 @@ urlpatterns = [
      
    
         path('doctor_dashboard/', DoctorView.doctor_dashboard, name='doctor_dashboard'),
+        path('new_procedure_order/', DoctorView.new_procedure_order, name='new_procedure_order'),
+        path('fetch_procedure_order_counts_view/', DoctorView.fetch_procedure_order_counts_view, name='fetch_procedure_order_counts_view'),
+        path('fetch_radiology_order_counts_view/', DoctorView.fetch_radiology_order_counts_view, name='fetch_radiology_order_counts_view'),
+        path('new_radiology_order/', DoctorView.new_radiology_order, name='new_radiology_order'),
+        path('fetch_order_counts/', DoctorView.fetch_order_counts_view, name='fetch_order_counts'),
         path('fetch_consultation_counts/', DoctorView.fetch_consultation_counts, name='fetch_consultation_counts'),
         path('unread_appointments/', DoctorView.unread_appointments_view, name='unread_appointments'),
         path('read_appointments/', DoctorView.read_appointments_view, name='read_appointments'),
         path('prescriptions/<str:visit_number>/<int:patient_id>/', DoctorView.prescription_detail, name='prescription_detail'),
+        path('new_consultation_order/',DoctorView.new_consultation_order, name="new_consultation_order"),
         path('add_remotepatient_visit/',DoctorView.add_remotepatient_visit, name="add_remotepatient_visit"),
         path('save_consultation_notes/',DoctorView.save_consultation_notes, name="save_consultation_notes"),
         path('save_patient_vital/',DoctorView.save_patient_vital, name="save_patient_vital"),
@@ -70,7 +76,7 @@ urlpatterns = [
         path('save_procedure/', DoctorView.save_procedure, name='save_procedure'),
         path('save_referral/', DoctorView.save_referral, name='save_referral'),  
         path('change_referral_status/', DoctorView.change_referral_status, name='change_referral_status'), 
-        path('invoice/<int:record_id>/', DoctorView.generate_invoice_bill, name='generate_invoice_bill'),
+        path('invoice/<int:order_id>/', DoctorView.generate_invoice_bill, name='generate_invoice_bill'),
         
         # imports urls 
         path('resa/import_Import/import_patient_vital_records',imports.import_patient_vital_records, name="import_patient_vital_records"),      

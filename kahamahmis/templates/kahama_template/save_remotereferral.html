@@ -1,4 +1,4 @@
-{% extends 'kahama_template/base_template.html' %}
+{% extends 'doctor_template/base_template.html' %}
 {% block title %}
 Patient referral   
 {% endblock title %}
@@ -8,7 +8,7 @@ Patient Referral
 {% endblock page_title %}
 
 {% block breadcrumb %}
-{% include "kahama_template/modal_form.html" %}
+{% include "doctor_template/modal_form.html" %}
     <a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#referralDetailsModal">
         <i class="fas fa-eye"></i>view referral record
     </a>
@@ -41,7 +41,10 @@ Patient Referral
                     <br />
                     <div class="row">
                         <div class="col-md-3">
-                            <b>company: {{ patient.company }}</b>
+                            <b>Payment Mode: {{ patient.payment_form }}</b>
+                        </div>
+                        <div class="col-md-3">
+                            <b>Visit number: {{ visit.vst }}</b>
                         </div>
                     </div>
                     <br />
@@ -558,7 +561,7 @@ Patient Referral
 </div>
 
 
-{% include 'kahama_template/datatable.html' %}
+{% include 'doctor_template/datatable.html' %}
     
 
 {% endblock main_content %}

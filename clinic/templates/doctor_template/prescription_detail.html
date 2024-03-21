@@ -39,9 +39,9 @@ Prescription List
             <div class="card">
                
                 <div class="card-body">
-                    <div class="row" style="font-size:13px;">
-                        <div class="col-md-3"><b>PATIENT: {{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</b></div>
-                        <div class="col-md-3"><b>DOB: {{ patient.dob|date:'Y-m-d' }} [ Age: {% if patient.dob %}
+                    <div class="row text-uppercase"" style="font-size:13px;">
+                        <div class="col-md-3">PATIENT: <b>{{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</b></div>
+                        <div class="col-md-3">DOB: <b>{{ patient.dob|date:'Y-m-d' }} [ Age: {% if patient.dob %}
                             <script>
                                 var dob = new Date("{{ patient.dob|date:'Y-m-d' }}");
                                 var now = new Date();
@@ -53,11 +53,13 @@ Prescription List
                             {% else %}
                             {{ patient.age }}
                             {% endif %}]</b></div>
-                        <div class="col-md-3"><b>SEX: {{ patient.gender }}</b></div>
-                        <div class="col-md-3"><b>FILE NO : {{ patient.mrn }}</b> </div>
+                        <div class="col-md-3">SEX: <b>{{ patient.gender }}</b></div>
+                        <div class="col-md-3">FILE NO : <b>{{ patient.mrn }}</b> </div>
                     </div>
                         <div class="row mt-3">
-                            <div class="col-md-3"><b>PAYMENT MODE: {{ patient.payment_form }}</b></div>
+                            <div class="col-md-3">PAYMENT MODE: <b>{{ patient.payment_form }}</b></div>
+                            <div class="col-md-3">VISIT NUMBER: <b>{{ visit_number }}</b></div>
+                            <div class="col-md-6">PRESCRIBED BY: <b>{{prescriber.role}} - {{ prescriber }}</b></div>
                         </div>
                 </div>           
             
@@ -74,8 +76,7 @@ Prescription List
                     <div class="table-responsive">
                         <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example5"  style="width:100%">
                             <thead>
-                                <tr>
-                                    <th>Was Recorded By</th>
+                                <tr>                                   
                                     <th>Drug</th>                                                      
                                     <th>Dose</th>
                                     <th>Frequency</th>
@@ -87,8 +88,7 @@ Prescription List
                             </thead>
                             <tbody>
                                 {% for prescription in prescriptions %}
-                                <tr>
-                                    <td>{{ prescription.entered_by.admin.first_name }} {{ prescription.entered_by.admin.middle_name }}  {{ prescription.entered_by.admin.last_name }}</td>                                
+                                <tr>                                   
                                     <td>{{ prescription.medicine.name }}</td>
                                     <td>{{ prescription.dose }}</td>                                                       
                                     <td>{{ prescription.frequency }}</td>

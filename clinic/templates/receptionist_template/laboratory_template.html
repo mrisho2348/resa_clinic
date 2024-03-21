@@ -132,7 +132,7 @@ New Lab Order - Request
                             </div>                            
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="doctor">Doctor:</label>
+                                    <label for="doctor">Lab Technician:</label>
                                     <select class="form-control select2bs4" style="width: 100%;" name="doctor_id" id="doctor" required>
                                         {% for doctor in doctors %}
                                             <option value="{{ doctor.id }}">{{ doctor.admin.first_name }} {{ doctor.middle_name }} {{ doctor.admin.last_name }}</option>

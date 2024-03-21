@@ -63,19 +63,37 @@ all Procedure
                 </button>
             </div>
             <div class="modal-body">
-                <p><strong>Procedure Number:</strong> {{ record.procedure_number }}</p>
-                <p><strong>Patient:</strong> {{ record.patient.first_name }} {{ record.patient.middle_name }} {{ record.patient.last_name }}</p>
-                <p><strong>Payment Mode:</strong> {{ record.patient.payment_form }}</p>
-                <p><strong>Order Date:</strong> {{ record.created_at }}</p>
-                <p><strong>Description:</strong> {{ record.description }}</p>
-                <p><strong>Duration Time:</strong> {{ record.duration_time }}</p>
-                <p><strong>Equipments Used:</strong> {{ record.equipments_used }}</p>
-                <p><strong>Cost :</strong> {{ record.cost }}</p>
-                <!-- Add more details here as needed -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Procedure Details</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Procedure Number:</strong> {{ record.procedure_number }}</p>
+                                <p><strong>Patient:</strong> {{ record.patient.first_name }} {{ record.patient.middle_name }} {{ record.patient.last_name }}</p>
+                                <p><strong>Payment Mode:</strong> {{ record.patient.payment_form }}</p>
+                                <p><strong>Order Date:</strong> {{ record.created_at }}</p>
+                            </div>           
+                        </div>
+                    </div>
+                
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Procedure Details</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Description:</strong> {{ record.description }}</p>
+                                <p><strong>Duration Time:</strong> {{ record.duration_time }}</p>
+                                <p><strong>Equipments Used:</strong> {{ record.equipments_used }}</p>
+                                <p><strong>Cost :</strong> {{ record.cost }}</p>
+                            </div>            
+                        </div>
+                    </div>
+                
+                    <!-- Add another column if needed for more details -->
+                </div>
         </div>
     </div>
 </div>

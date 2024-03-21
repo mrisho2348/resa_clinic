@@ -150,30 +150,13 @@ class ImportCountryForm(forms.Form):
         validators=[FileExtensionValidator(allowed_extensions=['xlsx', 'xls'])],
         widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.xlsx, .xls'})
     )
+class ImportHealthRecordForm(forms.Form):
+    health_records_file = forms.FileField(
+        label='Choose an Excel file',
+        validators=[FileExtensionValidator(allowed_extensions=['xlsx', 'xls'])],
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.xlsx, .xls'})
+    )
+    
 
-class StaffsForm(forms.ModelForm):
-    class Meta:
-        model = Staffs
-        fields = '__all__'
-
-class DiseaseRecodeForm(forms.ModelForm):
-    class Meta:
-        model = DiseaseRecode
-        fields = '__all__'
-        
-class InsuranceCompanyForm(forms.ModelForm):
-    class Meta:
-        model = InsuranceCompany
-        fields = '__all__'
-        # Assign the resource to the form
-        resource_class = InsuranceCompanyResource        
-
-class RemoteCompanyForm(forms.ModelForm):
-    class Meta:
-        model = RemoteCompany
-        fields = '__all__'        
-        
-class PathologyRecordForm(forms.ModelForm):
-    class Meta:
-        model = PathodologyRecord
-        fields = '__all__'        
+#------------------------------
+#   Editing existing data

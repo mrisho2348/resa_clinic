@@ -43,32 +43,21 @@
                             {% csrf_token %}
                             <input type="hidden" name="patient_id" value="{{ patient.id }}">
                             <div class="form-group">
-                                <label for="lifestyle_behavior">life style behaviour?</label>
-                                <select class="form-control" id="lifestyle_behavior" name="lifestyle_behavior">
-                                    <option value="no">No</option>
-                                    <option value="yes">Yes</option>
-                                </select>
+                                <label for="lifestyle_behavior">Does the patient have any of the following life style behaviour?</label>
+                                
                             </div>
-                            <div id="lifestyle_behavior_form_container">                             
-                                <div class="form-group mb-5">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <label class="form-check-label" for="">Lifestyle Habit</label>                                           
-                                        </div>
-                                        <div class="col-md-6">                                      
-                                            <label class="form-check-label" for="">Yes/No</label> 
-                                        </div>
-                                    </div>
-                                </div>    
-                                    <hr>
-                                    <br>
+                            <div id="lifestyle_behavior_form_containe">                           
+                            
                                 <div class="form-group form-check">
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <label class="form-check-label" for="smoking">Smoking</label>                                           
+                                            <label class="form-check-label" for="smoking">Tobacco use</label>                                           
                                         </div>
                                         <div class="col-md-6">                                      
-                                            <input type="checkbox" class="form-check-input" id="smoking" name="smoking">
+                                            <select class="form-control" id="lifestyle_behavior" name="lifestyle_behavior">
+                                                <option value="no">No</option>
+                                                <option value="yes">Yes</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -77,22 +66,13 @@
                                 <div class="form-group form-check">
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <label class="form-check-label" for="alcohol_consumption">Alcohol Consumption</label>                                            
+                                            <label class="form-check-label" for="alcohol_consumption">Execessive alcohol use </label>                                            
                                         </div>
                                         <div class="col-md-6">                                      
-                                            <input type="checkbox" class="form-check-input" id="alcohol_consumption" name="alcohol_consumption">
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr>
-                                <br>
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <label for="weekly_exercise_frequency" class="form-check-label">Weekly Exercise Frequency</label>
-                                        </div>
-                                        <div class="col-md-6">                                      
-                                            <input type="text" class="form-control" id="weekly_exercise_frequency" name="weekly_exercise_frequency">
+                                            <select class="form-control" id="lifestyle_behavior" name="lifestyle_behavior">
+                                                <option value="no">No</option>
+                                                <option value="yes">Yes</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -101,10 +81,13 @@
                                 <div class="form-group form-check">
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <label class="form-check-label" for="healthy_diet">Healthy Diet</label>
+                                            <label for="weekly_exercise_frequency" class="form-check-label">Lack of physical activities</label>
                                         </div>
                                         <div class="col-md-6">                                      
-                                            <input type="checkbox" class="form-check-input" id="healthy_diet" name="healthy_diet">
+                                            <select class="form-control" id="lifestyle_behavior" name="lifestyle_behavior">
+                                                <option value="no">No</option>
+                                                <option value="yes">Yes</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -113,10 +96,28 @@
                                 <div class="form-group form-check">
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <label class="form-check-label" for="stress_management">Stress Management</label>
+                                            <label class="form-check-label" for="healthy_diet">Poor nutrition (junky feeding/under nutrition)</label>
                                         </div>
                                         <div class="col-md-6">                                      
-                                            <input type="checkbox" class="form-check-input" id="stress_management" name="stress_management">
+                                            <select class="form-control" id="lifestyle_behavior" name="lifestyle_behavior">
+                                                <option value="no">No</option>
+                                                <option value="yes">Yes</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <br>
+                                <div class="form-group form-check">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label class="form-check-label" for="stress_management">Excessive stress </label>
+                                        </div>
+                                        <div class="col-md-6">                                      
+                                            <select class="form-control" id="lifestyle_behavior" name="lifestyle_behavior">
+                                                <option value="no">No</option>
+                                                <option value="yes">Yes</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>  
@@ -125,10 +126,13 @@
                                 <div class="form-group form-check">
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <label class="form-check-label" for="sufficient_sleep">Sufficient Sleep</label>
+                                            <label class="form-check-label" for="sufficient_sleep">Deprived sleeping (less than 5 hours)</label>
                                         </div>
                                         <div class="col-md-6">                                      
-                                            <input type="checkbox" class="form-check-input" id="sufficient_sleep" name="sufficient_sleep">
+                                            <select class="form-control" id="lifestyle_behavior" name="lifestyle_behavior">
+                                                <option value="no">No</option>
+                                                <option value="yes">Yes</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>                         

@@ -227,6 +227,7 @@ urlpatterns = [
         path('delete_health_issue/<int:health_issue_id>/', delete.delete_health_issue, name='delete_health_issue'),
         path('delete_reagent_used/<int:reagentusage_id>/', delete.delete_reagent_used, name='delete_reagent_used'),
                 
+             
         path('insurance-records/<int:insurance_id>/delete/', delete.delete_insurance, name='delete_insurance'),        
         path('pathodology/<int:pathodology_id>/delete/', delete.delete_pathodology, name='delete_pathodology'),
         path('company/<int:company_id>/delete/', delete.delete_company, name='delete_company'),

@@ -281,6 +281,13 @@
                             <p>Country</p> <!-- Updated to a more descriptive name -->
                         </a>
                     </li>
+                    <li class="nav-item"> 
+                        {% url 'kahamahmis:health_record_list' as health_record_list_url %}
+                        <a href="{{ health_record_list_url }}" class="nav-link{% if request.path == health_record_list_url %} active {% endif %}">                     
+                            <i class="nav-icon fas fa-notes-medical"></i> 
+                            <p>Health Records</p>
+                        </a>
+                    </li>
                       
                    <li class="nav-item">  
                         {% url 'kahamahmis:equipment_list' as equipment_list_url %}                   
@@ -435,7 +442,7 @@
     
 </script>
 
-<script>
+{% comment %} <script>
     function getItemsBelowMinStock() {
         $.ajax({
             type: 'GET',
@@ -460,4 +467,4 @@
         setInterval(getItemsBelowMinStock, 60000); // Check every minute
     });
     
-</script>
+</script> {% endcomment %}

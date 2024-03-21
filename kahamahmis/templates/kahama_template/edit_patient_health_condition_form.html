@@ -43,7 +43,7 @@
                             <input type="hidden" name="patient_id" value="{{ patient.id }}">
                                 <!-- Chronic Illness Selection -->
                                 <div class="form-group">
-                                    <label for="chronic_illness">Does Patient have chronic illness?</label>
+                                    <label for="chronic_illness">Does the patient have any chronic illness?</label>
                                     <select class="form-control" id="chronic_illness" name="chronic_illness">                                 
                                         <option value="no" {% if not patient_health_records %} selected {% endif %}>No</option>
                                         <option value="yes" {% if patient_health_records %} selected {% endif %}>Yes</option>
@@ -54,8 +54,8 @@
                                 <table class="table table-bordered" id="health_condition_table">
                                     <thead>
                                         <tr>
-                                            <th>chronic illness</th>
-                                            <th>chronic illness Notes</th>
+                                            <th>Chronic illness</th>
+                                            <th>Details of chronic illness (Diagnosis, medications etc.) </th>
                                             <th></th>
                                         </tr>
                                     </thead>
@@ -80,7 +80,8 @@
                                             <td><textarea class="form-control" name="health_condition_notes_{{ health_record.id }}" cols="30" rows="2">{{ health_record.health_condition_notes }}</textarea></td>
                                             <td>
                                                 <!-- Checkbox for record deletion -->
-                                             <input type="checkbox" name="delete_record_{{ health_record.id }}">
+                                                <button type="button" class="btn btn-danger btn-sm delete-row">Delete</button>
+                                           
                                             </td>
                      
                                         </tr>
@@ -89,14 +90,14 @@
                                 </table>
                                   <!-- Add More Health Record Button -->
                             <div class="form-group">
-                                <button type="button" class="btn btn-primary btn-block" id="add_health_record" name="add_more_records">Add Health Record</button>
+                                <button type="button" class="btn btn-primary btn-block" id="add_health_record" name="add_more_records">Add another chronic illness</button>
                             </div>
                             </div>
                             
                           
                             
                             <!-- Submit Button -->
-                            <button type="submit" class="btn btn-success btn-block" name="save_and_continue_family_health">Save change Health Records</button>
+                            <button type="submit" class="btn btn-success btn-block" name="save_and_continue_family_health">Save change  chronic illness</button>
                         </form>
                     </div>
                     <div class="card-footer">

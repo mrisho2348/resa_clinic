@@ -43,7 +43,7 @@
                                     {% csrf_token %}
                                     <input type="hidden" name="patient_id" value="{{ patient.id }}">
                                     <div class="form-group">
-                                        <label for="medication_allergy">Does Patient have  any allergies to medication?</label>
+                                        <label for="medication_allergy">Does the patient have any allergies to medication?</label>
                                         <select class="form-control" id="medication_allergy" name="medication_allergy">
                                             <option value="no">No</option>
                                             <option value="yes">Yes</option>
@@ -54,8 +54,8 @@
                                         <table class="table table-bordered" id="medication_allergy_table">
                                             <thead>
                                                 <tr>
-                                                    <th>Medicine Name</th>
-                                                    <th>Reaction</th>
+                                                    <th>Drug name</th>
+                                                    <th>Provide details (if any)</th>
                                                     <th></th>
                                                 </tr>
                                             </thead>
@@ -69,11 +69,11 @@
                                         </table>
                                         <!-- Add More Medication Allergy Button -->
                                         <div class="form-group">
-                                            <button type="button" class="btn btn-primary btn-block" id="add_medication_allergy">Add Medication Allergy</button>
+                                            <button type="button" class="btn btn-primary btn-block" id="add_medication_allergy">Add another drug </button>
                                         </div>
                                     </div>
                                     <!-- Submit Button -->
-                                    <button type="submit" class="btn btn-success btn-block">Save Medication Allergies</button>
+                                    <button type="submit" class="btn btn-success btn-block">Save to proceed</button>
                                 </form>
                             </div>
                             <div class="card-footer">

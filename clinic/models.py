@@ -144,24 +144,34 @@ class PatientMedicationAllergy(models.Model):
 class PatientSurgery(models.Model):
     patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE)
     surgery_name = models.CharField(max_length=100,blank=True, null=True)
-    surgery_date = models.DateField(blank=True, null=True)   
+    surgery_date = models.TextField(blank=True, null=True)   
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
     def __str__(self):
         return f"{self.surgery_name} - {self.surgery_date}"  
+ 
+class HealthRecord(models.Model):    
+    name = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+    # Add more fields for health record information as needed
+
+    def __str__(self):
+        return f"Health Record recorded on {self.created_at}"  
     
 class PatientLifestyleBehavior(models.Model):
     patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE)
-    weekly_exercise_frequency = models.CharField(max_length=100)    
-    smoking = models.BooleanField(default=False)
-    alcohol_consumption = models.BooleanField(default=False)    
-    healthy_diet = models.BooleanField(default=False)
-    stress_management = models.BooleanField(default=False)
-    sufficient_sleep = models.BooleanField(default=False)
+    weekly_exercise_frequency =models.CharField(max_length=10, blank=True, null=True)   
+    smoking = models.CharField(max_length=10, blank=True, null=True)
+    alcohol_consumption = models.CharField(max_length=10, blank=True, null=True)    
+    healthy_diet = models.CharField(max_length=10, blank=True, null=True)
+    stress_management = models.CharField(max_length=10, blank=True, null=True)
+    sufficient_sleep = models.CharField(max_length=10, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.patient} - {self.behavior_name}"
+        return f"{self.patient}"
 
 class Service(models.Model):
     coverage = models.CharField(max_length=200, blank=True, null=True)
@@ -387,7 +397,7 @@ class RemotePatient(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"   
+        return f"{self.first_name} {self.middle_name} {self.last_name}"   
 
 
    
@@ -491,12 +501,15 @@ class PatientVital(models.Model):
 class RemotePatientVital(models.Model):
     patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE)
     visit = models.ForeignKey('RemotePatientVisits', on_delete=models.CASCADE)  
+    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True)
     recorded_at = models.DateTimeField(auto_now_add=True)
-    respiratory_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Respiratory rate in breaths per minute")
+    respiratory_rate = models.PositiveIntegerField(null=True, blank=True, help_text="Respiratory rate in breaths per minute")
     pulse_rate = models.PositiveIntegerField(null=True, blank=True, help_text="Pulse rate in beats per minute")
+    sbp = models.CharField(max_length=20, null=True, blank=True, help_text="Systolic Blood Pressure (mmHg)")
+    dbp = models.CharField(max_length=20, null=True, blank=True, help_text="Diastolic Blood Pressure (mmHg)")
     blood_pressure = models.CharField(max_length=20, null=True, blank=True, help_text="Blood pressure measurement")
-    spo2 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="SPO2 measurement in percentage")
-    temperature = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Temperature measurement in Celsius")
+    spo2 = models.PositiveIntegerField(null=True, blank=True, help_text="SPO2 measurement in percentage")
+    temperature = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Temperature measurement in Celsius",default=37.5)
     gcs = models.PositiveIntegerField(null=True, blank=True, help_text="Glasgow Coma Scale measurement")
     avpu = models.CharField(max_length=20, null=True, blank=True, help_text="AVPU scale measurement")
     unique_identifier = models.CharField(max_length=20, unique=True, editable=False)
@@ -720,7 +733,7 @@ class ImagingRecord(models.Model):
     objects = models.Manager()
 
     def __str__(self):
-        return f"Imaging Record for {self.patient} - {self.imaging_type} ({self.imaging_date})"
+        return f"Imaging Record for {self.patient} - {self.imaging} ({self.data_recorder})"
     
 class ConsultationOrder(models.Model):
     patient = models.ForeignKey('Patients', on_delete=models.CASCADE)
@@ -808,6 +821,7 @@ class AmbulanceOrder(models.Model):
     service = models.CharField(max_length=100)
     from_location = models.CharField(max_length=100)
     to_location = models.CharField(max_length=100)
+    order_date = models.DateField(null=True, blank=True)  
     age = models.CharField(max_length=50)
     condition = models.CharField(max_length=100)
     intubation = models.CharField(max_length=100)
@@ -818,7 +832,10 @@ class AmbulanceOrder(models.Model):
     payment_mode = models.CharField(max_length=100)
     duration_hours = models.IntegerField()
     duration_days = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     ambulance_number = models.CharField(max_length=20, unique=True)  # Unique ambulance number
+    objects = models.Manager()
     
     def __str__(self):
         return f"Ambulance Order for {self.patient} - Service: {self.service}"
@@ -834,27 +851,22 @@ class AmbulanceOrder(models.Model):
             self.ambulance_number = f"AMB-{new_number:07}"  # Format the ambulance number
         super().save(*args, **kwargs)
            
-class Vehicle(models.Model):
-    VEHICLE_TYPES = [
-        ('Ambulance', 'Ambulance'),
-        ('Car', 'Car'),
-        ('Van', 'Van'),
-        ('Truck', 'Truck'),
-        ('Motorcycle', 'Motorcycle'),
-        # Add more vehicle types as needed
-    ]
-
-    vehicle_type = models.CharField(max_length=100, choices=VEHICLE_TYPES)
-    activities = models.CharField(max_length=255)
+class AmbulanceVehicleOrder(models.Model):
+    vehicle_type = models.CharField(max_length=100,blank=True, null=True)
+    activities = models.CharField(max_length=255,blank=True, null=True)
     cost = models.DecimalField(max_digits=10, decimal_places=2)
-    ambulance_type = models.CharField(max_length=100)
-    organization = models.CharField(max_length=255)
-    contact_person = models.CharField(max_length=100)
-    contact_phone = models.CharField(max_length=20)
-    location = models.CharField(max_length=100)
+    ambulance_number = models.CharField(max_length=100,blank=True, null=True)
+    organization = models.CharField(max_length=255,blank=True, null=True)
+    contact_person = models.CharField(max_length=100,blank=True, null=True)
+    contact_phone = models.CharField(max_length=20,blank=True, null=True)
+    location = models.CharField(max_length=100,blank=True, null=True)
     duration = models.IntegerField()
     days = models.IntegerField()
-    payment_mode = models.CharField(max_length=100)
+    payment_mode = models.CharField(max_length=100,blank=True, null=True)
+    order_date = models.DateField(null=True, blank=True) 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True) 
+    objects = models.Manager()
 
     def __str__(self):
         return f"{self.vehicle_type} - {self.organization}"
@@ -961,7 +973,9 @@ class Order(models.Model):
     patient = models.ForeignKey('Patients', on_delete=models.CASCADE)
     visit = models.ForeignKey(PatientVisits, on_delete=models.CASCADE,blank=True, null=True)
     added_by = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True)
+    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True,related_name='doctor')
     cost = models.DecimalField(max_digits=10, decimal_places=2)
+    is_read = models.BooleanField(default=False)
     status = models.CharField(max_length=100, choices=ORDER_STATUS, default='Unpaid')
     order_number = models.CharField(max_length=12, unique=True)
 
@@ -1287,6 +1301,16 @@ class MedicineInventory(models.Model):
             )
     
 class Prescription(models.Model):
+    VERIFICATION_CHOICES = (
+        ('verified', 'Verified'),
+        ('Not Verified', 'Not Verified'),
+    )
+
+    ISSUE_CHOICES = (
+        ('issued', 'Issued'),
+        ('Not Issued', 'Not Issued'),
+    )
+
     patient = models.ForeignKey('Patients', on_delete=models.CASCADE)
     entered_by = models.ForeignKey('Staffs', on_delete=models.CASCADE,blank=True, null=True)
     medicine = models.ForeignKey('Medicine', on_delete=models.CASCADE)  # Link with Medicine model
@@ -1296,12 +1320,26 @@ class Prescription(models.Model):
     duration = models.CharField(max_length=50)
     quantity_used = models.PositiveIntegerField()   
     total_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    verified = models.CharField(max_length=20, choices=VERIFICATION_CHOICES, default='Not Verified')
+    issued = models.CharField(max_length=20, choices=ISSUE_CHOICES, default='Not Issued')
+    status = models.CharField(max_length=20, choices=[('Paid', 'Paid'), ('Unpaid', 'Unpaid')], default='Unpaid')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)    
     def __str__(self):
         return f"{self.patient.first_name} - {self.medicine.name}"  # Accessing drug's name   
     
+    
 class RemotePrescription(models.Model):
+    VERIFICATION_CHOICES = (
+        ('verified', 'Verified'),
+        ('not_verified', 'Not Verified'),
+    )
+
+    ISSUE_CHOICES = (
+        ('issued', 'Issued'),
+        ('not_issued', 'Not Issued'),
+    )
+
     patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE)
     medicine = models.ForeignKey('Medicine', on_delete=models.CASCADE)  # Link with Medicine model
     visit = models.ForeignKey(RemotePatientVisits, on_delete=models.CASCADE)  # Link with Medicine model
@@ -1310,6 +1348,10 @@ class RemotePrescription(models.Model):
     frequency = models.CharField(max_length=50)
     duration = models.CharField(max_length=50)
     quantity_used = models.PositiveIntegerField()   
+    verified = models.CharField(max_length=20, choices=VERIFICATION_CHOICES, default='not_verified')
+    issued = models.CharField(max_length=20, choices=ISSUE_CHOICES, default='not_issued')
+    status = models.CharField(max_length=20, choices=[('paid', 'Paid'), ('unpaid', 'Unpaid')], default='unpaid')
+
     total_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

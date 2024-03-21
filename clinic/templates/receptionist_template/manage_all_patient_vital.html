@@ -27,8 +27,8 @@ Vital Information
                                 <tr>
                                     <th>VTN</th>
                                     <th>P/Name</th>
-                                    <th>Recorded Date</th>
-                                    <th>Recorded Time</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
                                     <th>RR (bpm)</th>
                                     <th>PR (bpm)</th>
                                     <th>BR</th>
@@ -43,9 +43,9 @@ Vital Information
                                 {% for vital in patient_vitals %}
                                     <tr>
                                         <td>{{ vital.unique_identifier }}</td>
-                                        <td>{{ vital.patient.fullname }}</td>
-                                        <td>{{ vital.recorded_at|date:"Y-m-d" }}</td>
-                                        <td>{{ vital.recorded_at|time:"H:i:s" }}</td>
+                                        <td class="text-uppercase">{{ vital.patient }}</td>
+                                        <td>{{ vital.updated_at|date:"Y-m-d" }}</td>
+                                        <td>{{ vital.updated_at|time:"H:i:s" }}</td>
                                         <td>{{ vital.respiratory_rate }}</td>
                                         <td>{{ vital.pulse_rate }}</td>
                                         <td>{{ vital.blood_pressure }}</td>
@@ -114,7 +114,7 @@ Vital Information
                                         <div class="modal-dialog">
                                           <div class="modal-content">
                                             <div class="modal-header">
-                                              <h5 class="modal-title" id="editPatientVitalModalLabel{{ vital.id }}">Edit Patient Vital</h5>
+                                              <h5 class="modal-title" id="editPatientVitalModalLabel{{ vital.id }}">Edit Patient Vital for {{ vital.patient }}</h5>
                                               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                 <span aria-hidden="true">&times;</span>
                                               </button>                       </div>
@@ -125,19 +125,8 @@ Vital Information
                                             
                                                 <div class="row">
                                                   <!-- Column 1 -->
-                                                  <div class="col-md-4">
-                                                    
-                                                    <div class="mb-3">
-                                                        <div class="form-group">
-                                                            <label for="patient">Patient:</label>
-                                                            <select class="form-control select2bs4" style="width: 100%;" id="patient" name="patient_id" required>
-                                                              <option value="">Select Patient</option>
-                                                              {% for patient in patients %}
-                                                                <option value="{{ patient.id }}" {% if patient.id == vital.patient.id  %} selected{% endif %}>{{ patient.fullname }}</option>
-                                                              {% endfor %}
-                                                            </select>
-                                                          </div>
-                                                    </div>
+                                                  <div class="col-md-4">                                                    
+                                              
                                                     <div class="mb-3">
                                                       <div class="form-group">
                                                         <label for="edit_respiratoryRate" class="form-label">Respiratory Rate (bpm)</label>
@@ -166,6 +155,8 @@ Vital Information
                                                     <div class="form-group">
                                                         <label for="edit_bloodPressure" class="form-label">Blood Pressure</label>
                                                         <input type="text" class="form-control" id="edit_bloodPressure" name="blood_pressure" value="{{ vital.blood_pressure }}">
+                                                        <input type="hidden" class="form-control" id="patient_id" name="patient_id" value="{{ vital.patient.id }}">
+                                                        <input type="hidden" class="form-control" id="visit_id" name="visit_id" value="{{ vital.visit.id }}">
                                                     </div>
                                                     </div>
                                                     <div class="mb-3">
@@ -234,7 +225,7 @@ Vital Information
                                                         e.preventDefault();
                                                         $.ajax({
                                                             type: 'POST',
-                                                            url: '{% url "save_patient_vital" %}',  // Replace with your URL
+                                                            url: '{% url "receptionist_save_patient_vital" %}',  // Replace with your URL
                                                             data: $('#editPatientVitalForm{{ vital.id }}').serialize(),
                                                             success: function (data) {
                                                                 if (data.status === 'success') {

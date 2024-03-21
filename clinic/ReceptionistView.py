@@ -2,9 +2,10 @@ from datetime import  datetime
 from django.urls import reverse
 from django.utils import timezone
 import logging
+from django.db.models import F
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render
-from django.http import HttpResponseBadRequest, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
@@ -13,7 +14,7 @@ from django.contrib import messages
 from clinic.models import Consultation,  Medicine,Notification,PathodologyRecord, Patients, Procedure, Staffs
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
-from .models import AmbulanceOrder,ConsultationNotes, ConsultationOrder, Country, Diagnosis, Diagnosis, ImagingRecord,InventoryItem, LabTest, LaboratoryOrder, Order, PatientVisits, PatientVital, Prescription, Referral,Service, Vehicle
+from .models import AmbulanceOrder,ConsultationNotes, ConsultationOrder, Country, Diagnosis, Diagnosis, ImagingRecord,InventoryItem, LabTest, LaboratoryOrder, Order, PatientVisits, PatientVital, Prescription, Referral,Service, AmbulanceVehicleOrder
 from django.db.models import Sum
 from django.db.models import Q
 # Create your views here.
@@ -62,7 +63,7 @@ def generate_invoice_bill(request,  order_id):
 
 @csrf_exempt
 @require_POST
-def update_payment_status(request):
+def update_orderpayment_status(request):
     order_id = request.POST.get('order_id')
     payment_status = request.POST.get('payment_status')
 
@@ -602,7 +603,7 @@ def save_laboratory(request, patient_id, visit_id):
         except Procedure.DoesNotExist:
             procedures = None
 
-        doctors = Staffs.objects.filter(role='doctor')
+        doctors = Staffs.objects.filter(role='labTechnician')
         total_price = sum(prescription.total_price for prescription in prescriptions)
 
         patient = Patients.objects.get(id=patient_id)
@@ -894,22 +895,81 @@ def ambulance_order_view(request):
     ambulance_orders = AmbulanceOrder.objects.all().order_by('-id')
     return render(request, template_name, {'ambulance_orders': ambulance_orders})
 
+def save_ambulance_order(request, patient_id, visit_id, ambulance_id=None): 
+    # Get the patient and visit objects based on IDs
+    patient = get_object_or_404(Patients, id=patient_id)
+    visit = get_object_or_404(PatientVisits, id=visit_id)
+    range_31 = range(1,31)
+    context = {
+        'patient': patient,
+        'visit': visit,
+        'days': range_31
+    }
 
+    # Check if ambulance_id is provided, indicating an edit operation
+    if ambulance_id:
+        ambulance_order = get_object_or_404(AmbulanceOrder, id=ambulance_id)
+        context['ambulance_order'] = ambulance_order
+
+    if request.method == 'POST':
+        try:
+            # If ambulance_id is provided, it's an edit operation
+            if ambulance_id:
+                ambulance_order = get_object_or_404(AmbulanceOrder, id=ambulance_id)
+            else:
+                # Otherwise, it's a new record
+                ambulance_order = AmbulanceOrder()
+
+            # Set the data recorder as the current user
+            data_recorder = request.user.staff
+            
+            # Assign values to the AmbulanceOrder fields
+            ambulance_order.patient = patient
+            ambulance_order.visit = visit
+            ambulance_order.data_recorder = data_recorder
+            ambulance_order.service = request.POST.get('service')
+            ambulance_order.from_location = request.POST.get('from_location')
+            ambulance_order.to_location = request.POST.get('to_location')
+            ambulance_order.age = request.POST.get('age')
+            ambulance_order.condition = request.POST.get('condition')
+            ambulance_order.intubation = request.POST.get('intubation')
+            ambulance_order.pregnancy = request.POST.get('pregnancy')
+            ambulance_order.oxygen = request.POST.get('oxygen')
+            ambulance_order.ambulance_type = request.POST.get('ambulance_type')
+            ambulance_order.cost = request.POST.get('cost')
+            ambulance_order.payment_mode = request.POST.get('payment_mode')
+            ambulance_order.duration_hours = request.POST.get('duration_hours')
+            ambulance_order.duration_days = request.POST.get('duration_days')
+
+            # Save the AmbulanceOrder object
+            ambulance_order.save()
+
+            # Define success message
+            if ambulance_id:
+                message = 'Ambulance order updated successfully'
+            else:
+                message = 'Ambulance order saved successfully'
+            # Redirect to another URL upon successful data saving
+            return redirect(reverse('receptionist_ambulance_order_view'))        
+        except Exception as e:
+            # Render the template with error message in case of exception
+            messages.error(request, f'Error adding/editing ambulance record: {str(e)}')
+            return render(request, 'receptionist_template/add_ambulance_order.html', context)
+    else:
+        # Render the template with patient and visit data for GET request
+        return render(request, 'receptionist_template/add_ambulance_order.html', context)
+    
+    
 def ambulance_order_detail(request, order_id):
     # Retrieve the ambulance order object
     ambulance_order = get_object_or_404(AmbulanceOrder, id=order_id)    
     # Pass the ambulance order object to the template
     return render(request, 'receptionist_template/ambulance_order_detail.html', {'ambulance_order': ambulance_order})
 
-
 def vehicle_ambulance_view(request):
-    vehicles = Vehicle.objects.all().order_by('-id')  # Retrieve all Vehicle ambulance records, newest first
+    orders = AmbulanceVehicleOrder.objects.all().order_by('-id')  # Retrieve all AmbulanceVehicleOrder ambulance records, newest first
     template_name = 'receptionist_template/vehicle_ambulance.html'
-    return render(request, template_name, {'vehicles': vehicles})
-
-def vehicle_detail(request, vehicle_id):
-    vehicle = get_object_or_404(Vehicle, pk=vehicle_id)
-    return render(request, 'receptionist_template/vehicle_detail.html', {'vehicle': vehicle})
+    return render(request, template_name, {'orders': orders})
 
 def patient_procedure_history_view(request, mrn):
     patient = get_object_or_404(Patients, mrn=mrn)
@@ -1390,6 +1450,7 @@ def add_patient_visit(request):
                 'Procedure': reverse('receptionist_save_remoteprocedure', args=[patient_id, visit.id]),
                 'Imaging': reverse('receptionist_save_observation', args=[patient_id, visit.id]),
                 'Consultation': reverse('receptionist_patient_consultation_detail', args=[patient_id, visit.id]),
+                'Ambulance': reverse('save_ambulance_order', args=[patient_id, visit.id]),
             }
             # If the primary service is not found in the redirect_url dictionary, default to receptionist_patient_visit_history_view
             return redirect(redirect_url.get(primary_service, reverse('receptionist_patient_visit_history_view', args=[patient_id])))
@@ -1445,25 +1506,31 @@ def patient_visit_history_view(request, patient_id):
 def prescription_list(request):
     # Retrieve all patients
     patients = Patients.objects.all()
-
     # Retrieve current date
-    current_date = timezone.now().date()
-    
+    current_date = timezone.now().date()    
     # Retrieve all prescriptions with related patient and visit
     prescriptions = Prescription.objects.select_related('patient', 'visit')
-
     # Group prescriptions by visit and calculate total price for each visit
-    visit_total_prices = prescriptions.values('visit__vst', 'visit__patient__first_name','visit__created_at', 'visit__patient__id', 'visit__patient__middle_name', 'visit__patient__last_name').annotate(total_price=Sum('total_price'))
-    
+    visit_total_prices = prescriptions.values(
+    'visit__vst', 
+    'visit__patient__first_name',
+    'visit__created_at', 
+    'visit__patient__id', 
+    'visit__patient__middle_name', 
+    'visit__patient__last_name'
+).annotate(
+    total_price=Sum('total_price'),
+    verified=F('verified'),  # Access verified field directly from Prescription
+    issued=F('issued'),      # Access issued field directly from Prescription
+    status=F('status'),      # Access status field directly from Prescription
+)
     # Retrieve medicines with inventory levels not equal to zero or greater than zero, and not expired
     medicines = Medicine.objects.filter(
         medicineinventory__remain_quantity__gt=0,  # Inventory level greater than zero
         expiration_date__gt=current_date  # Not expired
-    ).distinct() 
-    
+    ).distinct()     
     # Calculate total price of all prescriptions
-    total_price = sum(prescription.total_price for prescription in prescriptions) 
-    
+    total_price = sum(prescription.total_price for prescription in prescriptions)     
     return render(request, 'receptionist_template/manage_prescription_list.html', { 
         'medicines': medicines,
         'patients': patients,
@@ -1475,9 +1542,34 @@ def prescription_list(request):
 @login_required
 def prescription_detail(request, visit_number, patient_id):
     patient = Patients.objects.get(id=patient_id)
-    prescriptions = Prescription.objects.filter(visit__vst=visit_number, visit__patient__id=patient_id)
-    context = {'patient': patient, 'prescriptions': prescriptions}
+    prescriptions = Prescription.objects.filter(visit__vst=visit_number, patient_id=patient_id)
+    
+    # Get the prescriber information for the first prescription (assuming all prescriptions have the same prescriber)
+    prescriber = None
+    if prescriptions.exists():
+        prescriber = prescriptions.first().entered_by
+    
+    # Retrieve verification status, issued status, and payment status
+    verification_status = None
+    issued_status = None
+    payment_status = None
+    if prescriptions.exists():
+        verification_status = prescriptions.first().verified
+        issued_status = prescriptions.first().issued
+        payment_status = prescriptions.first().status
+    
+    context = {
+        'patient': patient,
+        'prescriptions': prescriptions,
+        'visit_number': visit_number,
+        'prescriber': prescriber,
+        'verification_status': verification_status,
+        'issued_status': issued_status,
+        'payment_status': payment_status,
+    }
     return render(request, "receptionist_template/prescription_detail.html", context)
+
+
     
 def patient_vital_list(request, patient_id):
     # Retrieve the patient object
@@ -1523,8 +1615,219 @@ def patient_vital_all_list(request):
     return render(request, 'receptionist_template/manage_all_patient_vital.html', context)    
 
 
-    
+# View to verify prescriptions
+# View to verify prescriptions
+@csrf_exempt
+def verify_prescriptions(request):
+    if request.method == 'POST':
+        visit_number = request.POST.get('visit_number')
+        # Perform logic to mark prescriptions as verified for the given visit_number
+        # Example:
+        try:
+            prescriptions = Prescription.objects.filter(visit__vst=visit_number)
+            for prescription in prescriptions:
+                prescription.verified = 'verified'
+                prescription.save()
+            return JsonResponse({'message': 'Prescriptions verified successfully.'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Invalid request.'}, status=400)
 
+# View to issue prescriptions
+@csrf_exempt
+def issue_prescriptions(request):
+    if request.method == 'POST':
+        visit_number = request.POST.get('visit_number')
+        # Perform logic to mark prescriptions as issued for the given visit_number
+        # Example:
+        try:
+            prescriptions = Prescription.objects.filter(visit__vst=visit_number)
+            for prescription in prescriptions:
+                prescription.issued = 'issued'
+                prescription.save()
+            return JsonResponse({'message': 'Prescriptions issued successfully.'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Invalid request.'}, status=400)
+
+# View to update payment status
+@csrf_exempt
+def update_payment_status(request):
+    if request.method == 'POST':
+        visit_number = request.POST.get('visit_number')
+        # Perform logic to update payment status for the given visit_number
+        # Example:
+        try:
+            prescriptions = Prescription.objects.filter(visit__vst=visit_number)
+            for prescription in prescriptions:
+                prescription.status = 'Paid'
+                prescription.save()
+            return JsonResponse({'message': 'Payment status updated successfully.'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Invalid request.'}, status=400)
+
+    
+# View to unverify prescriptions
+@csrf_exempt
+def unverify_prescriptions(request):
+    if request.method == 'POST':
+        visit_number = request.POST.get('visit_number')
+        # Perform logic to mark prescriptions as unverified for the given visit_number
+        # Example:
+        try:
+            prescriptions = Prescription.objects.filter(visit__vst=visit_number)
+            for prescription in prescriptions:
+                prescription.verified = 'Not Verified'
+                prescription.status = 'Unpaid'
+                prescription.issued = 'Not Issued'
+                prescription.save()
+            return JsonResponse({'message': 'Prescriptions unverified successfully.'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Invalid request.'}, status=400)
+
+# View to unissue prescriptions
+@csrf_exempt
+def unissue_prescriptions(request):
+    if request.method == 'POST':
+        visit_number = request.POST.get('visit_number')
+        # Perform logic to mark prescriptions as not issued for the given visit_number
+        # Example:
+        try:
+            prescriptions = Prescription.objects.filter(visit__vst=visit_number)
+            for prescription in prescriptions:
+                prescription.issued = 'Not Issued'
+                prescription.status = 'Unpaid'
+                prescription.save()
+            return JsonResponse({'message': 'Prescriptions unissued successfully.'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Invalid request.'}, status=400)
+
+# View to unpay prescriptions
+@csrf_exempt
+def unpay_prescriptions(request):
+    if request.method == 'POST':
+        visit_number = request.POST.get('visit_number')
+        # Perform logic to mark prescriptions as unpaid for the given visit_number
+        # Example:
+        try:
+            prescriptions = Prescription.objects.filter(visit__vst=visit_number)
+            for prescription in prescriptions:
+                prescription.status = 'Unpaid'
+                prescription.save()
+            return JsonResponse({'message': 'Prescriptions unpaid successfully.'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Invalid request.'}, status=400)
+    
+    
+def ambulance_order_create_or_update(request, order_id=None):
+    try:
+        duration_hours = range(1, 25)    
+        ambulance_number = range(1, 10)    
+        days = range(1, 121)    
+        if request.method == 'POST':
+            # Extract data from the request
+            vehicle_type = request.POST.get('ambulance_type')
+            activities = request.POST.get('activities')
+            cost = request.POST.get('cost')
+            ambulance_number = request.POST.get('ambulance_number')
+            organization = request.POST.get('organization')
+            contact_person = request.POST.get('contact_person')
+            contact_phone = request.POST.get('contact_phone')
+            location = request.POST.get('location')
+            duration = request.POST.get('duration_hours')
+            days = request.POST.get('duration_days')
+            payment_mode = request.POST.get('payment_mode')
+            order_date = request.POST.get('order_date')
+            
+            # Create or update AmbulanceVehicleOrder instance based on whether order_id is provided
+            if order_id:
+                order = AmbulanceVehicleOrder.objects.get(pk=order_id)
+            else:
+                order = AmbulanceVehicleOrder()
+
+            # Assign values to the instance
+            order.vehicle_type = vehicle_type
+            order.activities = activities
+            order.cost = cost
+            order.ambulance_number = ambulance_number
+            order.organization = organization
+            order.contact_person = contact_person
+            order.contact_phone = contact_phone
+            order.location = location
+            order.duration = duration
+            order.days = days
+            order.payment_mode = payment_mode
+            order.order_date = order_date
+            order.save()
+
+            # Redirect to a success URL
+            return redirect('receptionist_vehicle_ambulance_view')  # Replace 'success_url' with your actual success URL
+        else:
+            # If it's a GET request, render the form
+            context = {
+                'duration_hours':duration_hours,
+                'days':days,
+                'ambulance_numbers':ambulance_number,
+            }
+            if order_id:
+                order = AmbulanceVehicleOrder.objects.get(pk=order_id)
+                context['order'] = order
+            return render(request, 'receptionist_template/add_ambulance_carorder.html', context)
+    except Exception as e:
+        messages.error(request, f'Error adding/editing  record: {str(e)}')
+        return redirect('ambulance_order_create_or_update')  
+    
+def vehicle_detail(request, order_id):
+    # Retrieve the ambulance vehicle order object using the provided order_id
+    order = get_object_or_404(AmbulanceVehicleOrder, pk=order_id)    
+    # Render the vehicle detail template with the order object
+    return render(request, 'receptionist_template/vehicle_detail.html', {'order': order}) 
+
+
+@csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
+def delete_ambulancecardorder(request):
+    if request.method == 'POST':
+        try:
+            order_id = request.POST.get('order_id')
+
+            # Delete procedure record
+            record = get_object_or_404(AmbulanceVehicleOrder, pk=order_id)
+            record.delete()
+
+            return JsonResponse({'success': True, 'message': f' record for {record} deleted successfully.'})
+        except AmbulanceVehicleOrder.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid record ID.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+@csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
+def delete_ambulancedorder(request):
+    if request.method == 'POST':
+        try:
+            order_id = request.POST.get('order_id')
+            # Delete procedure record
+            record = get_object_or_404(AmbulanceOrder, pk=order_id)
+            record.delete()
+
+            return JsonResponse({'success': True, 'message': f' record for {record} deleted successfully.'})
+        except AmbulanceVehicleOrder.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid record ID.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+   
 
 
 

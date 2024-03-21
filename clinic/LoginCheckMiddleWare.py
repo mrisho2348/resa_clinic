@@ -51,7 +51,9 @@ class LoginCheckMiddleWare(MiddlewareMixin):
                             "kahamahmis.editView",
                             "kahamahmis.delete",
                             "django.views.static",
-                            "kahamahmis.views"
+                            "kahamahmis.views",
+                            "kahamahmis.kahamaImports",  
+                            "kahamahmis.kahamaViews",
                         ]
                     else:
                         return HttpResponseRedirect(reverse("home"))       
@@ -67,7 +69,9 @@ class LoginCheckMiddleWare(MiddlewareMixin):
                             "kahamahmis.editView",
                             "kahamahmis.delete",
                             "django.views.static",
-                            "kahamahmis.views"
+                            "kahamahmis.views",
+                            "kahamahmis.kahamaImports",  
+                            "kahamahmis.kahamaViews",
                         ]
                         if modulename in allowed_views:
                             return None
