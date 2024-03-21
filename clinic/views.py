@@ -1976,7 +1976,7 @@ def out_of_stock_medicines_view(request):
     
     except Exception as e:
         # Handle any errors and return an error response
-        return render(request, 'error.html', {'error_message': str(e)}) 
+        return render(request, '404.html', {'error_message': str(e)}) 
     
 def out_of_stock_reagent_view(request):
     try:
@@ -1988,7 +1988,7 @@ def out_of_stock_reagent_view(request):
     
     except Exception as e:
         # Handle any errors and return an error response
-        return render(request, 'error.html', {'error_message': str(e)}) 
+        return render(request, '404.html', {'error_message': str(e)}) 
     
     
 def in_stock_medicines_view(request):

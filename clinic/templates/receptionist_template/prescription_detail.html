@@ -110,27 +110,8 @@ Prescription List
 <div class="row mt-3">
     <div class="col-md-12">
         <div class="">
-           <div class="row">
-            <div class="col-md-4">
-                <!-- Verify Button -->
-                {% if verification_status %}
-                    {% if verification_status == 'verified' %}
-                        <button class="btn btn-danger btn-block" onclick="toggleVerification('{{ visit_number }}', 'unverify')">Unverify</button>
-                    {% else %}
-                        <button class="btn btn-success btn-block" onclick="toggleVerification('{{ visit_number }}', 'verify')">Verify</button>
-                    {% endif %}
-                {% endif %}
-            </div>
-            <div class="col-md-4">
-                {% if issued_status  and verification_status == 'verified' %}
-                    {% if issued_status == 'issued' %}
-                        <button class="btn btn-danger btn-block" onclick="toggleIssued('{{ visit_number }}', 'unissue')">Unissue</button>
-                    {% else %}
-                        <button class="btn btn-primary btn-block" onclick="toggleIssued('{{ visit_number }}', 'issue')">Issue</button>
-                    {% endif %}
-                {% endif %}
-            </div>
-            <div class="col-md-4">                
+           <div class="row">        
+        <div class="col-md-4">                
                 {% if payment_status and verification_status == 'verified' and issued_status == 'issued' %}
                     {% if payment_status == 'Paid' %}
                         <button class="btn btn-danger btn-block" onclick="togglePayment('{{ visit_number }}', 'unpay')">Unpay</button>
@@ -148,52 +129,6 @@ Prescription List
 </div>
 
 <script>
-
-// Function to toggle verification status
-function toggleVerification(visitNumber, action) {
-    var url = action === 'verify' ? '{% url "receptionist_verify_prescriptions" %}' : '{% url "receptionist_unverify_prescriptions" %}';
-    
-    // Perform AJAX request to toggle verification status
-    $.ajax({
-        url: url,
-        type: 'POST',
-        data: { visit_number: visitNumber },
-        success: function(response) {
-            // Handle success response
-            alert('Prescriptions verification status updated successfully.');
-            // Optionally, reload the page or update the UI
-            location.reload(); // Reload the page to reflect changes
-        },
-        error: function(xhr, status, error) {
-            // Handle error response
-            console.error('Error toggling verification status:', error);
-            alert('Error toggling verification status. Please try again.');
-        }
-    });
-}
-
-// Function to toggle issue status
-function toggleIssued(visitNumber, action) {
-    var url = action === 'issue' ? '{% url "receptionist_issue_prescriptions" %}' : '{% url "receptionist_unissue_prescriptions" %}';
-    
-    // Perform AJAX request to toggle issue status
-    $.ajax({
-        url: url,
-        type: 'POST',
-        data: { visit_number: visitNumber },
-        success: function(response) {
-            // Handle success response
-            alert('Prescriptions issue status updated successfully.');
-            // Optionally, reload the page or update the UI
-            location.reload(); // Reload the page to reflect changes
-        },
-        error: function(xhr, status, error) {
-            // Handle error response
-            console.error('Error toggling issue status:', error);
-            alert('Error toggling issue status. Please try again.');
-        }
-    });
-}
 
 // Function to toggle payment status
 function togglePayment(visitNumber, action) {

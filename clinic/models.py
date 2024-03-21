@@ -748,7 +748,7 @@ class ConsultationOrder(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
     def __str__(self):
-        return f"Consultation Order for {self.patient} - {self.imaging_type} ({self.imaging_date})"
+        return f"Consultation Order for {self.patient} - {self.data_recorder} ({self.order_date})"
 
 class Procedure(models.Model):
     patient = models.ForeignKey(Patients, on_delete=models.CASCADE)

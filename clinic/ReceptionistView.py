@@ -184,7 +184,7 @@ def add_remoteprescription(request):
         frequencies = request.POST.getlist('frequency[]')
         durations = request.POST.getlist('duration[]')
         quantities = request.POST.getlist('quantity[]')
-
+        entered_by = request.user.staff
         # Retrieve the corresponding patient and visit
         patient = Patients.objects.get(id=patient_id)
         visit = PatientVisits.objects.get(id=visit_id)
@@ -216,6 +216,7 @@ def add_remoteprescription(request):
             medicine = Medicine.objects.get(id=medicines[i])
             prescription = Prescription()
             prescription.patient = patient
+            prescription.entered_by = entered_by
             prescription.medicine = medicine
             prescription.visit = visit
             prescription.dose = doses[i]

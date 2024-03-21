@@ -54,7 +54,7 @@ medicine inventory
     }
     
 </style>
-<div class="">
+<div class="table-responsive">
     <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
         <thead>
             <tr>
@@ -96,7 +96,7 @@ medicine inventory
             </div>
             <div class="modal-body">
                 <!-- Bootstrap-styled form -->
-                <form method="post" action="{% url 'edit_inventory' inventory.id %}">
+                <form method="post" action="{% url 'clinic:edit_inventory' inventory.id %}">
                     {% csrf_token %}
 
                     <div class="form-group">
@@ -153,7 +153,7 @@ medicine inventory
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
 
                 <!-- Form for deletion -->
-                <form method="post" action="{% url 'delete_medicine_inventory' inventory.id %}">
+                <form method="post" action="{% url 'clinic:delete_medicine_inventory' inventory.id %}">
                     {% csrf_token %}
                     <input type="hidden" name="_method" value="DELETE">
                     <button type="submit" class="btn btn-danger">Delete</button>
@@ -188,7 +188,7 @@ medicine inventory
             </div>
             <div class="modal-body">
                 <!-- Bootstrap-styled form converted to a table -->
-                <form id="inventoryForm" method="post" action="{% url 'add_inventory' %}">
+                <form id="inventoryForm" method="post" action="{% url 'clinic:add_inventory' %}">
                     {% csrf_token %}
                     <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" >
                         <thead>
