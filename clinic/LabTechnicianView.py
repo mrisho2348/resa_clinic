@@ -463,10 +463,6 @@ def generate_invoice_bill(request,  order_id):
     }
     return render(request, 'labtechnician_template/invoice_bill.html', context)
 
-
-
-
-
 def generate_billing(request, procedure_id):
     procedure = get_object_or_404(Procedure, id=procedure_id)
 
