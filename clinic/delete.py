@@ -20,7 +20,7 @@ def delete_staff(request, staff_id):
         staff.delete()
         # Redirect to a success page or a list view
         messages.success(request, 'staff deleted successfully.')
-        return redirect('manage_staff')  # Replace 'staff_list' with your actual list view name
+        return redirect('clinic:manage_staff')  # Replace 'staff_list' with your actual list view name
 
     return render(request, 'delete/delete_staff_confirm.html', {'staff': staff})
 
@@ -33,7 +33,7 @@ def delete_patient(request, patient_id):
         patient.delete()
         # Redirect to a success page or a list view
         messages.success(request, 'patient deleted successfully.')
-        return redirect('manage_patient')  # Replace 'manage_patient' with your actual list view name
+        return redirect('clinic:manage_patient')  # Replace 'manage_patient' with your actual list view name
 
     return render(request, 'delete/delete_patient_confirm.html', {'patient': patient})
 
@@ -76,7 +76,7 @@ def delete_insurance(request, insurance_id):
             insurance.delete()
 
             messages.success(request, 'Insurance details deleted successfully!')
-            return redirect('manage_insurance')  # Replace 'your_redirect_url' with the appropriate URL name
+            return redirect('clinic:manage_insurance')  # Replace 'your_redirect_url' with the appropriate URL name
 
         except Exception as e:
             messages.error(request, f'An error occurred: {e}')
@@ -130,7 +130,7 @@ def delete_disease_record(request, disease_id):
             # Delete the DiseaseRecode object
             record.delete()
             messages.success(request, 'Disease record deleted successfully!')
-            return redirect('manage_disease')  # Replace with the appropriate URL name
+            return redirect('clinic:manage_disease')  # Replace with the appropriate URL name
 
         except Exception as e:
             messages.error(request, f'An error occurred: {e}')
@@ -146,7 +146,7 @@ def delete_company(request, company_id):
             company.delete()
 
             messages.success(request, 'Company deleted successfully!')
-            return redirect('manage_company')  # Replace 'your_redirect_url' with the appropriate URL name
+            return redirect('clinic:manage_company')  # Replace 'your_redirect_url' with the appropriate URL name
         except Exception as e:
             messages.error(request, f'An error occurred: {e}')
 
@@ -162,7 +162,7 @@ def delete_pathodology(request, pathodology_id):
             pathodology.delete()
 
             messages.success(request, 'Pathodology record deleted successfully!')
-            return redirect('manage_pathodology')  # Replace 'your_redirect_url' with the appropriate URL name
+            return redirect('clinic:manage_pathodology')  # Replace 'your_redirect_url' with the appropriate URL name
 
         except Exception as e:
             messages.error(request, f'An error occurred: {e}')
@@ -180,7 +180,7 @@ def delete_medicine_inventory(request, inventory_id):
     inventory.delete()
 
     # Redirect to the medicine inventory page
-    return redirect('medicine_inventory') 
+    return redirect('clinic:medicine_inventory') 
 
 @require_POST
 def delete_patient_disease(request, patient_disease_id):
@@ -191,7 +191,7 @@ def delete_patient_disease(request, patient_disease_id):
     patient_disease.delete()
 
     # Redirect to the PatientDisease page
-    return redirect('patient_diseases_view') 
+    return redirect('clinic:patient_diseases_view') 
 
 @require_POST
 def delete_diagnostic_test(request, test_id):
@@ -202,7 +202,7 @@ def delete_diagnostic_test(request, test_id):
     test.delete()
 
     # Redirect to the medicine inventory page
-    return redirect('diagnostic_tests')
+    return redirect('clinic:diagnostic_tests')
  
 @require_POST
 def delete_sample(request, sample_id):
@@ -213,7 +213,7 @@ def delete_sample(request, sample_id):
     sample.delete()
 
     # Redirect to the medicine inventory page
-    return redirect('sample_list') 
+    return redirect('clinic:sample_list') 
 
 @require_POST
 def pathology_diagnostic_test_delete(request, test_id):
@@ -224,7 +224,7 @@ def pathology_diagnostic_test_delete(request, test_id):
     pathology_diagnostic_test.delete()
 
     # Redirect to the PathologyDiagnosticTest  page
-    return redirect('pathology_diagnostic_test_list')
+    return redirect('clinic:pathology_diagnostic_test_list')
  
 @require_POST
 def delete_consultation(request, appointment_id):
@@ -235,7 +235,7 @@ def delete_consultation(request, appointment_id):
     consultation.delete()
 
     # Redirect to the Consultation  page
-    return redirect('appointment_list')
+    return redirect('clinic:appointment_list')
  
 @require_POST
 def delete_consultation_fee(request, fee_id):
@@ -246,7 +246,7 @@ def delete_consultation_fee(request, fee_id):
     consultation_fee.delete()
 
     # Redirect to the ConsultationFee  page
-    return redirect('consultation_fee_list') 
+    return redirect('clinic:consultation_fee_list') 
 
 @require_POST
 def delete_service(request):
@@ -258,7 +258,7 @@ def delete_service(request):
     service.delete()
 
     # Redirect to the Service  page
-    return redirect('manage_service') 
+    return redirect('clinic:manage_service') 
 
    
 @require_POST
@@ -280,7 +280,7 @@ def delete_medication_payment(request, payment_id):
             )
 
         # Redirect to the MedicationPayment
-        return redirect('patient_medicationpayment_history_view_mrn', mrn=medication_payment.patient.mrn)
+        return redirect('clinic:patient_medicationpayment_history_view_mrn', mrn=medication_payment.patient.mrn)
 
     except MedicationPayment.DoesNotExist:
         return HttpResponseBadRequest("MedicationPayment not found.")

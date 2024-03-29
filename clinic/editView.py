@@ -23,6 +23,7 @@ def edit_insurance(request, insurance_id):
             short_name = request.POST.get('Short_name')
             email = request.POST.get('Email')
             address = request.POST.get('Address')
+            website = request.POST.get('website')
 
             # Update the InsuranceCompany object
             insurance.name = name
@@ -30,12 +31,13 @@ def edit_insurance(request, insurance_id):
             insurance.short_name = short_name
             insurance.email = email
             insurance.address = address
+            insurance.website = website
 
             # Save the changes
             insurance.save()
 
             messages.success(request, 'Insurance details updated successfully!')
-            return redirect('manage_insurance')  # Replace 'your_redirect_url' with the appropriate URL name
+            return redirect('clinic:manage_insurance')  # Replace 'your_redirect_url' with the appropriate URL name
 
         except Exception as e:
             messages.error(request, f'An error occurred: {e}')
@@ -234,7 +236,7 @@ def edit_disease_record(request, disease_id):
             disease.save()
 
             messages.success(request, 'Disease details updated successfully!')
-            return redirect('manage_disease')  # Replace 'your_redirect_url' with the appropriate URL name
+            return redirect('clinic:manage_disease')  # Replace 'your_redirect_url' with the appropriate URL name
 
         except Exception as e:
             messages.error(request, f'An error occurred: {e}')
@@ -260,7 +262,7 @@ def edit_company(request, company_id):
             company.save()
 
             messages.success(request, 'Company details updated successfully!')
-            return redirect('manage_company')  # Replace 'your_redirect_url' with the appropriate URL name
+            return redirect('clinic:manage_company')  # Replace 'your_redirect_url' with the appropriate URL name
         except Exception as e:
             messages.error(request, f'An error occurred: {e}')
 
@@ -293,7 +295,7 @@ def edit_pathodology(request, pathodology_id):
             pathodology.save()
 
             messages.success(request, 'Pathodology details updated successfully!')
-            return redirect('manage_pathodology')  # Replace 'your_redirect_url' with the appropriate URL name
+            return redirect('clinic:manage_pathodology')  # Replace 'your_redirect_url' with the appropriate URL name
 
         except Exception as e:
             print(f"ERROR: {str(e)}")
@@ -318,7 +320,7 @@ def edit_inventory(request, inventory_id):
     # Validate form data (add more validation as needed)
     if not medicine_id or not quantity or not purchase_date:
         # Handle validation error, redirect or display an error message
-        return redirect('medicine_inventory')  # Adjust the URL as needed
+        return redirect('clinic:medicine_inventory')  # Adjust the URL as needed
 
     try:
         # Convert the quantity to an integer
@@ -339,11 +341,11 @@ def edit_inventory(request, inventory_id):
         inventory.save(update_fields=['total_payment'])
 
         # Redirect to a success page or the medicine inventory page
-        return redirect('medicine_inventory')  # Adjust the URL as needed
+        return redirect('clinic:medicine_inventory')  # Adjust the URL as needed
 
     except (ValueError, TypeError):
         # Handle invalid data types, redirect or display an error message
-        return redirect('medicine_inventory')
+        return redirect('clinic:medicine_inventory')
     
     
 
@@ -386,7 +388,7 @@ def edit_medication_payment(request, payment_id):
             )
 
         # Redirect to the medication history page or another appropriate page
-        return redirect('patient_medicationpayment_history_view_mrn', mrn=medication_payment.patient.mrn)
+        return redirect('clinic:patient_medicationpayment_history_view_mrn', mrn=medication_payment.patient.mrn)
 
     except (ValueError, TypeError, MedicationPayment.DoesNotExist):
         return HttpResponseBadRequest("Invalid data types or MedicationPayment not found.")
@@ -434,7 +436,7 @@ def edit_diagnostic_test(request, test_id):
                diagnostic_test.health_issues.set(health_issues_ids)
 
             # Redirect to the diagnostic tests page or another appropriate URL
-            return redirect('diagnostic_tests')  # Adjust the URL as needed
+            return redirect('clinic:diagnostic_tests')  # Adjust the URL as needed
 
         except Exception as e:
             print(f"ERROR: {str(e)}")
@@ -469,7 +471,7 @@ def edit_sample(request, sample_id):
             sample.save()
 
             # Redirect to a success page or another appropriate URL
-            return redirect('sample_list')  # Adjust the URL as needed
+            return redirect('clinic:sample_list')  # Adjust the URL as needed
 
         except Exception as e:
             print(f"ERROR: {str(e)}")
@@ -497,7 +499,7 @@ def edit_patient_disease_save(request, patient_disease_id):
             patient_disease.save()
 
             # Redirect to a success page or another appropriate URL
-            return redirect('patient_diseases_view')  # Adjust the URL as needed
+            return redirect('clinic:patient_diseases_view')  # Adjust the URL as needed
 
         except Exception as e:
             print(f"ERROR: {str(e)}")
@@ -528,7 +530,7 @@ def pathology_diagnostic_test_edit_save(request, test_id):
             # Save the changes
             pathology_diagnostic_test.save()
 
-            return redirect("pathology_diagnostic_test_list")
+            return redirect("clinic:pathology_diagnostic_test_list")
         except Exception as e:
             return HttpResponseBadRequest(f"Error: {str(e)}") 
 
@@ -561,7 +563,7 @@ def update_consultation_data(request, appointment_id):
             consultation.save()
 
             # Return a JsonResponse to indicate success
-            return redirect("appointment_list")
+            return redirect("clinic:appointment_list")
         except Exception as e:
             # Return a JsonResponse with an error message
             return HttpResponseBadRequest(f"Error: {str(e)}") 
@@ -593,7 +595,7 @@ def update_consultation_fee(request):
             # Save the updated ConsultationFee instance
             fee.save()
 
-        return redirect("consultation_fee_list")
+        return redirect("clinic:consultation_fee_list")
     except Exception as e:
         # Return a JsonResponse with an error message
         return HttpResponseBadRequest(f"Error: {str(e)}") 

@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import BaseUserManager
@@ -85,9 +86,10 @@ class InsuranceCompany(models.Model):
     short_name = models.CharField(max_length=50)
     email = models.EmailField()
     address = models.TextField()
+    website = models.URLField(default='http://example.com')  # Add the new field with a default value
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    objects = models.Manager()
+    objects = models.Manager()    
     def __str__(self):
         return self.name
     
@@ -179,13 +181,36 @@ class Service(models.Model):
     type_service = models.CharField(max_length=200, blank=True, null=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)  # New field for cost
+    cash_cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    insurance_cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    nhif_cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)  # New field for cost
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
 
     def __str__(self):
         return self.name
+    
+class MedicineRoute(models.Model):
+    name = models.CharField(max_length=100)
+    explanation = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+    
+    def __str__(self):
+        return self.name  
+    
+class MedicineUnitMeasure(models.Model):
+    name = models.CharField(max_length=100)
+    short_name = models.CharField(max_length=20)
+    application_user = models.CharField(max_length=100)  # You may want to adjust the field type as per your application requirements
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+    
+    def __str__(self):
+        return self.name      
 
 class InventoryItem(models.Model):
     name = models.CharField(max_length=100)
@@ -812,7 +837,67 @@ class LaboratoryOrder(models.Model):
             new_number = last_number + 1
             self.lab_number = f"LAB-{new_number:07}"  # Format the appointment number
         super().save(*args, **kwargs)  # Call the original save method
-        
+   
+
+class HospitalVehicle(models.Model):
+    number = models.CharField(max_length=50)
+    plate_number = models.CharField(max_length=50)
+    is_active = models.BooleanField(default=True)
+    vehicle_type = models.CharField(max_length=100)  # New field for vehicle type
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+    def __str__(self):
+        return self.number   
+    
+class AmbulanceRoute(models.Model):
+    from_location = models.CharField(max_length=100)
+    to_location = models.CharField(max_length=100)
+    distance = models.FloatField()
+    cost = models.DecimalField(max_digits=10, decimal_places=2)
+    profit = models.DecimalField(max_digits=10, decimal_places=2)
+    advanced_ambulance_cost = models.DecimalField(max_digits=10, decimal_places=2)
+    total = models.FloatField(editable=False)  # Make total field read-only
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+    def save(self, *args, **kwargs):
+        # Convert cost and profit to Decimal objects
+        cost = Decimal(str(self.cost))
+        profit = Decimal(str(self.profit))
+
+        # Calculate total using Decimal arithmetic
+        self.total = cost + profit
+
+        super(AmbulanceRoute, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.from_location} to {self.to_location}"       
+    
+    
+class AmbulanceActivity(models.Model):
+    name = models.CharField(max_length=100)
+    cost = models.DecimalField(max_digits=10, decimal_places=2)
+    profit = models.DecimalField(max_digits=10, decimal_places=2)
+    total = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+    
+    def save(self, *args, **kwargs):
+        # Convert cost and profit to Decimal objects
+        cost = Decimal(str(self.cost))
+        profit = Decimal(str(self.profit))
+
+        # Calculate total using Decimal arithmetic
+        self.total = cost + profit
+
+        super(AmbulanceActivity, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name    
         
 class AmbulanceOrder(models.Model):
     patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
@@ -958,6 +1043,17 @@ def generate_sample_id():
     last_sample_number = int(last_sample.sample_id.split('-')[-1]) if last_sample else 0
     new_sample_number = last_sample_number + 1
     return f"SMP-{new_sample_number:05d}"    
+
+
+class PrescriptionFrequency(models.Model):
+    name = models.CharField(max_length=100)
+    interval = models.CharField(max_length=50)
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+    def __str__(self):
+        return self.name
 
 class Order(models.Model):
 

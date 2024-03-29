@@ -14,7 +14,7 @@ Consultation
     <i class="fas fa-plus"></i> New Consultation 
 </a>
 <!-- Add Import insurance link and modal trigger -->
-<a class="btn btn-success float-right mr-2" href="{% url 'import_consultation_notes_records' %}">
+<a class="btn btn-success float-right mr-2" href="{% url 'clinic:import_consultation_notes_records' %}">
   <i class="fas fa-file-import"></i> Import Consultation 
 </a>
 {% endblock breadcrumb %}
@@ -89,7 +89,7 @@ Consultation
                                 <td>MEDICAL OFFICER CONSULTATION</td>
                                 <td>06 Mar, 2024</td>
                                 <td class="text-center">
-                                    <a href="{% url 'patient_consultation_detail' patient.id %}"><i class="icon-users4"></i> Consult</a>
+                                    <a href="{% url 'clinic:patient_consultation_detail' patient.id %}"><i class="icon-users4"></i> Consult</a>
                                 </td>
                             </tr>
                             <!-- Add more rows if needed -->

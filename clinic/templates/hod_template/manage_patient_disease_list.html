@@ -85,7 +85,7 @@ patient Disease
                             </div>
                             <div class="modal-body">
                                 <!-- Form for adding/editing PatientDisease -->
-                                <form id="editPatientDiseaseForm" method="POST" action="{% url 'edit_patient_disease_save' patient_disease.id %}">
+                                <form id="editPatientDiseaseForm" method="POST" action="{% url 'clinic:edit_patient_disease_save' patient_disease.id %}">
                                     {% csrf_token %}
                                     <!-- Patient -->
                                     <div class="form-group">
@@ -151,7 +151,7 @@ patient Disease
             </div>
             <div class="modal-body">
                 <!-- Form for adding/editing PatientDisease -->
-                <form id="patientDiseaseForm" method="POST" action="{% url "save_patient_disease" %}">
+                <form id="patientDiseaseForm" method="POST" action="{% url "clinic:save_patient_disease" %}">
                     {% csrf_token %}
                     <!-- Patient -->
                     <div class="form-group">

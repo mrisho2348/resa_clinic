@@ -51,10 +51,8 @@ def all_orders_view(request):
 
 
 def generate_invoice_bill(request,  order_id):
-    # Retrieve the patient and visit objects based on IDs
-    
-    order = Order.objects.get(id=order_id)
-     
+    # Retrieve the patient and visit objects based on IDs    
+    order = Order.objects.get(id=order_id)     
     context = {
         'order': order,
        
@@ -66,7 +64,7 @@ def generate_invoice_bill(request,  order_id):
 def update_orderpayment_status(request):
     order_id = request.POST.get('order_id')
     payment_status = request.POST.get('payment_status')
-
+    print(payment_status)
     try:
         order = Order.objects.get(id=order_id)
         order.status = payment_status
@@ -1812,6 +1810,7 @@ def delete_ambulancecardorder(request):
             return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
 
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
 @csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
 def delete_ambulancedorder(request):
     if request.method == 'POST':

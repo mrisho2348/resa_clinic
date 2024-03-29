@@ -16,7 +16,7 @@
           <div class="card card-primary">
             <h2 class="card-header">Edit Patient</h2>
             <div class="card-body">
-                <form id="patientForm" method="post"  action="{% url 'edit_patient' patient.id %}">
+                <form id="patientForm" method="post"  action="{% url 'clinic:edit_patient' patient.id %}">
                     {% csrf_token %}
                     <!-- Personal Information -->
                     <div class="row">

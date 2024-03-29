@@ -96,7 +96,7 @@ Order Details
                                         // Send Ajax request
                                         $.ajax({
                                             type: 'POST',
-                                            url: '{% url 'update_orderpayment_status' %}', // URL for updating payment status
+                                            url: '{% url 'receptionist_update_orderpayment_status' %}', // URL for updating payment status
                                             data: {
                                                 'order_id': orderId,
                                                 'payment_status': paymentStatus,

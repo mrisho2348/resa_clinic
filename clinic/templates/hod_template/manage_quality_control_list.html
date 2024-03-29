@@ -16,13 +16,10 @@ Quality Control List
 
 {% endblock breadcrumb %}
 
-
 {% load static %}
 {% block main_content %}
 
-{% comment %} <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css"> {% endcomment %}
-
-<div class="">
+<div class="table-responsive">
     <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
         <thead>
             <tr>
@@ -153,7 +150,7 @@ Quality Control List
                                     e.preventDefault();
                                     $.ajax({
                                         type: 'POST',
-                                        url: '{% url "add_quality_control" %}',  // Replace with your URL
+                                        url: '{% url "clinic:add_quality_control" %}',  // Replace with your URL
                                         data: $('#editQualityControlForm{{ control.id }}').serialize(),
                                         success: function (data) {
                                             if (data.status === 'success') {
@@ -245,7 +242,7 @@ Quality Control List
     function addQuality() {
         $.ajax({
             type: 'POST',
-            url: '{% url "add_quality_control" %}',  // Replace with your URL
+            url: '{% url "clinic:add_quality_control" %}',  // Replace with your URL
             data: $('#addQualityControlForm').serialize(),
             success: function (data) {
                 if (data.status === 'success') {

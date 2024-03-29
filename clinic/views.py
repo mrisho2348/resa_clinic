@@ -28,7 +28,8 @@ from tablib import Dataset
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import OuterRef, Subquery
-from .models import Category, ConsultationFee, ConsultationNotes, Country, Diagnosis, DiagnosticTest, Diagnosis, Equipment, EquipmentMaintenance, FamilyMedicalHistory, HealthIssue, InventoryItem, MedicationPayment, PathologyDiagnosticTest, PatientDisease, PatientHealthCondition, PatientVisits, PatientVital, Prescription, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, RemotePatient, RemotePatientVisits, RemotePrescription, Sample, Service, Supplier, UsageHistory
+from .models import AmbulanceActivity, AmbulanceOrder, AmbulanceRoute, AmbulanceVehicleOrder, Category, ConsultationFee, ConsultationNotes, ConsultationOrder, Country, Diagnosis, DiagnosticTest, Diagnosis, Equipment, EquipmentMaintenance, FamilyMedicalHistory, HealthIssue, HospitalVehicle, ImagingRecord, InventoryItem, LaboratoryOrder, MedicationPayment, MedicineRoute, MedicineUnitMeasure, Order, PathologyDiagnosticTest, PatientDisease, PatientHealthCondition, PatientVisits, PatientVital, Prescription, PrescriptionFrequency, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, Sample, Service, Supplier, UsageHistory
+from django.db.models import Sum
 
 # Create your views here.
 def index(request):
@@ -230,8 +231,10 @@ def resa_report(request):
 @login_required
 def manage_service(request):
     services=Service.objects.all()
+    insurance_companies=InsuranceCompany.objects.all()
     context = {
-        'services':services
+        'services':services,
+        'insurance_companies':insurance_companies,
     }
     return render(request,"hod_template/manage_service.html",context)
 
@@ -365,9 +368,36 @@ def update_staff_status(request):
             messages.error(request, 'Invalid request method')
     except Exception as e:
         messages.error(request, f'An error occurred: {str(e)}')
-
     # Redirect back to the staff list page
     return redirect('clinic:manage_staff')  # Make sure 'manage_staffs' is the name of your staff list URL
+
+def update_vehicle_status(request):
+    try:
+        if request.method == 'POST':
+            # Get the user_id and is_active values from POST data
+            vehicle_id = request.POST.get('vehicle_id')
+            is_active = request.POST.get('is_active')
+
+            # Retrieve the staff object or return a 404 response if not found
+            vehicle = get_object_or_404(HospitalVehicle, id=vehicle_id)
+
+            # Toggle the is_active status based on the received value
+            if is_active == '1':
+                vehicle.is_active = False
+            elif is_active == '0':
+                vehicle.is_active = True
+            else:
+                messages.error(request, 'Invalid request')
+                return redirect('clinic:hospital_vehicle_list')  # Make sure 'hospital_vehicle_lists' is the name of your staff list URL
+
+            vehicle.save()
+            messages.success(request, 'Status updated successfully')
+        else:
+            messages.error(request, 'Invalid request method')
+    except Exception as e:
+        messages.error(request, f'An error occurred: {str(e)}')
+    # Redirect back to the staff list page
+    return redirect('clinic:hospital_vehicle_list')  # Make sure 'hospital_vehicle_lists' is the name of your staff list URL
 
 def update_equipment_status(request):
     try:
@@ -1002,14 +1032,18 @@ def add_disease(request):
             disease_name = request.POST.get('Disease')
             code = request.POST.get('Code')
 
+            # Check if the disease already exists
+            if DiseaseRecode.objects.filter(disease_name=disease_name).exists():
+                return JsonResponse({'success': False, 'message': 'Disease already exists'})
+
             # Save data to the model
             DiseaseRecode.objects.create(disease_name=disease_name, code=code)
 
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True,'message':'disease added successfully'})
         else:
-            return JsonResponse({'success': False, 'error': 'Invalid request method'})
+            return JsonResponse({'success': False, 'message': 'Invalid request method'})
     except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
+        return JsonResponse({'success': False, 'message': str(e)})
  
 @csrf_exempt
 @login_required    
@@ -1021,6 +1055,7 @@ def add_insurance_company(request):
             short_name = request.POST.get('Short_name')
             email = request.POST.get('Email')
             address = request.POST.get('Address')
+            website = request.POST.get('website')
 
             # Save data to the model
             InsuranceCompany.objects.create(
@@ -1028,7 +1063,8 @@ def add_insurance_company(request):
                 phone=phone,
                 short_name=short_name,
                 email=email,
-                address=address
+                address=address,
+                website=website,
             )
 
             return JsonResponse({'success': True})
@@ -1638,8 +1674,7 @@ def save_consultation_fee(request):
 def save_service_data(request):
     if request.method == 'POST':
         service_id = request.POST.get('service_id')
-        coverage = request.POST.get('covarage')
-        department = request.POST.get('department')
+        coverage = request.POST.get('covarage')        
         type_service = request.POST.get('typeService')
         name = request.POST.get('serviceName')
         description = request.POST.get('description')
@@ -1653,8 +1688,7 @@ def save_service_data(request):
                 # Creating a new service
                 service = Service()
 
-            service.coverage = coverage
-            service.department = department
+            service.coverage = coverage           
             service.type_service = type_service
             service.name = name
             service.description = description
@@ -2442,14 +2476,6 @@ def generate_prescription_id():
     return f"PRS-{new_prescription_id:07d}"
 
 
-
-    
-    
-def generate_remoteprescription_id():
-    last_prescription = RemotePrescription.objects.last()
-    last_sample_number = int(last_prescription.prs_no.split('-')[-1]) if last_prescription else 0
-    new_prescription_id = last_sample_number + 1
-    return f"PRS-{new_prescription_id:07d}"
     
 def quality_control_list(request):
     # Retrieve all QualityControl objects
@@ -2626,63 +2652,6 @@ def generate_vst():
 
     return new_vst 
 
-@csrf_exempt     
-@require_POST
-def add_remotepatient_visit(request):
-    try:
-        visit_id = request.POST.get('visit_id')
-        visitType = request.POST.get('visitType')      
-        patient_id = request.POST.get('patient_id')   
-        primary_service = request.POST.get('primary_service')  
-        
-        patient = Patients.objects.get(pk=patient_id)
-        if visit_id:
-            # Editing existing HealthIssue item
-            visit = RemotePatientVisits.objects.get(pk=visit_id)
-            visit.visit_type = visitType         
-            visit.patient = patient
-            visit.primary_service = primary_service
-    
-                            
-            visit.save()
-        else:
-            # Adding new PatientVisit item
-            vst = remotegenerate_vst() 
-            
-            visit = RemotePatientVisits(
-            patient=patient,
-            visit_type=visitType,
-            vst=vst,
-            primary_service=primary_service,
-         
-                          
-               
-            )
-            visit.save()
-
-        return JsonResponse({'status': 'success'})
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}) 
-    
-
-def remotegenerate_vst():
-    # Retrieve the last patient's VST from the database
-    last_patient_visit = RemotePatientVisits.objects.last()
-
-    # Extract the numeric part from the last VST, or start from 0 if there are no patients yet
-    last_vst_number = int(last_patient_visit.vst.split('-')[-1]) if last_patient_visit else 0
-
-    # Increment the numeric part for the new patient
-    new_vst_number = last_vst_number + 1
-
-    # Format the VST with leading zeros and concatenate with the prefix "PAT-"
-    new_vst = f"VST-{new_vst_number:07d}"
-
-    return new_vst 
- 
-
-    
-
 
    
 def fetch_model_data(request):
@@ -2701,54 +2670,259 @@ def fetch_model_data(request):
 def patient_visit_history_view(request, patient_id):
     # Retrieve visit history for the specified patient
     visit_history = PatientVisits.objects.filter(patient_id=patient_id)
-    current_date = timezone.now().date()
     patient = Patients.objects.get(id=patient_id)
-    medicines = Medicine.objects.filter(
-        medicineinventory__remain_quantity__gt=0,  # Inventory level greater than zero
-        expiration_date__gt=current_date  # Not expired
-    ).distinct() 
-
+    
+    for visit in visit_history:
+        # Calculate total cost for Prescription
+        prescription_cost = Prescription.objects.filter(visit=visit).aggregate(total_cost=Sum('total_price'))['total_cost'] or 0        
+        # Calculate total cost for AmbulanceVehicleOrder
+        ambulance_cost = AmbulanceOrder.objects.filter(visit=visit).aggregate(total_cost=Sum('cost'))['total_cost'] or 0        
+        # Calculate total cost for ImagingRecord
+        imaging_cost = ImagingRecord.objects.filter(visit=visit).aggregate(total_cost=Sum('cost'))['total_cost'] or 0        
+        # Calculate total cost for ConsultationOrder
+        consultation_cost = ConsultationOrder.objects.filter(visit=visit).aggregate(total_cost=Sum('cost'))['total_cost'] or 0        
+        # Calculate total cost for Procedure
+        procedure_cost = Procedure.objects.filter(visit=visit).aggregate(total_cost=Sum('cost'))['total_cost'] or 0        
+        # Calculate total cost for LaboratoryOrder
+        lab_cost = LaboratoryOrder.objects.filter(visit=visit).aggregate(total_cost=Sum('cost'))['total_cost'] or 0        
+        # Calculate total cost for all models combined
+        total_cost = prescription_cost + ambulance_cost + imaging_cost + consultation_cost + procedure_cost + lab_cost        
+        # Assign the total cost to the visit object
+        visit.total_cost = total_cost    
     return render(request, 'hod_template/manage_patient_visit_history.html', {
         'visit_history': visit_history,
-        'patient':patient,
-        'medicines':medicines,
-        })
-def patient_health_record_view(request, patient_id):
-    # Retrieve visit history for the specified patient
-    visit_history = PatientVisits.objects.filter(patient_id=patient_id)
-    patient = Patients.objects.get(id=patient_id)
+        'patient': patient,     
+    })
+    
+def patient_health_record_view(request, patient_id, visit_id):
+    try:
+        # Retrieve visit history for the specified patient
+        visits = PatientVisits.objects.get(id=visit_id)
+        visit_history = PatientVisits.objects.filter(patient_id=patient_id)
+        prescriptions = Prescription.objects.filter(patient=patient_id, visit=visit_id)
+        try:
+            consultation_notes = ConsultationNotes.objects.filter(patient_id=patient_id, visit=visit_id).order_by('-created_at').first()
+        except ConsultationNotes.DoesNotExist:
+            consultation_notes = None
+         
+        try:
+            previous_vitals = PatientVital.objects.filter(patient=patient_id,visit=visit_id).order_by('-recorded_at')
+        except PatientVital.DoesNotExist:
+            previous_vitals = None   
+             
+        try:
+            consultation_notes_previous  = ConsultationNotes.objects.filter(patient=patient_id).order_by('-created_at')
+        except ConsultationNotes.DoesNotExist:
+            consultation_notes_previous  = None   
+             
+        try:
+            vital = PatientVital.objects.filter(patient=patient_id, visit=visit_id)
+        except PatientVital.DoesNotExist:
+            vital = None
+            
+        try:
+            procedures = Procedure.objects.filter(patient=patient_id, visit=visit_id)            
+        except Procedure.DoesNotExist:
+            procedures = None
+          
+        try:
+            lab_results = LaboratoryOrder.objects.filter(patient=patient_id, visit=visit_id)
+        except LaboratoryOrder.DoesNotExist:
+            lab_results = None  
 
-    return render(request, 'hod_template/manage_patitent_health_record.html', {'visit_history': visit_history,'patient':patient})
+        try:
+            imaging_records = ImagingRecord.objects.filter(patient_id=patient_id, visit_id=visit_id)
+        except ImagingRecord.DoesNotExist:
+            imaging_records = None
+        
+        total_procedure_cost = procedures.aggregate(Sum('cost'))['cost__sum']
+        total_imaging_cost = imaging_records.aggregate(Sum('cost'))['cost__sum']
+        lab_tests_cost = lab_results.aggregate(Sum('cost'))['cost__sum']      
+        pathology_records = PathodologyRecord.objects.all()  # Fetch all consultation notes from the database
+        doctors = Staffs.objects.filter(role='doctor')
+        provisional_diagnoses = Diagnosis.objects.all()
+        final_diagnoses = Diagnosis.objects.all()
+
+        total_price = sum(prescription.total_price for prescription in prescriptions)
+        range_31 = range(31)
+        current_date = timezone.now().date()
+        patient = Patients.objects.get(id=patient_id)
+
+        medicines = Medicine.objects.filter(
+            medicineinventory__remain_quantity__gt=0,  # Inventory level greater than zero
+            expiration_date__gt=current_date  # Not expired
+        ).distinct()
+
+        return render(request, 'hod_template/manage_patient_health_record.html', {
+            'visit_history': visit_history,
+            'patient': patient,
+            'visit': visits,
+            'range_31': range_31,
+            'medicines': medicines,
+            'total_procedure_cost': total_procedure_cost,
+            'total_imaging_cost': total_imaging_cost,
+            'lab_tests_cost': lab_tests_cost,
+            'imaging_records': imaging_records,
+            'prescriptions': prescriptions,
+            'total_price': total_price,
+            'consultation_notes': consultation_notes,
+            'pathology_records': pathology_records,
+            'doctors': doctors,
+            'consultation_notes_previous': consultation_notes_previous,
+            'provisional_diagnoses': provisional_diagnoses,
+            'previous_vitals': previous_vitals,
+            'final_diagnoses': final_diagnoses,
+            'vital': vital,
+            'lab_results': lab_results,
+            'procedures': procedures,
+      
+        })
+    except Exception as e:
+        # Handle other exceptions if necessary
+        return render(request, '404.html', {'error_message': str(e)})
 
 
 def prescription_list(request):
-    # Retrieve all prescriptions from the database
-    prescriptions = Prescription.objects.all()
+    # Retrieve all patients
     patients = Patients.objects.all()
-    current_date = timezone.now().date()
-
+    # Retrieve current date
+    current_date = timezone.now().date()    
+    # Retrieve all prescriptions with related patient and visit
+    prescriptions = Prescription.objects.select_related('patient', 'visit')
+    visit_total_prices = prescriptions.values(
+    'visit__vst', 
+    'visit__patient__first_name',
+    'visit__created_at', 
+    'visit__patient__id', 
+    'visit__patient__middle_name', 
+    'visit__patient__last_name'
+).annotate(
+    total_price=Sum('total_price'),
+    verified=F('verified'),  # Access verified field directly from Prescription
+    issued=F('issued'),      # Access issued field directly from Prescription
+    status=F('status'),      # Access status field directly from Prescription
+)
+    
     # Retrieve medicines with inventory levels not equal to zero or greater than zero, and not expired
     medicines = Medicine.objects.filter(
         medicineinventory__remain_quantity__gt=0,  # Inventory level greater than zero
         expiration_date__gt=current_date  # Not expired
     ).distinct() 
+    
+    # Calculate total price of all prescriptions
     total_price = sum(prescription.total_price for prescription in prescriptions) 
-    return render(request, 'hod_template/manage_prescription_list.html', {
-        'prescriptions': prescriptions,
+    
+    return render(request, 'hod_template/manage_prescription_list.html', { 
         'medicines': medicines,
         'patients': patients,
         'total_price': total_price,
-        })
+        'visit_total_prices': visit_total_prices,
+    })
     
-def patient_vital_list(request, patient_id):
+    
+def all_orders_view(request):
+    # Retrieve all orders from the database
+    orders = Order.objects.all().order_by('-order_date')
+    
+    # Calculate total cost for each order date group
+    order_dates_with_total_cost = []
+    for order_date in orders.values('order_date').distinct():
+        total_cost = orders.filter(order_date=order_date['order_date'],status='Paid').aggregate(total_cost=Sum('cost'))['total_cost']
+        order_dates_with_total_cost.append((order_date['order_date'], total_cost))
+
+    # Render the template with the list of orders and total cost for each group
+    return render(request, 'hod_template/order_detail.html', {'orders': orders, 'order_dates_with_total_cost': order_dates_with_total_cost})
+
+
+def orders_by_date(request, date):
+    # Query orders based on the provided date
+    orders = Order.objects.filter(order_date=date)
+    # Pass orders and date to the template
+    context = {
+        'orders': orders,
+        'date': date,
+    }
+    return render(request, 'hod_template/orders_by_date.html', context)
+
+def prescription_frequency_list(request):
+    frequencies = PrescriptionFrequency.objects.all()
+    return render(request, 'hod_template/prescription_frequency_list.html', {'frequencies': frequencies})
+
+@require_POST
+def delete_frequency(request):
+    try:
+        # Get the frequency ID from the POST data
+        frequency_id = request.POST.get('frequency_id')
+        # Delete the frequency from the database
+        frequency = PrescriptionFrequency.objects.get(pk=frequency_id)
+        frequency.delete()
+
+        return JsonResponse({'status': 'success', 'message': 'Frequency deleted successfully'})
+    except PrescriptionFrequency.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Frequency not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    
+    
+def add_frequency(request):
+    if request.method == 'POST':
+        try:
+            frequency_id = request.POST.get('frequency_id')
+            name = request.POST.get('name')
+            interval = request.POST.get('interval')
+            description = request.POST.get('description')
+            
+            if frequency_id:
+                # Editing existing frequency
+                frequency = PrescriptionFrequency.objects.get(pk=frequency_id)
+                frequency.name = name
+                frequency.interval = interval
+                frequency.description = description
+                frequency.save()
+                return JsonResponse({'status': 'success', 'message': 'Prescription frequency updated successfully'})
+            else:
+                # Adding new frequency
+                frequency = PrescriptionFrequency.objects.create(name=name, interval=interval, description=description)
+                return JsonResponse({'status': 'success', 'message': 'Prescription frequency added successfully', 'id': frequency.id})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+    
+def generate_invoice_bill(request,  order_id):
+    # Retrieve the patient and visit objects based on IDs    
+    order = Order.objects.get(id=order_id)     
+    context = {
+        'order': order,
+       
+    }
+    return render(request, 'hod_template/invoice_bill.html', context)   
+    
+@login_required
+def prescription_detail(request, visit_number, patient_id):
+    patient = Patients.objects.get(id=patient_id)
+    prescriptions = Prescription.objects.filter(visit__vst=visit_number, visit__patient__id=patient_id)
+    prescriber = None
+    if prescriptions.exists():
+        prescriber = prescriptions.first().entered_by
+    context = {
+        'patient': patient, 
+        'prescriptions': prescriptions,
+        'prescriber': prescriber,
+        'visit_number': visit_number,
+        }
+    return render(request, "hod_template/prescription_detail.html", context)    
+    
+def patient_vital_list(request, patient_id, visit_id):
     # Retrieve the patient object
     patient = Patients.objects.get(pk=patient_id)
+    visit = PatientVisits.objects.get(pk=visit_id)
     range_51 = range(51)
     range_301 = range(301)
     range_101 = range(101)
     range_15 = range(3, 16)
     # Retrieve all vital information for the patient
-    patient_vitals = PatientVital.objects.filter(patient=patient).order_by('-recorded_at')
+    patient_vitals = PatientVital.objects.filter(patient=patient,visit=visit).order_by('-recorded_at')
 
     # Render the template with the patient's vital information
     context = {
@@ -2757,10 +2931,11 @@ def patient_vital_list(request, patient_id):
         'range_101': range_101,
         'range_15': range_15,
         'patient': patient, 
-        'patient_vitals': patient_vitals
-    }
-    
-    return render(request, 'hod_template/manage_patient_vital_list.html', context)    
+        'patient_vitals': patient_vitals,
+        'visit': visit,
+    }    
+    return render(request, 'hod_template/manage_patient_vital_list.html', context)   
+ 
 def patient_vital_all_list(request):
     # Retrieve the patient object
     patients = Patients.objects.all()
@@ -2928,381 +3103,542 @@ def save_diagnosis(request):
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
+ 
+def ambulance_order_view(request):
+    template_name = 'hod_template/ambulance_order_template.html'
+    # Retrieve all ambulance records with the newest records appearing first
+    ambulance_orders = AmbulanceOrder.objects.all().order_by('-id')
+    return render(request, template_name, {'ambulance_orders': ambulance_orders})
     
-    
-def patient_info_form(request):
+@csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
+def delete_ambulancecardorder(request):
     if request.method == 'POST':
         try:
-            # Retrieve data from the form submission
-            first_name = request.POST.get('first_name')
-            middle_name = request.POST.get('middle_name')
-            last_name = request.POST.get('last_name')
-            gender = request.POST.get('gender')
-            occupation = request.POST.get('occupation')
-            phone = request.POST.get('phone')
-            employee_number = request.POST.get('employee_number')
-            date_of_first_employment = request.POST.get('date_of_first_employment')
-            longtime_illness = request.POST.get('longtime_illness')
-            longtime_medication = request.POST.get('longtime_medication')
-            osha_certificate = request.POST.get('osha_certificate')
-            date_of_osha_certification = request.POST.get('date_of_osha_certification')
-            insurance = request.POST.get('insurance')
-            insurance_company = request.POST.get('insurance_company')
-            insurance_number = request.POST.get('insurance_number')
-            emergency_contact_name = request.POST.get('emergency_contact_name')
-            emergency_contact_relation = request.POST.get('emergency_contact_relation')
-            emergency_contact_phone = request.POST.get('emergency_contact_phone')
-            emergency_contact_mobile = request.POST.get('emergency_contact_mobile')
-            life_style = request.POST.get('life_style')
-            age = request.POST.get('age')
-            marital_status = request.POST.get('marital_status')
-            nationality = request.POST.get('nationality')
-            tribe = request.POST.get('tribe')
-            patient_type = request.POST.get('patient_type')
-            company = request.POST.get('company')
-            
-            if date_of_first_employment == '':
-                 date_of_first_employment = None
+            order_id = request.POST.get('order_id')
+            # Delete procedure record
+            record = get_object_or_404(AmbulanceVehicleOrder, pk=order_id)
+            record.delete()
 
-            if date_of_osha_certification == '':
-                date_of_osha_certification = None
-            # Create a new RemotePatient object with the submitted data
-          
-            
-            patient = RemotePatient(            
-                first_name=first_name,
-                middle_name=middle_name,
-                last_name=last_name,
-                gender=gender,
-                occupation=occupation,
-                phone=phone,
-                employee_number=employee_number,
-                date_of_first_employment=date_of_first_employment,
-                longtime_illness=longtime_illness,
-                longtime_medication=longtime_medication,
-                osha_certificate=osha_certificate,
-                date_of_osha_certification=date_of_osha_certification,
-                insurance=insurance,
-                insurance_company=insurance_company,
-                insurance_number=insurance_number,
-                emergency_contact_name=emergency_contact_name,
-                emergency_contact_relation=emergency_contact_relation,
-                emergency_contact_phone=emergency_contact_phone,
-                emergency_contact_mobile=emergency_contact_mobile,
-                life_style=life_style,
-                age=age,
-                marital_status=marital_status,
-                nationality=nationality,
-                tribe=tribe,
-                patient_type=patient_type,
-                company=company
-            )
-
-            # Save the patient object to the database
-            patient.save()
-
-            # Determine which button was clicked
-            if 'save_back' in request.POST:
-                # Redirect to patients list
-                return redirect('patients_list')  # Replace 'patients_list' with the URL name of your patients list view
-            elif 'save_add_another' in request.POST:
-                # Redirect to the same form to add another patient
-                messages.success(request, 'Patient  record added successfully.')
-                return render(request, 'hod_template/add_remotePatients.html')
-            elif 'save_continue_health' in request.POST:
-                # Redirect to health information form
-                return redirect(reverse('save_patient_health_condition', args=[patient.id]))  # Replace 'health_info_form' with the URL name of your health information form view
+            return JsonResponse({'success': True, 'message': f' record for {record} deleted successfully.'})
+        except AmbulanceVehicleOrder.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid record ID.'})
         except Exception as e:
-            # Handle the exception, you can log it or render an error message
-            messages.error(request, f'Error adding Patient  record : {str(e)}')
-            range_100 = range(100)
-            return render(request, 'hod_template/add_remotePatients.html',{'range_100':range_100})
+            return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
 
-    # If the request method is not POST, render the form template
-    range_100 = range(100)
-    return render(request, 'hod_template/add_remotePatients.html',{'range_100':range_100})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
-
-
-def patients_list(request):
-    patients =RemotePatient.objects.order_by('-created_at')    
-    return render(request, 'hod_template/manage_remotepatients_list.html', {'patients': patients})
-
-
-def save_patient_health_condition(request, patient_id):
-    try:
-        # Retrieve the patient object using the patient_id from URL parameters
-        patient = RemotePatient.objects.get(pk=patient_id)
-
-        if request.method == 'POST':
-            # Retrieve data from the form submission
-            health_condition = request.POST.get('health_condition')
-            health_condition_notes = request.POST.get('health_condition_notes')
-
-            # Create a new PatientHealthCondition object with the submitted data
-            patient_health_condition = PatientHealthCondition(
-                patient=patient,
-                health_condition=health_condition,
-                health_condition_notes=health_condition_notes
-            )
-
-            # Save the patient health condition object to the database
-            patient_health_condition.save()
-
-            # Determine which button was clicked
-            if 'save_and_return' in request.POST:
-                # Redirect back to patient information
-                return redirect('patient_information')  # Replace with the appropriate URL name
-
-            elif 'save_and_continue_add_another_health_record' in request.POST:
-                # Redirect to add another patient health record
-                messages.success(request, 'Patient  health record added successfully.')
-                return redirect(reverse('save_patient_health_condition', args=[patient_id]))  # Replace with the appropriate URL name
-
-            elif 'save_and_continue' in request.POST:
-                # Redirect to add family health information
-                return redirect(reverse('save_family_medical_history', args=[patient_id]))  # Replace with the appropriate URL name
-
-    except RemotePatient.DoesNotExist:
-        # Handle the case where the patient ID is not valid
-        messages.error(request, f'Patient not found: {str(e)}')
-        return render(request, 'hod_template/add_patient_health_condition_form.html', {'patient': patient})
-
-    except Exception as e:
-        # Handle other exceptions
-        messages.error(request, f'Error adding Patient  health record : {str(e)}')
-        return render(request, 'hod_template/add_patient_health_condition_form.html', {'patient': patient})
-
-    # If the request method is not POST or if there's an error, render an empty form
-    return render(request, 'hod_template/add_patient_health_condition_form.html', {'patient': patient})
-
-
-
-def save_family_medical_history(request, patient_id):
-    try:
-        # Attempt to retrieve the patient object
-        patient = RemotePatient.objects.get(pk=patient_id)
-    except RemotePatient.DoesNotExist:
-        # If the patient does not exist, raise a 404 error
-        raise Http404("Patient does not exist")
-
+@csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
+def delete_ambulancedorder(request):
     if request.method == 'POST':
         try:
-            # Retrieve form data
-            condition = request.POST.get('condition')
-            relationship = request.POST.get('relationship')
-            comments = request.POST.get('comments')
+            order_id = request.POST.get('order_id')
+            # Delete procedure record
+            record = get_object_or_404(AmbulanceOrder, pk=order_id)
+            record.delete()
 
-            # Create a new FamilyMedicalHistory object with the submitted data
-            family_medical_history = FamilyMedicalHistory.objects.create(
-                patient=patient,
-                condition=condition,
-                relationship=relationship,
-                comments=comments
-            )
-
-            # Determine which button was clicked
-            if 'save_and_continue_add_another_family_record' in request.POST:
-                # Redirect to the same form to add another family record
-                messages.success(request, 'Patient family health record added successfully.')
-                return redirect(reverse('save_family_medical_history', args=[patient_id]))
-
-            elif 'save_and_return' in request.POST:
-                # Redirect to the patients list
-                return redirect('patients_list')
-
+            return JsonResponse({'success': True, 'message': f' record for {record} deleted successfully.'})
+        except AmbulanceVehicleOrder.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid record ID.'})
         except Exception as e:
-            # Handle the exception, you can log it or render an error message
-            messages.error(request, f'Error adding Patient family health record : {str(e)}')
-            return render(request, 'hod_template/add_patient_family_condition_form.html', {'patient': patient})
+            return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
 
-    # If the request method is not POST, render the form template
-    return render(request, 'hod_template/add_patient_family_condition_form.html', {'patient': patient})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
-
-def patient_info_form_edit(request, patient_id):    
-    try:
-        patient = RemotePatient.objects.get(pk=patient_id)    
-    except RemotePatient.DoesNotExist:
-        # Handle the case where the patient does not exist
-        # For example, you can redirect to an error page or return an appropriate response
-        return HttpResponse("Patient not found", status=404)
-    
-    if request.method == 'POST':
-        try:
-            # Extract data from POST request
-            first_name = request.POST.get('first_name')
-            middle_name = request.POST.get('middle_name')
-            last_name = request.POST.get('last_name')
-            gender = request.POST.get('gender')
-            occupation = request.POST.get('occupation')
-            phone = request.POST.get('phone')
-            employee_number = request.POST.get('employee_number')
-            date_of_first_employment = request.POST.get('date_of_first_employment')
-            longtime_illness = request.POST.get('longtime_illness')
-            longtime_medication = request.POST.get('longtime_medication')
-            osha_certificate = request.POST.get('osha_certificate') == '1'
-            date_of_osha_certification = request.POST.get('date_of_osha_certification')
-            insurance = request.POST.get('insurance')
-            insurance_company = request.POST.get('insurance_company')
-            insurance_number = request.POST.get('insurance_number')
-            emergency_contact_name = request.POST.get('emergency_contact_name')
-            emergency_contact_relation = request.POST.get('emergency_contact_relation')
-            emergency_contact_phone = request.POST.get('emergency_contact_phone')
-            emergency_contact_mobile = request.POST.get('emergency_contact_mobile')
-            life_style = request.POST.getlist('life_style')
-            age = int(request.POST.get('age'))
-            marital_status = request.POST.get('marital_status')
-            nationality = request.POST.get('nationality')
-            tribe = request.POST.get('tribe')
-            patient_type = request.POST.get('patient_type')
-            company = request.POST.get('company')
-
-            # Convert empty strings to None for date fields
-            if date_of_first_employment == '':
-                date_of_first_employment = None
-
-            if date_of_osha_certification == '':
-                date_of_osha_certification = None
-
-            # Update patient object
-            patient.first_name = first_name
-            patient.middle_name = middle_name
-            patient.last_name = last_name
-            patient.gender = gender
-            patient.occupation = occupation
-            patient.phone = phone
-            patient.employee_number = employee_number
-            patient.date_of_first_employment = date_of_first_employment
-            patient.longtime_illness = longtime_illness
-            patient.longtime_medication = longtime_medication
-            patient.osha_certificate = osha_certificate
-            patient.date_of_osha_certification = date_of_osha_certification
-            patient.insurance = insurance      
-            patient.emergency_contact_name = emergency_contact_name
-            patient.emergency_contact_relation = emergency_contact_relation
-            patient.emergency_contact_phone = emergency_contact_phone
-            patient.emergency_contact_mobile = emergency_contact_mobile
-            patient.life_style = life_style
-            patient.age = age
-            patient.marital_status = marital_status
-            patient.nationality = nationality
-            patient.tribe = tribe
-            patient.patient_type = patient_type
-            patient.company = company
-            if insurance == 'Insured':
-                patient.insurance_company = insurance_company
-                patient.insurance_number = insurance_number
-            patient.save()
-
-            if 'save_back' in request.POST:
-                # Redirect to the patients list view
-                return redirect('patients_list')
-            elif 'save_continue_health' in request.POST:
-                # Redirect to continue editing health information
-                try:
-        # Save the changes made to the patient's information
-                    patient.save()     
-    
-                    return redirect(reverse('health_info_edit', args=[patient_id]))
-    
-                except Exception as e:
-        # Handle any errors that may occur during the save operation
-                    messages.error(request, f'Error saving changes: {str(e)}')
-                    range_100 = range(100)
-                    return render(request, 'hod_template/edit_remotepatient.html', {'patient': patient, 'range_100': range_100})
-                    
-
-        except Exception as e:
-            # Handle any other exceptions that may occur during form processing
-            # For example, you can log the error and render an error page
-            messages.error(request, f'Error editing Patient  record : {str(e)}')
-            range_100 = range(100)
-            return render(request, 'hod_template/edit_remotepatient.html', {'patient': patient, 'range_100': range_100})
-
-    # Render the template with patient data if available
-    range_100 = range(100)
-    return render(request, 'hod_template/edit_remotepatient.html', {'patient': patient, 'range_100': range_100})
-
-
-def health_info_edit(request, patient_id):
-    try:
-        patient = RemotePatient.objects.get(pk=patient_id)
-        patient_health_condition =PatientHealthCondition.objects.filter(patient=patient).first()
-        
-        if request.method == 'POST':
-            health_condition = request.POST.get('health_condition')
-            health_condition_notes = request.POST.get('health_condition_notes')
-            
-            # Update patient's health condition
-            patient_health_condition.health_condition = health_condition
-            patient_health_condition.health_condition_notes = health_condition_notes
-            patient_health_condition.save()
-            
-            if 'save_and_return' in request.POST:
-                return redirect('patients_list')
-            elif 'save_and_continue_family_health' in request.POST:
-                return redirect('family_health_info_edit', patient_id=patient.id)
-
-            elif 'save_and_continue_add_another_health_record' in request.POST:
-                # Redirect to add another patient health record
-                messages.success(request, 'Patient  health record added successfully.')
-                return redirect(reverse('save_patient_health_condition', args=[patient_id])) 
-        # Prepopulate form fields with existing data
-        initial_data = {
-            'health_condition': patient_health_condition.health_condition,
-            'health_condition_notes': patient_health_condition.health_condition_notes
-        }
-        
-        return render(request, 'hod_template/edit_patient_health_condition_form.html', {'patient': patient, 'initial_data': initial_data})
-    
-    except Exception as e:
-        messages.error(request, f'Error editing Patient  health record : {str(e)}')
-        initial_data = {
-            'health_condition': patient_health_condition.health_condition,
-            'health_condition_notes': patient_health_condition.health_condition_notes
-        }
-        
-        return render(request, 'hod_template/edit_patient_health_condition_form.html', {'patient': patient, 'initial_data': initial_data})
-    
-def family_health_info_edit(request, patient_id):
-    try:
-        # Retrieve existing family medical history record for the patient
-        patient = RemotePatient.objects.get(pk=patient_id)
-        family_medical_history = FamilyMedicalHistory.objects.filter(patient=patient).first()
-        print(family_medical_history)
-        if request.method == 'POST':
-            condition = request.POST.get('condition')
-            relationship = request.POST.get('relationship')
-            comments = request.POST.get('comments')
-
-            # Update the existing family medical history instance
-            if family_medical_history:
-                family_medical_history.condition = condition
-                family_medical_history.relationship = relationship
-                family_medical_history.comments = comments
-                family_medical_history.save()
-                messages.success(request, 'Patient family health record edited successfully.')
-            else:
-                messages.error(request, 'Family medical history record does not exist for this patient.')
-
-            # Check which button was clicked
-            if 'save_and_continue_add_another_family_record' in request.POST:
-                return redirect(reverse('family_health_info_edit', args=[patient_id]))
-            elif 'save_and_return' in request.POST:
-                # Redirect to the patients list page
-                return redirect('patients_list')
-
-    except Exception as e:
-        messages.error(request, f'Error occurred: {e}')
-        # Redirect back to the edit page with an error message
-        return redirect(reverse('family_health_info_edit', args=[patient_id]))
-
+def save_ambulance_order(request, patient_id, visit_id, ambulance_id=None): 
+    # Get the patient and visit objects based on IDs
+    patient = get_object_or_404(Patients, id=patient_id)
+    visit = get_object_or_404(PatientVisits, id=visit_id)
+    range_31 = range(1,31)
     context = {
         'patient': patient,
-        'family_medical_history': family_medical_history
+        'visit': visit,
+        'days': range_31
     }
 
-    return render(request, 'hod_template/edit_patient_family_condition_form.html', context)
+    # Check if ambulance_id is provided, indicating an edit operation
+    if ambulance_id:
+        ambulance_order = get_object_or_404(AmbulanceOrder, id=ambulance_id)
+        context['ambulance_order'] = ambulance_order
+
+    if request.method == 'POST':
+        try:
+            # If ambulance_id is provided, it's an edit operation
+            if ambulance_id:
+                ambulance_order = get_object_or_404(AmbulanceOrder, id=ambulance_id)
+            else:
+                # Otherwise, it's a new record
+                ambulance_order = AmbulanceOrder()
+
+            # Set the data recorder as the current user
+            data_recorder = request.user.staff
+            
+            # Assign values to the AmbulanceOrder fields
+            ambulance_order.patient = patient
+            ambulance_order.visit = visit
+            ambulance_order.data_recorder = data_recorder
+            ambulance_order.service = request.POST.get('service')
+            ambulance_order.from_location = request.POST.get('from_location')
+            ambulance_order.to_location = request.POST.get('to_location')
+            ambulance_order.age = request.POST.get('age')
+            ambulance_order.condition = request.POST.get('condition')
+            ambulance_order.intubation = request.POST.get('intubation')
+            ambulance_order.pregnancy = request.POST.get('pregnancy')
+            ambulance_order.oxygen = request.POST.get('oxygen')
+            ambulance_order.ambulance_type = request.POST.get('ambulance_type')
+            ambulance_order.cost = request.POST.get('cost')
+            ambulance_order.payment_mode = request.POST.get('payment_mode')
+            ambulance_order.duration_hours = request.POST.get('duration_hours')
+            ambulance_order.duration_days = request.POST.get('duration_days')
+
+            # Save the AmbulanceOrder object
+            ambulance_order.save()
+
+            # Define success message
+            if ambulance_id:
+                message = 'Ambulance order updated successfully'
+            else:
+                message = 'Ambulance order saved successfully'
+            # Redirect to another URL upon successful data saving
+            return redirect(reverse('clinic:ambulance_order_view'))        
+        except Exception as e:
+            # Render the template with error message in case of exception
+            messages.error(request, f'Error adding/editing ambulance record: {str(e)}')
+            return render(request, 'hod_template/add_ambulance_order.html', context)
+    else:
+        # Render the template with patient and visit data for GET request
+        return render(request, 'hod_template/add_ambulance_order.html', context)
+    
+    
+def vehicle_detail(request, order_id):
+    # Retrieve the ambulance vehicle order object using the provided order_id
+    order = get_object_or_404(AmbulanceVehicleOrder, pk=order_id)    
+    # Render the vehicle detail template with the order object
+    return render(request, 'receptionist_template/vehicle_detail.html', {'order': order})     
+     
+def ambulance_order_detail(request, order_id):
+    # Retrieve the ambulance order object
+    ambulance_order = get_object_or_404(AmbulanceOrder, id=order_id)    
+    # Pass the ambulance order object to the template
+    return render(request, 'hod_template/ambulance_order_detail.html', {'ambulance_order': ambulance_order})
+
+def vehicle_ambulance_view(request):
+    orders = AmbulanceVehicleOrder.objects.all().order_by('-id')  # Retrieve all AmbulanceVehicleOrder ambulance records, newest first
+    template_name = 'hod_template/vehicle_ambulance.html'
+    return render(request, template_name, {'orders': orders})
 
 
+def hospital_vehicle_list(request):
+    vehicles = HospitalVehicle.objects.all()
+    return render(request, 'hod_template/hospital_vehicle_list.html', {'vehicles': vehicles})
+
+def add_vehicle(request):
+    if request.method == 'POST':
+        try:
+            vehicle_id = request.POST.get('vehicle_id')
+            if vehicle_id:
+                # Editing existing vehicle
+                vehicle = HospitalVehicle.objects.get(pk=vehicle_id)
+                vehicle.number = request.POST.get('number')
+                vehicle.plate_number = request.POST.get('plate_number')
+                vehicle.vehicle_type = request.POST.get('vehicle_type')
+                vehicle.save()
+                return JsonResponse({'status': 'success', 'message': 'Hospital vehicle updated successfully'})
+            else:
+                # Adding new vehicle
+                number = request.POST.get('number')
+                plate_number = request.POST.get('plate_number')
+                vehicle_type = request.POST.get('vehicle_type')
+                new_vehicle = HospitalVehicle.objects.create(number=number, plate_number=plate_number, vehicle_type=vehicle_type)
+                return JsonResponse({'status': 'success', 'message': 'Hospital vehicle added successfully'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+
+@require_POST
+def delete_vehicle(request):
+    try:
+        # Get the frequency ID from the POST data
+        vehicle_id = request.POST.get('vehicle_id')
+        # Delete the frequency from the database
+        vehicle = HospitalVehicle.objects.get(pk=vehicle_id)
+        vehicle.delete()
+        return JsonResponse({'status': 'success', 'message': 'vehicle deleted successfully'})
+    except HospitalVehicle.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'vehicle not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    
+@require_POST
+def delete_ambulance_route(request):
+    try:
+        # Get the frequency ID from the POST data
+        route_id = request.POST.get('route_id')
+        # Delete the frequency from the database
+        route = AmbulanceRoute.objects.get(id=route_id)
+        route.delete()
+        return JsonResponse({'status': 'success', 'message': 'route deleted successfully'})
+    except AmbulanceRoute.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'route not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    
+@require_POST
+def delete_ambulance_activity(request):
+    try:
+        # Get the frequency ID from the POST data
+        activity_id = request.POST.get('activity_id')
+        # Delete the frequency from the database
+        activity = AmbulanceActivity.objects.get(id=activity_id)
+        activity.delete()
+        return JsonResponse({'status': 'success', 'message': 'activity deleted successfully'})
+    except AmbulanceActivity.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'activity not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    
+@require_POST
+def delete_service(request):
+    try:
+        # Get the frequency ID from the POST data
+        service_id = request.POST.get('service_id')
+        # Delete the frequency from the database
+        service = Service.objects.get(id=service_id)
+        service.delete()
+        return JsonResponse({'status': 'success', 'message': 'service deleted successfully'})
+    except Service.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'service not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    
+    
+def ambulance_route_list(request):
+    ambulance_routes = AmbulanceRoute.objects.all()
+    return render(request, 'hod_template/ambulance_route_list.html', {'ambulance_routes': ambulance_routes})    
+
+def add_or_edit_ambulance_route(request):
+    if request.method == 'POST':
+        try:
+            # Retrieve data from POST request
+            from_location = request.POST.get('from_location')
+            to_location = request.POST.get('to_location')
+            distance = request.POST.get('distance')
+            cost = request.POST.get('cost')
+            profit = request.POST.get('profit')
+            advanced_ambulance_cost = request.POST.get('advanced_ambulance_cost')
+
+            # Check if an AmbulanceRoute ID is provided for editing
+            ambulance_route_id = request.POST.get('route_id')
+            if ambulance_route_id:
+                # Edit existing AmbulanceRoute
+                ambulance_route = get_object_or_404(AmbulanceRoute, pk=ambulance_route_id)
+                ambulance_route.from_location = from_location
+                ambulance_route.to_location = to_location
+                ambulance_route.distance = distance
+                ambulance_route.cost = cost
+                ambulance_route.profit = profit
+                ambulance_route.advanced_ambulance_cost = advanced_ambulance_cost
+                ambulance_route.save()
+                return JsonResponse({'status': 'success', 'message': 'Ambulance route updated successfully'})
+            else:
+                # Create new AmbulanceRoute
+                ambulance_route = AmbulanceRoute.objects.create(
+                    from_location=from_location,
+                    to_location=to_location,
+                    distance=distance,
+                    cost=cost,
+                    profit=profit,
+                    advanced_ambulance_cost=advanced_ambulance_cost
+                )
+                return JsonResponse({'status': 'success', 'message': 'Ambulance route added successfully'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+  
+def add_ambulance_activity(request):
+    if request.method == 'POST':
+        try:
+            # Retrieve data from POST request
+            activity_id = request.POST.get('activity_id')  # For editing existing activity
+            name = request.POST.get('name')
+            cost = request.POST.get('cost')
+            profit = request.POST.get('profit')            
+            # Perform data validation
+            if not all([name, cost, profit]):
+                return JsonResponse({'status': 'error', 'message': 'All fields are required'}, status=400)          
+
+            if activity_id:
+                # Editing existing activity
+                activity = AmbulanceActivity.objects.get(id=activity_id)
+                activity.name = name
+                activity.cost = cost
+                activity.profit = profit               
+                activity.save()
+                return JsonResponse({'status': 'success', 'message': 'Ambulance activity updated successfully'})
+            else:
+                # Adding new activity
+                AmbulanceActivity.objects.create(name=name, cost=cost, profit=profit)
+                return JsonResponse({'status': 'success', 'message': 'Ambulance activity added successfully'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)   
+    
+def ambulance_activity_list(request):
+    ambulance_activities = AmbulanceActivity.objects.all()
+    return render(request, 'hod_template/ambulance_activity_list.html', {'ambulance_activities': ambulance_activities}) 
+
+@login_required
+def new_consultation_order(request):  
+    consultation_orders = ConsultationOrder.objects.all().order_by('-order_date')     
+    # Retrieve all unread orders for the ConsultationOrder instances
+    unread_orders = Order.objects.filter(order_type__in=[consultation.consultation.name for consultation in consultation_orders], is_read=True)    
+    # Mark the retrieved unread orders as read
+    orders = unread_orders 
+    print(unread_orders)
+    unread_orders.update(is_read=True)    
+    # Render the template with the fetched unread orders
+    return render(request, 'hod_template/new_consultation_order.html', {'orders': orders})
+
+
+
+
+
+@login_required
+def new_radiology_order(request):    
+    pathodology_records=ImagingRecord.objects.all().order_by('-order_date')   
+    unread_orders = Order.objects.filter(order_type__in=[pathology.imaging.name for pathology in pathodology_records], is_read=True)     
+    orders = unread_orders   
+    unread_orders.update(is_read=True)     
+    return render(request,"hod_template/new_radiology_order.html",{
+        "orders":unread_orders,       
+        }) 
+    
+
+
+@login_required
+def new_procedure_order(request):
+    template_name = 'hod_template/new_procedure_order.html'
+    procedures = Procedure.objects.all().order_by('-order_date')    
+    unread_orders = Order.objects.filter(order_type__in=[procedure.name.name for procedure in procedures], is_read=True) 
+    print(procedures)
+    orders = unread_orders 
+    unread_orders.update(is_read=True)         
+    return render(request, template_name, {'orders': orders})  
+  
+
+def fetch_order_counts_view(request):
+    consultation_orders = ConsultationOrder.objects.all() 
+    current_date = timezone.now().date()  
+    # Retrieve the counts of unread and read orders for the current doctor
+    unread_count = Order.objects.filter(order_type__in=[consultation.consultation.name for consultation in consultation_orders], order_date=current_date).count()
+    read_count = Order.objects.filter(order_type__in=[consultation.consultation.name for consultation in consultation_orders], is_read=True).count()    
+    # Return the counts as JSON response
+    return JsonResponse({'unread_count': unread_count, 'read_count': read_count})
+
+def fetch_radiology_order_counts_view(request):  
+    pathodology_records=ImagingRecord.objects.all()
+    current_date = timezone.now().date()   
+    # Retrieve the counts of unread and read orders for the current doctor
+    unread_count = Order.objects.filter(order_type__in=[pathology.imaging.name for pathology in pathodology_records],order_date=current_date) .count()
+    read_count = Order.objects.filter(order_type__in=[pathology.imaging.name for pathology in pathodology_records], is_read=True) .count()    
+    # Return the counts as JSON response
+    return JsonResponse({'unread_count': unread_count, 'read_count': read_count})
+
+def fetch_procedure_order_counts_view(request):  
+    procedures = Procedure.objects.all()
+    current_date = timezone.now().date() 
+    # Retrieve the counts of unread and read orders for the current doctor
+    unread_count = Order.objects.filter(order_type__in=[procedure.name.name for procedure in procedures], order_date=current_date).count()
+    
+    read_count = Order.objects.filter(order_type__in=[procedure.name.name for procedure in procedures], is_read=True).count()    
+    # Return the counts as JSON response
+    return JsonResponse({'unread_count': unread_count, 'read_count': read_count})
+
+def fetch_prescription_counts_view(request):
+    # Get the current date
+    current_date = timezone.now().date()
+    # Query the Prescription model for prescriptions created on the current date
+    prescription_count = Prescription.objects.filter(created_at__date=current_date).count()
+    # Construct the response data
+    response_data = {
+        'total_prescriptions': prescription_count
+    }
+    # Return the response as JSON
+    return JsonResponse(response_data)
+
+
+def add_service(request):
+    try:
+        if request.method == 'POST':
+            # Get form data
+            name = request.POST.get('name')
+            description = request.POST.get('description')
+            type_service = request.POST.get('type_service')
+            coverage = request.POST.get('coverage')
+            cash_cost = request.POST.get('cash_cost')
+            nhif_cost = request.POST.get('nhif_cost')
+            insurance_cost = request.POST.get('insurance_cost')
+            
+            # Check if service ID is provided (for editing existing service)
+            service_id = request.POST.get('service_id')
+            
+            if service_id:
+                service = Service.objects.get(pk=service_id)
+                # Update existing service
+                service.name = name
+                service.description = description
+                service.type_service = type_service
+                service.coverage = coverage
+                service.cash_cost = cash_cost
+                
+                # Add nhif_cost and insurance_cost only if coverage is insurance
+                if coverage == 'Insurance':
+                    service.nhif_cost = nhif_cost
+                    service.insurance_cost = insurance_cost
+                else:
+                    # If coverage is not insurance, set nhif_cost and insurance_cost to 0
+                    service.nhif_cost = 0
+                    service.insurance_cost = 0
+                
+                service.save()
+                return JsonResponse({'success': True, 'message': 'Service updated successfully'})
+            else:
+                # Check if the service name already exists
+                if Service.objects.filter(name=name).exists():
+                    return JsonResponse({'success': False, 'message': 'Service with this name already exists'})
+                
+                # Add new service
+                new_service = Service.objects.create(name=name, description=description, type_service=type_service, 
+                                                      coverage=coverage, cash_cost=cash_cost)
+                # Add nhif_cost and insurance_cost only if coverage is insurance
+                if coverage == 'Insurance':
+                    new_service.nhif_cost = nhif_cost
+                    new_service.insurance_cost = insurance_cost
+                
+                else:
+                    service.nhif_cost = 0
+                    service.insurance_cost = 0  
+                      
+                new_service.save()
+                    
+                return JsonResponse({'success': True, 'message': 'Service added successfully'})
+        else:
+            return JsonResponse({'success': False, 'message': 'Invalid request method'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
+    
+def medicine_routes(request):
+    routes = MedicineRoute.objects.all()
+    return render(request, 'hod_template/medicine_routes.html', {'routes': routes}) 
+
+def add_medicine_route(request):
+    try:
+        if request.method == 'POST':
+            # Get form data
+            name = request.POST.get('names')
+            explanation = request.POST.get('explanation')
+            medicine_route_id = request.POST.get('route_id')  # Check for the ID
+            
+            # If ID is provided, check if it's an existing medicine route
+            if medicine_route_id:
+                try:
+                    medicine_route = MedicineRoute.objects.get(pk=medicine_route_id)
+                    # Update existing medicine route
+                    medicine_route.name = name
+                    medicine_route.explanation = explanation
+                    medicine_route.save()
+                    return JsonResponse({'success': True, 'message': 'Medicine route updated successfully'})
+                except MedicineRoute.DoesNotExist:
+                    return JsonResponse({'success': False, 'message': 'Medicine route does not exist'})
+            else:
+                # Check if the name already exists
+                if MedicineRoute.objects.filter(name=name).exists():
+                    return JsonResponse({'success': False, 'message': 'Medicine route with this name already exists'})
+                
+                # Create new MedicineRoute
+                MedicineRoute.objects.create(name=name, explanation=explanation)
+                return JsonResponse({'success': True, 'message': 'Medicine route added successfully'})
+        else:
+            return JsonResponse({'success': False, 'message': 'Invalid request method'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
+    
+def delete_medicine_route(request):
+    try:
+        if request.method == 'POST':
+            route_id = request.POST.get('route_id')
+            
+            if route_id:
+                try:
+                    route = MedicineRoute.objects.get(pk=route_id)
+                    route.delete()
+                    return JsonResponse({'success': True, 'message': 'Medicine route deleted successfully'})
+                except MedicineRoute.DoesNotExist:
+                    return JsonResponse({'success': False, 'message': 'Medicine route does not exist'})
+            else:
+                return JsonResponse({'success': False, 'message': 'Invalid route ID'})
+        else:
+            return JsonResponse({'success': False, 'message': 'Invalid request method'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})    
+    
+def medicine_unit_measures(request):
+    measures = MedicineUnitMeasure.objects.all()
+    return render(request, 'hod_template/medicine_unit_measures.html', {'measures': measures}) 
+
+def add_medicine_unit_measure(request):
+    try:
+        if request.method == 'POST':
+            # Get form data
+            name = request.POST.get('name')
+            short_name = request.POST.get('short_name')
+            application_user = request.POST.get('application_user')
+
+            # Check if the medicine unit measure ID is provided (for editing existing record)
+            unit_measure_id = request.POST.get('unit_measure_id')
+            if unit_measure_id:
+                # Get the existing medicine unit measure instance
+                unit_measure = get_object_or_404(MedicineUnitMeasure, pk=unit_measure_id)
+                # Update the existing instance
+                unit_measure.name = name
+                unit_measure.short_name = short_name
+                unit_measure.application_user = application_user
+                unit_measure.save()
+                return JsonResponse({'success': True, 'message': 'Medicine unit measure updated successfully'})
+
+            # Check if the name already exists
+            if MedicineUnitMeasure.objects.filter(name=name).exists():
+                return JsonResponse({'success': False, 'message': 'Medicine unit measure with this name already exists'})
+
+            # Create new MedicineUnitMeasure
+            MedicineUnitMeasure.objects.create(name=name, short_name=short_name, application_user=application_user)
+            return JsonResponse({'success': True, 'message': 'Medicine unit measure added successfully'})
+
+        else:
+            return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})   
+   
+def delete_medicine_unit_measure(request):
+    try:
+        if request.method == 'POST':
+            unit_measure_id = request.POST.get('unit_measure_id')
+            
+            if unit_measure_id:
+                try:
+                    unit_measure = MedicineUnitMeasure.objects.get(pk=unit_measure_id)
+                    unit_measure.delete()
+                    return JsonResponse({'success': True, 'message': 'Medicine unit_measure deleted successfully'})
+                except MedicineUnitMeasure.DoesNotExist:
+                    return JsonResponse({'success': False, 'message': 'Medicine unit_measure does not exist'})
+            else:
+                return JsonResponse({'success': False, 'message': 'Invalid unit_measure ID'})
+        else:
+            return JsonResponse({'success': False, 'message': 'Invalid request method'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})  

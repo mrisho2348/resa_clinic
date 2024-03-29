@@ -68,7 +68,7 @@ Pathology Diagnostic Tests
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <form id="deletePathologyDiagnosticTestForm" method="POST" action="{% url 'pathology_diagnostic_test_delete' test.id %}">
+                <form id="deletePathologyDiagnosticTestForm" method="POST" action="{% url 'clinic:pathology_diagnostic_test_delete' test.id %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
@@ -90,7 +90,7 @@ Pathology Diagnostic Tests
                                 </div>
                                 <div class="modal-body">
                                     <!-- Form for editing PathologyDiagnosticTest -->
-                                    <form id="editPathologyDiagnosticTestForm" method="POST" action="{% url 'pathology_diagnostic_test_edit_save' test.id %}">
+                                    <form id="editPathologyDiagnosticTestForm" method="POST" action="{% url 'clinic:pathology_diagnostic_test_edit_save' test.id %}">
                                         {% csrf_token %}
                                         
                                         <!-- Pathology Record -->
@@ -274,7 +274,7 @@ Pathology Diagnostic Tests
             </div>
             <div class="modal-body">
                 <!-- Form for adding PathologyDiagnosticTest -->
-                <form id="pathologyDiagnosticTestForm" method="POST" action="{% url 'pathology_diagnostic_test_save' %}">
+                <form id="pathologyDiagnosticTestForm" method="POST" action="{% url 'clinic:pathology_diagnostic_test_save' %}">
                     {% csrf_token %}
                     
                     <!-- Pathology Record -->

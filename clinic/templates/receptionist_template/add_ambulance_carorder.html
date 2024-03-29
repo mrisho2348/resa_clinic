@@ -1,4 +1,4 @@
-{% extends 'hod_template/base_template.html' %}
+{% extends 'receptionist_template/base_template.html' %}
 
 {% block title %}
     Ambulance Profile
@@ -15,7 +15,7 @@
           <div class="row">
             <div class="col-md-12">
                 <div class="card">
-                    <form action="{% if order %}{% url 'ambulance_order_edit' order.id %}{% else %}{% url 'ambulance_order_create_or_update' %}{% endif %}" method="post">
+                    <form action="{% if order %}{% url 'receptionist_ambulance_order_edit' order.id %}{% else %}{% url 'receptionist_ambulance_order_create_or_update' %}{% endif %}" method="post">
                         {% csrf_token %}
                         <div class="card-body">
                             <div class="row">

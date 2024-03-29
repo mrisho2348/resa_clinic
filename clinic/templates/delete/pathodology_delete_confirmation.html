@@ -3,7 +3,6 @@
 {% block page_title %}
   Confirm Deletion
 {% endblock page_title %}
-
 {% block main_content %}
   <section class="content">
     <div class="container-fluid">
@@ -20,7 +19,7 @@
               <form method="post">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger">Confirm Delete</button>
-                <a href="{% url 'manage_pathodology' %}" class="btn btn-secondary">Cancel</a>
+                <a href="{% url 'clinic:manage_pathodology' %}" class="btn btn-secondary">Cancel</a>
               </form>
             </div>
           </div>

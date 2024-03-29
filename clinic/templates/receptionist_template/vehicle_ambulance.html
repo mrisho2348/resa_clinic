@@ -6,7 +6,7 @@ Vehicle Ambulance Details
 
 {% block breadcrumb %}
 {% include "receptionist_template/modal_form.html" %}
-<a class="btn btn-primary" href="{% url 'ambulance_order_create_or_update' %}">
+<a class="btn btn-primary" href="{% url 'receptionist_ambulance_order_create_or_update' %}">
     <i class="fas fa-plus"></i> New
 </a>
 {% endblock breadcrumb %}
@@ -27,7 +27,7 @@ Vehicle Ambulance Details
                                         <th>Vehicle Type</th>
                                         <th>Activities</th>
                                         <th>Cost</th>
-                                        <th>Ambulance Type</th>
+                                        <th>Ambulance Number</th>
                                         <th>Organization</th>
                                         <th>Contact Person</th>
                                         <th>Contact Phone</th>
@@ -44,7 +44,7 @@ Vehicle Ambulance Details
                                         <td>{{ order.vehicle_type }}</td>
                                         <td>{{ order.activities }}</td>
                                         <td>{{ order.cost }}</td>
-                                        <td>{{ order.ambulance_type }}</td>
+                                        <td>{{ order.ambulance_number }}</td>
                                         <td>{{ order.organization }}</td>
                                         <td>{{ order.contact_person }}</td>
                                         <td>{{ order.contact_phone }}</td>
@@ -53,10 +53,10 @@ Vehicle Ambulance Details
                                         <td>{{ order.days }}</td>
                                         <td>{{ order.payment_mode }}</td>
                                         <td>
-                                            <a href="{% url 'ambulance_order_edit' order.id %}" class="btn btn-secondary" title="Edit">
+                                            <a href="{% url 'receptionist_ambulance_order_edit' order.id %}" class="btn btn-secondary" title="Edit">
                                                 <i class="fas fa-edit"></i> <!-- Font Awesome edit icon -->
                                             </a>
-                                            <a href="{% url 'vehicle_detail' order.id %}" class="btn btn-success" title="View">
+                                            <a href="{% url 'receptionist_vehicle_detail' order.id %}" class="btn btn-success" title="View">
                                                 <i class="fas fa-eye"></i> <!-- Font Awesome eye icon for view details -->
                                             </a>
                                             <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteAmbulanceCarModal{{ order.id }}"  data-toggle="tooltip" title="Delete">
@@ -87,7 +87,7 @@ Vehicle Ambulance Details
                                                                 function deleteAmbulanceCar(order_id) {
                                                                     $.ajax({
                                                                         type: 'POST',
-                                                                        url: '{% url "delete_ambulancecardorder" %}',  // Replace with your URL
+                                                                        url: '{% url "receptionist_delete_ambulancecardorder" %}',  // Replace with your URL
                                                                         data: { order_id: order_id },
                                                                         success: function (data) {
                                                                             if (data.success) {

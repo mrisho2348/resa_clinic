@@ -140,7 +140,7 @@ Diagnostic Tests
                 <p>Are you sure you want to delete the diagnostic test for {{ test.patient.fullname }}?</p>
             </div>
             <div class="modal-footer">
-                <form method="post" action="{% url 'delete_diagnostic_test' test.id %}">
+                <form method="post" action="{% url 'clinic:delete_diagnostic_test' test.id %}">
                     {% csrf_token %}
                     <input type="hidden" name="_method" value="DELETE">
                     <button type="submit" class="btn btn-danger">Delete</button>
@@ -165,7 +165,7 @@ Diagnostic Tests
             </div>
             <div class="modal-body">
                 <!-- Form for editing DiagnosticTest details -->
-                <form method="post" action="{% url 'edit_diagnostic_test' test.id %}">
+                <form method="post" action="{% url 'clinic:edit_diagnostic_test' test.id %}">
                     {% csrf_token %}
 
                     <!-- Patient selection -->
@@ -239,8 +239,7 @@ Diagnostic Tests
                             // Trigger change event on page load
                             $('#diseasepathology{{ test.id }}').trigger('change');
                         });
-                    </script>
-                
+                    </script>           
 
 
                     <!-- Save button -->
@@ -280,7 +279,7 @@ Diagnostic Tests
             </div>
             <div class="modal-body">
                 <!-- Form for entering DiagnosticTest details -->
-                <form method="post" action="{% url 'save_diagnostic_test' %}">
+                <form method="post" action="{% url 'clinic:save_diagnostic_test' %}">
                     {% csrf_token %}
 
                     <!-- Patient selection -->
