@@ -707,7 +707,9 @@ def add_medicine(request):
             manufacturer = request.POST['manufacturer']
             description = request.POST.get('description', '')
             expiration_date = request.POST['expiration_date']
-            unit_price = request.POST['unit_price']
+            cash_cost = request.POST['cash_cost']
+            buying_price = request.POST['buying_price']
+            nhif_cost = request.POST['nhif_cost']
 
             # Validate expiration date
             if expiration_date <= str(date.today()):                
@@ -723,7 +725,9 @@ def add_medicine(request):
                 manufacturer=manufacturer,
                 description=description,
                 expiration_date=expiration_date,
-                unit_price=unit_price
+                cash_cost=cash_cost,
+                buying_price=buying_price,
+                nhif_cost=nhif_cost
             )
 
            

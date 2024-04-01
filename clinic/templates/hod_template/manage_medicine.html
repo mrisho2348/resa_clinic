@@ -23,8 +23,6 @@
 {% load static %}
 {% block main_content %}
 
-{% comment %} <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css"> {% endcomment %}
-
 <div class="table-responsive">
     <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
         <thead>
@@ -37,7 +35,9 @@
                 <th>Manufacturer</th>
                 <th>Description</th>
                 <th>Expiration Date</th>
-                <th>Unit Price</th>              
+                <th>Cash Price</th>              
+                <th>NHIF Price</th>              
+                <th>Buying Price</th>              
                 <th>Action</th>              
             </tr>
         </thead>
@@ -52,7 +52,9 @@
                     <td>{{ medicine.manufacturer }}</td>
                     <td>{{ medicine.description|default:"N/A" }}</td>
                     <td>{{ medicine.expiration_date }}</td>
-                    <td>{{ medicine.unit_price }}</td>
+                    <td>{{ medicine.cash_cost }}</td>
+                    <td>{{ medicine.nhif_cost }}</td>
+                    <td>{{ medicine.buying_price }}</td>
                     <td>
                       <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#editMedicineModal{{ medicine.id }}"  data-toggle="tooltip" title="Edit">
                         <i class="fa fa-edit text-white"></i>
@@ -199,9 +201,8 @@
                                             <label for="editSideEffect">Side Effect</label>
                                             <textarea class="form-control" id="editSideEffect" name="side_effect">{{ medicine.side_effect }}</textarea>
                                         </div>
-                                    </div>
-                                
-                                    <!-- Dosage, Storage Condition, Manufacturer -->
+                                    </div>                                
+                                     <!-- Dosage, Storage Condition, Manufacturer -->
                                     <div class="form-row">
                                         <div class="form-group col-md-4">
                                             <label for="editDosage">Dosage</label>
@@ -216,22 +217,34 @@
                                             <input type="text" class="form-control" id="editManufacturer" name="manufacturer" value="{{ medicine.manufacturer }}" required>
                                         </div>
                                     </div>
-                                
+
                                     <!-- Description -->
                                     <div class="form-group">
                                         <label for="editDescription">Description</label>
                                         <textarea class="form-control" id="editDescription" name="description">{{ medicine.description }}</textarea>
                                     </div>
-                                
-                                    <!-- Expiration Date, Unit Price -->
+
+                                    <!-- Expiration Date, Cash Cost, Buying Price -->
                                     <div class="form-row">
                                         <div class="form-group col-md-4">
                                             <label for="editExpirationDate">Expiration Date</label>
                                             <input type="date" class="form-control" id="editExpirationDate" name="expiration_date" value="{{ medicine.expiration_date|date:'Y-m-d' }}" required>
                                         </div>
                                         <div class="form-group col-md-4">
-                                            <label for="editUnitPrice">Unit Price</label>
-                                            <input type="text" class="form-control" id="editUnitPrice" name="unit_price" value="{{ medicine.unit_price }}" required>
+                                            <label for="editCashCost">Cash Cost</label>
+                                            <input type="text" class="form-control" id="editCashCost" name="cash_cost" value="{{ medicine.cash_cost }}" required>
+                                        </div>
+                                        <div class="form-group col-md-4">
+                                            <label for="editBuyingPrice">Buying Price</label>
+                                            <input type="text" class="form-control" id="editBuyingPrice" name="buying_price" value="{{ medicine.buying_price }}" required>
+                                        </div>
+                                    </div>
+
+                                    <!-- NHIF Cost -->
+                                    <div class="form-row">
+                                        <div class="form-group col-md-4">
+                                            <label for="editNhifCost">NHIF Cost</label>
+                                            <input type="text" class="form-control" id="editNhifCost" name="nhif_cost" value="{{ medicine.nhif_cost }}" required>
                                         </div>
                                     </div>
                                     <div id="messageContainer" class="text-center mt-2"></div>

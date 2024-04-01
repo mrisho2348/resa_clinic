@@ -21,7 +21,7 @@ from django.core.mail import send_mail
 from clinic.emailBackEnd import EmailBackend
 from django.core.exceptions import ObjectDoesNotExist
 from clinic.forms import ImportStaffForm
-from clinic.models import HealthRecord, ImagingRecord, LabTest, LaboratoryOrder, PatientLifestyleBehavior, PatientMedicationAllergy, PatientSurgery, RemoteCompany, Consultation, ContactDetails, Country, CustomUser, DiseaseRecode, InsuranceCompany, Medicine, MedicineInventory, Notification, NotificationMedicine, PathodologyRecord, Patients, Procedure, RemoteConsultation, RemoteConsultationNotes, RemotePatientVital, RemotePrescription, RemoteProcedure, RemoteReferral, RemoteService, ServiceRequest, Staffs
+from clinic.models import ChiefComplaint, HealthRecord, ImagingRecord, LabTest, LaboratoryOrder, PatientLifestyleBehavior, PatientMedicationAllergy, PatientSurgery, RemoteCompany, Consultation, ContactDetails, Country, CustomUser, DiseaseRecode, InsuranceCompany, Medicine, MedicineInventory, Notification, NotificationMedicine, PathodologyRecord, Patients, Procedure, RemoteConsultation, RemoteConsultationNotes, RemotePatientVital, RemotePrescription, RemoteProcedure, RemoteReferral, RemoteService, ServiceRequest, Staffs
 from clinic.resources import StaffResources
 from tablib import Dataset
 from django.db.models import Sum
@@ -2874,7 +2874,7 @@ def patient_consultation_record_view(request, patient_id, visit_id):
             medicineinventory__remain_quantity__gt=0,  # Inventory level greater than zero
             expiration_date__gt=current_date  # Not expired
         ).distinct()
-
+        
         return render(request, 'kahama_template/manage_patient_consultation_record.html', {
             'visit_history': visit_history,
             'patient': patient,
@@ -3359,6 +3359,8 @@ def save_remotesconsultation_notes(request, patient_id, visit_id):
         messages.error(request, f'Error adding/editing patient consultation record: {str(e)}')  
         return render(request, 'kahama_template/add_consultation_notes.html', context)
            
+
+
            
 def save_nextremotesconsultation_notes(request, patient_id, visit_id):
     try:

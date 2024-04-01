@@ -43,12 +43,17 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="gender">Gender:</label><span class="error">* </span>
-                            <select class="form-control select2bs4" style="width: 100%;" id="gender" name="gender" required>
-                              
+                            <select class="form-control select2bs4" style="width: 100%;" id="gender" name="gender" required>                              
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
                             </select>
                             
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="dob">Date of Birth:</label>
+                            <input type="date" class="form-control" id="dob" name="dob" min="1922-01-01" max="2024-12-31">
                         </div>
                     </div>
                     <!-- Age -->
@@ -63,12 +68,7 @@
                         </div>
                     </div>
                <!-- Date of Birth -->
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label for="dob">Date of Birth:</label>
-                        <input type="date" class="form-control" id="dob" name="dob" min="1922-01-01" max="2024-12-31">
-                    </div>
-                </div>
+                
                 </div>
             
                 <!-- Additional Personal Information -->
@@ -261,96 +261,94 @@
       </div>
       <div class="modal-body">
         <!-- Bootstrap-styled form -->
-        <form method="post"  id="medicineForm">
-          {% csrf_token %}
-      
-          <!-- Medicine Name -->
-          <div class="form-row">
-              <div class="form-group col-md-4">
-                  <label for="medicineName">Medicine Name</label>
-                  <input type="text" class="form-control" id="medicineName" name="name" required>
-              </div>
-      
-              <!-- Medicine Type -->
-              <div class="form-group col-md-4">
-                  <label for="medicineType">Medicine Type</label>
-                  <select  class="form-control select2bs4" style="width: 100%;" id="medicineType" name="medicine_type" required>
-                      <option value="Tablet">Tablet</option>
-                      <option value="Capsule">Capsule</option>
-                      <option value="Injection">Injection</option>
-                      <option value="Ointment">Ointment</option>
-                      <option value="Drops">Drops</option>
-                      <option value="Inhaler">Inhaler</option>
-                      <option value="Patch">Patch</option>
-                      <option value="Liquid">Liquid</option>
-                      <option value="Cream">Cream</option>
-                      <option value="Gel">Gel</option>
-                      <option value="Suppository">Suppository</option>
-                      <option value="Powder">Powder</option>
-                      <option value="Suspension">Suspension</option>
-                      <option value="Lozenge">Lozenge</option>                     
-                      <!-- Add more options as needed -->
-                  </select>
-              </div>
-      
-              <!-- Side Effect -->
-              <div class="form-group col-md-4">
-                  <label for="sideEffect">Side Effect</label>
-                  <textarea class="form-control" id="sideEffect" name="side_effect"></textarea>
-              </div>
-          </div>
-      
-          <!-- Dosage -->
-          <div class="form-row">
-              <div class="form-group col-md-4">
-                  <label for="dosage">Dosage</label>
-                  <input type="text" class="form-control" id="dosage" name="dosage" required>
-              </div>
-      
-              <!-- Storage Condition -->
-              <div class="form-group col-md-4">
-                  <label for="storageCondition">Storage Condition</label>
-                  <input type="text" class="form-control" id="storageCondition" name="storage_condition" required>
-              </div>
-      
-              <!-- Manufacturer -->
-              <div class="form-group col-md-4">
-                  <label for="manufacturer">Manufacturer</label>
-                  <input type="text" class="form-control" id="manufacturer" name="manufacturer" required>
-              </div>
-          </div>
-      
-          <!-- Description -->
-          <div class="form-group">
-              <label for="description">Description</label>
-              <textarea class="form-control" id="description" name="description"></textarea>
-          </div>
-      
-          <!-- Expiration Date -->
-          <div class="form-row">
-              <div class="form-group col-md-4">
-                  <label for="expirationDate">Expiration Date</label>
-                  <input type="date" class="form-control" id="expirationDate" name="expiration_date" required>
-              </div>
-      
-              <!-- Unit Price -->
-              <div class="form-group col-md-4">
-                  <label for="unitPrice">Unit Price</label>
-                  <input type="text" class="form-control" id="unitPrice" name="unit_price" required>
-              </div>
-          </div>
-          <div id="messageContainer" class="text-center mt-2"></div>
-          <div id="expirationDateError" class="text-center mt-2"></div>
-            
-          <div class="form-group pt-2 float-end">
-              <div class="row">
-                  <div class="col-md-8"></div>
-                  <div class="col-md-4">
-                      <button type="submit" class="btn btn-md btn-primary">Save and Continue <i class="mdi mdi-forward"></i></button>
-                  </div>
-              </div>
-          </div>
-      </form>
+        <form method="post" id="medicineForm">
+            {% csrf_token %}
+            <!-- Medicine Name, Medicine Type, Side Effect -->
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="medicineName">Drug Name</label>
+                    <input type="text" class="form-control" id="medicineName" name="name" required>
+                </div>
+        
+                <div class="form-group col-md-4">
+                    <label for="medicineType">Drug Type</label>
+                    <select class="form-control select2bs4" style="width: 100%;" id="medicineType" name="medicine_type" required>
+                        <!-- Options here -->
+                    </select>
+                </div>
+        
+                <div class="form-group col-md-4">
+                    <label for="sideEffect">Side Effect</label>
+                    <textarea class="form-control" id="sideEffect" name="side_effect"></textarea>
+                </div>
+            </div>
+        
+            <!-- Dosage, Storage Condition, Manufacturer -->
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="Formulation">Formulation</label>
+                    <input type="text" class="form-control" id="dosage" name="dosage" required>
+                </div>
+        
+                <div class="form-group col-md-4">
+                    <label for="storageCondition">Storage Condition</label>
+                    <input type="text" class="form-control" id="storageCondition" name="storage_condition" required>
+                </div>
+        
+                <div class="form-group col-md-4">
+                    <label for="manufacturer">Manufacturer</label>
+                    <input type="text" class="form-control" id="manufacturer" name="manufacturer" required>
+                </div>
+            </div>
+        
+            <!-- Description -->
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea class="form-control" id="description" name="description"></textarea>
+            </div>
+        
+            <!-- Expiration Date, Cash Cost, Buying Price -->
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="expirationDate">Expiration Date</label>
+                    <input type="date" class="form-control" id="expirationDate" name="expiration_date" required>
+                </div>
+        
+                <div class="form-group col-md-4">
+                    <label for="cashCost">Cash Cost</label>
+                    <input type="text" class="form-control" id="cashCost" name="cash_cost" required>
+                </div>
+        
+                <div class="form-group col-md-4">
+                    <label for="buyingPrice">Buying Price</label>
+                    <input type="text" class="form-control" id="buyingPrice" name="buying_price" required>
+                </div>
+            </div>
+        
+            <!-- NHIF Cost -->
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="nhifCost">NHIF Cost</label>
+                    <input type="text" class="form-control" id="nhifCost" name="nhif_cost" required>
+                </div>
+            </div>
+        
+            <!-- Message Container -->
+            <div id="messageContainer" class="text-center mt-2"></div>
+            <!-- Expiration Date Error -->
+            <div id="expirationDateError" class="text-center mt-2"></div>
+        
+            <!-- Submit Button -->
+            <div class="form-group pt-2 float-end">
+                <div class="row">
+                    <div class="col-md-8"></div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-md btn-primary">Save and Continue <i class="mdi mdi-forward"></i></button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        
       <script>
          // Handle form submission
          function validateForm(event) {
@@ -384,7 +382,7 @@
   
               // Send AJAX request to the server
               $.ajax({
-                  url: '/add_medicine/',
+                  url: '{% url "clinic:add_medicine" %}',
                   method: 'POST',
                   data: formData,
                   success: function (response) {

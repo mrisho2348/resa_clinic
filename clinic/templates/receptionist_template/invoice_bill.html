@@ -21,11 +21,14 @@ Patient Details
                                     <img src="{% static 'dist/img/resalogo.png' %}" alt="Company Logo" class="company-logo">
                                 </td>
                                 <td class="text-white">
-                                    <p>RESA SPECIALIZED MEDICAL CLINIC,</p>
-                                    <p> kunduchi-kinondoni, Dar es Saalam</p>
-                                    <p>divine@resa.co.tz</p>
-                                    <p>PHONE: 255692082068</p>
-                                    <p><a href="https://www.divineheart.or.tz/" class="text-white">https://www.divineheart.or.tz/</a></p>
+                                    <h1>RESA MEDICAL CENTRE</h1>
+                                    <p> Polyclinic and EMS Care</p>
+                                    <p> P.O.BOX 54235 </p>
+                                    <p> Silver Sands Road, Plot 45, Block A, House No. 45 Kunduchi, Kinondoni, Dar es Saalam</p>
+                                    <p>info@resa.co.tz</p>
+                                    <p>Tel: 255 657 008 008</p>
+                                    <p><a href="https://www.resa.co.tz/" class="text-white">https://www.resa.co.tz/</a></p>
+                                  <p class="mt-2 " style="font-family: ;"> Part of RESA Medical Group </p>
                                 </td>
                             </tr>
                         </tbody>
@@ -35,14 +38,49 @@ Patient Details
         </div>
     </header>
 </div>
-
+<div class="row">
+    <div class="col-md-12">
+        <h1  class="text-center">BILL NOTE</h1>
+    </div>
+</div>
 <main class="container py-5">       
     <div class="row">
         <div class="col-12">
-            <div class="card patient-details-card">                    
+            <div class="card patient-details-card">   
+                                
                 <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                               
+                                <div class="card-body">
+                                    <div class="row" style="font-size:13px;">
+                                        <div class="col-md-3">PATIENT: <b>{{ order.patient.first_name }} {{ order.patient.middle_name }}  {{ order.patient.last_name }}</b></div>
+                                        <div class="col-md-3">DOB: <b>{{ order.patient.dob|date:'Y-m-d' }} [ Age: {% if order.patient.dob %}
+                                            <script>
+                                                var dob = new Date("{{ order.patient.dob|date:'Y-m-d' }}");
+                                                var now = new Date();
+                                                var ageMilliseconds = now - dob;
+                                                var ageSeconds = ageMilliseconds / 1000;
+                                                var ageYears = Math.floor(ageSeconds / (365.25 * 24 * 60 * 60));
+                                                document.write(ageYears + ' years');
+                                            </script>
+                                            {% else %}
+                                            {{ order.patient.age }}
+                                            {% endif %}]</b></div>
+                                        <div class="col-md-3">SEX: <b>{{ order.patient.gender }}</b></div>
+                                        <div class="col-md-3">FILE NO : <b>{{ order.patient.mrn }}</b> </div>
+                                    </div>
+                                        <div class="row mt-3">
+                                            <div class="col-md-3">Payment mode: <b>{{ order.patient.payment_form }}</b></div>
+                                        </div>
+                                </div>           
+                            
+                            </div>
+                        </div>
+                    </div>
                     <!-- Billing Information -->
-                    <div class="row">                           
+                    {% comment %} <div class="row">                           
                         <div class="col-md-9">
                             <h3>Billing to</h3>
                             <p> {{ order.patient }}</p>
@@ -54,7 +92,7 @@ Patient Details
                             <p><strong>Order Date:</strong> {{ order.order_date }}</p>
                         </div>
                     </div>
-
+                     {% endcomment %}
                     <!-- Order Service -->
                     <div class="row mt-4">
                         <div class="col-md-12">                               
@@ -92,14 +130,7 @@ Patient Details
                         </div>
                     </div>
 
-                    <!-- Thank You Message -->
-                    <div class="row mt-4">
-                        <div class="col-md-12">
-                            <div class="thank-you">
-                                <p class="text-center">Thank you for your business!</p>
-                            </div>
-                        </div>
-                    </div>
+                   
                 </div>
             </div>
         </div>

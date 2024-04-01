@@ -161,7 +161,7 @@ class HealthRecord(models.Model):
     # Add more fields for health record information as needed
 
     def __str__(self):
-        return f"Health Record recorded on {self.created_at}"  
+        return f"{self.name}"  
     
 class PatientLifestyleBehavior(models.Model):
     patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE)
@@ -1340,31 +1340,53 @@ class Medicine(models.Model):
     manufacturer = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)   
     expiration_date = models.DateField()
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
-    transactions = models.ManyToManyField('Transaction', blank=True)
+    cash_cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    buying_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    nhif_cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True) # New field for cost    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
     def __str__(self):
         return self.name    
     
-class Transaction(models.Model):
-    date = models.DateField()
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    # Medicines associated with this transaction through the MedicineTransaction model
-    medicines = models.ManyToManyField(Medicine, through='MedicineTransaction')
-    # Additional fields for Transaction
-    payment_method = models.CharField(max_length=20, choices=[('Cash', 'Cash'), ('Credit Card', 'Credit Card')])
-    is_successful = models.BooleanField(default=False)
-    transaction_status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Completed', 'Completed')])
+
+class ChiefComplaint(models.Model):    
+    patient = models.ForeignKey(RemotePatient, on_delete=models.CASCADE)
+    visit = models.ForeignKey(RemotePatientVisits, on_delete=models.CASCADE,blank=True, null=True)
+    health_record = models.ForeignKey(HealthRecord, on_delete=models.CASCADE,blank=True, null=True)
+    other_complaint = models.CharField(max_length=100)
+    duration = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
+    # Other fields for Chief Complaint
     def __str__(self):
-        return f"Transaction #{self.id} on {self.date} for {self.amount} ({'Successful' if self.is_successful else 'Pending'})"
+        return f"{self.health_record.name} - {self.duration}"    
     
-    
-    
+class PrimaryPhysicalExamination(models.Model):
+    patient = models.ForeignKey(RemotePatient, on_delete=models.CASCADE)
+    visit = models.ForeignKey(RemotePatientVisits, on_delete=models.CASCADE,blank=True, null=True)
+    patent_airway = models.CharField(max_length=100, blank=True)
+    notpatient_explanation = models.TextField(blank=True)
+    breathing = models.CharField(max_length=100, blank=True)
+    normal_breathing = models.TextField(blank=True)
+    abnormal_breathing = models.CharField(max_length=100, blank=True)
+    circulating = models.CharField(max_length=100, blank=True)
+    normal_circulating = models.TextField(blank=True)
+    abnormal_circulating = models.CharField(max_length=100, blank=True)    
+    gcs = models.CharField(max_length=100, blank=True)
+    rbg = models.CharField(max_length=100, blank=True)
+    pupil = models.CharField(max_length=100, blank=True)
+    pain_score = models.CharField(max_length=100, blank=True)
+    avpu = models.CharField(max_length=100, blank=True)
+    exposure = models.CharField(max_length=100, blank=True)
+    normal_exposure = models.CharField(max_length=100, blank=True)
+    abnormal_exposure = models.CharField(max_length=100, blank=True)
+
+
+    def __str__(self):
+        return f"Physical Examination - {self.pk}"
+        
 class MedicineInventory(models.Model):
     medicine = models.ForeignKey('Medicine', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
@@ -1493,20 +1515,6 @@ class MedicationPayment(models.Model):
         patient_info = self.patient.fullname if self.patient else f"Non-Registered: {self.non_registered_patient_name}"
         return f"Payment of {self.amount} for {self.quantity} {self.medicine.name}(s) by {patient_info} on {self.payment_date}"
 
-    
-    
-
-
-
-class MedicineTransaction(models.Model):
-    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
-    transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
-    total_cost = models.DecimalField(max_digits=10, decimal_places=2)  
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    objects = models.Manager()     
-    
 class PatientDisease(models.Model):
     patient = models.ForeignKey(Patients, on_delete=models.CASCADE, related_name='diseases')
     disease_record = models.ForeignKey(DiseaseRecode, on_delete=models.CASCADE)    

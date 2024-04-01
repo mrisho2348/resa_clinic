@@ -1,9 +1,10 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib import messages
-from clinic.models import HealthRecord, RemotePatient, PatientLifestyleBehavior, PatientSurgery, PatientHealthCondition, FamilyMedicalHistory, PatientMedicationAllergy
+from clinic.models import ChiefComplaint, HealthRecord, RemotePatient, PatientLifestyleBehavior, PatientSurgery, PatientHealthCondition, FamilyMedicalHistory, PatientMedicationAllergy
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.core.exceptions import ObjectDoesNotExist
 def save_patient_health_information(request, patient_id):
     try:
         # Retrieve the patient object using the patient_id from URL parameters
@@ -165,3 +166,126 @@ def get_chief_complaints(request):
     
     # Return the chief complaints as JSON response
     return JsonResponse(chief_complaints_list, safe=False)    
+
+@csrf_exempt
+def save_chief_complaint(request):
+    try:
+        if request.method == 'POST':
+            # Extract data from the request
+            patient_id = request.POST.get('patient_id')
+            visit_id = request.POST.get('visit_id')
+            health_record_id = request.POST.get('chief_complain_name')
+            other_chief_complaint = request.POST.get('other_chief_complaint')
+            duration = request.POST.get('chief_complain_duration')        
+
+            # Create a new ChiefComplaint object
+            chief_complaint = ChiefComplaint(
+                duration=duration,
+                patient_id=patient_id,
+                visit_id=visit_id
+            )
+
+            # Set the appropriate fields based on the provided data
+            if health_record_id == "other":
+                if ChiefComplaint.objects.filter(visit_id=visit_id,other_complaint=other_chief_complaint).exists():
+                    return JsonResponse({'error': 'A ChiefComplaint with the same health record already exists for this visit'}, status=400)
+                chief_complaint.other_complaint = other_chief_complaint
+            else:
+                # Check if a ChiefComplaint with the same health_record_id already exists for the given visit_id
+                if ChiefComplaint.objects.filter(health_record_id=health_record_id, visit_id=visit_id).exists():
+                    return JsonResponse({'error': 'A ChiefComplaint with the same health record already exists for this visit'}, status=400)
+               
+                chief_complaint.health_record_id = health_record_id          
+
+            chief_complaint.save()
+
+            # Initialize health_record_data to None
+            health_record_data = None
+
+            # Serialize the HealthRecord object if applicable
+            if health_record_id and health_record_id != "other":
+                health_record = HealthRecord.objects.get(pk=health_record_id)
+                # Extract the name of the health record
+                health_record_data = {'name': health_record.name}
+            
+            # Return the saved data as a JSON response
+            response_data = {
+                'id': chief_complaint.id,
+                'health_record': health_record_data,
+                'duration': chief_complaint.duration,
+            }
+
+            if other_chief_complaint:
+                response_data['other_complaint'] = other_chief_complaint
+
+            return JsonResponse(response_data, status=200)
+
+        # If request method is not POST, return an error response
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+    except Exception as e:
+        # Catch any exceptions and return an error response
+        return JsonResponse({'error': str(e)}, status=500)
+
+def fetch_existing_data(request):
+    try:
+        # Extract patient_id and visit_id from the request parameters
+        patient_id = request.GET.get('patient_id')
+        visit_id = request.GET.get('visit_id')
+
+        # Query the database to fetch existing chief complaints based on patient_id and visit_id
+        existing_data = ChiefComplaint.objects.filter(patient_id=patient_id, visit_id=visit_id).values()
+        
+        # Create a list to hold the modified data with unified information
+        modified_data = []
+
+        # Iterate through each entry in the existing data
+        for entry in existing_data:
+            # Determine the information to display based on whether the health record is null or not
+            display_info = None
+            if entry['health_record_id'] is not None:
+                try:
+                    health_record = HealthRecord.objects.get(pk=entry['health_record_id'])
+                    display_info = health_record.name
+                except ObjectDoesNotExist:
+                    # Handle the case where the HealthRecord object does not exist
+                    display_info = "Unknown Health Record"
+            else:
+                # Use the "other complaint" field if health record is null
+                display_info = entry['other_complaint'] if entry['other_complaint'] else "Unknown"
+
+            # Create a modified entry with unified information under the 'health_record' key
+            modified_entry = {
+                'id': entry['id'],
+                'patient_id': entry['patient_id'],
+                'visit_id': entry['visit_id'],
+                'health_record': display_info,
+                'duration': entry['duration'],
+                'created_at': entry['created_at'],
+                'updated_at': entry['updated_at']
+            }
+
+            # Add the modified entry to the list
+            modified_data.append(modified_entry)
+
+        # Return the modified data as a JSON response
+        return JsonResponse(modified_data, safe=False)
+    
+    except Exception as e:
+        # If an error occurs, return an error response with status code 500
+        return JsonResponse({'error': str(e)}, status=500)
+    
+
+@csrf_exempt
+def delete_chief_complaint(request, chief_complaint_id):
+    try:
+        # Fetch the ChiefComplaint object to delete
+        chief_complaint = get_object_or_404(ChiefComplaint, id=chief_complaint_id)
+        
+        # Delete the ChiefComplaint
+        chief_complaint.delete()
+        
+        # Return a success response
+        return JsonResponse({'message': 'Chief complaint deleted successfully'})
+    except Exception as e:
+        # If an error occurs, return an error response
+        return JsonResponse({'error': str(e)}, status=500)    

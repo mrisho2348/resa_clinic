@@ -6,6 +6,9 @@ from kahamahmis import kahamaViews
 from . import kahamaImports, views,delete,editView
 
 urlpatterns = [  
+        path('save_chief_complaint/', kahamaViews.save_chief_complaint, name='save_chief_complaint'),
+        path('delete_chief_complaint/<int:chief_complaint_id>/', kahamaViews.delete_chief_complaint, name='delete_chief_complaint'),   
+         path('fetch-existing-data/', kahamaViews.fetch_existing_data, name='endpoint_to_fetch_existing_data'),       
         path('get_chief_complaints/', kahamaViews.get_chief_complaints, name='get_chief_complaints'),          
         path('delete_healthrecord/', kahamaViews.delete_healthrecord, name='delete_healthrecord'),          
         path('health_record_list',kahamaViews.health_record_list, name="health_record_list"),           

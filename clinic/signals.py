@@ -37,8 +37,7 @@ def update_total_payment(sender, instance, created, **kwargs):
 def update_total_payment_per_prescription(sender, instance, created, **kwargs):
     if created:
         # Calculate total payment for the inventory
-        total_price = instance.quantity_used * instance.medicine.unit_price
-        
+        total_price = instance.quantity_used * instance.medicine.unit_price        
         # Update the total_payment field of the MedicineInventory instance
         instance.total_price = total_price
         instance.save(update_fields=['total_price']) 

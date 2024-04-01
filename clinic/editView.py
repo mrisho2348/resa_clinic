@@ -191,7 +191,9 @@ def edit_medicine(request, medicine_id):
         manufacturer = request.POST.get('manufacturer')
         description = request.POST.get('description')
         expiration_date = request.POST.get('expiration_date')
-        unit_price = request.POST.get('unit_price')
+        cash_cost = request.POST.get('cash_cost')
+        buying_price = request.POST.get('buying_price')
+        nhif_cost = request.POST.get('nhif_cost')
 
         # Perform the update within a transaction
         with transaction.atomic():
@@ -204,7 +206,9 @@ def edit_medicine(request, medicine_id):
             medicine.manufacturer = manufacturer
             medicine.description = description
             medicine.expiration_date = expiration_date
-            medicine.unit_price = unit_price
+            medicine.cash_cost = cash_cost
+            medicine.buying_price = buying_price
+            medicine.nhif_cost = nhif_cost
 
             # Save the changes
             medicine.save()
