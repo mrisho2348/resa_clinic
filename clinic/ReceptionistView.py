@@ -5,7 +5,7 @@ import logging
 from django.db.models import F
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.http import HttpResponseBadRequest
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
@@ -14,7 +14,7 @@ from django.contrib import messages
 from clinic.models import Consultation,  Medicine,Notification,PathodologyRecord, Patients, Procedure, Staffs
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
-from .models import AmbulanceOrder,ConsultationNotes, ConsultationOrder, Country, Diagnosis, Diagnosis, ImagingRecord,InventoryItem, LabTest, LaboratoryOrder, Order, PatientVisits, PatientVital, Prescription, Referral,Service, AmbulanceVehicleOrder
+from .models import AmbulanceOrder,ConsultationNotes, ConsultationOrder, Country, Diagnosis, Diagnosis, ImagingRecord,InventoryItem, LaboratoryOrder, Order, PatientVisits, PatientVital, Prescription, Referral,Service, AmbulanceVehicleOrder
 from django.db.models import Sum
 from django.db.models import Q
 # Create your views here.

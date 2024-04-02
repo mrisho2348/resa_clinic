@@ -1,4 +1,4 @@
-from datetime import  datetime
+
 from django.utils import timezone
 import logging
 from django.urls import reverse
@@ -16,7 +16,7 @@ from django.db.models import Q
 from clinic.models import  Consultation,  DiseaseRecode, Medicine, Notification,  PathodologyRecord, Patients, Procedure, Staffs
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
-from .models import ConsultationFee, ConsultationNotes, ConsultationNotification, ConsultationOrder, Counseling, Country, Diagnosis,Diagnosis,HealthIssue, ImagingRecord, InventoryItem, LabTest, LaboratoryOrder, Order, PatientVisits, PatientVital, Prescription, Procedure, Patients, Referral,Service
+from .models import ConsultationNotes, ConsultationOrder,Country, Diagnosis,Diagnosis,HealthIssue, ImagingRecord, LaboratoryOrder, Order, PatientVisits, PatientVital, Prescription, Procedure, Patients,Service
 
 @login_required
 def labtechnician_dashboard(request):

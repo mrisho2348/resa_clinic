@@ -1,34 +1,11 @@
-from datetime import date, datetime
-import json
-from django.utils import timezone
-import logging
-from django.db import models
-from django.db import IntegrityError
-from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib.auth import logout,login
-from django.http import Http404, HttpResponse, HttpResponseBadRequest,HttpResponseRedirect
+
+from django.shortcuts import render
+
 from django.template import loader
 from django.shortcuts import render
-from django.urls import reverse
-from django.db.models import F
-from django.views.decorators.csrf import csrf_protect
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from django.views.generic.edit import FormView
-from django.contrib.messages.views import SuccessMessageMixin
-from django.core.mail import send_mail
-from clinic.emailBackEnd import EmailBackend
-from django.core.exceptions import ObjectDoesNotExist
-from clinic.forms import ImportStaffForm
-from clinic.models import RemoteCompany, Consultation, ContactDetails, CustomUser, DiseaseRecode, InsuranceCompany, Medicine, MedicineInventory, Notification, NotificationMedicine, PathodologyRecord, Patients, Procedure, Staffs
-from clinic.resources import StaffResources
-from tablib import Dataset
-from django.views.decorators.http import require_POST
-from django.contrib.contenttypes.models import ContentType
-from django.db.models import OuterRef, Subquery
-from .models import Category, ConsultationFee, ConsultationNotes, Country, Diagnosis, DiagnosticTest, Diagnosis, Equipment, EquipmentMaintenance, FamilyMedicalHistory, HealthIssue, InventoryItem, MedicationPayment, PathologyDiagnosticTest, PatientDisease, PatientHealthCondition, PatientVisits, PatientVital, Prescription, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, RemotePatient, RemotePatientVisits, RemotePrescription, Sample, Service, Supplier, UsageHistory
+
+from clinic.models import Patients, Staffs
+
 
 # Create your views here.
 def index(request):

@@ -1,10 +1,14 @@
+import json
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib import messages
-from clinic.models import ChiefComplaint, HealthRecord, RemotePatient, PatientLifestyleBehavior, PatientSurgery, PatientHealthCondition, FamilyMedicalHistory, PatientMedicationAllergy
+from clinic.models import Diagnosis, HealthRecord, PathodologyRecord
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.decorators import login_required
+
+from kahamahmis.models import ChiefComplaint, FamilyMedicalHistory, PatientHealthCondition, PatientLifestyleBehavior, PatientMedicationAllergy, PatientSurgery, PrimaryPhysicalExamination, RemoteConsultationNotes, RemotePatient, RemotePatientVisits, RemotePatientVital, SecondaryPhysicalExamination
 def save_patient_health_information(request, patient_id):
     try:
         # Retrieve the patient object using the patient_id from URL parameters
@@ -288,4 +292,309 @@ def delete_chief_complaint(request, chief_complaint_id):
         return JsonResponse({'message': 'Chief complaint deleted successfully'})
     except Exception as e:
         # If an error occurs, return an error response
-        return JsonResponse({'error': str(e)}, status=500)    
+        return JsonResponse({'error': str(e)}, status=500)   
+    
+@csrf_exempt
+def add_primary_physical_examination(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            primary_physical_id = data.get('primary_physical_id')  # Check if primary_physical_id is provided
+
+            if primary_physical_id:  # If primary_physical_id is provided, update the existing record
+                primary_examination = PrimaryPhysicalExamination.objects.get(id=primary_physical_id)
+            else:  # Otherwise, create a new record
+                # Check if a record already exists for the patient on the specified visit
+                existing_record = PrimaryPhysicalExamination.objects.filter(patient_id=data.get('patient_id'), visit_id=data.get('visit_id')).first()
+                if existing_record:
+                    return JsonResponse({'success': False, 'error': 'A record already exists for this patient on the specified visit.'})
+                
+                primary_examination = PrimaryPhysicalExamination()
+
+            # Extract data from the JSON
+            primary_examination.patient_id = data.get('patient_id')
+            primary_examination.visit_id = data.get('visit_id')
+            primary_examination.patent_airway = data.get('airway')
+            primary_examination.notpatient_explanation = data.get('explanation')
+            primary_examination.breathing = data.get('breathing')
+            primary_examination.normal_breathing = data.get('normalBreathing')
+            primary_examination.abnormal_breathing = data.get('abnormalBreathing')
+            primary_examination.circulating = data.get('circulating')
+            primary_examination.normal_circulating = data.getlist('normalCirculating[]')
+            primary_examination.abnormal_circulating = data.get('abnormalCirculating')
+            primary_examination.gcs = data.get('gcs')
+            primary_examination.rbg = data.get('rbg')
+            primary_examination.pupil = data.get('pupil')
+            primary_examination.pain_score = data.get('painScore')
+            primary_examination.avpu = data.get('avpu')
+            primary_examination.exposure = data.get('exposure')
+            primary_examination.normal_exposure = data.get('temperatures')
+            primary_examination.abnormal_exposure = data.get('abnormalities')
+
+            # Save the PrimaryPhysicalExamination object
+            primary_examination.save()
+
+            # Return success response
+            return JsonResponse({'success': True})
+
+        except Exception as e:
+            # Return error response
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    else:
+        # Return error response for unsupported request method
+        return JsonResponse({'success': False, 'error': 'Unsupported request method'})
+     
+@login_required
+def save_remotesconsultation_notes(request, patient_id, visit_id):
+    doctor = request.user.staff
+    patient = get_object_or_404(RemotePatient, pk=patient_id)
+    visit = get_object_or_404(RemotePatientVisits, patient=patient_id, id=visit_id)
+    
+    try:
+        health_conditions = PatientHealthCondition.objects.filter(patient_id=patient_id)
+        surgery_info = PatientSurgery.objects.filter(patient_id=patient_id)
+        family_history = FamilyMedicalHistory.objects.filter(patient_id=patient_id)
+        allergies = PatientMedicationAllergy.objects.filter(patient_id=patient_id)
+        behaviors = PatientLifestyleBehavior.objects.get(patient_id=patient_id)
+        patient_vitals = RemotePatientVital.objects.filter(patient=patient_id, visit=visit)
+        health_records = HealthRecord.objects.all()
+        patient_surgeries = PatientSurgery.objects.filter(patient=patient_id)
+    except Exception as e:
+        patient_vitals = None  
+        surgery_info = None  
+        family_history = None  
+        allergies = None  
+        health_conditions = None  
+        health_records = None  
+        patient_surgeries = None  
+        behaviors = None  
+       
+
+    consultation_note = RemoteConsultationNotes.objects.filter(patient=patient_id, visit=visit).first()
+    primary_examination = PrimaryPhysicalExamination.objects.filter(patient=patient_id, visit=visit).first()
+    secondary_examination = SecondaryPhysicalExamination.objects.filter(patient_id=patient_id, visit_id=visit_id).first()
+    
+    pathology_records = PathodologyRecord.objects.all()
+    provisional_diagnoses = Diagnosis.objects.all()
+    final_diagnoses = Diagnosis.objects.all()
+    range_51 = range(51)
+    range_301 = range(301)
+    range_101 = range(101)
+    range_15 = range(3, 16)
+    
+    context = {
+        'secondary_examination': secondary_examination,
+        'primary_examination': primary_examination,
+        'health_records': health_records,
+        'pathology_records': pathology_records,
+        'provisional_diagnoses': provisional_diagnoses,
+        'final_diagnoses': final_diagnoses,
+        'health_conditions': health_conditions,
+        'surgery_info': surgery_info,
+        'family_history': family_history,
+        'behaviors': behaviors,
+        'allergies': allergies,
+        'patient': patient,
+        'visit': visit,
+        'patient_vitals': patient_vitals,
+        'patient_surgeries': patient_surgeries,
+        'range_51': range_51,
+        'range_301': range_301,
+        'range_101': range_101,
+        'range_15': range_15,
+        'consultation_note': consultation_note,
+    }
+
+    if request.method == 'POST':
+        try:
+            # Retrieve form fields for consultation note
+            chief_complaints = request.POST.get('chief_complaints')
+            history_of_presenting_illness = request.POST.get('history_of_presenting_illness')
+            allergy_to_medications = request.POST.get('allergy_to_medications')
+            doctor_plan = request.POST.get('doctor_plan')
+            provisional_diagnosis = request.POST.getlist('provisional_diagnosis[]')
+            final_diagnosis = request.POST.getlist('final_diagnosis[]')
+            pathology = request.POST.getlist('pathology[]')
+            
+               # Retrieve form fields for secondary examination
+            heent = request.POST.get('heent')
+            cns = request.POST.get('cns')
+            normal_cns = request.POST.get('normal_cns')
+            abnormal_cns = request.POST.get('abnormal_cns')
+            cvs = request.POST.get('cvs')
+            normal_cvs = request.POST.get('normal_cvs')
+            abnormal_cvs = request.POST.get('abnormal_cvs')
+            rs = request.POST.get('rs')
+            normal_rs = request.POST.get('normal_rs')
+            abnormal_rs = request.POST.get('abnormal_rs')
+            pa = request.POST.get('pa')
+            normal_pa = request.POST.get('normal_pa')
+            abnormal_pa = request.POST.get('abnormal_pa')
+            gu = request.POST.get('gu')
+            normal_gu = request.POST.get('normal_gu')
+            abnormal_gu = request.POST.get('abnormal_gu')
+            mss = request.POST.get('mss')
+            normal_mss = request.POST.get('normal_mss')
+            abnormal_mss = request.POST.get('abnormal_mss')
+
+            # Retrieve form fields for primary examination
+            airway = request.POST.get('airway')
+            explanation = request.POST.get('explanation')
+            breathing = request.POST.get('breathing')
+            normal_breathing = request.POST.getlist('normalBreathing[]')
+            abnormal_breathing = request.POST.get('abnormalBreathing')
+            circulating = request.POST.get('circulating')
+            normal_circulating = request.POST.getlist('normalCirculating[]')
+            abnormal_circulating = request.POST.get('abnormalCirculating')
+            gcs = request.POST.get('gcs')
+            rbg = request.POST.get('rbg')
+            pupil = request.POST.get('pupil')
+            pain_score = request.POST.get('painScore')
+            avpu = request.POST.get('avpu')
+            exposure = request.POST.get('exposure')
+            normal_exposure = request.POST.getlist('normal_exposure[]')
+            abnormal_exposure = request.POST.get('abnormalities')
+
+            # Handle primary examination model
+            if primary_examination:                
+                primary_examination.patent_airway = airway
+                primary_examination.notpatient_explanation = explanation
+                primary_examination.breathing = breathing
+                primary_examination.normal_breathing = normal_breathing
+                primary_examination.abnormal_breathing = abnormal_breathing
+                primary_examination.circulating = circulating
+                primary_examination.normal_circulating = normal_circulating
+                primary_examination.abnormal_circulating = abnormal_circulating
+                primary_examination.gcs = gcs
+                primary_examination.rbg = rbg
+                primary_examination.pupil = pupil
+                primary_examination.pain_score = pain_score
+                primary_examination.avpu = avpu
+                primary_examination.exposure = exposure
+                primary_examination.normal_exposure = normal_exposure
+                primary_examination.abnormal_exposure = abnormal_exposure
+                primary_examination.save()
+            else:
+                existing_record = PrimaryPhysicalExamination.objects.filter(patient_id=patient_id, visit_id=visit_id).first()
+                if existing_record:
+                    messages.error(request, f'A record already exists for this patient on the specified visit')
+                    return render(request, 'kahama_template/add_consultation_notes.html', context)
+                PrimaryPhysicalExamination.objects.create(
+                    patient_id=patient_id,
+                    visit_id=visit_id,
+                    patent_airway = airway,
+                    notpatient_explanation = explanation,
+                    breathing = breathing,
+                    normal_breathing = normal_breathing,
+                    abnormal_breathing = abnormal_breathing,
+                    circulating = circulating,
+                    normal_circulating = normal_circulating,
+                    abnormal_circulating = abnormal_circulating,
+                    gcs = gcs,
+                    rbg = rbg,
+                    pupil = pupil,
+                    pain_score = pain_score,
+                    avpu = avpu,
+                    exposure = exposure,
+                    normal_exposure = normal_exposure,
+                    abnormal_exposure = abnormal_exposure,
+                )
+
+            if secondary_examination:  # If record exists, update it
+                secondary_examination.heent = heent
+                secondary_examination.cns = cns
+                secondary_examination.normal_cns = normal_cns
+                secondary_examination.abnormal_cns = abnormal_cns
+                secondary_examination.cvs = cvs
+                secondary_examination.normal_cvs = normal_cvs
+                secondary_examination.abnormal_cvs = abnormal_cvs
+                secondary_examination.rs = rs
+                secondary_examination.normal_rs = normal_rs
+                secondary_examination.abnormal_rs = abnormal_rs
+                secondary_examination.pa = pa
+                secondary_examination.normal_pa = normal_pa
+                secondary_examination.abnormal_pa = abnormal_pa
+                secondary_examination.gu = gu
+                secondary_examination.normal_gu = normal_gu
+                secondary_examination.abnormal_gu = abnormal_gu
+                secondary_examination.mss = mss
+                secondary_examination.normal_mss = normal_mss
+                secondary_examination.abnormal_mss = abnormal_mss
+                secondary_examination.save()
+            else:
+                existing_record = SecondaryPhysicalExamination.objects.filter(patient_id=patient_id, visit_id=visit_id).first()
+                if existing_record:
+                    messages.error(request, f'A record already exists for this patient on the specified visit')
+                    return render(request, 'kahama_template/add_consultation_notes.html', context)
+                # If record doesn't exist, create a new one
+                SecondaryPhysicalExamination.objects.create(
+                    patient_id=patient_id,
+                    visit_id=visit_id,
+                    heent=heent,
+                    cns=cns,
+                    normal_cns=normal_cns,
+                    abnormal_cns=abnormal_cns,
+                    cvs=cvs,
+                    normal_cvs=normal_cvs,
+                    abnormal_cvs=abnormal_cvs,
+                    rs=rs,
+                    normal_rs=normal_rs,
+                    abnormal_rs=abnormal_rs,
+                    pa=pa,
+                    normal_pa=normal_pa,
+                    abnormal_pa=abnormal_pa,
+                    gu=gu,
+                    normal_gu=normal_gu,
+                    abnormal_gu=abnormal_gu,
+                    mss=mss,
+                    normal_mss=normal_mss,
+                    abnormal_mss=abnormal_mss
+                )             
+            
+
+            # Handle consultation note model
+            if consultation_note:
+                consultation_note.history_of_presenting_illness = history_of_presenting_illness
+                consultation_note.allergy_to_medications = allergy_to_medications
+                consultation_note.doctor_plan = doctor_plan
+                consultation_note.save()
+                consultation_note.provisional_diagnosis.set(provisional_diagnosis)
+                consultation_note.final_diagnosis.set(final_diagnosis)
+                consultation_note.pathology.set(pathology)
+            else:
+                existing_record = RemoteConsultationNotes.objects.filter(patient_id=patient_id, visit_id=visit_id).first()
+                if existing_record:
+                    messages.error(request, f'A record already exists for this patient on the specified visit')
+                    return render(request, 'kahama_template/add_consultation_notes.html', context)
+                consultation_note = RemoteConsultationNotes()
+                consultation_note.doctor = doctor
+                consultation_note.patient = patient
+                consultation_note.visit = visit
+                consultation_note.history_of_presenting_illness = history_of_presenting_illness
+                consultation_note.allergy_to_medications = allergy_to_medications
+                consultation_note.doctor_plan = doctor_plan
+                consultation_note.save()
+                consultation_note.provisional_diagnosis.set(provisional_diagnosis)
+                consultation_note.final_diagnosis.set(final_diagnosis)
+                consultation_note.pathology.set(pathology)
+
+            # Redirect based on doctor's plan
+            if doctor_plan == 'Prescription':
+                return redirect(reverse('kahamahmis:save_prescription', args=[patient_id, visit_id]))
+            elif doctor_plan == 'Laboratory':
+                return redirect(reverse('kahamahmis:save_laboratory', args=[patient_id, visit_id]))
+            elif doctor_plan == 'Procedure':
+                return redirect(reverse('kahamahmis:save_remoteprocedure', args=[patient_id, visit_id]))
+            elif doctor_plan == 'Observation':
+                return redirect(reverse('kahamahmis:save_observation', args=[patient_id, visit_id]))
+            # Add similar logic for other plans
+            
+        except Exception as e:
+            messages.error(request, f'Error: {str(e)}')
+            # Return an appropriate response or render a template with an error message
+            return render(request, 'kahama_template/add_consultation_notes.html', context)
+    else:
+        # If GET request, render the template for adding consultation notes
+        return render(request, 'kahama_template/add_consultation_notes.html', context)
+   

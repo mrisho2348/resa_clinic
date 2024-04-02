@@ -1,7 +1,4 @@
 from django import forms
-
-from clinic.models import RemoteCompany, DiseaseRecode, InsuranceCompany, PathodologyRecord, Staffs
-from .resources import DiseaseRecodeResource, InsuranceCompanyResource, StaffResources
 from django.core.validators import FileExtensionValidator
 
 class ImportStaffForm(forms.Form):

@@ -6,6 +6,7 @@ from kahamahmis import kahamaViews
 from . import kahamaImports, views,delete,editView
 
 urlpatterns = [  
+        path('add_primary_physical_examination/', kahamaViews.add_primary_physical_examination, name='add_primary_physical_examination'),
         path('save_chief_complaint/', kahamaViews.save_chief_complaint, name='save_chief_complaint'),
         path('delete_chief_complaint/<int:chief_complaint_id>/', kahamaViews.delete_chief_complaint, name='delete_chief_complaint'),   
          path('fetch-existing-data/', kahamaViews.fetch_existing_data, name='endpoint_to_fetch_existing_data'),       
@@ -47,7 +48,7 @@ urlpatterns = [
         path('save_edit_remotepatient_vitals/<int:patient_id>/',views.save_edit_remotepatient_vitals, name="save_edit_remotepatient_vitals"),
         path('save_edited_patient_visit/<int:patient_id>/',views.save_edited_patient_visit, name="save_edited_patient_visit"),
         path('save_nextremotesconsultation_notes/<int:patient_id>/<int:visit_id>/',views.save_nextremotesconsultation_notes, name="save_nextremotesconsultation_notes"),
-        path('save_remotesconsultation_notes/<int:patient_id>/<int:visit_id>/',views.save_remotesconsultation_notes, name="save_remotesconsultation_notes"),
+        path('save_remotesconsultation_notes/<int:patient_id>/<int:visit_id>/',kahamaViews.save_remotesconsultation_notes, name="save_remotesconsultation_notes"),
         path('edit_remotesconsultation_notes/<int:patient_id>/',views.edit_remotesconsultation_notes, name="edit_remotesconsultation_notes"),
         path('save_nextprescription/<int:patient_id>/<int:visit_id>/', views.save_nextprescription, name='nextsave_prescription'),
         path('prescription/<int:patient_id>/<int:visit_id>/', views.save_prescription, name='save_prescription'),

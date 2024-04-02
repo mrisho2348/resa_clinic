@@ -2,7 +2,9 @@
 
 from django.db.models.signals import post_save,pre_save
 from django.dispatch import receiver
-from .models import AmbulanceOrder, Consultation, ConsultationNotification, ConsultationOrder, ImagingRecord, InventoryItem, LaboratoryOrder, MedicationPayment, MedicineInventory, Order, Prescription, Procedure, Reagent, ReagentUsage, RemotePrescription, UsageHistory
+
+from kahamahmis.models import RemotePrescription
+from .models import AmbulanceOrder, Consultation, ConsultationNotification, ConsultationOrder, ImagingRecord, InventoryItem, LaboratoryOrder, MedicationPayment, MedicineInventory, Order, Prescription, Procedure, Reagent, ReagentUsage, UsageHistory
 from django.db.models import F
 from django.db import models
 
