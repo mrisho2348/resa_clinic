@@ -6,6 +6,11 @@ from kahamahmis import kahamaViews
 from . import kahamaImports, views,delete,editView
 
 urlpatterns = [  
+        path('counsel/<int:patient_id>/<int:visit_id>/', kahamaViews.save_counsel, name='save_remote_counseling'),
+        path('laboratory/<int:patient_id>/<int:visit_id>/', kahamaViews.save_laboratory, name='save_laboratory'),
+        path('observation/<int:patient_id>/<int:visit_id>/', kahamaViews.save_observation, name='save_observation'),
+        path('save_remoteprocedure/<int:patient_id>/<int:visit_id>/', kahamaViews.save_remoteprocedure, name='save_remoteprocedure'),
+        path('save_remotereferral/<int:patient_id>/<int:visit_id>/', kahamaViews.save_remotereferral, name='save_remotereferral'),
         path('add_primary_physical_examination/', kahamaViews.add_primary_physical_examination, name='add_primary_physical_examination'),
         path('save_chief_complaint/', kahamaViews.save_chief_complaint, name='save_chief_complaint'),
         path('delete_chief_complaint/<int:chief_complaint_id>/', kahamaViews.delete_chief_complaint, name='delete_chief_complaint'),   
@@ -53,15 +58,12 @@ urlpatterns = [
         path('save_nextprescription/<int:patient_id>/<int:visit_id>/', views.save_nextprescription, name='nextsave_prescription'),
         path('prescription/<int:patient_id>/<int:visit_id>/', views.save_prescription, name='save_prescription'),
         path('save_nextlaboratory/<int:patient_id>/<int:visit_id>/', views.save_nextlaboratory, name='nextsave_laboratory'),
-        path('laboratory/<int:patient_id>/<int:visit_id>/', views.save_laboratory, name='save_laboratory'),
-        path('nextsave_remotereferral/<int:patient_id>/<int:visit_id>/', views.save_nextremotereferral, name='nextsave_remotereferral'),
-        path('save_remotereferral/<int:patient_id>/<int:visit_id>/', views.save_remotereferral, name='save_remotereferral'),
-        path('save_nextcounsel/<int:patient_id>/<int:visit_id>/', views.save_nextcounsel, name='nextsave_counsel'),
-        path('counsel/<int:patient_id>/<int:visit_id>/', views.save_counsel, name='save_counsel'),
+        
+        path('nextsave_remotereferral/<int:patient_id>/<int:visit_id>/', views.save_nextremotereferral, name='nextsave_remotereferral'),        
+        path('save_nextcounsel/<int:patient_id>/<int:visit_id>/', views.save_nextcounsel, name='nextsave_counsel'),        
         path('save_nextremoteprocedure/<int:patient_id>/<int:visit_id>/', views.save_nextremoteprocedure, name='nextsave_remoteprocedure'),
-        path('save_remoteprocedure/<int:patient_id>/<int:visit_id>/', views.save_remoteprocedure, name='save_remoteprocedure'),
-        path('save_nextobservation/<int:patient_id>/<int:visit_id>/', views.save_nextobservation, name='nextsave_observation'),
-        path('observation/<int:patient_id>/<int:visit_id>/', views.save_observation, name='save_observation'),
+        
+        path('save_nextobservation/<int:patient_id>/<int:visit_id>/', views.save_nextobservation, name='nextsave_observation'),        
         path('save_patient_vital/',views.save_patient_vital, name="save_patient_vital"),
         path('save_remotepatient_vital/',views.save_remotepatient_vital, name="save_remotepatient_vital"),
         path('add_prescription/',views.add_prescription, name="add_prescription"),
@@ -199,8 +201,7 @@ urlpatterns = [
         path('resa/medicine-list/', views.medicine_list, name='medicine_list'),
         path('resa/medicine-expired-list/', views.medicine_expired_list, name='medicine_expired_list'),
         path('add_medicine/', views.add_medicine, name='add_medicine'),
-        path('save_procedure/', views.save_procedure, name='save_procedure'),
-        path('save_remoteprocedure/', views.save_remoteprocedure, name='save_remoteprocedure'),
+        path('save_procedure/', views.save_procedure, name='save_procedure'),        
         path('save_referral/', views.save_referral, name='save_referral'),
         path('add_medication_payment/', views.add_medication_payment, name='add_medication_payment'),
         path('change_referral_status/', views.change_referral_status, name='change_referral_status'),

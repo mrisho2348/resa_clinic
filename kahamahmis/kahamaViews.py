@@ -2,13 +2,13 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib import messages
-from clinic.models import Diagnosis, HealthRecord, PathodologyRecord
+from clinic.models import Diagnosis, HealthRecord, PathodologyRecord, Service
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 
-from kahamahmis.models import ChiefComplaint, FamilyMedicalHistory, PatientHealthCondition, PatientLifestyleBehavior, PatientMedicationAllergy, PatientSurgery, PrimaryPhysicalExamination, RemoteConsultationNotes, RemotePatient, RemotePatientVisits, RemotePatientVital, SecondaryPhysicalExamination
+from kahamahmis.models import ChiefComplaint, FamilyMedicalHistory, PatientHealthCondition, PatientLifestyleBehavior, PatientMedicationAllergy, PatientSurgery, PrimaryPhysicalExamination, RemoteConsultationNotes, RemoteCounseling, RemoteLaboratoryOrder, RemoteObservationRecord, RemoteObservationRecord, RemotePatient, RemotePatientVisits, RemotePatientVital, RemoteProcedure, RemoteReferral, RemoteService, SecondaryPhysicalExamination
 def save_patient_health_information(request, patient_id):
     try:
         # Retrieve the patient object using the patient_id from URL parameters
@@ -408,12 +408,11 @@ def save_remotesconsultation_notes(request, patient_id, visit_id):
 
     if request.method == 'POST':
         try:
-            # Retrieve form fields for consultation note
-            chief_complaints = request.POST.get('chief_complaints')
+            # Retrieve form fields for consultation note      
             history_of_presenting_illness = request.POST.get('history_of_presenting_illness')
             allergy_to_medications = request.POST.get('allergy_to_medications')
             doctor_plan = request.POST.get('doctor_plan')
-            provisional_diagnosis = request.POST.getlist('provisional_diagnosis[]')
+            provisional_diagnosis = request.POST.getlist('provisional_diagnosis[]')         
             final_diagnosis = request.POST.getlist('final_diagnosis[]')
             pathology = request.POST.getlist('pathology[]')
             
@@ -554,14 +553,21 @@ def save_remotesconsultation_notes(request, patient_id, visit_id):
             
 
             # Handle consultation note model
+            print("Provisional Diagnosis:", provisional_diagnosis)
+            print("Final Diagnosis:", final_diagnosis)
+            provisional_diagnosis_ids = [int(diagnosis_id) for diagnosis_id in provisional_diagnosis]
+            final_diagnosis_ids = [int(diagnosis_id) for diagnosis_id in final_diagnosis]
             if consultation_note:
                 consultation_note.history_of_presenting_illness = history_of_presenting_illness
                 consultation_note.allergy_to_medications = allergy_to_medications
-                consultation_note.doctor_plan = doctor_plan
-                consultation_note.save()
-                consultation_note.provisional_diagnosis.set(provisional_diagnosis)
-                consultation_note.final_diagnosis.set(final_diagnosis)
+                consultation_note.doctor_plan = doctor_plan               
+                consultation_note.provisional_diagnosis.set(provisional_diagnosis_ids)
+                consultation_note.final_diagnosis.set(final_diagnosis_ids)
                 consultation_note.pathology.set(pathology)
+                try:
+                    consultation_note.save()
+                except Exception as e:
+                    print("Error saving consultation note:", e)
             else:
                 existing_record = RemoteConsultationNotes.objects.filter(patient_id=patient_id, visit_id=visit_id).first()
                 if existing_record:
@@ -573,17 +579,25 @@ def save_remotesconsultation_notes(request, patient_id, visit_id):
                 consultation_note.visit = visit
                 consultation_note.history_of_presenting_illness = history_of_presenting_illness
                 consultation_note.allergy_to_medications = allergy_to_medications
-                consultation_note.doctor_plan = doctor_plan
-                consultation_note.save()
+                consultation_note.doctor_plan = doctor_plan                
                 consultation_note.provisional_diagnosis.set(provisional_diagnosis)
                 consultation_note.final_diagnosis.set(final_diagnosis)
                 consultation_note.pathology.set(pathology)
+                consultation_note.save()
 
             # Redirect based on doctor's plan
             if doctor_plan == 'Prescription':
                 return redirect(reverse('kahamahmis:save_prescription', args=[patient_id, visit_id]))
             elif doctor_plan == 'Laboratory':
                 return redirect(reverse('kahamahmis:save_laboratory', args=[patient_id, visit_id]))
+            
+            elif doctor_plan == 'Referral':
+                # Redirect to Referral page with necessary parameters
+                return redirect(reverse('kahamahmis:save_remotereferral', args=[patient_id, visit_id]))
+            elif doctor_plan == 'Counselling':
+                # Redirect to Counsel page with necessary parameters
+                return redirect(reverse('kahamahmis:save_remote_counseling', args=[patient_id, visit_id]))
+            
             elif doctor_plan == 'Procedure':
                 return redirect(reverse('kahamahmis:save_remoteprocedure', args=[patient_id, visit_id]))
             elif doctor_plan == 'Observation':
@@ -597,4 +611,258 @@ def save_remotesconsultation_notes(request, patient_id, visit_id):
     else:
         # If GET request, render the template for adding consultation notes
         return render(request, 'kahama_template/add_consultation_notes.html', context)
+    
+    
+def save_counsel(request, patient_id, visit_id):
+    # Retrieve patient and visit objects
+    patient = get_object_or_404(RemotePatient, id=patient_id)
+    visit = get_object_or_404(RemotePatientVisits, id=visit_id)              
+    
+    # Retrieve existing remote counseling record if it exists
+    remote_counseling = RemoteCounseling.objects.filter(patient=patient, visit=visit).first()
+    
+    # Prepare context for rendering the template
+    context = {
+        'patient': patient, 
+        'visit': visit,
+        'remote_counseling': remote_counseling,
+    }
+    
+    # Handle form submission
+    if request.method == 'POST':
+        topic = request.POST.get('topic')
+        description = request.POST.get('description')             
+        
+        # Check if all required fields are present
+        if topic and description and patient_id:
+            try:
+                # Update or create remote counseling record
+                if remote_counseling:
+                    # If the record exists, update it
+                    remote_counseling.topic = topic
+                    remote_counseling.description = description
+                    remote_counseling.save()
+                    messages.success(request, 'Remote counseling updated successfully.')
+                else:
+                    # If the record doesn't exist, create a new one
+                    existing_record = RemoteCounseling.objects.filter(patient_id=patient_id, visit_id=visit_id).first()
+                    if existing_record:
+                        messages.error(request, f'A record already exists for this patient on the specified visit')
+                        return render(request, 'kahama_template/counsel_template.html', context)
+                    else:
+                        RemoteCounseling.objects.create(
+                            topic=topic,
+                            description=description,
+                            patient=patient,
+                            visit=visit
+                        )
+                        messages.success(request, 'Remote counseling saved successfully.')               
+             
+                return redirect(reverse('kahamahmis:save_remote_counseling', args=[patient_id, visit_id]))
+                
+            except Exception as e:                
+                messages.error(request, f'Error: {str(e)}')
+        else:          
+            messages.error(request, 'Please fill out all required fields.')
    
+    return render(request, 'kahama_template/counsel_template.html', context)
+
+def save_remotereferral(request, patient_id, visit_id):
+      # Retrieve patient and visit objects
+    patient = get_object_or_404(RemotePatient, id=patient_id)
+    visit = get_object_or_404(RemotePatientVisits, id=visit_id)        
+    # Check if a referral record already exists for this patient on the specified visit
+    referral = RemoteReferral.objects.filter(patient=patient, visit=visit).first()   
+    context = {'patient': patient, 'visit': visit, 'referral': referral}  
+    try:
+         
+        if request.method == 'POST':
+            # Process the form data if it's a POST request
+            source_location = request.POST.get('source_location')
+            destination_location = request.POST.get('destination_location')
+            reason = request.POST.get('reason')
+
+            if referral:
+                # If a referral record exists, update it
+                referral.source_location = source_location
+                referral.destination_location = destination_location
+                referral.reason = reason
+                referral.save()
+                messages.success(request, 'Remote referral updated successfully.')
+            else:
+                 # If the record doesn't exist, create a new one
+                existing_record = RemoteReferral.objects.filter(patient_id=patient_id, visit_id=visit_id).first()
+                if existing_record:
+                    messages.error(request, f'A record already exists for this patient on the specified visit')
+                    return render(request, 'kahama_template/save_remotereferral.html', context)
+                # If no referral record exists, create a new one
+                RemoteReferral.objects.create(
+                    patient=patient,
+                    visit=visit,
+                    source_location=source_location,
+                    destination_location=destination_location,
+                    reason=reason
+                )
+                messages.success(request, 'Remote referral saved successfully.')
+
+            # Redirect to a success page or another view
+            return redirect(reverse('kahamahmis:save_remotereferral', args=[patient_id, visit_id])) # Change 'success_page' to the URL name of your success page
+        
+        else:          
+            return render(request, 'kahama_template/save_remotereferral.html', context)    
+    except Exception as e:
+        messages.error(request, f'An error occurred: {str(e)}')
+        return render(request, 'kahama_template/save_remotereferral.html', context)  
+    
+def save_remoteprocedure(request, patient_id, visit_id):
+    patient = get_object_or_404(RemotePatient, id=patient_id)
+    visit = get_object_or_404(RemotePatientVisits, id=visit_id)
+    procedures = Service.objects.filter(type_service='Procedure')
+    context = {'patient': patient, 'visit': visit,'procedures': procedures}
+    existing_procedure = RemoteProcedure.objects.filter(patient_id=patient_id, visit_id=visit_id).first()
+
+    if request.method == 'POST':
+        name_id = request.POST.get('name')
+        description = request.POST.get('description')
+        cost = request.POST.get('cost')
+
+        # Check if all required fields are present and valid
+        if not (patient_id and visit_id and name_id and description and cost):
+            messages.error(request, 'Please fill out all required fields.')
+        else:
+            try:
+                # Check if a RemoteProcedure record already exists for this patient on the specified visit
+                
+                if existing_procedure:
+                    # If a procedure exists, update it
+                    existing_procedure.name_id = name_id
+                    existing_procedure.description = description
+                    existing_procedure.cost = cost
+                    existing_procedure.save()
+                    messages.success(request, 'Remote procedure updated successfully.')
+                else:
+                     # If the record doesn't exist, create a new one
+                    existing_record = RemoteProcedure.objects.filter(patient_id=patient_id, visit_id=visit_id).first()
+                    if existing_record:
+                        messages.error(request, f'A record already exists for this patient on the specified visit')
+                        return render(request, 'kahama_template/procedure_template.html', context)
+                    RemoteProcedure.objects.create(
+                        patient_id=patient_id,
+                        visit_id=visit_id,
+                        name_id=name_id,
+                        description=description,
+                        cost=cost
+                    )
+                    messages.success(request, 'Remote procedure saved successfully.')
+
+                return redirect(reverse('kahamahmis:save_remoteprocedure', args=[patient_id, visit_id]))  # Change 'success_page' to your success page URL name
+            except Exception as e:
+                messages.error(request, f'Error: {str(e)}')
+
+    context['existing_procedure'] = existing_procedure
+    return render(request, 'kahama_template/procedure_template.html', context) 
+
+
+def save_observation(request, patient_id, visit_id):
+    patient = get_object_or_404(RemotePatient, id=patient_id)
+    visit = get_object_or_404(RemotePatientVisits, id=visit_id)
+    record_exists = RemoteObservationRecord.objects.filter(patient_id=patient_id, visit_id=visit_id).first()    
+    services = Service.objects.filter(type_service='Imaging')
+    context = {'patient': patient, 'visit': visit,'record_exists':record_exists,'services':services}
+
+    if request.method == 'POST':        
+        imaging_id = request.POST.get('imaging')
+        description = request.POST.get('description')
+        result = request.POST.get('result')
+        cost = request.POST.get('cost')
+        image = request.FILES.get('new_image')
+
+        # Check if all required fields are filled
+        if not (imaging_id and description and cost):
+            messages.error(request, 'Please fill out all required fields.')
+        else:
+            try:                    
+                if record_exists:
+                    # If a record exists, update it
+                    observation_record = RemoteObservationRecord.objects.get(patient_id=patient_id, visit_id=visit_id)
+                    observation_record.imaging_id = imaging_id
+                    observation_record.description = description
+                    observation_record.result = result
+                    observation_record.cost = cost
+                    if image:
+                        observation_record.image = image
+                    observation_record.save()
+                    messages.success(request, 'Remote observation record updated successfully.')
+                else:
+                     # If the record doesn't exist, create a new one
+                    existing_record = RemoteObservationRecord.objects.filter(patient_id=patient_id, visit_id=visit_id).first()
+                    if existing_record:
+                        messages.error(request, f'A record already exists for this patient on the specified visit')
+                        return render(request, 'kahama_template/observation_template.html', context)
+                    # If no record exists, create a new one
+                    RemoteObservationRecord.objects.create(
+                        patient=patient,
+                        visit=visit,                   
+                        imaging_id=imaging_id,
+                        description=description,
+                        result=result,
+                        cost=cost,
+                        image=image
+                    )
+                    messages.success(request, 'Remote observation record saved successfully.')
+
+                return redirect(reverse('kahamahmis:save_observation', args=[patient_id, visit_id]))  # Change 'success_page' to your success page URL name
+            except Exception as e:
+                messages.error(request, f'Error: {str(e)}')
+
+    return render(request, 'kahama_template/observation_template.html', context)
+
+def save_laboratory(request, patient_id, visit_id):
+    patient = get_object_or_404(RemotePatient, id=patient_id)
+    visit = get_object_or_404(RemotePatientVisits, id=visit_id)   
+    services = Service.objects.filter(type_service='Laboratory')
+    # Check if the laboratory order already exists for this patient on the specified visit
+    laboratory_order = RemoteLaboratoryOrder.objects.filter(patient=patient, visit=visit).first()
+    context = {'patient': patient, 'visit': visit,'laboratory_order':laboratory_order, 'services':services} 
+    if request.method == 'POST':
+        # Process the form data if it's a POST request
+        name_id = request.POST.get('imaging')
+        description = request.POST.get('description')
+        result = request.POST.get('result')
+        cost = request.POST.get('cost')
+        lab_number = request.POST.get('lab_number')
+
+        try:
+            # If the laboratory order already exists, update it
+            if laboratory_order:
+                laboratory_order.name_id = name_id
+                laboratory_order.description = description
+                laboratory_order.result = result
+                laboratory_order.cost = cost
+                laboratory_order.lab_number = lab_number
+                laboratory_order.save()
+                messages.success(request, 'Laboratory order updated successfully.')
+            else:
+                existing_record = RemoteLaboratoryOrder.objects.filter(patient_id=patient_id, visit_id=visit_id).first()
+                if existing_record:
+                        messages.error(request, f'A record already exists for this patient on the specified visit')
+                        return render(request, 'kahama_template/laboratory_template.html', context)
+                # If no laboratory order exists, create a new one
+                RemoteLaboratoryOrder.objects.create(
+                    patient=patient,
+                    visit=visit,
+                    name_id=name_id,
+                    description=description,
+                    result=result,
+                    cost=cost,
+                    lab_number=lab_number
+                )
+                messages.success(request, 'Laboratory order saved successfully.')
+
+            # Redirect to a success page or another view
+            return redirect(reverse('kahamahmis:save_laboratory', args=[patient_id, visit_id]))  # Change 'success_page' to your success page URL name
+
+        except Exception as e:
+            messages.error(request, f'Error: {str(e)}')
+
+    return render(request, 'kahama_template/laboratory_template.html', context)

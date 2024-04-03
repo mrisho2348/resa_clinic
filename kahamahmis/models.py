@@ -5,7 +5,7 @@ from django.contrib.auth.models import BaseUserManager
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from clinic.models import Country, Medicine, PathodologyRecord, Staffs
+from clinic.models import Country, Medicine, PathodologyRecord, Service, Staffs
 
 
     
@@ -352,12 +352,12 @@ def remotegenerate_vst():
         
 
 
-class RemoteImagingRecord(models.Model):
+class RemoteObservationRecord(models.Model):
     patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE)
     visit = models.ForeignKey('RemotePatientVisits', on_delete=models.CASCADE)
     doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True) 
     data_recorder = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True,related_name='remote_data_recorder') 
-    imaging= models.ForeignKey(RemoteService, on_delete=models.CASCADE,blank=True, null=True) 
+    imaging= models.ForeignKey(Service, on_delete=models.CASCADE,blank=True, null=True) 
     order_date = models.DateField(null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     result = models.TextField(null=True, blank=True)   
@@ -392,7 +392,7 @@ class RemoteLaboratoryOrder(models.Model):
     visit = models.ForeignKey(RemotePatientVisits, on_delete=models.CASCADE,blank=True, null=True) 
     doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True) 
     data_recorder = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True,related_name='remote_lab_data_recorder') 
-    name = models.ForeignKey(RemoteService, on_delete=models.CASCADE,blank=True, null=True) 
+    name = models.ForeignKey(Service, on_delete=models.CASCADE,blank=True, null=True) 
     description = models.TextField(blank=True, null=True)  
     order_date = models.DateField(null=True, blank=True)  
     result = models.TextField(blank=True, verbose_name=_('Test Result'))
@@ -539,12 +539,9 @@ class RemoteAmbulanceVehicleOrder(models.Model):
 class RemoteProcedure(models.Model):
     patient = models.ForeignKey(RemotePatient, on_delete=models.CASCADE)
     doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True)
-    visit = models.ForeignKey(RemotePatientVisits, on_delete=models.CASCADE)
-    consultation = models.ForeignKey(RemoteConsultationNotes, on_delete=models.CASCADE,blank=True, null=True)
-    name = models.CharField(max_length=100)
-    description = models.TextField()
-    duration_time = models.CharField(max_length=50)
-    equipments_used = models.CharField(max_length=255)
+    visit = models.ForeignKey(RemotePatientVisits, on_delete=models.CASCADE)   
+    name  = models.ForeignKey(Service, on_delete=models.CASCADE,blank=True, null=True) 
+    description = models.TextField()    
     cost = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -640,9 +637,8 @@ class RemoteReferral(models.Model):
     # Patient who is being referred
     patient = models.ForeignKey(RemotePatient, on_delete=models.CASCADE)   
     visit = models.ForeignKey(RemotePatientVisits, on_delete=models.CASCADE,blank=True, null=True)
-    consultation = models.ForeignKey(RemoteConsultationNotes, on_delete=models.CASCADE,blank=True, null=True)
-    # Information about the referral
-    source_location  = models.CharField(max_length=255, help_text='Source location of the patient')
+    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True)   
+    source_location  = models.CharField(max_length=255, help_text='Source location of the patient',default="resa medical hospital")
     destination_location = models.CharField(max_length=255, help_text='Destination location for MedEvac')
     rfn = models.CharField(max_length=20, unique=True, editable=False)  
     reason = models.TextField()

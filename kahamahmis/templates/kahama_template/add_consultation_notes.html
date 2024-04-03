@@ -57,6 +57,10 @@ Add  Consultation notes
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                   </div>
+            </div> 
+        </div>              
                         <br />
                         <div class="row">
                             <div class="col-md-12">
@@ -272,366 +276,7 @@ Add  Consultation notes
                          
                         </form>
                         
-                        <script>
-                         // Function to add a new row for chief complaint
-function addChiefComplaint() {
-    var container = document.getElementById('chiefComplaintsContainer');
-    var rowCount = container.getElementsByTagName('tr').length + 1;
-
-    var newRow = document.createElement('tr');
-    newRow.id = 'chiefComplaintRow' + rowCount;
-
-    newRow.innerHTML = `
-        <td>
-            <select class="form-control select2bs4" style="width: 100%;" name="chief_complain_name" required onchange="handleOtherOption(this.value, 'chiefComplaintRow${rowCount}')">
-                {% for health_record in health_records %}
-                <option value="{{health_record.id}}">{{health_record.name}}</option>
-                {% endfor %}
-                <option value="other">Other</option>
-            </select>
-        </td>
-        <td>
-            <input type="text" class="form-control duration-cell" name="chief_complain_duration" required placeholder ="durations">
-            <input type="hidden" name="patient_id" id="patient_id" value="{{ patient.id }}">                                     
-            <input type="hidden" class="form-control" id="visit_id" name="visit_id" value="{{ visit.id }}">
-        </td>
-        <td>
-            <button type="button" class="btn btn-danger btn-sm delete-row" onclick="deleteChiefComplaint('chiefComplaintRow${rowCount}')">Delete</button>
-            <button type="button" class="btn btn-success btn-sm save-row" onclick="saveChiefComplaint('chiefComplaintRow${rowCount}')">Save</button>
-        </td>
-    `;
-
-    container.querySelector('tbody').appendChild(newRow);
-}
-
-
-
-
-// Function to handle editing chief complaints and toggle visibility
-function editChiefComplaint() {
-    // Get the container element for chief complaints
-    var chiefComplaintsContainer = document.getElementById('savedChiefComplaints');
-    
-    // Toggle visibility of the container
-    if (chiefComplaintsContainer.style.display === 'none') {
-        // If the container is hidden, fetch and display existing chief complaints
-        fetchAndDisplayChiefComplaints();
-        chiefComplaintsContainer.style.display = 'block';
-    } else {
-        // If the container is visible, hide it
-        chiefComplaintsContainer.style.display = 'none';
-    }
-}
-
-// Function to fetch and display existing chief complaints
-function fetchAndDisplayChiefComplaints() {
-    // Get the patient ID and visit ID
-    var patientId = document.getElementById('patient_id').value;
-    var visitId = document.getElementById('visit_id').value;
-
-    // Generate the URL for fetching existing chief complaints
-    var url = `{% url 'kahamahmis:endpoint_to_fetch_existing_data' %}?patient_id=${patientId}&visit_id=${visitId}`;
-
-    // Fetch existing chief complaints from the server
-    fetch(url)
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Populate the form with existing chief complaints
-        populateEditForm(data);
-    })
-    .catch(error => {
-        console.error('Error fetching existing chief complaints:', error);
-    });
-}
-
-var deleteChiefComplaintUrl = "{% url 'kahamahmis:delete_chief_complaint' chief_complaint_id=0 %}";
-// Function to populate the edit form with existing chief complaints
-function populateEditForm(existingData) {
-    // Get the container where the edit form will be displayed
-    var editFormContainer = document.getElementById('savedChiefComplaints');
-    
-    // Clear existing data in the container
-    editFormContainer.innerHTML = '';
-
-    // Iterate through existing chief complaints and create rows for each
-    existingData.forEach(function(data) {
-        // Create a row element
-        var row = document.createElement('div');
-        row.classList.add('row');
-
-        // Create columns for displaying health record, duration, and delete button
-        var healthRecordColumn = document.createElement('div');
-        healthRecordColumn.classList.add('col');
-        healthRecordColumn.textContent = data.health_record;
-
-        var durationColumn = document.createElement('div');
-        durationColumn.classList.add('col');
-        durationColumn.textContent = data.duration;
-
-        var deleteColumn = document.createElement('div');
-        deleteColumn.classList.add('col');
-
-        // Create the delete button with Font Awesome icon
-        var deleteButton = document.createElement('button');
-        deleteButton.type = 'button';
-        deleteButton.classList.add('btn', 'btn-sm', 'btn-danger','m-2');
-        deleteButton.innerHTML = '<i class="fa fa-trash" aria-hidden="true"></i>';
-        
-        // Add event listener to handle deleting this chief complaint
-        deleteButton.addEventListener('click', function() {
-            deleteRow(data.id, row); // Pass the chief complaint ID and the row element to the delete function
-        });
-
-        // Append delete button to the delete column
-        deleteColumn.appendChild(deleteButton);
-
-        // Append columns to the row
-        row.appendChild(healthRecordColumn);
-        row.appendChild(durationColumn);
-        row.appendChild(deleteColumn);
-
-        // Append the row to the edit form container
-        editFormContainer.appendChild(row);
-    });
-}
-
-// Function to handle deleting a specific chief complaint row
-function deleteRow(chiefComplaintId, row) {
-    // Construct the URL dynamically using the global variable
-    var deleteUrl = deleteChiefComplaintUrl.replace('0', chiefComplaintId);
-    
-    // Send an AJAX request to delete the chief complaint with the given ID
-    fetch(deleteUrl, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-            // Add any additional headers if needed
-        },
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to delete chief complaint');
-        }
-        // Return the response data as JSON
-        return response.json();
-    })
-    .then(data => {
-        // If the data is successfully deleted, remove the corresponding row from the edit form container
-        row.remove();
-    })
-    .catch(error => {
-        console.error('Error deleting chief complaint:', error);
-    });
-}
-
-
-
-// Function to handle "Other" option
-function handleOtherOption(selectValue, rowId) {
-    var row = document.getElementById(rowId);
-
-    if (selectValue === 'other') {
-        // Remove the previous duration input, if any
-        var durationCell = row.querySelector('.duration-cell');
-        if (durationCell) {
-            durationCell.parentNode.removeChild(durationCell);
-        }
-
-        // Create input fields for other complaint and duration
-        var otherInput = document.createElement('input');
-        otherInput.type = 'text';
-        otherInput.classList.add('form-control');
-        otherInput.placeholder = 'Other Chief Complaint';
-        otherInput.name = 'other_chief_complaint'; // Set the name attribute
-
-        var durationInput = document.createElement('input');
-        durationInput.type = 'text';
-        durationInput.classList.add('form-control', 'duration-input');
-        durationInput.placeholder = 'Duration (days)';
-        durationInput.name = 'other_complain_duration'; // Set the name attribute
-
-        // Get the last cell in the row to ensure proper placement
-        var lastCellIndex = row.cells.length - 1;
-        var lastCell = row.cells[lastCellIndex];
-
-        // Insert new input fields to the existing row before the last cell
-        lastCell.insertAdjacentHTML('beforebegin', `<td>${otherInput.outerHTML}</td>`);
-        lastCell.insertAdjacentHTML('beforebegin', `<td class="duration-cell">${durationInput.outerHTML}</td>`);
-
-        // Include the other complaint and duration inputs in the form data
-        var formData = new FormData();
-        formData.append('other_chief_complaint', otherInput.value);
-        formData.append('other_complain_duration', durationInput.value);
-    }
-}
-
-function fetchAndPopulateTable(patientId, visitId) {
-    // Generate the URL using the URL name and parameters
-    var url = `{% url 'kahamahmis:endpoint_to_fetch_existing_data' %}?patient_id=${patientId}&visit_id=${visitId}`;
-
-    // Fetch existing data from the server
-    fetch(url)
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Populate the table with existing data
-        populateTable(data);
-    })
-    .catch(error => {
-        console.error('Error fetching existing data:', error);
-    });
-}
-
-
-function populateTable(savedData) {
-    var savedChiefComplaints = document.getElementById('savedChiefComplaints');
-    savedChiefComplaints.innerHTML = ''; // Clear existing data
-
-    // Create table element
-    var table = document.createElement('table');
-    table.classList.add('list-item');
-
-    // Create table header
-    var headerRow = document.createElement('tr');
-    headerRow.innerHTML = '';
-    table.appendChild(headerRow);
-
-    // Iterate through saved data and create table rows
-    savedData.forEach(function(data) {
-        var newRow = document.createElement('ul');
-        newRow.innerHTML = `          
-            <li>${data.health_record}-${data.duration}</li>       
-           
-        `;
-        table.appendChild(newRow);
-    });
-
-    // Append table to the container
-    savedChiefComplaints.appendChild(table);
-}
-
-// Function to delete a row for chief complaint
-function deleteChiefComplaint(rowId) {
-    var row = document.getElementById(rowId);
-    row.parentNode.removeChild(row);
-}
-
-
-// Function to fetch existing data and populate the table when the page loads or a new row is added
-document.addEventListener('DOMContentLoaded', function() {
-    fetchAndPopulateTable(document.getElementById('patient_id').value, document.getElementById('visit_id').value);
-});
-
-
-function saveChiefComplaint(rowId) {
-    // Get the row and initialize form data and popup container
-    var row = document.getElementById(rowId);
-    var formData = new FormData();
-    var popupContainer = document.getElementById('popupContainer');
-    
-    // Clear previous content in the popup container
-    popupContainer.innerHTML = '';
-
-    // Get the selected chief complaint value
-    var selectedValue = row.querySelector('[name="chief_complain_name"]').value;
-
-    // Get other input fields
-    var otherInput = row.querySelector('[name="other_chief_complaint"]');
-    var durationInput = row.querySelector('[name="other_complain_duration"]');
-
-    // Check if all required fields are filled
-    if (!selectedValue) {
-        displayPopupMessage('Please select a chief complaint.', 'alert-info');
-        return; // Stop further execution if required fields are not filled
-    }
-
-    // Include other chief complaint and duration if the selected value is "other"
-    if (selectedValue === 'other') {
-        if (!otherInput.value || !durationInput.value) {
-            displayPopupMessage('Please fill in all fields for other chief complaint.', 'alert-danger');
-            return; // Stop further execution if required fields are not filled
-        }
-        formData.append('other_chief_complaint', otherInput.value);
-    } else {
-        // Include the selected chief complaint
-        formData.append('chief_complain_name', selectedValue);
-        
-        // Check if duration is filled for the selected chief complaint
-        if (!row.querySelector('[name="chief_complain_duration"]').value) {
-            displayPopupMessage('Please fill in duration for the selected chief complaint.', 'alert-danger');
-            return; // Stop further execution if required fields are not filled
-        }
-        formData.append('chief_complain_duration', row.querySelector('[name="chief_complain_duration"]').value);
-    }
-
-    // Include patient and visit IDs
-    formData.append('patient_id', document.getElementById('patient_id').value);
-    formData.append('visit_id', document.getElementById('visit_id').value);
-
-    // Generate the URL using the URL name
-    var url = "{% url 'kahamahmis:save_chief_complaint' %}";
-
-    // Send the data to the server to save
-    fetch(url, {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Display the saved data above the form
-        populateTable([data]); // Add the saved data to the table
-
-        // Fetch and populate the table with existing data only when the data is successfully saved
-        fetchAndPopulateTable(document.getElementById('patient_id').value, document.getElementById('visit_id').value);
-    })
-    .catch(error => {
-        // Check if the error message contains the specific message for duplicate ChiefComplaint
-        if (error.message.includes("A ChiefComplaint with the same health record already exists for this visit")) {
-            displayPopupMessage('A ChiefComplaint with the same health record already exists for this visit.', 'alert-danger');
-        } else {
-            // Display other error messages in the popup container
-            displayPopupMessage('Error saving chief complaint: ' + error.message, 'alert-danger');
-        }
-    });
-}
-
-// Function to display popup message
-function displayPopupMessage(message, alertType) {
-    var popupContainer = document.getElementById('popupContainer');
-    popupContainer.innerHTML = '<div class="popup-message alert ' + alertType + '">' +
-                                message +
-                                '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
-                                '<span aria-hidden="true">&times;</span></button></div>';
-}
-
-
-
-
-
-function ViewChiefComplaint() {
-    var chiefComplaintsContainer = document.getElementById('savedChiefComplaints');
-    chiefComplaintsContainer.style.display = 'block';
-    fetchAndPopulateTable(
-        document.getElementById('patient_id').value,
-        document.getElementById('visit_id').value
-    );
-}
-
-                          </script>
+                     
         <div class="row justify-content-center">
             <div class="col-md-12">
                 <div class="card">
@@ -969,7 +614,7 @@ function ViewChiefComplaint() {
                                                         {% endif %}
 
                                                 {% if patient_surgeries %}
-                                                             <!-- Patient Surgery Information-->
+                                                 <!-- Patient Surgery Information-->
                                                     <div class="card">
                                                         <div class="card-header">
                                                             <h6 class="header-title text-center mt-0 mb-1 text-uppercase">Patient Surgery Information</h6>
@@ -997,30 +642,30 @@ function ViewChiefComplaint() {
                                                     </div>
                                                         {% endif %}
                                         
-                                                        {% if behaviors %}
+                                                        {% if "yes" in behaviors.weekly_exercise_frequency or "yes" in behaviors.alcohol_consumption or "yes" in behaviors.smoking or "yes" in behaviors.healthy_diet or "yes" in behaviors.stress_management or "yes" in behaviors.sufficient_sleep %}
                                                         <div class="card">
                                                             <div class="card-header">
                                                                 <h6 class="header-title text-center mt-0 mb-1 text-uppercase">Lifestyle Behaviors</h6>
                                                             </div>
                                                             <div class="card-body">
                                                                 <ul class="list-group">
-                                                                    {% if behaviors.weekly_exercise_frequency == "Yes" %}
-                                                                    <li class="list-group-item">Weekly Exercise Frequency: {{ behaviors.weekly_exercise_frequency }}</li>
+                                                                    {% if behaviors.weekly_exercise_frequency == "yes" %}
+                                                                    <li class="list-group-item">Weekly Exercise Frequency</li>
                                                                     {% endif %}
-                                                                    {% if behaviors.smoking == "Yes" %}
-                                                                    <li class="list-group-item">Smoking: {{ behaviors.smoking }}</li>
+                                                                    {% if behaviors.smoking == "yes" %}
+                                                                    <li class="list-group-item">Smoking</li>
                                                                     {% endif %}
-                                                                    {% if behaviors.alcohol_consumption == "Yes" %}
-                                                                    <li class="list-group-item">Alcohol Consumption: {{ behaviors.alcohol_consumption }}</li>
+                                                                    {% if behaviors.alcohol_consumption == "yes" %}
+                                                                    <li class="list-group-item">Alcohol Consumption</li>
                                                                     {% endif %}
-                                                                    {% if behaviors.healthy_diet == "Yes" %}
-                                                                    <li class="list-group-item">Healthy Diet: {{ behaviors.healthy_diet }}</li>
+                                                                    {% if behaviors.healthy_diet == "yes" %}
+                                                                    <li class="list-group-item">Healthy Diet</li>
                                                                     {% endif %}
-                                                                    {% if behaviors.stress_management == "Yes" %}
-                                                                    <li class="list-group-item">Stress Management: {{ behaviors.stress_management }}</li>
+                                                                    {% if behaviors.stress_management == "yes" %}
+                                                                    <li class="list-group-item">Stress Management</li>
                                                                     {% endif %}
-                                                                    {% if behaviors.sufficient_sleep == "Yes" %}
-                                                                    <li class="list-group-item">Sufficient Sleep: {{ behaviors.sufficient_sleep }}</li>
+                                                                    {% if behaviors.sufficient_sleep == "yes" %}
+                                                                    <li class="list-group-item">Sufficient Sleep</li>
                                                                     {% endif %}
                                                                 </ul>
                                                             </div>
@@ -1080,6 +725,8 @@ function ViewChiefComplaint() {
                                             <option value="Laboratory" {% if "Laboratory" in consultation_note.doctor_plan %} selected {% endif %}>Laboratory</option>                                          
                                             <option value="Procedure" {% if "Procedure" in consultation_note.doctor_plan %} selected {% endif %}>Procedure</option>
                                             <option value="Observation" {% if "Observation" in consultation_note.doctor_plan %} selected {% endif %}>Observation</option>
+                                            <option value="Referral" {% if "Referral" in consultation_note.doctor_plan %} selected {% endif %}>Referral</option>
+                                            <option value="Counselling" {% if "Counselling" in consultation_note.doctor_plan %} selected {% endif %}>Counselling</option>
                                         </select>
                                     </div>
                                 </div>
@@ -1107,146 +754,13 @@ function ViewChiefComplaint() {
                             </div>
                         </form>
                     </div>
-                    <div class="card-footer">
-                        <div class="row">
-                            <div class="col-md-3 text-left">
-                                <a class="btn btn-primary" type="button" data-toggle="modal" data-target="#counselingModal">
-                                    <i class="fas fa-plus"></i> Counselling
-                                </a>
-                            </div>
-                            <div class="col-md-6">
-                                <a class="btn btn-primary" type="button" data-toggle="modal" data-target="#addReferralModal">
-                                    <i class="fas fa-plus"></i>  Refer Patient
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                    
                 </div>
             </div>
         </div>
     </div>
 
 
-            <!-- Counseling Modal -->
-            <div class="modal fade" id="counselingModal" tabindex="-1" role="dialog" aria-labelledby="counselingModalLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                    <h5 class="modal-title" id="counselingModalLabel">Counseling Modal</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    </div>
-                    <div class="modal-body">
-                    <!-- Form fields for counseling details -->
-                    <form id="counselingForm" method="post">
-                        {% csrf_token %}
-                        <div class="form-group">
-                        <label for="counselingTopic">Counseling Topic</label>
-                        <input type="text" class="form-control" id="counselingTopic" name="counseling_topic" placeholder="Enter counseling topic">
-                        <input type="hidden" class="form-control" id="visit" name="visit_id" value="{{ visit_history.id }}">
-                        <input type="hidden" class="form-control" id="patient_id" name="patient_id" value="{{ patient.id }}">
-                        </div>
-                        <div class="form-group">
-                        <label for="counselingDescription">Counseling Description</label>
-                        <textarea class="form-control" id="counselingDescription" rows="3" name="counseling_description" placeholder="Enter counseling description"></textarea>
-                        </div>
-                    
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div id="CounselResponse">
-
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="saveCounseling()">Save Counseling</button>
-                    </div>
-                </div>
-                </form>
-                </div>
-            </div>
-
-
-        <div class="modal fade" id="addReferralModal" tabindex="-1" role="dialog" aria-labelledby="addReferralModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addReferralModalLabel">Add Referral</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="addReferralForm" method="post">
-                            {% csrf_token %}
-                            <div class="form-row">                    
-                            
-                                <div class="form-group col-md-4">
-                                    <label for="destination_location">Destination Location</label>
-                                    <input type="text" class="form-control" id="destination_location" name="destination_location" required>
-                                    <input type="hidden" class="form-control" id="visit_id{{ visit.id }}" name="visit_id" value="{{ visit_history.id }}">
-                                    <input type="hidden" class="form-control" id="patient_id{{ visit.id }}" name="patient_id" value="{{ patient.id }}">
-                                </div>
-                                <div class="form-group col-md-6">
-                                    <label for="reason">Reason</label>
-                                    <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
-                                </div> 
-                            </div>                  
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div id="ReferralResponse">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <button type="button" class="btn btn-primary btn-block" onclick="submitReferral()">Add Referral</button>
-                            </div>
-                        </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        
-
-        
-        <!-- JavaScript to handle AJAX request and form validation -->
-        <script>
-                        // Function to handle submission of referral form
-                        function submitReferral() {      
-                            // Get form data
-                            var formData = new FormData(document.getElementById('addReferralForm'));    
-                            
-                            // Make AJAX request to the server endpoint
-                            $.ajax({
-                                url: '{% url "save_referral" %}',  // Replace with your server endpoint
-                                type: 'POST',
-                                data: formData,
-                                contentType: false,
-                                processData: false,
-                                success: function(response) {
-                                    // Handle success response
-                                    if (response.success) {  
-                                        $('#ReferralResponse').html('<div class="alert alert-success">' + response.message + '</div>');                                                            
-                                    } else {
-                                        // Handle other status cases if needed
-                                        $('#ReferralResponse').html('<div class="alert alert-danger">' + response.message + '</div>');                                               
-                                    }
-                                },
-                                error: function(xhr, status, error) {
-                                    // Handle error response
-                                    $('#ReferralResponse').html('<div class="alert alert-danger">' + xhr.responseText + '</div>');                                               
-                                }
-                            });
-                        }
-                            
-            </script>  
 
     <!-- Modal -->
 <div class="modal fade" id="addPatientVitalModal" tabindex="-1" role="dialog" aria-labelledby="addPatientVitalModalLabel" aria-hidden="true">
@@ -1470,5 +984,365 @@ function ViewChiefComplaint() {
         
     </script>
     
+    <script>
+                        // Function to add a new row for chief complaint
+                function addChiefComplaint() {
+                var container = document.getElementById('chiefComplaintsContainer');
+                var rowCount = container.getElementsByTagName('tr').length + 1;
+
+                var newRow = document.createElement('tr');
+                newRow.id = 'chiefComplaintRow' + rowCount;
+
+                newRow.innerHTML = `
+                <td>
+                <select class="form-control select2bs4" style="width: 100%;" name="chief_complain_name" required onchange="handleOtherOption(this.value, 'chiefComplaintRow${rowCount}')">
+                {% for health_record in health_records %}
+                <option value="{{health_record.id}}">{{health_record.name}}</option>
+                {% endfor %}
+                <option value="other">Other</option>
+                </select>
+                </td>
+                <td>
+                <input type="text" class="form-control duration-cell" name="chief_complain_duration" required placeholder ="durations">
+                <input type="hidden" name="patient_id" id="patient_id" value="{{ patient.id }}">                                     
+                <input type="hidden" class="form-control" id="visit_id" name="visit_id" value="{{ visit.id }}">
+                </td>
+                <td>
+                <button type="button" class="btn btn-danger btn-sm delete-row" onclick="deleteChiefComplaint('chiefComplaintRow${rowCount}')">Delete</button>
+                <button type="button" class="btn btn-success btn-sm save-row" onclick="saveChiefComplaint('chiefComplaintRow${rowCount}')">Save</button>
+                </td>
+                `;
+
+                container.querySelector('tbody').appendChild(newRow);
+                }
+
+
+
+
+                // Function to handle editing chief complaints and toggle visibility
+                function editChiefComplaint() {
+                // Get the container element for chief complaints
+                var chiefComplaintsContainer = document.getElementById('savedChiefComplaints');
+
+                // Toggle visibility of the container
+                if (chiefComplaintsContainer.style.display === 'none') {
+                // If the container is hidden, fetch and display existing chief complaints
+                fetchAndDisplayChiefComplaints();
+                chiefComplaintsContainer.style.display = 'block';
+                } else {
+                // If the container is visible, hide it
+                chiefComplaintsContainer.style.display = 'none';
+                }
+                }
+
+                // Function to fetch and display existing chief complaints
+                function fetchAndDisplayChiefComplaints() {
+                // Get the patient ID and visit ID
+                var patientId = document.getElementById('patient_id').value;
+                var visitId = document.getElementById('visit_id').value;
+
+                // Generate the URL for fetching existing chief complaints
+                var url = `{% url 'kahamahmis:endpoint_to_fetch_existing_data' %}?patient_id=${patientId}&visit_id=${visitId}`;
+
+                // Fetch existing chief complaints from the server
+                fetch(url)
+                .then(response => {
+                if (!response.ok) {
+                throw new Error('Network response was not ok');
+                }
+                return response.json();
+                })
+                .then(data => {
+                // Populate the form with existing chief complaints
+                populateEditForm(data);
+                })
+                .catch(error => {
+                console.error('Error fetching existing chief complaints:', error);
+                });
+                }
+
+                var deleteChiefComplaintUrl = "{% url 'kahamahmis:delete_chief_complaint' chief_complaint_id=0 %}";
+                // Function to populate the edit form with existing chief complaints
+                function populateEditForm(existingData) {
+                // Get the container where the edit form will be displayed
+                var editFormContainer = document.getElementById('savedChiefComplaints');
+
+                // Clear existing data in the container
+                editFormContainer.innerHTML = '';
+
+                // Iterate through existing chief complaints and create rows for each
+                existingData.forEach(function(data) {
+                // Create a row element
+                var row = document.createElement('div');
+                row.classList.add('row');
+
+                // Create columns for displaying health record, duration, and delete button
+                var healthRecordColumn = document.createElement('div');
+                healthRecordColumn.classList.add('col');
+                healthRecordColumn.textContent = data.health_record;
+
+                var durationColumn = document.createElement('div');
+                durationColumn.classList.add('col');
+                durationColumn.textContent = data.duration;
+
+                var deleteColumn = document.createElement('div');
+                deleteColumn.classList.add('col');
+
+                // Create the delete button with Font Awesome icon
+                var deleteButton = document.createElement('button');
+                deleteButton.type = 'button';
+                deleteButton.classList.add('btn', 'btn-sm', 'btn-danger','m-2');
+                deleteButton.innerHTML = '<i class="fa fa-trash" aria-hidden="true"></i>';
+
+                // Add event listener to handle deleting this chief complaint
+                deleteButton.addEventListener('click', function() {
+                deleteRow(data.id, row); // Pass the chief complaint ID and the row element to the delete function
+                });
+
+                // Append delete button to the delete column
+                deleteColumn.appendChild(deleteButton);
+
+                // Append columns to the row
+                row.appendChild(healthRecordColumn);
+                row.appendChild(durationColumn);
+                row.appendChild(deleteColumn);
+
+                // Append the row to the edit form container
+                editFormContainer.appendChild(row);
+                });
+                }
+
+                // Function to handle deleting a specific chief complaint row
+                function deleteRow(chiefComplaintId, row) {
+                // Construct the URL dynamically using the global variable
+                var deleteUrl = deleteChiefComplaintUrl.replace('0', chiefComplaintId);
+
+                // Send an AJAX request to delete the chief complaint with the given ID
+                fetch(deleteUrl, {
+                method: 'DELETE',
+                headers: {
+                'Content-Type': 'application/json',
+                // Add any additional headers if needed
+                },
+                })
+                .then(response => {
+                if (!response.ok) {
+                throw new Error('Failed to delete chief complaint');
+                }
+                // Return the response data as JSON
+                return response.json();
+                })
+                .then(data => {
+                // If the data is successfully deleted, remove the corresponding row from the edit form container
+                row.remove();
+                })
+                .catch(error => {
+                console.error('Error deleting chief complaint:', error);
+                });
+                }
+
+
+
+                // Function to handle "Other" option
+                function handleOtherOption(selectValue, rowId) {
+                var row = document.getElementById(rowId);
+
+                if (selectValue === 'other') {
+                // Remove the previous duration input, if any
+                var durationCell = row.querySelector('.duration-cell');
+                if (durationCell) {
+                durationCell.parentNode.removeChild(durationCell);
+                }
+
+                // Create input fields for other complaint and duration
+                var otherInput = document.createElement('input');
+                otherInput.type = 'text';
+                otherInput.classList.add('form-control');
+                otherInput.placeholder = 'Other Chief Complaint';
+                otherInput.name = 'other_chief_complaint'; // Set the name attribute
+
+                var durationInput = document.createElement('input');
+                durationInput.type = 'text';
+                durationInput.classList.add('form-control', 'duration-input');
+                durationInput.placeholder = 'Duration (days)';
+                durationInput.name = 'other_complain_duration'; // Set the name attribute
+
+                // Get the last cell in the row to ensure proper placement
+                var lastCellIndex = row.cells.length - 1;
+                var lastCell = row.cells[lastCellIndex];
+
+                // Insert new input fields to the existing row before the last cell
+                lastCell.insertAdjacentHTML('beforebegin', `<td>${otherInput.outerHTML}</td>`);
+                lastCell.insertAdjacentHTML('beforebegin', `<td class="duration-cell">${durationInput.outerHTML}</td>`);
+
+                // Include the other complaint and duration inputs in the form data
+                var formData = new FormData();
+                formData.append('other_chief_complaint', otherInput.value);
+                formData.append('other_complain_duration', durationInput.value);
+                }
+                }
+
+                function fetchAndPopulateTable(patientId, visitId) {
+                // Generate the URL using the URL name and parameters
+                var url = `{% url 'kahamahmis:endpoint_to_fetch_existing_data' %}?patient_id=${patientId}&visit_id=${visitId}`;
+
+                // Fetch existing data from the server
+                fetch(url)
+                .then(response => {
+                if (!response.ok) {
+                throw new Error('Network response was not ok');
+                }
+                return response.json();
+                })
+                .then(data => {
+                // Populate the table with existing data
+                populateTable(data);
+                })
+                .catch(error => {
+                console.error('Error fetching existing data:', error);
+                });
+                }
+
+
+                function populateTable(savedData) {
+                var savedChiefComplaints = document.getElementById('savedChiefComplaints');
+                savedChiefComplaints.innerHTML = ''; // Clear existing data
+
+                // Create table element
+                var table = document.createElement('table');
+                table.classList.add('list-item');
+
+                // Create table header
+                var headerRow = document.createElement('tr');
+                headerRow.innerHTML = '';
+                table.appendChild(headerRow);
+
+                // Iterate through saved data and create table rows
+                savedData.forEach(function(data) {
+                var newRow = document.createElement('ul');
+                newRow.innerHTML = `          
+                <li>${data.health_record}-${data.duration}</li>       
+
+                `;
+                table.appendChild(newRow);
+                });
+
+                // Append table to the container
+                savedChiefComplaints.appendChild(table);
+                }
+
+                // Function to delete a row for chief complaint
+                function deleteChiefComplaint(rowId) {
+                var row = document.getElementById(rowId);
+                row.parentNode.removeChild(row);
+                }
+
+
+                // Function to fetch existing data and populate the table when the page loads or a new row is added
+                document.addEventListener('DOMContentLoaded', function() {
+                fetchAndPopulateTable(document.getElementById('patient_id').value, document.getElementById('visit_id').value);
+                });
+
+
+                function saveChiefComplaint(rowId) {
+                // Get the row and initialize form data and popup container
+                var row = document.getElementById(rowId);
+                var formData = new FormData();
+                var popupContainer = document.getElementById('popupContainer');
+
+                // Clear previous content in the popup container
+                popupContainer.innerHTML = '';
+
+                // Get the selected chief complaint value
+                var selectedValue = row.querySelector('[name="chief_complain_name"]').value;
+
+                // Get other input fields
+                var otherInput = row.querySelector('[name="other_chief_complaint"]');
+                var durationInput = row.querySelector('[name="other_complain_duration"]');
+
+                // Check if all required fields are filled
+                if (!selectedValue) {
+                displayPopupMessage('Please select a chief complaint.', 'alert-info');
+                return; // Stop further execution if required fields are not filled
+                }
+
+                // Include other chief complaint and duration if the selected value is "other"
+                if (selectedValue === 'other') {
+                if (!otherInput.value || !durationInput.value) {
+                displayPopupMessage('Please fill in all fields for other chief complaint.', 'alert-danger');
+                return; // Stop further execution if required fields are not filled
+                }
+                formData.append('other_chief_complaint', otherInput.value);
+                } else {
+                // Include the selected chief complaint
+                formData.append('chief_complain_name', selectedValue);
+
+                // Check if duration is filled for the selected chief complaint
+                if (!row.querySelector('[name="chief_complain_duration"]').value) {
+                displayPopupMessage('Please fill in duration for the selected chief complaint.', 'alert-danger');
+                return; // Stop further execution if required fields are not filled
+                }
+                formData.append('chief_complain_duration', row.querySelector('[name="chief_complain_duration"]').value);
+                }
+
+                // Include patient and visit IDs
+                formData.append('patient_id', document.getElementById('patient_id').value);
+                formData.append('visit_id', document.getElementById('visit_id').value);
+
+                // Generate the URL using the URL name
+                var url = "{% url 'kahamahmis:save_chief_complaint' %}";
+
+                // Send the data to the server to save
+                fetch(url, {
+                method: 'POST',
+                body: formData
+                })
+                .then(response => {
+                if (!response.ok) {
+                throw new Error('Network response was not ok');
+                }
+                return response.json();
+                })
+                .then(data => {
+                // Display the saved data above the form
+                populateTable([data]); // Add the saved data to the table
+
+                // Fetch and populate the table with existing data only when the data is successfully saved
+                fetchAndPopulateTable(document.getElementById('patient_id').value, document.getElementById('visit_id').value);
+                })
+                .catch(error => {
+                // Check if the error message contains the specific message for duplicate ChiefComplaint
+                if (error.message.includes("A ChiefComplaint with the same health record already exists for this visit")) {
+                displayPopupMessage('A ChiefComplaint with the same health record already exists for this visit.', 'alert-danger');
+                } else {
+                // Display other error messages in the popup container
+                displayPopupMessage('Error saving chief complaint: ' + error.message, 'alert-danger');
+                }
+                });
+                }
+
+                // Function to display popup message
+                function displayPopupMessage(message, alertType) {
+                var popupContainer = document.getElementById('popupContainer');
+                popupContainer.innerHTML = '<div class="popup-message alert ' + alertType + '">' +
+                            message +
+                            '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                            '<span aria-hidden="true">&times;</span></button></div>';
+                }
+
+
+
+
+
+                function ViewChiefComplaint() {
+                var chiefComplaintsContainer = document.getElementById('savedChiefComplaints');
+                chiefComplaintsContainer.style.display = 'block';
+                fetchAndPopulateTable(
+                document.getElementById('patient_id').value,
+                document.getElementById('visit_id').value
+                );
+                }
+
+         </script>
     {% include 'kahama_template/datatable.html' %}     
 {% endblock main_content %}
