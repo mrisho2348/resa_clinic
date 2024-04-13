@@ -3,8 +3,8 @@ import logging
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
-from kahamahmis.models import RemoteCompany
-from .models import Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Medicine, Procedure, Referral, Sample, Staffs
+
+from .models import Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Medicine, Procedure, Referral, RemoteCompany, Sample, Staffs
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db import transaction
@@ -166,7 +166,7 @@ def edit_patient(request, patient_id):
             patient.save()
 
             messages.success(request, 'Patient details updated successfully!')
-            return redirect('manage_patient')  # Replace 'manage_patient' with the appropriate URL name
+            return redirect('clinic:manage_patient')  # Replace 'manage_patient' with the appropriate URL name
 
         except Exception as e:
             messages.error(request, f'An error occurred: {e}')
@@ -217,7 +217,7 @@ def edit_medicine(request, medicine_id):
 
         # Log a success message
         messages.success(request, 'Medicine details updated successfully!')
-        return redirect('medicine_list') 
+        return redirect('clinic:medicine_list') 
     except Exception as e:
         # Log an error message
         logger.error(f'Error updating medicine details. Medicine ID: {medicine_id}, Error: {str(e)}')

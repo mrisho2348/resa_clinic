@@ -3,12 +3,11 @@ import logging
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.db import IntegrityError
-from clinic.models import Category, HealthRecord, ConsultationNotes, Country, Diagnosis, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, PatientVital, Patients, Prescription, Procedure, Reagent, Referral,Service, Staffs, Supplier
+from clinic.models import Category, HealthRecord, ConsultationNotes, Country, Diagnosis, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, PatientVital, Patients, Prescription, Procedure, Reagent, Referral, RemoteCompany, RemotePatient, RemoteService,Service, Staffs, Supplier
 from clinic.resources import CategoryResource, CompanyResource, ConsultationNotesResource, CountryResource, DiagnosisResource, DiseaseRecodeResource, EquipmentMaintenanceResource, EquipmentResource, HealthIssueResource, HealthRecordResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, PathologyRecordResource, PatientVitalResource, PatientsResource, PrescriptionResource, ProcedureResource, ReagentResource, ReferralResource, RemotePatientResource, RemoteServiceResource, ServiceResource, SupplierResource
 from clinic.forms import ImportCategoryForm, ImportCompanyForm, ImportConsultationNotesForm, ImportCountryForm, ImportDiagnosisForm, ImportDiseaseForm, ImportEquipmentForm, ImportEquipmentMaintenanceForm, ImportHealthIssueForm, ImportHealthRecordForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientVitalForm, ImportPatientsForm, ImportPrescriptionForm, ImportProcedureForm, ImportReagentForm, ImportReferralForm, ImportRemotePatientForm, ImportRemoteServiceForm, ImportServiceForm, ImportSupplierForm
 from tablib import Dataset
 
-from kahamahmis.models import RemoteCompany, RemotePatient, RemoteService
 logger = logging.getLogger(__name__)
 def import_disease_recode(request):
     if request.method == 'POST':
@@ -328,13 +327,13 @@ def import_pathology_records(request):
                 for data in imported_data:
                      pathodology_recode = PathodologyRecord(
                         name=data[0],
-                        description=data[1],                     
+                        description=data[1],                    
                       
                         # Add other fields accordingly
                     )
                      pathodology_recode.save()
 
-                return redirect('manage_pathodology') 
+                return redirect('kahamahmis:manage_pathodology') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -375,7 +374,7 @@ def import_ImportInventoryItemForm_records(request):
                     )
                      pathodology_recode.save()
 
-                return redirect('inventory_list') 
+                return redirect('kahamahmis:inventory_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -409,7 +408,7 @@ def import_prescription_records(request):
                        )
                      prescription_record.save()
 
-                return redirect('prescription_list') 
+                return redirect('kahamahmis:prescription_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -444,7 +443,7 @@ def import_patient_vital_records(request):
                        )
                      patient_vital_record.save()
 
-                return redirect('patient_vital_all_list') 
+                return redirect('kahamahmis:patient_vital_all_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -496,7 +495,7 @@ def import_patient(request):
                        )
                      patient_record.save()
 
-                return redirect('patient_vital_all_list') 
+                return redirect('kahamahmis:patient_vital_all_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -519,23 +518,20 @@ def import_remoteservice_records(request):
 
                 for data in imported_data:
                      service_record = RemoteService(
-                        name=data[0],
-                        price=data[1],                     
-                        description=data[2],                    
-                        category=data[3],                  
-                                        
-                                         
+                        name=data[0],                                        
+                        description=data[1],                    
+                        category=data[2],                  
+                                                             
                        )
                      service_record.save()
 
                 return redirect('kahamahmis:remoteservice_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
-
     else:
         form = ImportRemoteServiceForm()
-
     return render(request, 'kahama_template/import_remoteservice.html', {'form': form})
+
 
 def import_consultation_notes_records(request):
     if request.method == 'POST':
@@ -566,7 +562,7 @@ def import_consultation_notes_records(request):
                        )
                      consultation_notes_record.save()
 
-                return redirect('consultation_notes') 
+                return redirect('kahamahmis:consultation_notes') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -596,7 +592,7 @@ def import_diagnosis_records(request):
                        )
                      diagnosis_record.save()
 
-                return redirect('diagnosis_list') 
+                return redirect('kahamahmis:diagnosis_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -635,7 +631,7 @@ def import_patient_records(request):
                         messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
                         continue
 
-                return redirect('manage_patient') 
+                return redirect('kahamahmis:manage_patient') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -671,7 +667,7 @@ def import_service_records(request):
                         messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
                         continue
 
-                return redirect('manage_service') 
+                return redirect('kahamahmis:manage_service') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -769,7 +765,7 @@ def import_referral_records(request):
                         messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
                         continue
 
-                return redirect('manage_referral') 
+                return redirect('kahamahmis:manage_referral') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -805,7 +801,7 @@ def import_procedure_records(request):
                         messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
                         continue
 
-                return redirect('patient_procedure_view') 
+                return redirect('kahamahmis:patient_procedure_view') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 
@@ -844,7 +840,7 @@ def import_medicine_records(request):
                         messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
                         continue
 
-                return redirect('medicine_list') 
+                return redirect('kahamahmis:medicine_list') 
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
 

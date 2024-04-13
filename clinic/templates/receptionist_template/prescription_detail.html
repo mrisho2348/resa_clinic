@@ -111,7 +111,7 @@ Prescription List
     <div class="col-md-12">
         <div class="">
            <div class="row">        
-        <div class="col-md-4">                
+          <div class="col-md-4">                
                 {% if payment_status and verification_status == 'verified' and issued_status == 'issued' %}
                     {% if payment_status == 'Paid' %}
                         <button class="btn btn-danger btn-block" onclick="togglePayment('{{ visit_number }}', 'unpay')">Unpay</button>

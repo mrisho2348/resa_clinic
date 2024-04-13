@@ -32,6 +32,7 @@ Diagnosis
                         <thead>
                             <tr>
                                 <th>Diagnosis Name</th>
+                                <th>Diagnosis Code</th>
                                 <th>Created At</th>
                                 <th>Updated At</th>
                                 <th>Action</th>
@@ -41,6 +42,7 @@ Diagnosis
                             {% for diagnosis in diagnoses %}
                             <tr>
                                 <td>{{ diagnosis.diagnosis_name }}</td>
+                                <td>{{ diagnosis.diagnosis_code }}</td>
                                 <td>{{ diagnosis.created_at }}</td>
                                 <td>{{ diagnosis.updated_at }}</td>
                                 <td>
@@ -64,10 +66,19 @@ Diagnosis
                                             <form id="editDiagnosisForm{{ diagnosis.id }}" method="post">
                                                 {% csrf_token %}
                                                 <div class="container-fluid">
-                                                    <!-- Diagnosis name -->
-                                                    <div class="form-group">
-                                                        <label for="edit_diagnosis_name">Diagnosis Name:</label>
-                                                        <input type="text" class="form-control" id="edit_diagnosis_name{{ diagnosis.id }}" name="diagnosis_name" value="{{ diagnosis.diagnosis_name }}" required>
+                                                    <div class="row">
+                                                        <div class="col-md-6">                                                            <!-- Diagnosis name -->
+                                                            <div class="form-group">
+                                                                <label for="edit_diagnosis_name">Diagnosis Name:</label>
+                                                                <input type="text" class="form-control" id="edit_diagnosis_name{{ diagnosis.id }}" name="diagnosis_name" value="{{ diagnosis.diagnosis_name }}" required>
+                                                            </div>                                                    
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="edit_diagnosis_code">Diagnosis Code:</label>
+                                                                <input type="text" class="form-control" id="edit_diagnosis_code{{ diagnosis.id }}" name="diagnosis_code" value="{{ diagnosis.diagnosis_code }}" required>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                     <input type="hidden" class="form-control" id="edit_diagnosis_id{{ diagnosis.id }}" name="diagnosis_id" value="{{ diagnosis.id }}">
                                                 </div>
@@ -173,12 +184,23 @@ Diagnosis
             <div class="modal-body">
                 <form id="addDiagnosisForm" method="post">
                     <div class="container-fluid">
-                        <!-- Diagnosis name -->
+                      <div class="row">
+                        <div class="col-md-6">
+                              <!-- Diagnosis name -->
                         <div class="form-group">
                             <label for="diagnosis_name">Diagnosis Name:</label>
                             <input type="text" class="form-control" id="diagnosis_name" name="diagnosis_name" required>
                             <input type="hidden" class="form-control" id="diagnosis_id" name="diagnosis_id" >
+                        </div>                        
                         </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="diagnosis_code">Diagnosis Code:</label>
+                                <input type="text" class="form-control" id="diagnosis_code" name="diagnosis_code" required>
+                                <input type="hidden" class="form-control" id="diagnosis_id" name="diagnosis_id" >
+                            </div>
+                        </div>
+                      </div>
                     </div>
                               <!-- Submit button -->
                     <div class="form-row">

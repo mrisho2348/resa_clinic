@@ -3,11 +3,6 @@
 {% block title %}
    All patient
 {% endblock title %}
-
-{% block page_title %}
-   All patient
-{% endblock page_title %}
-
 {% block breadcrumb %}
 {% include "kahama_template/modal_form.html" %}
 <a class="btn btn-primary float-right" href="{% url 'kahamahmis:patient_info_form' %}">
@@ -26,369 +21,199 @@
         
    
 
-<div class="table-responsive">
-    <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
-        <thead>
-            <tr>
-                <th>MRN</th>
-                <th>Name</th>           
-                <th>Gender</th>
-                <th>Age</th>
-                <th>Company</th>
-                <th>Phone</th>
-                <th>Created At</th>              
-                <th>Patient Type</th>               
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="student-table-body">
-            {% for patient in patients %}
-            <tr>
-                <td>{{ patient.mrn }}</td>
-                <td>{{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</td>                
-                <td>{{ patient.gender }}</td>
-                <td>{{ patient.age }}</td>
-                <td>{{ patient.company }}</td>
-                <td>{{ patient.phone }}</td>
-                <td>{{ patient.created_at }}</td>              
-                <td>{{ patient.patient_type }}</td>              
-                 <td class="text-center">
-                    <button  class="btn btn-success btn-sm" data-toggle="modal" data-target="#patientDetailsModal{{ patient.id }}"  data-toggle="tooltip" title="View">
-                        <i class="fa fa-eye text-dark"></i>
-                    </button>  
-                    <button  class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#addConsultationModal{{ patient.id }}"  data-toggle="tooltip" title="Appointment">
-                        <i class="fa fa-calendar-alt text-dark"></i>
-                    </button>  
-                    <a href="{% url 'kahamahmis:patient_info_form_edit' patient_id=patient.id %}" data-toggle="tooltip" title="Edit patient">
-                        <button type="button" class="btn btn-secondary btn-sm"><i class="fa fa-edit text-white"></i></button>
-                    </a>
-                    <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteRemotePatientModal{{ patient.id }}"  data-toggle="tooltip" title="Delete">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                                <!-- Add more action links as needed -->
-                    <a href="{% url 'kahamahmis:patient_visit_history_view' patient.id %}" data-toggle="tooltip" title="open visit History">
-                        <button type="button" class="btn btn-success btn-sm"><i class="fa fa-eye text-dark"></i></button>
-                    </a> 
-                       <!-- Visit Action -->
-                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#addVisitModal{{ patient.id }}" title="Add Visit">
-                            <i class="fas fa-eye text-dark"></i>
-                          </button>
-
-    
-                       
-                </td>
-                
-
-                        <!-- Modal -->
-            <!-- Modal for adding consultation -->
-            <div class="modal fade" id="addConsultationModal{{ patient.id }}" tabindex="-1" aria-labelledby="addConsultationModalLabel{{ patient.id }}" aria-hidden="true">
-                <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                    <h5 class="modal-title" id="addConsultationModalLabel{{ patient.id }}">Add Consultation for {{ patient }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    </div>
-                    <div class="modal-body">
-                    <!-- Consultation form -->
-                    <form id="addConsultationForm{{ patient.id }}" method="post">
-                        {% csrf_token %}
-                        <div class="form-group">
-                        <label for="doctor">Doctor:</label>
-                        <select class="form-control select2bs4" style="width: 100%;" name="doctor" required>
-                            <option value="">Select Doctor</option>
-                            {% for doctor in doctors %}
-                            <option value="{{ doctor.id }}">{{ doctor.admin.first_name }} {{ doctor.middle_name }} {{ doctor.admin.last_name }}</option>
-                            {% endfor %}
-                        </select>
-                        </div>
-                        <input type="hidden" class="form-control" id="patient_id{{ patient.id }}" name="patient_id" value="{{ patient.id }}">
-                        <div class="form-group">
-                        <label for="description">Description:</label>
-                        <textarea id="description" name="description" rows="2" class="form-control"></textarea>
-                        </div>
-                        <div class="form-group">
-                        <label for="date_of_consultation">Date of Consultation:</label>
-                        <input type="date" id="date_of_consultation" name="date_of_consultation" class="form-control">
-                        </div>
-                        <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <label for="start_time">Start Time:</label>
-                            <input type="time" class="form-control" name="start_time" id="start_time">
-                        </div>
-                        <div class="form-group col-md-6">
-                            <label for="end_time">End Time:</label>
-                            <input type="time" class="form-control" name="end_time" id="end_time">
-                        </div>
-                        </div>
-                    </form>
-                    </div>
-                    <div class="modal-footer">                    
-                        <div class="form-row">
-                            <div class="col-md-12">
-                                <button type="button" class="btn btn-success btn-block" onclick="addRemoteConsultation()">Create an Appointment</button>
-                            </div>
-                        </div>
-                    </div>
+{% comment %} <div class="container">
+    <div class="row">
+        <div class="col-md">
+            <div class="card">
+                <div class="card-header">
+                    <h3  class="header-title text-center mt-0 mb-1  text-uppercase">   List of all patients </h3>
                 </div>
+                <div class="card-body">
+                    
                 </div>
             </div>
-  
-            <script>        
-                
-              
-                // Function to add remote consultation using AJAX
-                function addRemoteConsultation() {               
-                    $.ajax({
-                      type: 'POST',
-                      url: '{% url "kahamahmis:add_remote_consultation" %}',
-                      data: $('#addConsultationForm{{ patient.id }}').serialize(),
-                      success: function(data) {
-                        if (data.status === 'success') {
-                          $('#addConsultationModal{{ patient.id }}').modal('hide');
-                          location.reload(true); // Refresh the page
-                        } else {
-                          alert(data.message); // Display error message if any
-                        }
-                      },
-                      error: function(xhr, status, error) {
-                        alert(xhr.responseText); // Display error message if AJAX request fails
-                      }
-                    });
-                  
-                }
-              </script>
-              
-                    <!-- Bootstrap Modal for Adding Visit -->
-                    <div class="modal fade" id="addVisitModal{{ patient.id }}" tabindex="-1" aria-labelledby="addVisitModalLabel{{ patient.id }}" aria-hidden="true">
-                      <div class="modal-dialog modal-lg">
-                          <div class="modal-content">
-                              <div class="modal-header bg-teal-800">
-                                  <h3 class="modal-title text-center text-uppercase">Add Visit for {{ patient }}</h3>
-                                  <button type="button" class="close" data-dismiss="modal">×</button>
-                              </div>
-                  
-                              <div class="modal-body">
-                                  <!-- Form for adding a visit -->
-                                  <form id="addVisitForm{{ patient.id }}" method="post">
-                                      {% csrf_token %}
-                                      <!-- Visit type dropdown -->
-                                      <input type="hidden" class="form-control" id="patient_id{{ patient.id }}" name="patient_id" value="{{ patient.id }}">
-                                      <input type="hidden" class="form-control" id="visit_id{{ patient.id }}" name="visit_id">
-                                      <div class="form-group">
-                                          <label for="visitType">Visit Type:</label>
-                                          <select class="form-control select2bs4" style="width: 100%;" id="visitType{{ patient.id }}" name="visitType">
-                                              <option value="Normal">Normal</option>
-                                              <option value="Emergency">Emergency</option>
-                                              <option value="Referral">Referral</option>
-                                              <option value="Follow-up">Follow-up</option>
-                                          </select>
-                                      </div>
-                                      <div class="form-group">
-                                          <label class="control-label">Primary Service:</label>
-                                          <select class="form-control select2bs4" style="width: 100%;" id="primary_service{{ patient.id }}" name="primary_service">
-                                              <option value="Consultation">Consultation</option>
-                                              <option value="Imaging">Imaging</option>
-                                              <option value="Investigation">Investigation</option>
-                                              <option value="Procedure">Procedure</option>
-                                              <option value="Physiotherapy">Physiotherapy</option>
-                                              <option value="Ambulance">Ambulance</option>
-                                          </select>
-                                      </div>
-                                  
-                         
-                                      <div class="form-group pt-2 float-end">
-                                          <div class="row">
-                                              <div class="col-md-8"></div>
-                                              <div class="col-md-4">
-                                                  <button type="button" class="btn btn-md btn-primary"  onclick="AddVisits({{ patient.id }})">Save and Continue <i class="mdi mdi-forward"></i></button>
-                                              </div>
-                                          </div>
-                                      </div>
-                                  </form>
-                                  <script>
-                                    function AddVisits(patientId) {
-                                        var visitType = $('#visitType' + patientId).val();
-                                        var primaryService = $('#primary_service' + patientId).val();
-                                        var patientIdValue = $('#patient_id' + patientId).val();
-                                        var visitId = $('#visit_id' + patientId).val();
-                                
-                                        $.ajax({
-                                            type: 'POST',
-                                            url: '/add_remotepatient_visit/',
-                                            data: {
-                                                visitType: visitType,
-                                                patient_id: patientIdValue,
-                                                visit_id: visitId,
-                                                primary_service: primaryService
-                                            },
-                                            success: function(data) {
-                                                if (data.status === 'success') {
-                                                    // Display success message
-                                                    $('#addVisitModal' + patientId).modal('hide');
-                                                    location.reload(true);
-                                                } else {
-                                                    // Display error message if any
-                                                    alert(data.message);
-                                                }
-                                            },
-                                            error: function(error) {
-                                                alert(error);
-                                                // Display error message
-                                                $('#successMessageContainer').html('<div class="alert alert-danger" role="alert">Failed to use item</div>');
-                                            }
-                                        });
-                                    }
-                                </script>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
+        </div>
+    </div>
+</div> {% endcomment %}
+<div class="container">
+    <div class="row">
+        <div class="col-md">
+            <div class="card">
+                <div class="card-header">
+                    <h6  class="header-title text-center mt-0 mb-1  text-uppercase">   List of all patients </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>MRN</th>
+                                    <th>Name</th>           
+                                    <th>Gender</th>
+                                    <th>Age</th>
+                                    <th>Company</th>
+                                    <th>Phone</th>
+                                    <th>Created At</th>              
+                                    <th>Patient Type</th>               
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-table-body">
+                                {% for patient in patients %}
+                                <tr>
+                                    <td>{{ patient.mrn }}</td>
+                                    <td>{{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</td>                
+                                    <td>{{ patient.gender }}</td>
+                                    <td>{{ patient.age }}</td>
+                                    <td>{{ patient.company }}</td>
+                                    <td>{{ patient.phone }}</td>
+                                    <td>{{ patient.created_at }}</td>              
+                                    <td>{{ patient.patient_type }}</td>              
+                                     <td class="text-center">
+                                        <button  class="btn btn-success btn-sm" data-toggle="modal" data-target="#patientDetailsModal{{ patient.id }}"  data-toggle="tooltip" title="View">
+                                            <i class="fa fa-eye text-dark"></i>
+                                        </button> 
+                                        <a href="{% url 'kahamahmis:patient_info_form_edit' patient_id=patient.id %}" data-toggle="tooltip" title="Edit patient">
+                                            <button type="button" class="btn btn-secondary btn-sm"><i class="fa fa-edit text-white"></i></button>
+                                        </a>
+                                        <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteRemotePatientModal{{ patient.id }}"  data-toggle="tooltip" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                                    <!-- Add more action links as needed -->
+                                        <a href="{% url 'kahamahmis:patient_visit_history_view' patient.id %}" data-toggle="tooltip" title="open visit History">
+                                            <button type="button" class="btn btn-success btn-sm"><i class="fa fa-eye text-dark"></i></button>
+                                        </a>                                     
+                                       </td>                                  
+                                   <div class="modal fade" id="patientDetailsModal{{ patient.id }}" tabindex="-1" aria-labelledby="patientDetailsModalLabel{{ patient.id }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-primary text-white">
+                                                    <h5 class="modal-title" id="patientDetailsModalLabel{{ patient.id }}">Patient Details</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body custom-modal-body">
+                                                    <div class="row">                    
+                                                        <div class="col-md-4">
+                                                            <div class="card border-primary">
+                                                                <div class="card-body">
+                                                                    <h5 class="card-title text-primary">Personal Information</h5>
+                                                                    <ul class="list-unstyled custom-list">
+                                                                        <br>
+                                                                        <li><strong>MRN:</strong> {{ patient.mrn }}</li>
+                                                                        <li><strong>Name:</strong> {{ patient.first_name }} {{ patient.middle_name }} {{ patient.last_name }}</li>
+                                                                        <li><strong>Gender:</strong> {{ patient.gender }}</li>
+                                                                        <li><strong>Age:</strong> {{ patient.age }}</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="card border-primary">
+                                                                <div class="card-body">
+                                                                    <ul class="list-unstyled custom-list">
+                                                                        <br>
+                                                                        <li><strong>Date of Birth:</strong> {{ patient.dob }}</li>
+                                                                        <li><strong>Nationality:</strong> {{ patient.nationality }}</li>
+                                                                        <li><strong>Phone:</strong> {{ patient.phone }}</li>
+                                                                        <li><strong>Emergency Contact:</strong> {{ patient.emergency_contact_name }}</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="card border-primary">
+                                                                <div class="card-body">
+                                                                    <ul class="list-unstyled custom-list">
+                                                                        <br>
+                                                                        <li><strong>Emergency Contact Relation:</strong> {{ patient.emergency_contact_relation }}</li>
+                                                                        <li><strong>Emergency Contact Phone:</strong> {{ patient.emergency_contact_phone }}</li>
+                                                                        <li><strong>Marital Status:</strong> {{ patient.marital_status }}</li>                                                                        
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="card border-primary">
+                                                                <div class="card-body">
+                                                                    <ul class="list-unstyled custom-list">
+                                                                        <br>
+                                                                        <li><strong>Occupation:</strong> {{ patient.occupation }}</li>
+                                                                        <li><strong>Patient Type:</strong> {{ patient.patient_type }}</li>
+                                                                        <li><strong>OSHA Certificate:</strong> {% if patient.osha_certificate %} Yes {% else %} No {% endif %}</li>
+                                                                        <li><strong>Date of OSHA Certification:</strong> {{ patient.date_of_osha_certification }}</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                      </div>                                               
+                                                 </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                    
                      
-          
-         
-                  
-
-                  <div class="modal fade" id="patientDetailsModal{{ patient.id }}" tabindex="-1" aria-labelledby="patientDetailsModalLabel{{ patient.id }}" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header bg-primary text-white">
-                                <h5 class="modal-title" id="patientDetailsModalLabel{{ patient.id }}">Patient Details</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body custom-modal-body">
-                                <div class="row">                    
-                                    <div class="col-md-12">
-                                        <div class="card border-primary">
-                                            <div class="card-body">
-                                                <h5 class="card-title text-primary">Personal Information</h5>
-                                                <ul class="list-unstyled custom-list">
-                                                    <br>
-                                                    <li><strong>MRN:</strong> {{ patient.mrn }}</li>
-                                                    <li><strong>Name:</strong> {{ patient.first_name }} {{ patient.middle_name }} {{ patient.last_name }}</li>
-                                                    <li><strong>Gender:</strong> {{ patient.gender }}</li>
-                                                    <li><strong>Age:</strong> {{ patient.age }}</li>
-                                                    <li><strong>Date of Birth:</strong> {{ patient.dob }}</li>
-                                                    <li><strong>Nationality:</strong> {{ patient.nationality }}</li>
-                                                    <li><strong>Phone:</strong> {{ patient.phone }}</li>
-                                                    <li><strong>Emergency Contact:</strong> {{ patient.emergency_contact_name }}</li>
-                                                    <li><strong>Emergency Contact Relation:</strong> {{ patient.emergency_contact_relation }}</li>
-                                                    <li><strong>Emergency Contact Phone:</strong> {{ patient.emergency_contact_phone }}</li>
-                                                    <li><strong>Marital Status:</strong> {{ patient.marital_status }}</li>
-                                                    <li><strong>Occupation:</strong> {{ patient.occupation }}</li>
-                                                    <li><strong>Patient Type:</strong> {{ patient.patient_type }}</li>
-                                                    <li><strong>OSHA Certificate:</strong> {% if patient.osha_certificate %} Yes {% else %} No {% endif %}</li>
-                                                    <li><strong>Date of OSHA Certification:</strong> {{ patient.date_of_osha_certification }}</li>
-                                                    <li><strong>Insurance:</strong> {{ patient.insurance }}</li>
-                                                    <li><strong>Insurance Company:</strong> {{ patient.insurance_company }}</li>
-                                                    <li><strong>Insurance Number:</strong> {{ patient.insurance_number }}</li>
-                                                </ul>
-                                                <!-- Add more personal details here -->
+                    
+                    
+                                    <div class="modal fade" id="deleteRemotePatientModal{{ patient.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteRemotePatientModalLabel{{ patient.id }}" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="deleteRemotePatientModalLabel{{ patient.id }}">Delete Category</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Are you sure you want to delete this Patient: <strong>{{ patient }}</strong>?</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                    <button type="button" class="btn btn-danger" onclick="deleteRemotePatient({{ patient.id }})">Delete</button>
+                                                </div>
                                             </div>
+                                
+                                            <script>
+                                                function deleteRemotePatient(patientId) {
+                                                    $.ajax({
+                                                        type: 'POST',
+                                                      
+                                                        data: {},
+                                                        success: function (data) {
+                                                            if (data.status === 'success') {
+                                                                $('#deleteRemotePatientModal' + patientId).modal('hide');
+                                                                location.reload(true);
+                                                                // Refresh the category list or perform any other actions
+                                                            } else {
+                                                                // Handle other status cases if needed
+                                                                alert(data.message);
+                                                            }
+                                                        },
+                                                        error: function (error) {
+                                                            alert(error);
+                                                            // Handle errors if necessary
+                                                        }
+                                                    });
+                                                }
+                                            </script>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="row mt-3">
-                                    <div class="col-md-6">
-                                        <div class="card border-success">
-                                            <div class="card-body">
-                                                <h5 class="card-title text-success">Medical Information</h5>
-                                                <br>
-                                                {% for health_condition in patient.health_conditions.all %}
-                                                    <p class="card-text"><strong>Condition:</strong> {{ health_condition.health_condition }}</p>
-                                                    <p class="card-text"><strong>Notes:</strong> {{ health_condition.health_condition_notes }}</p>
-                                                {% endfor %}
-                                                
-                                                <!-- Display family medical history -->
-                                                <h5 class="card-title text-success">Family Medical History</h5>
-                                                {% for family_history in patient.family_medical_history.all %}
-                                                    <p class="card-text"><strong>Condition:</strong> {{ family_history.condition }}</p>
-                                                    <p class="card-text"><strong>Relationship:</strong> {{ family_history.relationship }}</p>
-                                                    <p class="card-text"><strong>Comments:</strong> {{ family_history.comments }}</p>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="card border-info">
-                                            <div class="card-body">
-                                                <h5 class="card-title text-info">Insurance Information</h5>
-                                                <br>
-                                                <ul class="list-unstyled custom-list">
-                                                    <li><strong>Insurance:</strong> {{ patient.insurance }}</li>
-                                                    <li><strong>Insurance Company:</strong> {{ patient.insurance_company }}</li>
-                                                    <li><strong>Insurance Number:</strong> {{ patient.insurance_number }}</li>
-                                                    <!-- Add more insurance details here -->
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- Add more rows and columns for additional patient details -->
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            </div>
-                        </div>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
+                    
                 </div>
-                
-
- 
-
-
-                <div class="modal fade" id="deleteRemotePatientModal{{ patient.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteRemotePatientModalLabel{{ patient.id }}" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="deleteRemotePatientModalLabel{{ patient.id }}">Delete Category</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body">
-                                <p>Are you sure you want to delete this Patient: <strong>{{ patient }}</strong>?</p>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                <button type="button" class="btn btn-danger" onclick="deleteRemotePatient({{ patient.id }})">Delete</button>
-                            </div>
-                        </div>
-            
-                        <script>
-                            function deleteRemotePatient(patientId) {
-                                $.ajax({
-                                    type: 'POST',
-                                    url: '/delete_remote_patient/' + patientId + '/',  // Replace with your URL
-                                    data: {},
-                                    success: function (data) {
-                                        if (data.status === 'success') {
-                                            $('#deleteRemotePatientModal' + patientId).modal('hide');
-                                            location.reload(true);
-                                            // Refresh the category list or perform any other actions
-                                        } else {
-                                            // Handle other status cases if needed
-                                            alert(data.message);
-                                        }
-                                    },
-                                    error: function (error) {
-                                        alert(error);
-                                        // Handle errors if necessary
-                                    }
-                                });
-                            }
-                        </script>
-                    </div>
-                </div>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </div>
+        </div>
+    </div>
 </div>
-
 
 <script>
     function submitForm(checkbox) {

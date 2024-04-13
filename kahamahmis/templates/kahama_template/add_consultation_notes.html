@@ -1,7 +1,7 @@
 {% extends 'kahama_template/base_template.html' %}
 
 {% block title %}
-Add  Consultation notes
+{{ patient.first_name }} {{ patient.middle_name }} {{ patient.last_name }}  Consultation notes
 {% endblock title %}
 
 {% block breadcrumb %}
@@ -695,41 +695,59 @@ Add  Consultation notes
                                             <textarea class="form-control" rows="10" id="history_of_presenting_illness" name="history_of_presenting_illness" col="25">{{ consultation_note.history_of_presenting_illness }}</textarea>
                                         </div>  
                                     </div>
-                                </div>
-                                <!-- Third row -->
-                            
+                                </div>                    
+                                        <!-- Type of illness -->
+                                    <div class="form-group">
+                                        <label for="type_of_illness{{ consultation_note.id }}">Type of illness:</label>
+                                        <select class="form-control select2bs4" style="width: 100%;" id="type_of_illness{{ consultation_note.id }}" name="type_of_illness">
+                                            <option value="Medical" {% if consultation_note.type_of_illness == 'Medical' %} selected {% endif %}>Medical</option>
+                                            <option value="Injury" {% if consultation_note.type_of_illness == 'Injury' %} selected {% endif %}>Injury</option>
+                                            <option value="Surgical-non traumatic" {% if consultation_note.type_of_illness == 'Surgical-non traumatic' %} selected {% endif %}>Surgical-non traumatic</option>
+                                        </select>                        
+                                    </div>
+
+                                    <!-- Nature of current illness -->
+                                    <div class="form-group">
+                                        <label for="nature_of_current_illness{{ consultation_note.id }}">Nature of current illness:</label>
+                                        <select class="form-control select2bs4" style="width: 100%;" id="nature_of_current_illness{{ consultation_note.id }}" name="nature_of_current_illness">
+                                            <option value="Non-occupational" {% if consultation_note.nature_of_current_illness == 'Non-occupational' %} selected {% endif %}>Non-occupational</option>
+                                            <option value="Occupational" {% if consultation_note.nature_of_current_illness == 'Occupational' %} selected {% endif %}>Occupational</option>
+                                            <option value="Unknown" {% if consultation_note.nature_of_current_illness == 'Unknown' %} selected {% endif %}>Unknown</option>
+                                        </select>
+                                    </div>         
                                     <!-- Provisional diagnosis -->
                                     <div class=" form-group">
                                         <label for="provisional_diagnosis{{ consultation_note.id }}">Provisional Diagnosis:</label>
                                         <select class="form-control select2bs4" style="width: 100%;" id="provisional_diagnosis{{ consultation_note.id }}" name="provisional_diagnosis[]" multiple>
                                             {% for diagnosis in provisional_diagnoses %}
-                                            <option value="{{ diagnosis.id }}" {% if diagnosis in consultation_note.provisional_diagnosis.all %} selected {% endif %}>{{ diagnosis.diagnosis_name }}</option>
+                                                <option value="{{ diagnosis.id }}" {% if diagnosis.id in provisional_diagnosis_ids %} selected {% endif %}>{{ diagnosis }}</option>
                                             {% endfor %}
-                                        </select>
-                            
-                                    <!-- Final diagnosis -->
-                                    <div class=" form-group">
-                                        <label for="final_diagnosis{{ consultation_note.id }}">Final Diagnosis:</label>
-                                        <select class="form-control select2bs4" style="width: 100%;" id="final_diagnosis{{ consultation_note.id }}" name="final_diagnosis[]" multiple>
-                                            {% for diagnosis in final_diagnoses %}
-                                            <option value="{{ diagnosis.id }}" {% if diagnosis in consultation_note.final_diagnosis.all %} selected {% endif %}>{{ diagnosis.diagnosis_name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <!-- Doctor plan -->
+                                        </select>                       
+                                   
+                                   <!-- Doctor plan -->
                                     <div class="form-group">
                                         <label for="doctor_plan">Doctor Plan:</label>
                                         <select class="form-control select2bs4" style="width: 100%;" id="doctor_plan" name="doctor_plan">
                                             <option value="">Select Doctor Plan</option>
-                                            <option value="Prescription" {% if "Prescription" in consultation_note.doctor_plan %} selected {% endif %}>Prescription</option>
-                                            <option value="Laboratory" {% if "Laboratory" in consultation_note.doctor_plan %} selected {% endif %}>Laboratory</option>                                          
-                                            <option value="Procedure" {% if "Procedure" in consultation_note.doctor_plan %} selected {% endif %}>Procedure</option>
-                                            <option value="Observation" {% if "Observation" in consultation_note.doctor_plan %} selected {% endif %}>Observation</option>
-                                            <option value="Referral" {% if "Referral" in consultation_note.doctor_plan %} selected {% endif %}>Referral</option>
-                                            <option value="Counselling" {% if "Counselling" in consultation_note.doctor_plan %} selected {% endif %}>Counselling</option>
+                                            <option value="Prescription" {% if consultation_note.doctor_plan == 'Prescription' %} selected {% endif %}>Prescription</option>
+                                            <option value="Laboratory" {% if consultation_note.doctor_plan == 'Laboratory' %} selected {% endif %}>Laboratory</option>                                          
+                                            <option value="Procedure" {% if consultation_note.doctor_plan == 'Procedure' %} selected {% endif %}>Procedure</option>
+                                            <option value="Observation" {% if consultation_note.doctor_plan == 'Observation' %} selected {% endif %}>Observation</option>
+                                            <option value="Referral" {% if consultation_note.doctor_plan == 'Referral' %} selected {% endif %}>Referral</option>
+                                            <option value="Counselling" {% if consultation_note.doctor_plan == 'Counselling' %} selected {% endif %}>Counselling</option>
+                                            <option value="Discharge" {% if consultation_note.doctor_plan == 'Discharge' %} selected {% endif %}>Discharge</option>
                                         </select>
                                     </div>
-                                </div>
+
+                                    <!-- Hidden buttons for each doctor plan -->
+                                    <button type="button" class="btn btn-primary referral-button" {% if consultation_note.doctor_plan == 'Referral' %} style="display: block;" {% else %} style="display: none;" {% endif %} data-toggle="modal" data-target="#previousReferralModal">View Previous Referral </button>
+                                    <button type="button" class="btn btn-primary counselling-button" {% if consultation_note.doctor_plan == 'Counselling' %} style="display: block;" {% else %} style="display: none;" {% endif %} data-toggle="modal" data-target="#previousCounsellingModal">View Previous Counselling </button>
+                                    <!-- Add similar hidden buttons for other doctor plans -->
+                                    <button type="button" class="btn btn-primary prescription-button" {% if consultation_note.doctor_plan == 'Prescription' %} style="display: block;" {% else %} style="display: none;" {% endif %} data-toggle="modal" data-target="#previousPrescriptionModal">View Previous Prescription </button>
+                                    <button type="button" class="btn btn-primary laboratory-button" {% if consultation_note.doctor_plan == 'Laboratory' %} style="display: block;" {% else %} style="display: none;" {% endif %} data-toggle="modal" data-target="#previousLaboratoryModal">View Previous Laboratory </button>
+                                    <button type="button" class="btn btn-primary procedure-button" {% if consultation_note.doctor_plan == 'Procedure' %} style="display: block;" {% else %} style="display: none;" {% endif %} data-toggle="modal" data-target="#previousProceduresModal">View Previous Procedures</button>
+                                    <button type="button" class="btn btn-primary observation-button" {% if consultation_note.doctor_plan == 'Observation' %} style="display: block;" {% else %} style="display: none;" {% endif %} data-toggle="modal" data-target="#previousObservationModal">View Previous Observation </button>
+                                    <button type="button" class="btn btn-primary discharge-button" {% if consultation_note.doctor_plan == 'Discharge' %} style="display: block;" {% else %} style="display: none;" {% endif %} data-toggle="modal" data-target="#previousDischargeModal">View Previous Discharge </button>
                             </div>
                             <div class="card-footer">
                                 {% if messages %}
@@ -760,6 +778,351 @@ Add  Consultation notes
         </div>
     </div>
 
+
+<div class="modal fade" id="previousProceduresModal" tabindex="-1" role="dialog" aria-labelledby="previousProceduresModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previousProceduresModalLabel">{{ patient.first_name }} {{ patient.middle_name }} {{ patient.last_name }} Previous Procedures</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm display" id="example">
+                        <thead>
+                            <tr>                            
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Day</th>
+                                <th>Procedure Name</th>
+                                <th>Description</th>                           
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Loop through previous procedures and populate the table -->
+                            {% for procedure in previous_procedures %}
+                            <tr>                           
+                                <td>{{ procedure.created_at.date|date:"d/m/Y"  }}</td>
+                                <td>{{ procedure.created_at.time }}</td>
+                                <td>{{ procedure.created_at|date:"l" }}</td>
+                                <td>{{ procedure.name }}</td>
+                                <td style="word-wrap: break-word;">{{ procedure.description }}</td>
+                                 </tr>                            
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Referral Modal -->
+<div class="modal fade" id="previousReferralModal" tabindex="-1" aria-labelledby="previousReferralModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previousReferralModalLabel">{{ patient.first_name }} {{ patient.middle_name }} {{ patient.last_name }}  Previous Referral Records</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Table to display referral records -->
+                <div class="table-responsive">
+                    <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm display" id="example1">
+                        <thead>
+                            <tr>
+                                <!-- Table headers -->
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Day</th>                                                  
+                                <th>Data Recorder</th>
+                                <th>Source Location</th>
+                                <th>Destination Location</th>                        
+                                <th>Notes</th>
+                                <th>Nature of Referral</th>
+                                <th>Transport Model</th>
+                                <th>Status</th>
+                                <!-- Add more columns for referral data as needed -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Loop through previous referral records -->
+                            {% for referral in previous_referrals %}
+                                <tr>
+                                    <!-- Display data for each field -->
+                                    <td>{{ referral.created_at.date|date:"d/m/Y"  }}</td>
+                                    <td>{{ referral.created_at.time }}</td>
+                                    <td>{{ referral.created_at|date:"l" }}</td>                                                             
+                                    <td>{{ referral.data_recorder }}</td>
+                                    <td>{{ referral.source_location }}</td>
+                                    <td>{{ referral.destination_location }}</td>                                  
+                                    <td>{{ referral.notes|safe }}</td>
+                                    <td>{{ referral.nature_of_referral }}</td>
+                                    <td>{{ referral.transport_model }}</td>
+                                    <td>{{ referral.status }}</td>
+                                    <!-- Add more columns for referral data as needed -->
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Previous Laboratory Modal -->
+<div class="modal fade" id="previousLaboratoryModal" tabindex="-1" aria-labelledby="previousLaboratoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previousLaboratoryModalLabel">{{ patient.first_name }} {{ patient.middle_name }} {{ patient.last_name }}  Previous Laboratory Orders</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Table to display laboratory orders -->
+                <div class="table-responsive">
+                    <table class="table table-hover text-nowrap table-bordered table-striped table-sm display" id="example2">
+                        <thead>
+                            <tr>
+                                <!-- Table headers -->
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Day</th>                              
+                               <th>Data Recorder</th>
+                                <th>Service Name</th>
+                                <th>Test Result</th>                    
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Loop through previous laboratory orders -->
+                            {% for lab_order in previous_lab_orders %}
+                                <tr>
+                                    <!-- Display laboratory order data in table rows -->
+                                    <td>{{ lab_order.created_at.date|date:"d/m/Y"  }}</td>
+                                    <td>{{ lab_order.created_at.time }}</td>
+                                    <td>{{ lab_order.created_at|date:"l" }}</td>
+                                    <td>{{ lab_order.data_recorder }}</td>
+                                    <td>{{ lab_order.name }}</td>
+                                    <td>{{ lab_order.result }}</td>                          
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Previous Counseling Modal -->
+<div class="modal fade" id="previousCounsellingModal" tabindex="-1" aria-labelledby="previousCounsellingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previousCounsellingModalLabel">{{ patient.first_name }} {{ patient.middle_name }} {{ patient.last_name }}  Previous Counseling Notes</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Table to display counseling notes -->
+                <div class="table-responsive">
+                    <table class="table table-hover text-nowrap table-bordered table-striped table-sm display" id="example3">
+                        <thead>
+                            <tr>
+                                <!-- Table headers -->
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Day</th>
+                                <th>Data Recorder</th>
+                                <th>Counseling Notes</th>
+                               </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Loop through previous counseling notes -->
+                            {% for counseling in previous_counselings %}
+                                <tr>
+                                    <!-- Display counseling note data in table rows -->
+                                    <td>{{ counseling.created_at|date:"d/m/Y" }}</td>
+                                    <td>{{ counseling.created_at.time }}</td>
+                                    <td>{{ counseling.created_at|date:"l" }}</td>
+                                    <td>{{ counseling.data_recorder }}</td>
+                                    <td>{{ counseling.counselling_notes|safe }}</td>
+                                     </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Previous Observation Modal -->
+<div class="modal fade" id="previousObservationModal" tabindex="-1" aria-labelledby="previousObservationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previousObservationModalLabel">{{ patient.first_name }} {{ patient.middle_name }} {{ patient.last_name }}  Previous Observation Records</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Table to display observation records -->
+                <div class="table-responsive">
+                    <table class="table table-hover text-nowrap table-bordered table-striped table-sm display" id="example4">
+                        <thead>
+                            <tr>
+                                <!-- Table headers -->                  
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Day</th>
+                                <th>Data Recorder</th>
+                                <th>Observation Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Loop through previous observation records -->
+                            {% for observation in previous_observations %}
+                                <tr>
+                                    <!-- Display observation record data in table rows -->
+                                    <td>{{ observation.created_at.date|date:"d/m/Y"  }}</td>
+                                    <td>{{ observation.created_at.time }}</td>
+                                    <td>{{ observation.created_at|date:"l" }}</td>
+                                    <td>{{ observation.data_recorder }}</td>
+                                    <td>{{ observation.observation_notes|safe }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Previous Discharge Modal -->
+<div class="modal fade" id="previousDischargeModal" tabindex="-1" aria-labelledby="previousDischargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previousDischargeModalLabel">{{ patient.first_name }} {{ patient.middle_name }} {{ patient.last_name }}  Previous Discharge Records</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Table to display discharge records -->
+                <div class="table-responsive">
+                    <table class="table table-hover text-nowrap table-bordered table-striped table-sm display" id="example5">
+                        <thead>
+                            <tr>
+                                <!-- Table headers -->
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Day</th>
+                                <th>Data Recorder</th>
+                                <th>Discharge Condition</th>
+                                <th>Discharge Notes</th>                          
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Loop through previous discharge records -->
+                            {% for discharge in previous_discharges %}
+                                <tr>
+                                    <!-- Display discharge record data in table rows -->
+                                    <td>{{ discharge.discharge_date.date|date:"d/m/Y"  }}</td>
+                                    <td>{{ discharge.discharge_date.time }}</td>
+                                    <td>{{ discharge.discharge_date|date:"l" }}</td>
+                                    <td>{{ discharge.data_recorder }}</td>
+                                    <td>{{ discharge.discharge_condition }}</td>
+                                    <td>{{ discharge.discharge_notes|safe }}</td>                            
+                                    <!-- Add more fields as needed -->
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Prescription Modal -->
+<div class="modal fade" id="previousPrescriptionModal" tabindex="-1" aria-labelledby="previousPrescriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previousPrescriptionModalLabel">Previous Prescription Records</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Table to display prescription records -->
+                <div class="table-responsive">
+                    <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm display" id="example6">
+                        <thead>
+                            <tr>
+                                <!-- Table headers -->
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Day</th>                               
+                                <th>Entered By</th>
+                                <th>Drug name</th>
+                                 <th>Dose</th>
+                                <th>Frequency</th>
+                                <th>Duration</th>
+                                <th>Quantity Used</th>
+                                <th>Verified</th>
+                                <th>Issued</th>
+                                <th>Status</th>
+                                <th>Total Price</th>
+                                <!-- Add more columns as needed -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Loop through previous prescription records -->
+                            {% for prescription in previous_prescriptions %}
+                                <tr>
+                                    <!-- Display data for each field -->
+                                    <td>{{ prescription.created_at.date|date:"d/m/Y"  }}</td>
+                                    <td>{{ prescription.created_at.time }}</td>
+                                    <td>{{ prescription.created_at|date:"l" }}</td>                                  
+                                    <td>{{ prescription.entered_by }}</td>
+                                    <td>{{ prescription.medicine }}</td>                              
+                                    <td>{{ prescription.dose }}</td>
+                                    <td>{{ prescription.frequency }}</td>
+                                    <td>{{ prescription.duration }}</td>
+                                    <td>{{ prescription.quantity_used }}</td>
+                                    <td>{{ prescription.verified }}</td>
+                                    <td>{{ prescription.issued }}</td>
+                                    <td>{{ prescription.status }}</td>
+                                    <td>{{ prescription.total_price }}</td>
+                                    <!-- Add more fields as needed -->
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 
     <!-- Modal -->

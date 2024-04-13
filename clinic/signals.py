@@ -3,8 +3,8 @@
 from django.db.models.signals import post_save,pre_save
 from django.dispatch import receiver
 
-from kahamahmis.models import RemotePrescription
-from .models import AmbulanceOrder, Consultation, ConsultationNotification, ConsultationOrder, ImagingRecord, InventoryItem, LaboratoryOrder, MedicationPayment, MedicineInventory, Order, Prescription, Procedure, Reagent, ReagentUsage, UsageHistory
+
+from .models import AmbulanceOrder, Consultation, ConsultationNotification, ConsultationOrder, ImagingRecord, InventoryItem, LaboratoryOrder, MedicationPayment, MedicineInventory, Order, Prescription, Procedure, Reagent, ReagentUsage, RemotePrescription, UsageHistory
 from django.db.models import F
 from django.db import models
 
@@ -48,7 +48,7 @@ def update_total_payment_per_prescription(sender, instance, created, **kwargs):
 def update_total_payment_prescription(sender, instance, created, **kwargs):
     if created:
         # Calculate total payment for the inventory
-        total_price = instance.quantity_used * instance.medicine.unit_price
+        total_price = instance.quantity_used * instance.medicine.cash_cost
         
         # Update the total_payment field of the MedicineInventory instance
         instance.total_price = total_price

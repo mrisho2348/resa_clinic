@@ -23,7 +23,7 @@
                       </div>
                       <!-- /.card-header -->
                       <!-- form start -->
-                      {% url 'import_remoteservice_records' as action_path %}
+                      {% url 'kahamahmis:import_remoteservice_records' as action_path %}
                       {% include 'kahama_template/form_template.html' with messages=messages forms=forms action_path=action_path button_text="Import" %}
                     </div>
 

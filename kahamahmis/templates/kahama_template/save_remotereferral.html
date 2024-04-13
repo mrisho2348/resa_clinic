@@ -77,28 +77,13 @@ Patient Referral
                             <div class="card">
                                 <div class="card-body">
                                     <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="source_location">Source Location</label>
-                                                <input type="text" class="form-control" id="source_location" name="source_location" value="{{ referral.source_location }}">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="destination_location">Destination Location</label>
-                                                <input type="text" class="form-control" id="destination_location" name="destination_location" value="{{ referral.destination_location }}">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row mt-3">
                                         <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label for="reason">Reason</label>
-                                                <textarea class="form-control" id="reason" name="reason" rows="3"> {{ referral.reason }}</textarea>
+                                            <div class="form-group">                                     
+                                                {{ form.media }}
+                                                {{ form.as_p }}
                                             </div>
-                                        </div>
-                                        <!-- Add more fields as needed -->
-                                    </div>
+                                        </div>                 
+                                    </div> 
                                 </div>
                                 <div class="card-footer">
                                     {% if messages %}

@@ -29,6 +29,7 @@ urlpatterns = [
     path('doctor/', include('resaclinic.doctor_urls')),
     path('nurse/', include('resaclinic.nurse_urls')),
     path('accounts/', include('django.contrib.auth.urls')), 
+    path("ckeditor5/", include('django_ckeditor_5.urls'), name="ck_editor_5_upload_file"),
     path('kahama/', include(('kahamahmis.urls', 'kahamahmis'), namespace='kahamahmis')),
 ]
 if settings.DEBUG:

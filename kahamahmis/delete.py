@@ -2,14 +2,14 @@
 
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render,get_object_or_404
-from clinic.models import Category,  Consultation, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, PatientVisits, PatientVital, Patients, Prescription, Procedure, QualityControl, Reagent, ReagentUsage, Sample, Service, Staffs, Supplier, UsageHistory
+from clinic.models import Category,  Consultation, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, PatientVisits, PatientVital, Patients, Prescription, Procedure, QualityControl, Reagent, ReagentUsage, RemoteCompany, RemoteLaboratoryOrder, RemoteObservationRecord, RemotePatient, RemoteProcedure, RemoteReferral, Sample, Service, Staffs, Supplier, UsageHistory
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from django.db.models import F
 
-from kahamahmis.models import RemoteCompany, RemotePatient, RemoteReferral
+
 
 def delete_staff(request, staff_id):
     # Retrieve the staff object or return a 404 if not found
@@ -22,7 +22,7 @@ def delete_staff(request, staff_id):
         messages.success(request, 'staff deleted successfully.')
         return redirect('manage_staff')  # Replace 'staff_list' with your actual list view name
 
-    return render(request, 'delete/delete_staff_confirm.html', {'staff': staff})
+    return render(request, 'kahamaDelete/delete_staff_confirm.html', {'staff': staff})
 
 def delete_patient(request, patient_id):
     # Retrieve the staff object or return a 404 if not found
@@ -33,9 +33,9 @@ def delete_patient(request, patient_id):
         patient.delete()
         # Redirect to a success page or a list view
         messages.success(request, 'patient deleted successfully.')
-        return redirect('manage_patient')  # Replace 'manage_patient' with your actual list view name
+        return redirect('kahamahmis:manage_patient')  # Replace 'manage_patient' with your actual list view name
 
-    return render(request, 'delete/delete_patient_confirm.html', {'patient': patient})
+    return render(request, 'kahamaDelete/delete_patient_confirm.html', {'patient': patient})
 
 @csrf_exempt
 @require_POST
@@ -61,28 +61,41 @@ def delete_insurance(request, insurance_id):
             insurance.delete()
 
             messages.success(request, 'Insurance details deleted successfully!')
-            return redirect('manage_insurance')  # Replace 'your_redirect_url' with the appropriate URL name
+            return redirect('kahamahmis:manage_insurance')  # Replace 'your_redirect_url' with the appropriate URL name
 
         except Exception as e:
             messages.error(request, f'An error occurred: {e}')
 
-    return render(request, 'delete/delete_insurance_confirmation.html', {'insurance': insurance})
-
+    return render(request, 'kahamaDelete/delete_insurance_confirmation.html', {'insurance': insurance})
 
 
 @csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
-def delete_procedure(request):
+def delete_observation(request):
     if request.method == 'POST':
         try:
-            procedure_id = request.POST.get('procedure_id')
-
+            observation_id = request.POST.get('observation_id')
             # Delete procedure record
-            procedure_record = Procedure.objects.get(id=procedure_id)
-            procedure_record.delete()
+            observation = RemoteObservationRecord.objects.get(id=observation_id)
+            observation.delete()
+            return JsonResponse({'success': True, 'message': f'observation record for {observation.imaging} deleted successfully.'})
+        except RemoteObservationRecord.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid observation ID.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
 
-            return JsonResponse({'success': True, 'message': f'Procedure record for {procedure_record.name} deleted successfully.'})
-        except Procedure.DoesNotExist:
-            return JsonResponse({'success': False, 'message': 'Invalid procedure ID.'})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+@csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
+def delete_lab_result(request):
+    if request.method == 'POST':
+        try:
+            lab_result_id = request.POST.get('lab_result_id')
+            # Delete procedure record
+            lab_result = RemoteLaboratoryOrder.objects.get(id=lab_result_id)
+            lab_result.delete()
+            return JsonResponse({'success': True, 'message': f'lab result record for {lab_result.name} deleted successfully.'})
+        except RemoteLaboratoryOrder.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid lab result ID.'})
         except Exception as e:
             return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
 
@@ -131,11 +144,11 @@ def delete_company(request, company_id):
             company.delete()
 
             messages.success(request, 'Company deleted successfully!')
-            return redirect('manage_company')  # Replace 'your_redirect_url' with the appropriate URL name
+            return redirect('kahamahmis:manage_company')  # Replace 'your_redirect_url' with the appropriate URL name
         except Exception as e:
             messages.error(request, f'An error occurred: {e}')
 
-    return render(request, 'delete/company_delete_confirmation_template.html', {'company': company})
+    return render(request, 'kahamaDelete/company_delete_confirmation_template.html', {'company': company})
 
 
 def delete_pathodology(request, pathodology_id):
@@ -147,12 +160,12 @@ def delete_pathodology(request, pathodology_id):
             pathodology.delete()
 
             messages.success(request, 'Pathodology record deleted successfully!')
-            return redirect('manage_pathodology')  # Replace 'your_redirect_url' with the appropriate URL name
+            return redirect('kahamahmis:manage_pathodology')  # Replace 'your_redirect_url' with the appropriate URL name
 
         except Exception as e:
             messages.error(request, f'An error occurred: {e}')
 
-    return render(request, 'delete/pathodology_delete_confirmation.html', {'pathodology': pathodology})
+    return render(request, 'kahamaDelete/pathodology_delete_confirmation.html', {'pathodology': pathodology})
 
 
  
@@ -166,7 +179,7 @@ def delete_medicine_inventory(request, inventory_id):
     inventory.delete()
 
     # Redirect to the medicine inventory page
-    return redirect('medicine_inventory') 
+    return redirect('kahamahmis:medicine_inventory') 
 
 @require_POST
 def delete_patient_disease(request, patient_disease_id):
@@ -177,7 +190,7 @@ def delete_patient_disease(request, patient_disease_id):
     patient_disease.delete()
 
     # Redirect to the PatientDisease page
-    return redirect('patient_diseases_view') 
+    return redirect('kahamahmis:patient_diseases_view') 
 
 @require_POST
 def delete_diagnostic_test(request, test_id):
@@ -188,7 +201,7 @@ def delete_diagnostic_test(request, test_id):
     test.delete()
 
     # Redirect to the medicine inventory page
-    return redirect('diagnostic_tests')
+    return redirect('kahamahmis:diagnostic_tests')
  
 @require_POST
 def delete_sample(request, sample_id):
@@ -199,7 +212,7 @@ def delete_sample(request, sample_id):
     sample.delete()
 
     # Redirect to the medicine inventory page
-    return redirect('sample_list') 
+    return redirect('kahamahmis:sample_list') 
 
 @require_POST
 def pathology_diagnostic_test_delete(request, test_id):
@@ -210,7 +223,7 @@ def pathology_diagnostic_test_delete(request, test_id):
     pathology_diagnostic_test.delete()
 
     # Redirect to the PathologyDiagnosticTest  page
-    return redirect('pathology_diagnostic_test_list')
+    return redirect('kahamahmis:pathology_diagnostic_test_list')
  
 @require_POST
 def delete_consultation(request, appointment_id):
@@ -221,7 +234,7 @@ def delete_consultation(request, appointment_id):
     consultation.delete()
 
     # Redirect to the Consultation  page
-    return redirect('appointment_list')
+    return redirect('kahamahmis:appointment_list')
  
 @require_POST
 def delete_consultation_fee(request, fee_id):
@@ -232,7 +245,7 @@ def delete_consultation_fee(request, fee_id):
     consultation_fee.delete()
 
     # Redirect to the ConsultationFee  page
-    return redirect('consultation_fee_list') 
+    return redirect('kahamahmis:consultation_fee_list') 
 
 @require_POST
 def delete_service(request):
@@ -244,7 +257,7 @@ def delete_service(request):
     service.delete()
 
     # Redirect to the Service  page
-    return redirect('manage_service') 
+    return redirect('kahamahmis:manage_service') 
 
    
 @require_POST
@@ -266,7 +279,7 @@ def delete_medication_payment(request, payment_id):
             )
 
         # Redirect to the MedicationPayment
-        return redirect('patient_medicationpayment_history_view_mrn', mrn=medication_payment.patient.mrn)
+        return redirect('kahamahmis:patient_medicationpayment_history_view_mrn', mrn=medication_payment.patient.mrn)
 
     except MedicationPayment.DoesNotExist:
         return HttpResponseBadRequest("MedicationPayment not found.")
@@ -454,5 +467,40 @@ def delete_reagent_used(request, reagentusage_id):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})    
     
+
+@csrf_exempt    
+def delete_procedure(request):
+    if request.method == 'POST':
+        # Retrieve the procedure ID from the POST data
+        procedure_id = request.POST.get('procedure_id')
+        print(procedure_id)
+        try:
+            # Query and delete the procedure object from the database
+            procedure = RemoteProcedure.objects.get(id=procedure_id)
+            procedure.delete()
+            # Return a success response
+            return JsonResponse({'status': 'success', 'message': 'Procedure deleted successfully.'})
+        except Exception as e:
+            # Return an error response if deletion fails
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    else:
+        # Return an error response for requests other than POST
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})     
     
-    
+# View for deleting a result
+@csrf_exempt
+def delete_result(request):
+    if request.method == 'POST':
+        try:
+            result_id = request.POST.get('result_id')    
+            result = RemoteLaboratoryOrder.objects.get(id=result_id)
+            result.delete()     
+            deleted_result_id = result_id
+            # Return a JSON response indicating success
+            return JsonResponse({'success': True, 'result_id': deleted_result_id})
+        except Exception as e:
+            # Return a JSON response indicating failure
+            return JsonResponse({'success': False, 'message': f'Error deleting result: {str(e)}'})
+    else:
+        # Return a JSON response indicating failure
+        return JsonResponse({'success': False, 'message': 'Invalid request method'})       

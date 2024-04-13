@@ -2,7 +2,7 @@ from datetime import datetime
 import logging
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from clinic.models import Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Medicine, Procedure, Referral, Sample, Staffs
+from clinic.models import Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Medicine, Procedure, Referral, RemoteCompany, RemoteLaboratoryOrder, RemoteObservationRecord, RemotePatient, RemoteProcedure, RemoteReferral, Sample, Staffs
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db import transaction
@@ -10,7 +10,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from django.db.models import F
 
-from kahamahmis.models import RemoteCompany, RemotePatient, RemoteProcedure, RemoteReferral
 # Define a logger
 logger = logging.getLogger(__name__)
 def edit_insurance(request, insurance_id):
@@ -49,35 +48,70 @@ def edit_procedure(request):
     if request.method == 'POST':
         try:
             procedure_id = request.POST.get('procedure_id')
-            name = request.POST.get('name')
-            start_time_str = request.POST.get('start_time')
-            end_time_str = request.POST.get('end_time')
-            description = request.POST.get('description')
-            equipments_used = request.POST.get('equipments_used')
+            name_id = request.POST.get('name')         
+            description = request.POST.get('description')          
             cost = request.POST.get('cost')
-
-            # Validate start and end times
-            start_time = datetime.strptime(start_time_str, '%H:%M').time()
-            end_time = datetime.strptime(end_time_str, '%H:%M').time()
-
-            if start_time >= end_time:
-                return JsonResponse({'success': False, 'message': 'Start time must be greater than end time.'})
-
-            # Calculate duration in hours
-            duration = (datetime.combine(datetime.today(), end_time) - datetime.combine(datetime.today(), start_time)).seconds / 3600
-
             # Update procedure record
             procedure_record = RemoteProcedure.objects.get(id=procedure_id)
-            procedure_record.name = name          
-            procedure_record.description = description
-            procedure_record.equipments_used = equipments_used
-            procedure_record.cost = cost
-            procedure_record.duration_time = duration
+            procedure_record.name_id = name_id          
+            procedure_record.description = description  
+            procedure_record.cost = cost     
             procedure_record.save()
-
             return JsonResponse({'success': True, 'message': f'Procedure record for {procedure_record.name} updated successfully.'})
         except Procedure.DoesNotExist:
             return JsonResponse({'success': False, 'message': 'Invalid procedure ID.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+@csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
+def edit_observation(request):
+    if request.method == 'POST':
+        try:
+            observation_id = request.POST.get('observation_id')
+            imaging_id = request.POST.get('imaging')
+            description = request.POST.get('description')
+            result = request.POST.get('result')
+            cost = request.POST.get('cost')
+            image = request.FILES.get('new_image')
+            # Update procedure record
+            observation_record = RemoteObservationRecord.objects.get(id=observation_id)
+            observation_record.imaging_id = imaging_id
+            observation_record.description = description
+            observation_record.result = result
+            observation_record.cost = cost
+            if image:
+                observation_record.image = image
+            observation_record.save()         
+            return JsonResponse({'success': True, 'message': f'observation record for {observation_record.imaging} updated successfully.'})
+        except RemoteObservationRecord.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid observation ID.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+
+@csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
+def edit_lab_result(request):
+    if request.method == 'POST':
+        try:
+            lab_result_id = request.POST.get('lab_result_id')
+            name_id = request.POST.get('lab_service')
+            description = request.POST.get('description')
+            result = request.POST.get('result')
+            cost = request.POST.get('cost')        
+            # Update procedure record
+            lab_record = RemoteLaboratoryOrder.objects.get(id=lab_result_id)
+            lab_record.name_id = name_id
+            lab_record.description = description
+            lab_record.result = result
+            lab_record.cost = cost         
+            lab_record.save()         
+            return JsonResponse({'success': True, 'message': f'lab record record for {lab_record.name} updated successfully.'})
+        except RemoteLaboratoryOrder.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid lab record ID.'})
         except Exception as e:
             return JsonResponse({'success': False, 'message': f'An error occurred: {e}'})
 
@@ -299,13 +333,13 @@ def edit_pathodology(request, pathodology_id):
             pathodology.save()
 
             messages.success(request, 'Pathodology details updated successfully!')
-            return redirect('manage_pathodology')  # Replace 'your_redirect_url' with the appropriate URL name
+            return redirect('kahamahmis:manage_pathodology')  # Replace 'your_redirect_url' with the appropriate URL name
 
         except Exception as e:
             print(f"ERROR: {str(e)}")
             messages.error(request, f'An error occurred: {e}')
 
-    return render(request, 'update/edit_pathodology.html', {
+    return render(request, 'kahamaUpdate/edit_pathodology.html', {
         'pathodology': pathodology,
         'all_diseases': disease_records,
         })

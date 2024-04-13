@@ -3,8 +3,8 @@
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render,get_object_or_404
 
-from kahamahmis.models import RemoteCompany, RemotePatient, RemoteService
-from .models import Category, Consultation, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, HealthRecord, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, PatientVisits, PatientVital, Patients, Prescription, Procedure, QualityControl, Reagent, ReagentUsage, Referral, Sample, Service, Staffs, Supplier, UsageHistory
+
+from .models import Category, Consultation, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, HealthRecord, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, PatientVisits, PatientVital, Patients, Prescription, Procedure, QualityControl, Reagent, ReagentUsage, Referral, RemoteCompany, RemotePatient, RemoteService, Sample, Service, Staffs, Supplier, UsageHistory
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt

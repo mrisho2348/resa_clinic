@@ -25,9 +25,7 @@ from tablib import Dataset
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import OuterRef, Subquery
-
-from kahamahmis.models import RemoteCompany
-from .models import AmbulanceActivity, AmbulanceOrder, AmbulanceRoute, AmbulanceVehicleOrder, Category, ConsultationFee, ConsultationNotes, ConsultationOrder, Country, Diagnosis, DiagnosticTest, Diagnosis, Equipment, EquipmentMaintenance, HealthIssue, HospitalVehicle, ImagingRecord, InventoryItem, LaboratoryOrder, MedicationPayment, MedicineRoute, MedicineUnitMeasure, Order, PathologyDiagnosticTest, PatientDisease,PatientVisits, PatientVital, Prescription, PrescriptionFrequency, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, Sample, Service, Supplier, UsageHistory
+from .models import AmbulanceActivity, AmbulanceOrder, AmbulanceRoute, AmbulanceVehicleOrder, Category, ConsultationFee, ConsultationNotes, ConsultationOrder, Country, Diagnosis, DiagnosticTest, Diagnosis, Equipment, EquipmentMaintenance, HealthIssue, HospitalVehicle, ImagingRecord, InventoryItem, LaboratoryOrder, MedicationPayment, MedicineRoute, MedicineUnitMeasure, Order, PathologyDiagnosticTest, PatientDisease,PatientVisits, PatientVital, Prescription, PrescriptionFrequency, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, RemoteCompany, Sample, Service, Supplier, UsageHistory
 from django.db.models import Sum
 
 # Create your views here.
@@ -852,11 +850,9 @@ def patient_procedure_view(request):
 
 
 def patient_procedure_history_view(request, mrn):
-    patient = get_object_or_404(Patients, mrn=mrn)
-    
+    patient = get_object_or_404(Patients, mrn=mrn)    
     # Retrieve all procedures for the specific patient
-    procedures = Procedure.objects.filter(patient=patient)
-    
+    procedures = Procedure.objects.filter(patient=patient)    
     context = {
         'patient': patient,
         'procedures': procedures,
@@ -3090,6 +3086,7 @@ def save_diagnosis(request):
     try:
         # Extract data from the request
         diagnosis_name = request.POST.get('diagnosis_name')
+        diagnosis_code = request.POST.get('diagnosis_code')
         diagnosis_id = request.POST.get('diagnosis_id')
 
         # Check if the Diagnosis ID is provided for editing
@@ -3097,9 +3094,10 @@ def save_diagnosis(request):
             # Editing existing diagnosis
             diagnosis = Diagnosis.objects.get(pk=diagnosis_id)
             diagnosis.diagnosis_name = diagnosis_name
+            diagnosis.diagnosis_code = diagnosis_code
         else:
             # Creating a new diagnosis
-            diagnosis = Diagnosis.objects.create(diagnosis_name=diagnosis_name)
+            diagnosis = Diagnosis.objects.create(diagnosis_name=diagnosis_name,diagnosis_code=diagnosis_code)
 
         diagnosis.save()
 

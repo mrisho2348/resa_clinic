@@ -647,7 +647,7 @@ ADMIN HOME
             // Function to fetch patient data by company from the server
             function fetchPatientDataByCompany() {
                 $.ajax({
-                    url: '/kahama/get_patient_data_by_company',
+                    url: '{% url "kahamahmis:get_patient_data_by_company" %}',
                     method: 'GET',
                     success: function(data) {
                         createDoughnutChart(data);

@@ -1,7 +1,7 @@
 from import_export import resources
 
-from kahamahmis.models import RemoteCompany, RemotePatient, RemoteService
-from .models import AmbulanceActivity, AmbulanceRoute, Category, HealthRecord, MedicineRoute, MedicineUnitMeasure, PrescriptionFrequency,  ConsultationNotes, Country, Diagnosis, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, PatientVital, Patients, Prescription, Procedure, Reagent, Referral,Service, Staffs, Supplier
+
+from .models import AmbulanceActivity, AmbulanceRoute, Category, HealthRecord, MedicineRoute, MedicineUnitMeasure, PrescriptionFrequency,  ConsultationNotes, Country, Diagnosis, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, PatientVital, Patients, Prescription, Procedure, Reagent, Referral, RemoteCompany, RemotePatient, RemoteService,Service, Staffs, Supplier
 
 class StaffResources(resources.ModelResource):
     class Meta:

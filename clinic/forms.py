@@ -1,6 +1,8 @@
 from django import forms
 from django.core.validators import FileExtensionValidator
+from django_ckeditor_5.widgets import CKEditor5Widget
 
+from clinic.models import RemoteCounseling, RemoteDischargesNotes, RemoteObservationRecord, RemoteReferral
 class ImportStaffForm(forms.Form):
     staff_file = forms.FileField(
         label='Choose an Excel file',
@@ -185,5 +187,99 @@ class ImportMedicineUnitMeasureForm(forms.Form):
     )
     
 
+
+# class RemoteObservationRecordForm(forms.Form):
+#     observation_notes = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 5}))
+
+class RemoteObservationRecordForm(forms.ModelForm):
+    """Form for observation notes."""
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["observation_notes"].required = False
+
+    class Meta:
+        model = RemoteObservationRecord
+        fields = ("observation_notes",)
+        widgets = {
+            "observation_notes": CKEditor5Widget(
+                attrs={"class": "django_ckeditor_5"}, config_name="extends"
+            )
+        }
+        
+        
+class RemoteCounselingForm(forms.ModelForm):
+    """Form for counseling notes."""
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["counselling_notes"].required = False
+
+    class Meta:
+        model = RemoteCounseling
+        fields = ("counselling_notes",)
+        widgets = {
+            "counselling_notes": CKEditor5Widget(
+                attrs={"class": "django_ckeditor_5"}, config_name="extends"
+            )
+        }   
+        
+
+class RemoteReferralForm(forms.ModelForm):
+    """Form for remote referrals."""
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["notes"].required = False
+
+        # Add Bootstrap classes to specific form fields
+        self.fields["source_location"].widget.attrs['class'] = 'form-control'
+        self.fields["destination_location"].widget.attrs['class'] = 'form-control'
+        self.fields["destination_location"].widget.attrs['class'] = 'form-control'
+        self.fields["nature_of_referral"].widget.attrs['class'] = 'form-control select2bs4'
+        self.fields["transport_model"].widget.attrs['class'] = 'form-control select2bs4'
+        
+        self.fields["source_location"].widget.attrs['disabled'] = 'disabled'
+        self.fields["source_location"].initial = "Default Source Location"
+
+    class Meta:
+        model = RemoteReferral
+        fields = ['notes', 'destination_location', 'nature_of_referral', 'transport_model', 'destination_location', 'source_location']
+        widgets = {
+            'notes': CKEditor5Widget(attrs={'class': 'django_ckeditor_5'}, config_name='extends'),
+        }
+        labels = {
+            'notes': 'Referral Reason',
+            'source_location': 'Source Location',
+            'destination_location': 'Patient Destination',
+            'nature_of_referral': 'Nature of Referral',
+            'transport_model': 'Transport Model',
+            'destination_location': 'Destination Location',
+        }
+        
+class RemoteDischargesNotesForm(forms.ModelForm):
+    """Form for remote discharge notes."""
+    
+    DISCHARGE_CONDITION_CHOICES = [
+        ('stable', 'Stable'),
+        ('unstable', 'Unstable'),
+    ]
+    
+    discharge_condition = forms.ChoiceField(
+        choices=DISCHARGE_CONDITION_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["discharge_notes"].required = False
+        self.fields["discharge_condition"].widget.attrs.update({'class': 'form-control select2bs4'})
+
+    class Meta:
+        model = RemoteDischargesNotes
+        fields = ['discharge_condition', 'discharge_notes']
+        widgets = {
+            'discharge_notes': CKEditor5Widget(attrs={'class': 'django_ckeditor_5'}, config_name='extends'),
+        }
 #------------------------------
 #   Editing existing data

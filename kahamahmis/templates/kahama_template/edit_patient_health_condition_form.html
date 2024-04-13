@@ -17,21 +17,29 @@
         <!-- Patient Information Card -->
         <div class="row">
             <div class="col-md-12">
-                <div class="card">
+                <div class="card">               
                     <div class="card-body">
                         <div class="row" style="font-size:13px;">
-                            <div class="col-md-3"><b>PATIENT: {{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</b></div>
-                            <div class="col-md-3"><b>Age: {{ patient.age }}</b></div>
-                            <div class="col-md-3"><b>SEX: {{ patient.gender }}</b></div>
-                            <div class="col-md-3"><b>FILE NO : {{ patient.mrn }}</b></div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-md-3"><b>PAYMENT MODE: {{ patient.payment_form }}</b></div>
-                        </div>
-                    </div>    
-                </div>
+                            <div class="col-md-3">PATIENT: <b>{{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</b></div>
+                            <div class="col-md-3">DOB: <b>{{ patient.dob|date:'Y-m-d' }} [ Age: {% if patient.dob %}
+                                <script>
+                                    var dob = new Date("{{ patient.dob|date:'Y-m-d' }}");
+                                    var now = new Date();
+                                    var ageMilliseconds = now - dob;
+                                    var ageSeconds = ageMilliseconds / 1000;
+                                    var ageYears = Math.floor(ageSeconds / (365.25 * 24 * 60 * 60));
+                                    document.write(ageYears + ' years');
+                                </script>
+                                {% else %}
+                                {{ patient.age }}
+                                {% endif %}]</b></div>
+                            <div class="col-md-3">SEX: <b>{{ patient.gender }}</b></div>
+                            <div class="col-md-3">FILE NO : <b>{{ patient.mrn }}</b> </div>
+                        </div>                       
+                    </div>         
+                  </div>
             </div>
-        </div>
+        </div> 
         
         <!-- Health Condition Entry Form -->
         <div class="row justify-content-cente">
@@ -81,38 +89,300 @@
                                             <td>
                                                 <!-- Checkbox for record deletion -->
                                                 <button type="button" class="btn btn-danger btn-sm delete-row">Delete</button>
-                                           
-                                            </td>
-                     
+                                            </td>                     
                                         </tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
                                   <!-- Add More Health Record Button -->
+                                  <div class="form-group">
+                                    <button type="button" class="btn btn-primary btn-block" id="add_health_record">Add another chronic illness</button>
+                                </div>
+                           </div>                         
+                        </form>
+                    </div>
+                 
+                </div>
+            </div>
+        </div>
+             <!-- Medication Allergy Entry Form -->
+
+        <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post" action="{% url 'kahamahmis:edit_patient_medication_allergy' patient.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="patient_id" value="{{ patient.id }}">
+                        <div class="form-group">
+                            <label for="medication_allergy">Does Patient have any allergies to medication?</label>
+                            <select class="form-control" id="medication_allergy" name="medication_allergy">
+                                <option value="no" {% if not medication_allergiesy %} selected {% endif %}>No</option>
+                                <option value="yes" {% if medication_allergies %} selected {% endif %}>Yes</option>
+                            </select>
+                        </div>
+                        <!-- Medication Allergy Table -->
+                        <div class="table-responsive" id="medication_allergy_form_container" {% if patient.has_medication_allergy %} style="display: block;" {% else %} style="display: none;" {% endif %}>
+                            <table class="table table-bordered" id="medication_allergy_table">
+                                <thead>
+                                    <tr>
+                                        <th>Drug name</th>
+                                        <th>Provide details (if any)</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for allergy in medication_allergies %}
+                                    <tr>
+                                        <td><input type="text" class="form-control" name="medicine_name_{{ allergy.id }}" value="{{ allergy.medicine_name }}" ></td>
+                                        <td><input type="text" class="form-control" name="reaction_{{ allergy.id }}" value="{{ allergy.reaction }}" ></td>
+                                        <td><input type="checkbox" name="delete_record_{{ allergy.id }}"></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            <!-- Add More Medication Allergy Button -->
                             <div class="form-group">
-                                <button type="button" class="btn btn-primary btn-block" id="add_health_record" name="add_more_records">Add another chronic illness</button>
+                                <button type="button" class="btn btn-primary btn-block" id="add_medication_allergy">Add another drug</button>
                             </div>
+                        </div>                      
+                    </form>
+                </div>                   
+            </div>
+        </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="post" action="{% url 'kahamahmis:edit_patient_surgery_history' patient.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="patient_id" value="{{ patient.id }}">
+                            <div class="form-group">
+                                <label for="surgery_history">Does the patient have any history of surgery ?</label>
+                                <select class="form-control" id="surgery_history" name="surgery_history">
+                                    <option value="no" {% if not has_surgery_history  %} selected {% endif %}>No</option>
+                                    <option value="yes" {% if has_surgery_history %} selected {% endif %}>Yes</option>
+                                </select>
                             </div>
-                            
-                          
-                            
+                            <!-- Surgery History Table -->
+                            <div class="table-responsive" id="surgery_history_form_container" {% if patient.has_surgery_history %} style="display: block;" {% else %} style="display: none;" {% endif %}>
+                                <table class="table table-bordered" id="surgery_history_table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name of surgery</th>                                          
+                                            <th>Provide details (if any)</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for surgery in surgery_history %}
+                                        <tr>
+                                            <td><input type="text" class="form-control" name="surgery_name_{{ surgery.id }}" value="{{ surgery.surgery_name }}" ></td>
+                                            <td><input type="date" class="form-control" name="date_of_surgery_{{ surgery.id }}" value="{{ surgery.surgery_date|date:'Y-m-d' }}" ></td>
+                                            <td><input type="checkbox" name="delete_record_{{ surgery.id }}"></td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                <!-- Add More Surgery History Button -->
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-primary btn-block" id="add_surgery_history">Add another surgical history</button>
+                                </div>
+                            </div>                        
+                        </form>
+                    </div>                  
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">                                  
+                        <div class="form-group">
+                            <label for="lifestyle_behavior">Does the patient have any of the following lifestyle behaviors?</label>                                            
+                        </div>
+                        <div id="lifestyle_behavior_container">                          
+                            <div class="form-group form-check">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-check-label" for="smoking">Tobacco use</label>                                           
+                                    </div>
+                                    <div class="col-md-6">                                      
+                                        <select class="form-control" id="smoking" name="smoking">
+                                            <option value="no" {% if existing_lifestyle_behavior.smoking == 'no' %} selected {% endif %}>No</option>
+                                            <option value="yes" {% if existing_lifestyle_behavior.smoking == 'yes' %} selected {% endif %}>Yes</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <br>
+                            <div class="form-group form-check">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-check-label" for="alcohol_consumption">Excessive alcohol use</label>                                            
+                                    </div>
+                                    <div class="col-md-6">                                      
+                                        <select class="form-control" id="alcohol_consumption" name="alcohol_consumption">
+                                            <option value="no" {% if existing_lifestyle_behavior.alcohol_consumption == 'no' %} selected {% endif %}>No</option>
+                                            <option value="yes" {% if existing_lifestyle_behavior.alcohol_consumption == 'yes' %} selected {% endif %}>Yes</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <br>
+                            <div class="form-group form-check">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="weekly_exercise_frequency" class="form-check-label">Lack of physical activities</label>
+                                    </div>
+                                    <div class="col-md-6">                                      
+                                        <select class="form-control" id="weekly_exercise_frequency" name="weekly_exercise_frequency">
+                                            <option value="no" {% if existing_lifestyle_behavior.weekly_exercise_frequency == 'no' %} selected {% endif %}>No</option>
+                                            <option value="yes" {% if existing_lifestyle_behavior.weekly_exercise_frequency == 'yes' %} selected {% endif %}>Yes</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <br>
+                            <div class="form-group form-check">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-check-label" for="healthy_diet">Poor nutrition (junk feeding/under nutrition)</label>
+                                    </div>
+                                    <div class="col-md-6">                                      
+                                        <select class="form-control" id="healthy_diet" name="healthy_diet">
+                                            <option value="no" {% if existing_lifestyle_behavior.healthy_diet == 'no' %} selected {% endif %}>No</option>
+                                            <option value="yes" {% if existing_lifestyle_behavior.healthy_diet == 'yes' %} selected {% endif %}>Yes</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <br>
+                            <div class="form-group form-check">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-check-label" for="stress_management">Excessive stress</label>
+                                    </div>
+                                    <div class="col-md-6">                                      
+                                        <select class="form-control" id="stress_management" name="stress_management">
+                                            <option value="no" {% if existing_lifestyle_behavior.stress_management == 'no' %} selected {% endif %}>No</option>
+                                            <option value="yes" {% if existing_lifestyle_behavior.stress_management == 'yes' %} selected {% endif %}>Yes</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>  
+                            <hr>
+                            <br>                           
+                            <div class="form-group form-check">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-check-label" for="sufficient_sleep">Deprived sleeping (less than 5 hours)</label>
+                                    </div>
+                                    <div class="col-md-6">                                      
+                                        <select class="form-control" id="sufficient_sleep" name="sufficient_sleep">
+                                            <option value="no" {% if existing_lifestyle_behavior.sufficient_sleep == 'no' %} selected {% endif %}>No</option>
+                                            <option value="yes" {% if existing_lifestyle_behavior.sufficient_sleep == 'yes' %} selected {% endif %}>Yes</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>                      
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="post" action="{% url 'kahamahmis:family_health_info_edit' patient.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="patient_id" value="{{ patient.id }}">
+                            <div class="form-group">
+                                <label for="family_medical_history">Does the patient have significant family medical history?</label>
+                                <select class="form-control" id="family_medical_history" name="family_medical_history">
+                                    <option value="no" {% if not family_medical_history  %} selected {% endif %}>No</option>
+                                    <option value="yes" {% if family_medical_history %} selected {% endif %}>Yes</option>
+                                </select>
+                            </div>
+                            <!-- Family Medical History Table -->
+                            <div class="table-responsive" id="family_medical_history_form_container" {% if patient.has_family_medical_history %} style="display: block;" {% else %} style="display: none;" {% endif %}>
+                                <table class="table table-bordered" id="family_medical_history_table">
+                                    <thead>
+                                        <tr>
+                                            <th>Condition</th>
+                                            <th>Relationship</th>
+                                            <th>Provide details (if any)</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for record in family_medical_history %}
+                                        <tr>
+                                            <td>
+                                                <select class="form-control select2bs4" style="width: 100%;" name="condition_{{ record.id }}">
+                                                    <option value="" selected>Select Condition</option>
+                                                    <option value="Allergies" {% if record.condition == 'Allergies' %} selected {% endif %}>Allergies</option>
+                                                    <option value="Asthma" {% if record.condition == 'Asthma' %} selected {% endif %}>Asthma</option>
+                                                    <option value="Lung Disease" {% if record.condition == 'Lung Disease' %} selected {% endif %}>Lung Disease</option>
+                                                    <option value="Cancer" {% if record.condition == 'Cancer' %} selected {% endif %}>Cancer</option>
+                                                    <option value="Diabetes" {% if record.condition == 'Diabetes' %} selected {% endif %}>Diabetes</option>
+                                                    <option value="Hypertension" {% if record.condition == 'Hypertension' %} selected {% endif %}>Hypertension</option>
+                                                    <option value="Heart Disease" {% if record.condition == 'Heart Disease' %} selected {% endif %}>Heart Disease</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <select class="form-control select2bs4" style="width: 100%;" id="relationship" name="relationship_{{ record.id }}">
+                                                    <option value="Father">Father</option>
+                                                    <option value="Mother">Mother</option>
+                                                    <option value="Brother">Brother</option>
+                                                    <option value="Sister">Sister</option>
+                                                    <option value="Relative">Uncle</option>
+                                                    <option value="Relative">Aunt</option>
+                                                    <option value="Father">Grandfather</option>
+                                                    <option value="Father">Grandmother</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+                                            </td>
+                                            <td><textarea class="form-control" name="comments_{{ record.id }}" rows="3">{{ record.comments }}</textarea></td>
+                                            <td><input type="checkbox" name="delete_record_{{ record.id }}"></td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-primary btn-block" id="add_family_medical_record">Add another significant family medical history</button>
+                                </div>
+                            </div>
                             <!-- Submit Button -->
-                            <button type="submit" class="btn btn-success btn-block" name="save_and_continue_family_health">Save change  chronic illness</button>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <button type="submit" name="save_and_continue_add_another_family_record" class="btn btn-primary btn-block">Save &  continue</button>
+                                </div>
+                            </div>
                         </form>
                     </div>
                     <div class="card-footer">
                         <div class="form-row">
                             <div>
                                 {% if messages %}
-                                    <div class="col-12">
-                                        {% for message in messages %}
-                                            {% if message.tags == 'error' %}
-                                                <div class="alert alert-danger">{{ message }}</div>
-                                            {% elif message.tags == 'success' %}
-                                                <div class="alert alert-primary">{{ message }}</div>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </div>
+                                <div class="col-12">
+                                    {% for message in messages %}
+                                    {% if message.tags == 'error' %}
+                                    <div class="alert alert-danger">{{ message }}</div>
+                                    {% elif message.tags == 'success' %}
+                                    <div class="alert alert-primary">{{ message }}</div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
                                 {% endif %}
                             </div>
                         </div>
@@ -120,6 +390,7 @@
                 </div>
             </div>
         </div>
+
     </div>
   
     
@@ -179,6 +450,147 @@
 
     // Delete Health Record Row
     $(document).on('click', '.delete-row', function () {
+        $(this).closest('tr').remove();
+    });
+</script>
+<script>
+    // Initially show/hide the medication allergy entry form based on patient's selection
+    $(document).ready(function() {
+        toggleMedicationAllergyForm($('#medication_allergy').val() === 'yes');
+    });
+
+    // Event listener for medication allergy selection
+    $('#medication_allergy').change(function() {
+        toggleMedicationAllergyForm($(this).val() === 'yes');
+    });
+
+    // Function to toggle visibility of medication allergy form
+    function toggleMedicationAllergyForm(show) {
+        if (show) {
+            $('#medication_allergy_form_container').show();
+        } else {
+            $('#medication_allergy_form_container').hide();
+        }
+    }
+
+    // JavaScript for Adding/Deleting Rows
+    $('#add_medication_allergy').click(function() {
+        var newRow = `<tr>
+                            <td><input type="text" class="form-control" name="new_medicine_name[]" ></td>
+                            <td><input type="text" class="form-control" name="new_reaction[]" ></td>
+                            <td><button type="button" class="btn btn-danger btn-sm delete-row">Delete</button></td>
+                        </tr>`;
+        $('#medication_allergy_table tbody').append(newRow);
+    });
+
+    // Delete Medication Allergy Row
+    $(document).on('click', '.delete-row', function() {
+        $(this).closest('tr').remove();
+    });
+</script>
+<script>
+    // Initially show/hide the family medical history form based on patient's selection
+    $(document).ready(function() {
+        toggleFamilyMedicalHistoryForm($('#family_medical_history').val() === 'yes');
+    });
+
+    // Event listener for family medical history selection
+    $('#family_medical_history').change(function() {
+        toggleFamilyMedicalHistoryForm($(this).val() === 'yes');
+    });
+
+    // Function to toggle visibility of family medical history form
+    function toggleFamilyMedicalHistoryForm(show) {
+        if (show) {
+            $('#family_medical_history_form_container').show();
+        } else {
+            $('#family_medical_history_form_container').hide();
+        }
+    }
+
+    // JavaScript for Adding/Deleting Rows
+    // Add Family Medical Record Row
+    $('#add_family_medical_record').click(function () {
+        var newRow = `<tr>
+                        <td>
+                            <select class="form-control select2bs4" style="width: 100%;" name="new_condition[]" required>
+                                <option value="" selected>Select Condition</option>
+                                <option value="Allergies">Allergies</option>
+                                <option value="Asthma">Asthma</option>
+                                <option value="Lung Disease">Lung Disease</option>
+                                <option value="Cancer">Cancer</option>
+                                <option value="Diabetes">Diabetes</option>
+                                <option value="Hypertension">Hypertension</option>
+                                <option value="Heart Disease">Heart Disease</option>
+                            </select>
+                        </td>
+                        <td><input type="text" class="form-control" name="new_relationship[]"></td>
+                        <td><textarea class="form-control" name="new_comments[]" rows="3"></textarea></td>
+                        <td><button type="button" class="btn btn-danger btn-sm delete-row">Delete</button></td>
+                    </tr>`;
+        $('#family_medical_history_table tbody').append(newRow);
+    });
+
+    // Delete Family Medical Record Row
+    $(document).on('click', '.delete-row', function () {
+        $(this).closest('tr').remove();
+    });
+</script>
+<script>
+    // Initially show/hide the lifestyle behavior entry form based on patient's selection
+    $(document).ready(function() {
+        toggleLifestyleBehaviorForm($('#lifestyle_behavior').val() === 'yes');
+    });
+
+    // Event listener for lifestyle behavior selection
+    $('#lifestyle_behavior').change(function() {
+        toggleLifestyleBehaviorForm($(this).val() === 'yes');
+    });
+
+    // Function to toggle visibility of lifestyle behavior form
+    function toggleLifestyleBehaviorForm(show) {
+        if (show) {
+            $('#lifestyle_behavior_form_container').show();
+        } else {
+            $('#lifestyle_behavior_form_container').hide();
+        }
+    }
+
+    
+</script>
+   
+<script>
+    // Initially show/hide the surgery history entry form based on patient's selection
+    $(document).ready(function() {
+        toggleSurgeryHistoryForm($('#surgery_history').val() === 'yes');
+    });
+
+    // Event listener for surgery history selection
+    $('#surgery_history').change(function() {
+        toggleSurgeryHistoryForm($(this).val() === 'yes');
+    });
+
+    // Function to toggle visibility of surgery history form
+    function toggleSurgeryHistoryForm(show) {
+        if (show) {
+            $('#surgery_history_form_container').show();
+        } else {
+            $('#surgery_history_form_container').hide();
+        }
+    }
+
+    // JavaScript for Adding/Deleting Rows
+    $('#add_surgery_history').click(function() {
+        var newRow = `<tr>
+                            <td><input type="text" class="form-control" name="new_surgery_name[]" ></td>
+                            <td><input type="date" class="form-control" name="new_date_of_surgery[]" ></td>
+                            <td><button type="button" class="btn btn-danger btn-sm delete-row">Delete</button></td>
+                        </tr>`;
+        $('#surgery_history_table tbody').append(newRow);
+    });
+
+    // Delete Surgery History Row
+    $(document).on('click', '.delete-row', function() {
         $(this).closest('tr').remove();
     });
 </script>

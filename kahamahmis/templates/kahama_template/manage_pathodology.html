@@ -19,35 +19,41 @@ Pathology
     {% load static %}
 {% endblock breadcrumb %}
 {% block main_content %}
-<div class="table-responsive">
-    <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Related Diseases</th> <!-- New added field -->
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="pathology-record-table-body">
-            {% for pathodology in pathodology_records %}
-                <tr>
-                    <td>{{ pathodology.name }}</td>
-                    <td>{{ pathodology.description }}</td>
-                    <td>
-                        {% for disease in pathodology.related_diseases.all %}
-                            {{ disease.disease_name }}
-                            {% if not forloop.last %}, {% endif %}
-                        {% endfor %}
-                    </td>
-                    <td>
-                        <a href="{% url 'edit_pathodology' pathodology.id %}" class="btn btn-info">Edit</a>
-                        <a href="{% url 'delete_pathodology' pathodology.id %}" class="btn btn-danger">Delete</a>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6  class="header-title text-center mt-0 mb-1  text-uppercase"> List of all diseases </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Description</th>        
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="">
+                                {% for pathodology in pathodology_records %}
+                                    <tr>
+                                        <td>{{ pathodology.name }}</td>
+                                        <td>{{ pathodology.description }}</td>                    
+                                        <td>
+                                            <a href="{% url 'kahamahmis:edit_pathodology' pathodology.id %}" class="btn btn-info">Edit</a>
+                                            <a href="{% url 'kahamahmis:delete_pathodology' pathodology.id %}" class="btn btn-danger">Delete</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 
@@ -70,9 +76,7 @@ Pathology
         margin-top: 20px;
     }
 
-    th, td {
-        text-align: center;
-    }
+   
 
     th {
         background-color: #007bff;
@@ -84,11 +88,6 @@ Pathology
     }
 </style>
 
-<script>
-    function submitForm(checkbox) {
-        checkbox.form.submit();
-    }
-</script>
 
 {% include 'kahama_template/datatable.html' %}
 

@@ -79,91 +79,43 @@ Patient Service
             </div>
         </div>
     </div>
-    <!-- remote_imaging_record_form.html -->
-    <form method="POST" action="{% url 'kahamahmis:save_observation' patient.id visit.id %}" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="container">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row">                       
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="imaging">Imaging Service</label>
-                                <select id="imaging"  class="form-control select2bs4" style="width: 100%;" name="imaging">
-                                    {% for service in services %}
-                                        <option value="{{ service.id }}" {% if service.id == record_exists.imaging   %} selected {% endif %}>{{ service.name }}</option>
+    <div class="row">
+        <div class="col-md-12">                 
+            <form method="POST" action="{% url 'kahamahmis:save_observation' patient.id visit.id %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="container">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">                                     
+                                        {{ form.media }}
+                                        {{ form.as_p }}
+                                    </div>
+                                </div>                 
+                            </div>              
+                        <button type="submit" class="btn btn-primary btn-block">Save to proceed</button>
+                        </div>
+                        <div class="card-footer">
+                            {% if messages %}
+                            <div class="row">
+                                <div class="col-12">
+                                    {% for message in messages %}
+                                    {% if message.tags == 'error' %}
+                                    <div class="alert alert-danger">{{ message }}</div>
+                                    {% elif message.tags == 'success' %}
+                                    <div class="alert alert-primary">{{ message }}</div>
+                                    {% endif %}
                                     {% endfor %}
-                                </select>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="cost">Cost</label>
-                                <input type="number" class="form-control" id="cost" name="cost" step="0.01" value="{{ record_exists.cost }}">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="description">Description</label>
-                                <textarea class="form-control" id="description" name="description" rows="3">{{ record_exists.description }}</textarea>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="result">Result</label>
-                                <textarea class="form-control" id="result" name="result" rows="3">{{ record_exists.result }}</textarea>
-                            </div>
-                        </div>
-                    </div>
-                    {% if record_exists.image %}
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">                             
-                               <img src="{{ record_exists.image }}" class="img-thumbnail" alt="Observation Image">
-                            </div>
-                        </div>
-                    </div> 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="new_image">Upload New Image</label>
-                                <input type="file" class="form-control-file" id="new_image" name="new_image">
-                            </div>
-                        </div>
-                    </div>             
-                {% else %}
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="new_image">Upload New Image</label>
-                            <input type="file" class="form-control-file" id="new_image" name="new_image">
-                        </div>
-                    </div>
-                </div>
-                {% endif %}                  
-                    
-                    <button type="submit" class="btn btn-primary btn-block">Save to proceed</button>
-                </div>
-                <div class="card-footer">
-                    {% if messages %}
-                    <div class="row">
-                        <div class="col-12">
-                            {% for message in messages %}
-                            {% if message.tags == 'error' %}
-                            <div class="alert alert-danger">{{ message }}</div>
-                            {% elif message.tags == 'success' %}
-                            <div class="alert alert-primary">{{ message }}</div>
                             {% endif %}
-                            {% endfor %}
                         </div>
                     </div>
-                    {% endif %}
                 </div>
-            </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>
 {% include 'kahama_template/datatable.html' %}    
 
