@@ -1,9 +1,10 @@
 
 from django.urls import include, path
-from kahamahmis import kahamaViews
+from kahamahmis import KahamaReportsView, kahamaViews
 from . import kahamaImports, views,delete,editView
 
 urlpatterns = [  
+        path('generate_comprehensive_report/', KahamaReportsView.generate_comprehensive_report, name='generate_comprehensive_report'),
         path('search_report/', kahamaViews.search_report, name='search_report'),
         path('patient_type_report/', kahamaViews.patient_type_report, name='patient_type_report'),
         path('pathology_record_report/', kahamaViews.pathology_record_report, name='pathology_record_report'),

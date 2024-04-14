@@ -77,6 +77,13 @@
                             <p>Radiology</p> 
                         </a>
                     </li>
+                    <li class="nav-item">
+                        {% url 'kahamahmis:generate_comprehensive_report' as generate_comprehensive_report %}
+                        <a href="{% url 'kahamahmis:generate_comprehensive_report'  %}" class="nav-link{% if request.path == generate_comprehensive_report %} active {% endif %}">
+                            <i class="nav-icon fas fa-x-ray"></i> <!-- Replace 'fa-x-ray' with the appropriate Font Awesome icon class for radiology -->
+                            <p>Comprehensive reports</p> 
+                        </a>
+                    </li>
                     
                     <li class="nav-item">
                         {% url 'kahamahmis:patient_laboratory_view' as patient_laboratory_view %}

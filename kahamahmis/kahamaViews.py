@@ -2,10 +2,10 @@ import calendar
 from datetime import datetime
 import json
 from django.db import IntegrityError
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib import messages
-from clinic.forms import RemoteCounselingForm, RemoteDischargesNotesForm, RemoteObservationRecordForm, RemoteReferralForm
+from clinic.forms import RemoteCounselingForm, RemoteDischargesNotesForm, RemoteObservationRecordForm, RemoteReferralForm, YearSelectionForm
 from clinic.models import ChiefComplaint, Diagnosis, FamilyMedicalHistory, HealthRecord, Medicine, Notification, PathodologyRecord, PatientHealthCondition, PatientLifestyleBehavior, PatientMedicationAllergy, PatientSurgery, PrescriptionFrequency, PrimaryPhysicalExamination, RemoteCompany, RemoteConsultation, RemoteConsultationNotes, RemoteCounseling, RemoteDischargesNotes, RemoteLaboratoryOrder, RemoteObservationRecord, RemotePatient, RemotePatientDiagnosisRecord, RemotePatientVisits, RemotePatientVital, RemotePrescription, RemoteProcedure, RemoteReferral, RemoteService, SecondaryPhysicalExamination, Service, Staffs
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -14,6 +14,8 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import OuterRef, Subquery
 from django.db.models import Count
 from django.db.models import Q
+from openpyxl import Workbook
+from openpyxl.styles import Alignment, Font
 from django.core.exceptions import ValidationError
 from django.db.models.functions import ExtractMonth  # Add this import
 from django.template.loader import render_to_string
@@ -1953,3 +1955,231 @@ def patient_health_info_edit_record(request, patient_id):
     
     
 
+def render_comprehensive_report(year):
+    # Create a new Excel workbook
+    wb = Workbook()
+
+    # Define report types and their corresponding functions to fetch data
+    report_types = {
+        'patient_type_reports': fetch_patient_type_reports,
+        'patient_company_wise_reports': fetch_patient_company_wise_reports,
+        'patient_lab_result_reports': fetch_patient_lab_result_reports,
+        'patient_procedure_reports': fetch_patient_procedure_reports,
+        'patient_referral_reports': fetch_patient_referral_reports,
+        'patient_pathology_reports': fetch_patient_pathology_reports,
+    }
+
+    # Iterate through each report type and add a corresponding sheet to the workbook
+    for report_type, fetch_function in report_types.items():
+        data = fetch_function(year)
+        sheet = wb.create_sheet(title=report_type.replace('_', ' ').title())
+        render_report_to_sheet(sheet, data)
+
+    # Prepare response to return the Excel workbook
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename="comprehensive_report_{year}.xlsx"'
+    wb.save(response)
+
+    return response
+
+def fetch_patient_type_reports(year):
+    # Define the list of all patient types
+    all_patient_types = ['National Staff', 'International Staff', 'National Visitor', 'International Visitor', 'Unknown Status', 'Others']
+
+    # Query the database to get patient counts grouped by patient type and month
+    patients_by_type = (
+        RemotePatient.objects.filter(created_at__year=year)
+        .values('patient_type')
+        .annotate(month=ExtractMonth('created_at'))
+        .annotate(num_patients=Count('id'))
+    )
+
+    # Organize the data into a dictionary
+    patient_type_reports = {}
+    for patient_type in all_patient_types:
+        # Initialize counts for each month
+        patient_type_reports[patient_type] = [0] * 12
+
+    for patient in patients_by_type:
+        patient_type = patient['patient_type']
+        month = patient['month']
+        num_patients = patient['num_patients']
+
+        if month is not None:
+            month_index = month - 1  # ExtractMonth returns month as an integer
+            patient_type_reports[patient_type][month_index] = num_patients
+
+    return {
+        'all_patient_types': all_patient_types,
+        'patient_type_reports': patient_type_reports
+    }
+
+def fetch_patient_company_wise_reports(year):
+    # Get all distinct company names
+    all_companies = RemoteCompany.objects.values_list('name', flat=True)
+
+    # Query the database to get patient counts grouped by company and month
+    patients_by_company = (
+        RemotePatient.objects.filter(created_at__year=year)
+        .values('company__name')
+        .annotate(month=ExtractMonth('created_at'))
+        .annotate(num_patients=Count('id'))
+    )
+
+    # Organize the data into a dictionary
+    company_reports = {company: [0] * 12 for company in all_companies}
+    for patient in patients_by_company:
+        company_name = patient['company__name']
+        month = patient['month']
+        num_patients = patient['num_patients']
+
+        if month is not None:
+            month_index = month - 1  # ExtractMonth returns month as an integer
+            company_reports[company_name][month_index] = num_patients
+
+    return {
+        'all_companies': all_companies,
+        'company_reports': company_reports
+    }
+
+def fetch_patient_lab_result_reports(year):
+    # Get all services with the laboratory category
+    laboratory_services = RemoteService.objects.filter(category='Laboratory')
+
+    # Query the database to get patient counts grouped by laboratory category and month
+    laboratories_by_month = (
+        RemoteLaboratoryOrder.objects.filter(created_at__year=year)
+        .annotate(month=ExtractMonth('created_at'))
+        .values('name__name', 'month')
+        .annotate(num_patients=Count('id'))
+    )
+
+    # Organize the data into a dictionary
+    laboratory_reports = {}
+    for laboratory_service in laboratory_services:
+        laboratory_name = laboratory_service.name
+        laboratory_reports[laboratory_name] = [0] * 12  # Initialize counts for each month
+
+    for laboratory in laboratories_by_month:
+        laboratory_name = laboratory['name__name']
+        month = laboratory['month']
+        num_patients = laboratory['num_patients']
+
+        if month is not None:
+            month_index = int(month) - 1
+            laboratory_reports[laboratory_name][month_index] = num_patients
+
+    return {
+        'laboratory_reports': laboratory_reports
+    }
+
+def fetch_patient_procedure_reports(year):
+    # Get all services with the procedure category
+    procedure_services = RemoteService.objects.filter(category='Procedure')
+    # Query the database to get patient counts grouped by procedure category and month
+    procedures_by_month = (
+        RemoteProcedure.objects.filter(created_at__year=year)
+        .annotate(month=ExtractMonth('created_at'))
+        .values('name__name', 'month')
+        .annotate(num_patients=Count('id'))
+    )
+
+    # Organize the data into a dictionary
+    procedure_reports = {}
+    for procedure_service in procedure_services:
+        procedure_name = procedure_service.name
+        procedure_reports[procedure_name] = [0] * 12  # Initialize counts for each month
+
+    for procedure in procedures_by_month:
+        procedure_name = procedure['name__name']
+        month = procedure['month']
+        num_patients = procedure['num_patients']
+
+        if month is not None:
+            month_index = int(month) - 1
+            procedure_reports[procedure_name][month_index] = num_patients
+
+    return {
+        'procedure_reports': procedure_reports
+    }
+
+def fetch_patient_referral_reports(year):
+    # Fetch data for patient referral report
+    referrals = RemoteReferral.objects.filter(created_at__year=year)
+    
+    referral_data = []
+    for referral in referrals:
+        referral_info = {
+            'patient_name': referral.patient,  # Adjust this field according to your model
+            'referral_date': referral.created_at.date(),  # Extract the date from the datetime object
+            'referral_reason': referral.notes,  # Adjust this field according to your model
+            'referral_from': referral.from_location,  # Adjust this field according to your model
+            'referral_to': referral.to_location,  # Adjust this field according to your model
+        }
+        referral_data.append(referral_info)
+    
+    return {
+        'referral_data': referral_data
+    }
+
+def fetch_patient_pathology_reports(year):
+    # Get all distinct Pathodology Record names for the given year
+    all_pathology_records = PathodologyRecord.objects.values_list('name', flat=True)
+    # Query the database to get patient counts grouped by Pathodology Record and month for the given year
+    patients_by_pathology_record = (
+        PathodologyRecord.objects.filter(remoteconsultationnotes__created_at__year=year)
+        .annotate(month=ExtractMonth('remoteconsultationnotes__created_at'))
+        .values('name', 'month')
+        .annotate(num_patients=Count('remoteconsultationnotes__id'))
+    )
+
+    # Organize the data into a dictionary
+    pathology_record_reports = {record: [0] * 12 for record in all_pathology_records}
+    for patient in patients_by_pathology_record:
+        pathology_record_name = patient['name']
+        month = patient['month']
+        num_patients = patient['num_patients']
+
+        if month is not None:
+            month_index = month - 1  # ExtractMonth returns month as an integer
+            pathology_record_reports[pathology_record_name][month_index] = num_patients
+
+    return {
+        'pathology_record_reports': pathology_record_reports
+    }
+
+def render_report_to_sheet(sheet, data):
+    # Define cell styles
+    header_font = Font(bold=True)
+    cell_alignment = Alignment(horizontal='center')
+
+    # Add headers
+    headers = list(data.keys())
+    for col, header in enumerate(headers, start=1):
+        sheet.cell(row=1, column=col, value=header).font = header_font
+        sheet.cell(row=1, column=col).alignment = cell_alignment
+
+    # Add data
+    max_rows = max(len(values) for values in data.values())
+    for col, header in enumerate(headers, start=1):
+        values = data[header]
+        for row, value in enumerate(values, start=2):
+            sheet.cell(row=row, column=col, value=value).alignment = cell_alignment
+
+    # Autofit column width
+    for col in range(1, len(headers) + 1):
+        max_length = max(len(str(sheet.cell(row=row, column=col).value)) for row in range(1, max_rows + 1))
+        adjusted_width = max_length + 2
+        sheet.column_dimensions[chr(64 + col)].width = adjusted_width
+        
+def generate_comprehensive_report(request):
+    if request.method == 'POST':
+        form = YearSelectionForm(request.POST)
+        if form.is_valid():
+            year = form.cleaned_data['year']
+            response = render_comprehensive_report(year)
+            return response
+    else:
+        form = YearSelectionForm()
+    
+    return render(request, 'kahama_template/generate_comprehensive_report.html', {'form': form})        

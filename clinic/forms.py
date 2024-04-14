@@ -281,5 +281,8 @@ class RemoteDischargesNotesForm(forms.ModelForm):
         widgets = {
             'discharge_notes': CKEditor5Widget(attrs={'class': 'django_ckeditor_5'}, config_name='extends'),
         }
+        
+class YearSelectionForm(forms.Form):
+    year = forms.IntegerField(label='Year', widget=forms.TextInput(attrs={'class': 'form-control'}))       
 #------------------------------
 #   Editing existing data

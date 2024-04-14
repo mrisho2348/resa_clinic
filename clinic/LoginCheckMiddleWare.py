@@ -53,6 +53,7 @@ class LoginCheckMiddleWare(MiddlewareMixin):
                             "django.views.static",
                             "kahamahmis.views",
                             "kahamahmis.kahamaImports",  
+                            "kahamahmis.KahamaReportsView",  
                             "kahamahmis.kahamaViews",
                         ]
                     else:
@@ -70,6 +71,7 @@ class LoginCheckMiddleWare(MiddlewareMixin):
                             "kahamahmis.delete",
                             "django.views.static",
                             "kahamahmis.views",
+                            "kahamahmis.KahamaReportsView",  
                             "kahamahmis.kahamaImports",  
                             "kahamahmis.kahamaViews",
                         ]
