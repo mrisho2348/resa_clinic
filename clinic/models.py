@@ -914,6 +914,33 @@ class Medicine(models.Model):
     def __str__(self):
         return self.name    
     
+class RemoteMedicine(models.Model):
+    drug_name = models.CharField(max_length=100)
+    drug_type = models.CharField(max_length=20, blank=True, null=True) 
+    formulation_unit = models.CharField(max_length=50)    
+    manufacturer = models.CharField(max_length=100)
+    remain_quantity = models.PositiveIntegerField(blank=True, null=True)
+    quantity = models.PositiveIntegerField(blank=True, null=True)
+    dividable = models.CharField(max_length=20, blank=True, null=True)   
+    batch_number = models.CharField(max_length=20, blank=True, null=True)   
+    expiration_date = models.DateField()
+    unit_cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    buying_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    total_buying_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    objects = models.Manager()
+
+    def save(self, *args, **kwargs):
+        # Calculate total buying price before saving
+        if self.buying_price is not None and self.quantity is not None:
+            self.total_buying_price = float(self.buying_price) * self.quantity
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.drug_name    
+    
 
 
 class MedicineInventory(models.Model):
@@ -1022,8 +1049,7 @@ class PatientDisease(models.Model):
 class HealthIssue(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
-    is_disease = models.BooleanField(default=True)
-    
+    is_disease = models.BooleanField(default=True)    
     # Additional fields
     severity = models.CharField(max_length=50, blank=True, null=True)
     treatment_plan = models.TextField(blank=True, null=True)
@@ -1121,6 +1147,23 @@ def save_user_profile(sender, instance, **kwargs):
         instance.staff.save()
 
 
+
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+    registration_number = models.CharField(max_length=50, unique=True)
+    address = models.TextField(blank=True, null=True)
+    city = models.CharField(max_length=50)
+    state = models.CharField(max_length=50, blank=True, null=True)
+    country = models.CharField(max_length=50)
+    postal_code = models.CharField(max_length=20, blank=True, null=True)
+    phone_number = models.CharField(max_length=20)
+    email = models.EmailField()
+    website = models.URLField(blank=True, null=True)
+    date_registered = models.DateField(auto_now_add=True)
+    logo = models.ImageField(upload_to='company_logos/', blank=True, null=True)
+
+    def __str__(self):
+        return self.name
 
 # kahama
 
@@ -1871,7 +1914,7 @@ class RemotePrescription(models.Model):
 
     patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE)
     entered_by = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True)
-    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)  # Link with Medicine model
+    medicine = models.ForeignKey(RemoteMedicine, on_delete=models.CASCADE)  # Link with Medicine model
     visit = models.ForeignKey(RemotePatientVisits, on_delete=models.CASCADE)  # Link with Medicine model
     prs_no = models.CharField(max_length=20, unique=True, editable=False)    
     dose = models.CharField(max_length=50)

@@ -128,11 +128,12 @@
                                             <select class="form-control select2bs4 medicine-select" style="width: 100%;" id="medicine" name="medicine[]" required>
                                             <option value="">Select Medicine</option>
                                             {% for medicine in medicines %}
-                                              <option value="{{ medicine.id }}" {% if medicine.id == prescription.medicine.id  %} selected {% endif %}>{{ medicine.name }}</option>
+                                              <option value="{{ medicine.id }}" {% if medicine.id == prescription.medicine.id  %} selected {% endif %}>{{ medicine.drug_name }}</option>
                                             {% endfor %}
-                                            <p class="medicine-dosage"></p>
-                                          </select>
-                                        </td>
+                                        
+                                          </select>                                         
+                                        </td>   
+                                        <p class="medicine-dosage"></p>                                    
                                         <td><input type="text" class="form-control dose-input" name="dose[]" value="1"></td>
                                         <td><select class="form-control select2bs4 frequency-select" style="width: 100%;" id="frequency" name="frequency[]">                                
                                             <option value="">Select frequency</option>
@@ -244,7 +245,7 @@
                         <select class="form-control select2bs4 medicine-select" style="width: 100%;"  id="medicine" name="medicine[]"  required>
                             <option value="">Select Medicine</option>
                             {% for medicine in medicines %}
-                                <option value="{{ medicine.id }}">{{ medicine.name }}</option>
+                                <option value="{{ medicine.id }}">{{ medicine.drug_name }}</option>
                             {% endfor %}
                             <p class="medicine-dosage"></p>
                         </select>
@@ -298,7 +299,7 @@
             });
         }
         
-        // Function to update total price and calculate quantity based on drug type and selected frequency
+     // Function to update total price and calculate quantity based on drug type and selected frequency
 function updateTotalPrice() {
     var totalPrice = 0;
     $('#prescriptionTable{{ visit.id }} tbody tr').each(function() {
@@ -307,38 +308,18 @@ function updateTotalPrice() {
         var selectedFrequencyId = row.find('.frequency-select').val();
         var selectedDuration = parseInt(row.find('.duration-select').val());
         var interedDose = parseInt(row.find('.dose-input').val());
-        var drugType = getDrugType(selectedMedicineId);
+        var dividable = IsDrugDividable(selectedMedicineId);
         var frequencyName = getFrequencyName(selectedFrequencyId);
         var quantity;
 
-        // Check if quantity is manually entered for PRN frequency
-        if (frequencyName === 'PRN' || drugType !== 'Tablet') {
+        // Check if quantity is manually entered for PRN frequency or non-dividable medicine
+        if (frequencyName === 'PRN' || dividable === 'False') {
             quantity = parseInt(row.find('.quantity-input').val()) || 0; // Use entered quantity or default to 0
-            var selectedDuration = parseInt(row.find('.duration-select').val('1'));
-            var interedDose = parseInt(row.find('.dose-input').val('1'));
         } else {
-            quantity = calculateTabletQuantity(frequencyName, selectedDuration, interedDose);
-            row.find('.quantity-input').val('');
-            if (drugType !== 'Tablet') {
-                row.find('.dose-input').val('1');
-            
-                // Check if the option with value '1' exists in the duration select element
-                var durationSelect = row.find('.duration-select');
-                if (!durationSelect.find('option[value="1"]').length) {
-                    // If the option with value '1' doesn't exist, append it before the first option
-                    durationSelect.prepend('<option value="1">1</option>');
-                }
-            
-                // Set the default option selected to be '1'
-                durationSelect.val('1');
-            
-                // Call the function to calculate quantity
-                var selectedDuration = 1; // Set the default duration
-                var interedDose = 1; // Set the default dose
-                var frequencyName = 'STAT'; // Assuming you have access to selectedFrequencyId
-                var quantity = calculateTabletQuantity(frequencyName, selectedDuration, interedDose);
-                quantity = parseInt(row.find('.quantity-input').val()) || 0;
-            }
+            var formulationUnit = getFormulationUnit(selectedMedicineId);
+            var adjustedDose = interedDose / formulationUnit; // Adjusted dose based on formulation unit
+            console.log(adjustedDose)
+            quantity = calculateTabletQuantity(frequencyName, selectedDuration, adjustedDose);
         }
 
         // Set quantity value
@@ -353,16 +334,16 @@ function updateTotalPrice() {
 }
         
         // Function to get the drug type based on medicine ID
-        function getDrugType(medicineId) {
-            var drugType = '';
+        function IsDrugDividable(medicineId) {
+            var dividable = '';
             $.ajax({
-                url: '{% url "kahamahmis:get_drug_type" %}',
+                url: '{% url "kahamahmis:get_drug_division_status" %}',
                 method: 'GET',
                 data: { medicine_id: medicineId },
                 async: false,
                 success: function(response) {
-                    if ('drug_type' in response) {
-                        drugType = response.drug_type;
+                    if ('dividable' in response) {
+                        dividable = response.dividable;
                     } else {
                         console.error('Drug type not found');
                     }
@@ -371,7 +352,7 @@ function updateTotalPrice() {
                     console.error('Error fetching drug type:', error);
                 }
             });
-            return drugType;
+            return dividable;
         }
         
         // Function to get the frequency name based on frequency ID
@@ -426,6 +407,28 @@ function calculateTabletQuantity(frequency, duration, dose) {
 }
 
 
+// Function to get the formulation unit based on medicine ID
+function getFormulationUnit(medicineId) {
+    var formulationUnit = 1; // Default formulation unit is 1
+    // Perform AJAX request to fetch formulation unit for the medicine
+    $.ajax({
+        url: '{% url "kahamahmis:get_formulation_unit" %}',
+        method: 'GET',
+        data: { medicine_id: medicineId },
+        async: false, // Make the request synchronous
+        success: function(response) {
+            if (response && response.formulation_unit) {
+                formulationUnit = parseFloat(response.formulation_unit);
+              
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching formulation unit:', error);
+        }
+    });
+    return formulationUnit;
+}
+
  // Handle form submission using AJAX
  function addPrescription{{ visit.id }}() {
     $.ajax({
@@ -456,10 +459,10 @@ function calculateTabletQuantity(frequency, duration, dose) {
             $('.medicine-select').change(function() {
                 var medicineId = $(this).val();
                 var dosageDisplay = $(this).closest('tr').find('.medicine-dosage');
-        
+    
                 // Make an AJAX request to fetch the dosage information for the selected medicine
                 $.ajax({
-                    url: '/get_medicine_dosage/', // Update this URL to match your endpoint
+                    url: '{% url "kahamahmis:get_medicine_dosage" %}', // Update this URL to match your endpoint
                     method: 'GET',
                     data: { 'medicine_id': medicineId },
                     success: function(response) {
@@ -468,16 +471,21 @@ function calculateTabletQuantity(frequency, duration, dose) {
                             // Populate the dosage information in the <p> tag
                             dosageDisplay.text(response.dosage);
                         } else {
+                            // Clear the dosage information if not available
+                            dosageDisplay.text('');
                             console.error('Dosage information not found in response.');
                         }
                     },
                     error: function(xhr, status, error) {
+                        // Handle error if AJAX request fails
+                        dosageDisplay.text('');
                         console.error('Error fetching medicine dosage:', error);
                     }
                 });
             });
         });
     </script>
+    
     
 
 </div>

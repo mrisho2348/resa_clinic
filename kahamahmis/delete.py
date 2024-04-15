@@ -2,7 +2,7 @@
 
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render,get_object_or_404
-from clinic.models import Category,  Consultation, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, PatientVisits, PatientVital, Patients, Prescription, Procedure, QualityControl, Reagent, ReagentUsage, RemoteCompany, RemoteLaboratoryOrder, RemoteObservationRecord, RemotePatient, RemoteProcedure, RemoteReferral, Sample, Service, Staffs, Supplier, UsageHistory
+from clinic.models import Category,  Consultation, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, PatientVisits, PatientVital, Patients, Prescription, Procedure, QualityControl, Reagent, ReagentUsage, RemoteCompany, RemoteLaboratoryOrder, RemoteMedicine, RemoteObservationRecord, RemotePatient, RemoteProcedure, RemoteReferral, Sample, Service, Staffs, Supplier, UsageHistory
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -498,6 +498,23 @@ def delete_result(request):
             deleted_result_id = result_id
             # Return a JSON response indicating success
             return JsonResponse({'success': True, 'result_id': deleted_result_id})
+        except Exception as e:
+            # Return a JSON response indicating failure
+            return JsonResponse({'success': False, 'message': f'Error deleting result: {str(e)}'})
+    else:
+        # Return a JSON response indicating failure
+        return JsonResponse({'success': False, 'message': 'Invalid request method'})     
+      
+@csrf_exempt
+def delete_drug(request):
+    if request.method == 'POST':
+        try:
+            medicine_id = request.POST.get('medicine_id')    
+            result = RemoteMedicine.objects.get(id=medicine_id)
+            result.delete()     
+            deleted_medicine_id = medicine_id
+            # Return a JSON response indicating success
+            return JsonResponse({'success': True, 'medicine_id': deleted_medicine_id})
         except Exception as e:
             # Return a JSON response indicating failure
             return JsonResponse({'success': False, 'message': f'Error deleting result: {str(e)}'})

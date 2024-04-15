@@ -6,7 +6,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib import messages
 from clinic.forms import RemoteCounselingForm, RemoteDischargesNotesForm, RemoteObservationRecordForm, RemoteReferralForm, YearSelectionForm
-from clinic.models import ChiefComplaint, Diagnosis, FamilyMedicalHistory, HealthRecord, Medicine, Notification, PathodologyRecord, PatientHealthCondition, PatientLifestyleBehavior, PatientMedicationAllergy, PatientSurgery, PrescriptionFrequency, PrimaryPhysicalExamination, RemoteCompany, RemoteConsultation, RemoteConsultationNotes, RemoteCounseling, RemoteDischargesNotes, RemoteLaboratoryOrder, RemoteObservationRecord, RemotePatient, RemotePatientDiagnosisRecord, RemotePatientVisits, RemotePatientVital, RemotePrescription, RemoteProcedure, RemoteReferral, RemoteService, SecondaryPhysicalExamination, Service, Staffs
+from clinic.models import ChiefComplaint, Company, Diagnosis, FamilyMedicalHistory, HealthRecord, Medicine, Notification, PathodologyRecord, PatientHealthCondition, PatientLifestyleBehavior, PatientMedicationAllergy, PatientSurgery, PrescriptionFrequency, PrimaryPhysicalExamination, RemoteCompany, RemoteConsultation, RemoteConsultationNotes, RemoteCounseling, RemoteDischargesNotes, RemoteLaboratoryOrder, RemoteMedicine, RemoteObservationRecord, RemotePatient, RemotePatientDiagnosisRecord, RemotePatientVisits, RemotePatientVital, RemotePrescription, RemoteProcedure, RemoteReferral, RemoteService, SecondaryPhysicalExamination, Service, Staffs
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ObjectDoesNotExist
@@ -858,26 +858,50 @@ def get_unit_price(request):
     if request.method == 'GET':
         medicine_id = request.GET.get('medicine_id')
         try:
-            medicine = Medicine.objects.get(pk=medicine_id)
-            unit_price = medicine.cash_cost
+            medicine = RemoteMedicine.objects.get(pk=medicine_id)
+            unit_price = medicine.unit_cost
             return JsonResponse({'unit_price': unit_price})
-        except Medicine.DoesNotExist:
+        except RemoteMedicine.DoesNotExist:
             return JsonResponse({'error': 'Medicine not found'}, status=404)
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
 
     
-def get_drug_type(request):
+def get_drug_division_status(request):
     if request.method == 'GET':
         medicine_id = request.GET.get('medicine_id')
         try:
-            medicine = Medicine.objects.get(pk=medicine_id)
-            drug_type = medicine.medicine_type
-            return JsonResponse({'drug_type': drug_type})
-        except Medicine.DoesNotExist:
+            medicine = RemoteMedicine.objects.get(pk=medicine_id)
+            dividable = medicine.dividable
+            return JsonResponse({'dividable': dividable})
+        except RemoteMedicine.DoesNotExist:
             return JsonResponse({'error': 'Medicine not found'}, status=404)
     else:
         return JsonResponse({'error': 'Invalid request method or missing parameter'}, status=400) 
+    
+def get_medicine_dosage(request):
+    if request.method == 'GET':
+        medicine_id = request.GET.get('medicine_id')
+        try:
+            medicine = RemoteMedicine.objects.get(pk=medicine_id)
+            dosage = medicine.formulation_unit
+            return JsonResponse({'dosage': dosage})
+        except RemoteMedicine.DoesNotExist:
+            return JsonResponse({'error': 'Medicine not found'}, status=404)
+    else:
+        return JsonResponse({'error': 'Invalid request method or missing parameter'}, status=400) 
+    
+def get_formulation_unit(request):
+    if request.method == 'GET':
+        medicine_id = request.GET.get('medicine_id')
+        try:
+            medicine = RemoteMedicine.objects.get(pk=medicine_id)
+            formulation_unit = medicine.formulation_unit
+            return JsonResponse({'formulation_unit': formulation_unit})
+        except RemoteMedicine.DoesNotExist:
+            return JsonResponse({'error': 'Medicine not found'}, status=404)
+    else:
+        return JsonResponse({'error': 'Method not allowed'}, status=405)    
     
 def get_frequency_name(request):
     if request.method == 'GET' and 'frequency_id' in request.GET:
@@ -1955,231 +1979,152 @@ def patient_health_info_edit_record(request, patient_id):
     
     
 
-def render_comprehensive_report(year):
-    # Create a new Excel workbook
-    wb = Workbook()
 
-    # Define report types and their corresponding functions to fetch data
-    report_types = {
-        'patient_type_reports': fetch_patient_type_reports,
-        'patient_company_wise_reports': fetch_patient_company_wise_reports,
-        'patient_lab_result_reports': fetch_patient_lab_result_reports,
-        'patient_procedure_reports': fetch_patient_procedure_reports,
-        'patient_referral_reports': fetch_patient_referral_reports,
-        'patient_pathology_reports': fetch_patient_pathology_reports,
-    }
+def remotemedicine_list(request):
+    medicines = RemoteMedicine.objects.all()
+    return render(request, 'kahama_template/remotemedicine_list.html', {'medicines': medicines})
 
-    # Iterate through each report type and add a corresponding sheet to the workbook
-    for report_type, fetch_function in report_types.items():
-        data = fetch_function(year)
-        sheet = wb.create_sheet(title=report_type.replace('_', ' ').title())
-        render_report_to_sheet(sheet, data)
-
-    # Prepare response to return the Excel workbook
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename="comprehensive_report_{year}.xlsx"'
-    wb.save(response)
-
-    return response
-
-def fetch_patient_type_reports(year):
-    # Define the list of all patient types
-    all_patient_types = ['National Staff', 'International Staff', 'National Visitor', 'International Visitor', 'Unknown Status', 'Others']
-
-    # Query the database to get patient counts grouped by patient type and month
-    patients_by_type = (
-        RemotePatient.objects.filter(created_at__year=year)
-        .values('patient_type')
-        .annotate(month=ExtractMonth('created_at'))
-        .annotate(num_patients=Count('id'))
-    )
-
-    # Organize the data into a dictionary
-    patient_type_reports = {}
-    for patient_type in all_patient_types:
-        # Initialize counts for each month
-        patient_type_reports[patient_type] = [0] * 12
-
-    for patient in patients_by_type:
-        patient_type = patient['patient_type']
-        month = patient['month']
-        num_patients = patient['num_patients']
-
-        if month is not None:
-            month_index = month - 1  # ExtractMonth returns month as an integer
-            patient_type_reports[patient_type][month_index] = num_patients
-
-    return {
-        'all_patient_types': all_patient_types,
-        'patient_type_reports': patient_type_reports
-    }
-
-def fetch_patient_company_wise_reports(year):
-    # Get all distinct company names
-    all_companies = RemoteCompany.objects.values_list('name', flat=True)
-
-    # Query the database to get patient counts grouped by company and month
-    patients_by_company = (
-        RemotePatient.objects.filter(created_at__year=year)
-        .values('company__name')
-        .annotate(month=ExtractMonth('created_at'))
-        .annotate(num_patients=Count('id'))
-    )
-
-    # Organize the data into a dictionary
-    company_reports = {company: [0] * 12 for company in all_companies}
-    for patient in patients_by_company:
-        company_name = patient['company__name']
-        month = patient['month']
-        num_patients = patient['num_patients']
-
-        if month is not None:
-            month_index = month - 1  # ExtractMonth returns month as an integer
-            company_reports[company_name][month_index] = num_patients
-
-    return {
-        'all_companies': all_companies,
-        'company_reports': company_reports
-    }
-
-def fetch_patient_lab_result_reports(year):
-    # Get all services with the laboratory category
-    laboratory_services = RemoteService.objects.filter(category='Laboratory')
-
-    # Query the database to get patient counts grouped by laboratory category and month
-    laboratories_by_month = (
-        RemoteLaboratoryOrder.objects.filter(created_at__year=year)
-        .annotate(month=ExtractMonth('created_at'))
-        .values('name__name', 'month')
-        .annotate(num_patients=Count('id'))
-    )
-
-    # Organize the data into a dictionary
-    laboratory_reports = {}
-    for laboratory_service in laboratory_services:
-        laboratory_name = laboratory_service.name
-        laboratory_reports[laboratory_name] = [0] * 12  # Initialize counts for each month
-
-    for laboratory in laboratories_by_month:
-        laboratory_name = laboratory['name__name']
-        month = laboratory['month']
-        num_patients = laboratory['num_patients']
-
-        if month is not None:
-            month_index = int(month) - 1
-            laboratory_reports[laboratory_name][month_index] = num_patients
-
-    return {
-        'laboratory_reports': laboratory_reports
-    }
-
-def fetch_patient_procedure_reports(year):
-    # Get all services with the procedure category
-    procedure_services = RemoteService.objects.filter(category='Procedure')
-    # Query the database to get patient counts grouped by procedure category and month
-    procedures_by_month = (
-        RemoteProcedure.objects.filter(created_at__year=year)
-        .annotate(month=ExtractMonth('created_at'))
-        .values('name__name', 'month')
-        .annotate(num_patients=Count('id'))
-    )
-
-    # Organize the data into a dictionary
-    procedure_reports = {}
-    for procedure_service in procedure_services:
-        procedure_name = procedure_service.name
-        procedure_reports[procedure_name] = [0] * 12  # Initialize counts for each month
-
-    for procedure in procedures_by_month:
-        procedure_name = procedure['name__name']
-        month = procedure['month']
-        num_patients = procedure['num_patients']
-
-        if month is not None:
-            month_index = int(month) - 1
-            procedure_reports[procedure_name][month_index] = num_patients
-
-    return {
-        'procedure_reports': procedure_reports
-    }
-
-def fetch_patient_referral_reports(year):
-    # Fetch data for patient referral report
-    referrals = RemoteReferral.objects.filter(created_at__year=year)
-    
-    referral_data = []
-    for referral in referrals:
-        referral_info = {
-            'patient_name': referral.patient,  # Adjust this field according to your model
-            'referral_date': referral.created_at.date(),  # Extract the date from the datetime object
-            'referral_reason': referral.notes,  # Adjust this field according to your model
-            'referral_from': referral.from_location,  # Adjust this field according to your model
-            'referral_to': referral.to_location,  # Adjust this field according to your model
-        }
-        referral_data.append(referral_info)
-    
-    return {
-        'referral_data': referral_data
-    }
-
-def fetch_patient_pathology_reports(year):
-    # Get all distinct Pathodology Record names for the given year
-    all_pathology_records = PathodologyRecord.objects.values_list('name', flat=True)
-    # Query the database to get patient counts grouped by Pathodology Record and month for the given year
-    patients_by_pathology_record = (
-        PathodologyRecord.objects.filter(remoteconsultationnotes__created_at__year=year)
-        .annotate(month=ExtractMonth('remoteconsultationnotes__created_at'))
-        .values('name', 'month')
-        .annotate(num_patients=Count('remoteconsultationnotes__id'))
-    )
-
-    # Organize the data into a dictionary
-    pathology_record_reports = {record: [0] * 12 for record in all_pathology_records}
-    for patient in patients_by_pathology_record:
-        pathology_record_name = patient['name']
-        month = patient['month']
-        num_patients = patient['num_patients']
-
-        if month is not None:
-            month_index = month - 1  # ExtractMonth returns month as an integer
-            pathology_record_reports[pathology_record_name][month_index] = num_patients
-
-    return {
-        'pathology_record_reports': pathology_record_reports
-    }
-
-def render_report_to_sheet(sheet, data):
-    # Define cell styles
-    header_font = Font(bold=True)
-    cell_alignment = Alignment(horizontal='center')
-
-    # Add headers
-    headers = list(data.keys())
-    for col, header in enumerate(headers, start=1):
-        sheet.cell(row=1, column=col, value=header).font = header_font
-        sheet.cell(row=1, column=col).alignment = cell_alignment
-
-    # Add data
-    max_rows = max(len(values) for values in data.values())
-    for col, header in enumerate(headers, start=1):
-        values = data[header]
-        for row, value in enumerate(values, start=2):
-            sheet.cell(row=row, column=col, value=value).alignment = cell_alignment
-
-    # Autofit column width
-    for col in range(1, len(headers) + 1):
-        max_length = max(len(str(sheet.cell(row=row, column=col).value)) for row in range(1, max_rows + 1))
-        adjusted_width = max_length + 2
-        sheet.column_dimensions[chr(64 + col)].width = adjusted_width
-        
-def generate_comprehensive_report(request):
+@csrf_exempt
+def add_remote_medicine(request):
     if request.method == 'POST':
-        form = YearSelectionForm(request.POST)
-        if form.is_valid():
-            year = form.cleaned_data['year']
-            response = render_comprehensive_report(year)
-            return response
-    else:
-        form = YearSelectionForm()
+        try:
+            # Retrieve data from POST request
+            drug_id = request.POST.get('drug_id')  # Check if drug ID is provided
+            drug_name = request.POST.get('drug_name')
+            drug_type = request.POST.get('drug_type')
+            formulation_unit = request.POST.get('formulation_unit')
+            manufacturer = request.POST.get('manufacturer')           
+            quantity = request.POST.get('quantity')
+            dividable = request.POST.get('dividable')
+            batch_number = request.POST.get('batch_number')
+            expiration_date = request.POST.get('expiration_date')
+            unit_cost = request.POST.get('unit_cost')
+            buying_price = request.POST.get('buying_price')
+            
+            # Check if required fields are provided
+            if not (drug_name and quantity and buying_price):
+                return JsonResponse({'success': False, 'message': 'Missing required fields'})
+
+            # Convert quantity and buying_price to integers
+            try:
+                quantity = int(quantity)
+                buying_price = float(buying_price)
+            except ValueError:
+                return JsonResponse({'success': False, 'message': 'Invalid quantity or buying price'})
+
+            # If drug ID is provided, it indicates editing existing data
+            if drug_id:
+                # Get the RemoteMedicine object to edit
+                medicine = RemoteMedicine.objects.get(pk=drug_id)
+                
+                # Update fields with new values
+                medicine.drug_name = drug_name
+                medicine.drug_type = drug_type
+                medicine.formulation_unit = formulation_unit
+                medicine.manufacturer = manufacturer                
+                medicine.quantity = quantity
+                medicine.remain_quantity = quantity
+                medicine.dividable = dividable
+                medicine.batch_number = batch_number
+                medicine.expiration_date = expiration_date
+                medicine.unit_cost = unit_cost
+                medicine.buying_price = buying_price                
+                # Save the changes
+                medicine.save()                
+                # Return success response
+                return JsonResponse({'success': True, 'message': 'Medicine updated successfully'})
+            
+            else:            
+                 # Check if drug name already exists in the database
+                if not drug_id and RemoteMedicine.objects.filter(drug_name=drug_name).exists():
+                    return JsonResponse({'success': False, 'message': 'Medicine with this name already exists'})
+                    # Create RemoteMedicine object for adding new data
+                medicine = RemoteMedicine(
+                    drug_name=drug_name,
+                    drug_type=drug_type,
+                    formulation_unit=formulation_unit,
+                    manufacturer=manufacturer,            
+                    quantity=quantity,
+                    remain_quantity=quantity,
+                    dividable=dividable,
+                    batch_number=batch_number,
+                    expiration_date=expiration_date,
+                    unit_cost=unit_cost,
+                    buying_price=buying_price
+                )
+                
+                # Save the object
+                medicine.save()
+                
+                # Return success response
+                return JsonResponse({'success': True, 'message': 'Medicine added successfully'})
+        
+        except Exception as e:
+            # Return error response if an exception occurs
+            return JsonResponse({'success': False, 'message': f'Error: {str(e)}'})
+
+    # If request method is not POST, return error response
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+
+def company_registration_view(request, company_id=None):
+    try:
+        if request.method == 'POST':
+            name = request.POST.get('name')
+            registration_number = request.POST.get('registration_number')
+            address = request.POST.get('address')
+            city = request.POST.get('city')
+            state = request.POST.get('state')
+            country = request.POST.get('country')
+            postal_code = request.POST.get('postal_code')
+            phone_number = request.POST.get('phone_number')
+            email = request.POST.get('email')
+            website = request.POST.get('website')
+            logo = request.FILES.get('logo') if 'logo' in request.FILES else None
+
+            if company_id:  # Editing existing record
+                company = get_object_or_404(Company, pk=company_id)
+                company.name = name
+                company.registration_number = registration_number
+                company.address = address
+                company.city = city
+                company.state = state
+                company.country = country
+                company.postal_code = postal_code
+                company.phone_number = phone_number
+                company.email = email
+                company.website = website
+                if logo:
+                    company.logo = logo
+                company.save()
+                messages.success(request, 'Company details updated successfully.')
+            else:  # Adding new record
+                new_company = Company(
+                    name=name,
+                    registration_number=registration_number,
+                    address=address,
+                    city=city,
+                    state=state,
+                    country=country,
+                    postal_code=postal_code,
+                    phone_number=phone_number,
+                    email=email,
+                    website=website,
+                    logo=logo
+                )
+                new_company.save()
+                messages.success(request, 'Company added successfully.')
+
+            return redirect('registration_success')  # Redirect to success page
+
+        else:
+            if company_id:  # Editing existing record
+                company = get_object_or_404(Company, pk=company_id)
+            else:  # Adding new record
+                company = None
+            return render(request, 'kahama_template/company_registration.html', {'company': company})
+    except Exception as e:
+        messages.error(request, f'An error occurred: {str(e)}')
+        return render(request, 'kahama_template/company_registration.html')
+        
     
-    return render(request, 'kahama_template/generate_comprehensive_report.html', {'form': form})        

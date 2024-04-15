@@ -25,7 +25,7 @@ from tablib import Dataset
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import OuterRef, Subquery
-from .models import AmbulanceActivity, AmbulanceOrder, AmbulanceRoute, AmbulanceVehicleOrder, Category, ConsultationFee, ConsultationNotes, ConsultationOrder, Country, Diagnosis, DiagnosticTest, Diagnosis, Equipment, EquipmentMaintenance, HealthIssue, HospitalVehicle, ImagingRecord, InventoryItem, LaboratoryOrder, MedicationPayment, MedicineRoute, MedicineUnitMeasure, Order, PathologyDiagnosticTest, PatientDisease,PatientVisits, PatientVital, Prescription, PrescriptionFrequency, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, RemoteCompany, Sample, Service, Supplier, UsageHistory
+from .models import AmbulanceActivity, AmbulanceOrder, AmbulanceRoute, AmbulanceVehicleOrder, Category, Company, ConsultationFee, ConsultationNotes, ConsultationOrder, Country, Diagnosis, DiagnosticTest, Diagnosis, Equipment, EquipmentMaintenance, HealthIssue, HospitalVehicle, ImagingRecord, InventoryItem, LaboratoryOrder, MedicationPayment, MedicineRoute, MedicineUnitMeasure, Order, PathologyDiagnosticTest, PatientDisease,PatientVisits, PatientVital, Prescription, PrescriptionFrequency, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, RemoteCompany, Sample, Service, Supplier, UsageHistory
 from django.db.models import Sum
 
 # Create your views here.
@@ -3643,3 +3643,4 @@ def delete_medicine_unit_measure(request):
             return JsonResponse({'success': False, 'message': 'Invalid request method'})
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)})  
+    

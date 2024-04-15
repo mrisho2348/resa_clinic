@@ -221,8 +221,15 @@
                       <li class="nav-item"> 
                         {% url 'kahamahmis:manage_country' as manage_country %}                    
                         <a href="{% url 'kahamahmis:manage_country' %}" class="nav-link{% if request.path == manage_country %} active {% endif %}">                     
-                            <i class="nav-icon fas fa-heartbeat"></i> <!-- Assuming "fa-heartbeat" represents health issues -->
-                            <p>Country</p> <!-- Updated to a more descriptive name -->
+                            <i class="nav-icon fas fa-globe"></i> <!-- Font Awesome icon for globe -->
+                            <p>Country</p> 
+                        </a>
+                    </li>
+                    <li class="nav-item"> 
+                        {% url 'kahamahmis:remotemedicine_list' as remotemedicine_list %}                    
+                        <a href="{% url 'kahamahmis:remotemedicine_list' %}" class="nav-link{% if request.path == remotemedicine_list %} active {% endif %}">                     
+                            <i class="nav-icon fas fa-pills"></i> <!-- Font Awesome icon for pills/medicine -->
+                            <p>Medicine/Drug</p>
                         </a>
                     </li>
                     <li class="nav-item"> 
@@ -231,60 +238,8 @@
                             <i class="nav-icon fas fa-notes-medical"></i> 
                             <p>Health Records</p>
                         </a>
-                    </li>
-                      
-                   <li class="nav-item">  
-                        {% url 'kahamahmis:equipment_list' as equipment_list_url %}                   
-                        <a href="{% url 'kahamahmis:equipment_list' %}" class="nav-link{% if request.path == equipment_list_url %} active {% endif %}">                     
-                            <i class="nav-icon fas fa-tools"></i> <!-- Assuming "fa-tools" represents equipment -->
-                            <p>Equipment Inventory</p> <!-- Renamed to "Equipment Inventory" for better readability -->
-                        </a>
-                    </li> 
-
-                    <li class="nav-item">  
-                        {% url 'kahamahmis:equipment_maintenance_list' as maintenance_list_url %}                   
-                        <a href="{% url "kahamahmis:equipment_maintenance_list" %}" class="nav-link{% if request.path == maintenance_list_url %} active {% endif %}">                     
-                            <i class="nav-icon fas fa-tools"></i> <!-- Assuming "fa-tools" represents maintenance -->
-                            <p>Equipment Maintenance</p> <!-- Renamed to "Equipment Maintenance" for better readability -->
-                        </a>
-                    </li>
-                  <li class="nav-item">  
-                        {% url 'kahamahmis:reagent_list' as reagent_list_url %}                   
-                        <a href="{% url "kahamahmis:reagent_list" %}" class="nav-link{% if request.path == reagent_list_url %} active {% endif %}">                     
-                            <i class="nav-icon fas fa-flask"></i> <!-- Assuming "fa-flask" represents reagents -->
-                            <p>Reagent Inventory</p> <!-- Renamed to "Reagent Inventory" for better readability -->
-                        </a>
-                    </li>
-                   <li class="nav-item">  
-                        {% url 'kahamahmis:reagent_usage_list' as reagent_usage_list_url %}                   
-                        <a href="{% url "kahamahmis:reagent_usage_list" %}" class="nav-link{% if request.path == reagent_usage_list_url %} active {% endif %}">                     
-                            <i class="nav-icon fas fa-vial"></i> <!-- Assuming "fa-vial" represents reagent usage -->
-                            <p>Reagent Usage History</p> <!-- Renamed to "Reagent Usage History" for better readability -->
-                        </a>
-                    </li>
-                   <li class="nav-item">  
-                        {% url 'kahamahmis:in_stock_reagent_view' as in_stock_reagent_view_url %}                   
-                        <a href="{% url "kahamahmis:in_stock_reagent_view" %}" class="nav-link{% if request.path == in_stock_reagent_view_url %} active {% endif %}">                     
-                            <i class="nav-icon fas fa-flask"></i> <!-- Assuming "fa-flask" represents reagents -->
-                            <p>Available Reagents</p> <!-- Renamed to "Available Reagents" for better readability -->
-                        </a>
-                    </li>
-                <li class="nav-item">  
-                        {% url 'kahamahmis:out_of_stock_reagent_view' as out_of_stock_reagent_view_url %}                   
-                        <a href="{% url "kahamahmis:out_of_stock_reagent_view" %}" class="nav-link{% if request.path == out_of_stock_reagent_view_url %} active {% endif %}">                     
-                            <i class="nav-icon fas fa-exclamation-circle"></i> <!-- Assuming "fa-exclamation-circle" represents out-of-stock -->
-                            <p>Out of Stock Reagents</p> <!-- Renamed to "Out of Stock Reagents" for better readability -->
-                            <span id="notification-count-reagent" class="badge badge-danger"  title="reagent out  Stock"></span> <!-- Notification badge -->
-                        </a>
-                    </li>
-                  <li class="nav-item">  
-                        {% url 'kahamahmis:quality_control_list' as quality_control_list_url %}                   
-                        <a href="{% url "kahamahmis:quality_control_list" %}" class="nav-link{% if request.path == quality_control_list_url %} active {% endif %}">                     
-                            <i class="nav-icon fas fa-tasks"></i> <!-- Assuming "fa-tasks" represents quality control -->
-                            <p>Quality Control</p> <!-- Updated to a more descriptive name -->
-                        </a>
-                    </li>
-                    
+                    </li>                    
+                  
                       <li class="nav-item"> 
                         {% url 'kahamahmis:manage_company' as manage_company %}                       
                           <a href="{% url "kahamahmis:manage_company" %}" class="nav-link{% if request.path == manage_company %} active {% endif %} ">
@@ -318,20 +273,21 @@
                               <i class="nav-icon fas fa-users"></i>
                               <p>Staffs</p>
                           </a>
-                      </li>
-                      <li class="nav-item">                  
-                          <a href="#" class="nav-link">
-                              <i class="nav-icon fas fa-bars"></i>
-                              <p>Company</p>
-                          </a>
-                      </li>
+                      </li>                    
                       <li class="nav-item"> 
-                        {% url 'remoteservice_list' as remoteservice_list %}                    
+                        {% url 'kahamahmis:remoteservice_list' as remoteservice_list %}                    
                           <a href="{% url 'kahamahmis:remoteservice_list' %}" class="nav-link{% if request.path == remoteservice_list %} active {% endif %}">
                               <i class="nav-icon fas fa-medkit"></i>
                               <p>Services</p>
                           </a>
                       </li>
+                      <li class="nav-item"> 
+                        {% url 'kahamahmis:add_clinc_company' as company_registration_view %}                    
+                        <a href="{% url 'kahamahmis:add_clinc_company' %}" class="nav-link{% if request.path == company_registration_view %} active {% endif %}">
+                            <i class="nav-icon fas fa-building"></i>
+                            <p>Clinic Register</p>
+                        </a>
+                    </li>
                   </ul>
               </li>
           </ul>

@@ -3,9 +3,9 @@ import logging
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.db import IntegrityError
-from clinic.models import Category, HealthRecord, ConsultationNotes, Country, Diagnosis, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, PatientVital, Patients, Prescription, Procedure, Reagent, Referral, RemoteCompany, RemotePatient, RemoteService,Service, Staffs, Supplier
-from clinic.resources import CategoryResource, CompanyResource, ConsultationNotesResource, CountryResource, DiagnosisResource, DiseaseRecodeResource, EquipmentMaintenanceResource, EquipmentResource, HealthIssueResource, HealthRecordResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, PathologyRecordResource, PatientVitalResource, PatientsResource, PrescriptionResource, ProcedureResource, ReagentResource, ReferralResource, RemotePatientResource, RemoteServiceResource, ServiceResource, SupplierResource
-from clinic.forms import ImportCategoryForm, ImportCompanyForm, ImportConsultationNotesForm, ImportCountryForm, ImportDiagnosisForm, ImportDiseaseForm, ImportEquipmentForm, ImportEquipmentMaintenanceForm, ImportHealthIssueForm, ImportHealthRecordForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientVitalForm, ImportPatientsForm, ImportPrescriptionForm, ImportProcedureForm, ImportReagentForm, ImportReferralForm, ImportRemotePatientForm, ImportRemoteServiceForm, ImportServiceForm, ImportSupplierForm
+from clinic.models import Category, HealthRecord, ConsultationNotes, Country, Diagnosis, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, PatientVital, Patients, Prescription, Procedure, Reagent, Referral, RemoteCompany, RemoteMedicine, RemotePatient, RemoteService,Service, Staffs, Supplier
+from clinic.resources import CategoryResource, CompanyResource, ConsultationNotesResource, CountryResource, DiagnosisResource, DiseaseRecodeResource, EquipmentMaintenanceResource, EquipmentResource, HealthIssueResource, HealthRecordResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, PathologyRecordResource, PatientVitalResource, PatientsResource, PrescriptionResource, ProcedureResource, ReagentResource, ReferralResource, RemoteMedicineResource, RemotePatientResource, RemoteServiceResource, ServiceResource, SupplierResource
+from clinic.forms import ImportCategoryForm, ImportCompanyForm, ImportConsultationNotesForm, ImportCountryForm, ImportDiagnosisForm, ImportDiseaseForm, ImportEquipmentForm, ImportEquipmentMaintenanceForm, ImportHealthIssueForm, ImportHealthRecordForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientVitalForm, ImportPatientsForm, ImportPrescriptionForm, ImportProcedureForm, ImportReagentForm, ImportReferralForm, ImportRemoteMedicineForm, ImportRemotePatientForm, ImportRemoteServiceForm, ImportServiceForm, ImportSupplierForm
 from tablib import Dataset
 
 logger = logging.getLogger(__name__)
@@ -639,6 +639,46 @@ def import_patient_records(request):
         form = ImportPatientsForm()
 
     return render(request, 'kahama_template/import_patients.html', {'form': form})
+
+def import_medicine_drug_records(request):
+    if request.method == 'POST':
+        form = ImportRemoteMedicineForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                resource = RemoteMedicineResource()
+                new_records = request.FILES['records_file']
+
+                # Use tablib to load the imported data
+                dataset = resource.export()
+                imported_data = dataset.load(new_records.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
+                
+                for data in imported_data:
+                    try:
+                        drug_record = RemoteMedicine.objects.create(
+                            drug_name=data[0],
+                            drug_type=data[1],                     
+                            formulation_unit=data[2],                     
+                            manufacturer=data[3],                    
+                            quantity=data[4],                     
+                            dividable=data[5],                     
+                            batch_number=data[6],                     
+                            expiration_date=data[7],                     
+                            unit_cost=data[8], 
+                            buying_price=data[9],                      
+                            remain_quantity=data[4],                      
+                        )
+                    except IntegrityError:
+                        messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
+                        continue
+
+                return redirect('kahamahmis:remotemedicine_list') 
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
+    else:
+        form = ImportRemoteMedicineForm()
+
+    return render(request, 'kahama_template/import_medicine_drug_records.html', {'form': form})
 
 
 def import_service_records(request):

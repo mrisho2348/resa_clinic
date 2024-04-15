@@ -5,6 +5,12 @@ from . import kahamaImports, views,delete,editView
 
 urlpatterns = [  
         path('generate_comprehensive_report/', KahamaReportsView.generate_comprehensive_report, name='generate_comprehensive_report'),
+        path('company/add/', kahamaViews.company_registration_view, name='add_clinc_company'),    # URL for editing an existing company
+        path('company/edit/<int:company_id>/', kahamaViews.company_registration_view, name='edit_clinic_company'),
+        path('get_formulation_unit/', kahamaViews.get_formulation_unit, name='get_formulation_unit'),
+        path('get_medicine_dosage/', kahamaViews.get_medicine_dosage, name='get_medicine_dosage'),
+        path('add_remote_medicine/', kahamaViews.add_remote_medicine, name='add_remote_medicine'),
+        path('remotemedicine_list/', kahamaViews.remotemedicine_list, name='remotemedicine_list'),
         path('search_report/', kahamaViews.search_report, name='search_report'),
         path('patient_type_report/', kahamaViews.patient_type_report, name='patient_type_report'),
         path('pathology_record_report/', kahamaViews.pathology_record_report, name='pathology_record_report'),
@@ -18,7 +24,7 @@ urlpatterns = [
         path('get_unit_price/', kahamaViews.get_unit_price, name='get_unit_price'),
         path('get_medicine_dosage/', kahamaViews.medicine_dosage, name='medicine_dosage'),
         path('appointment_view/', kahamaViews.appointment_view, name='appointment_view'), 
-        path('get_drug_type/', kahamaViews.get_drug_type, name='get_drug_type'),
+        path('get_drug_division_status/', kahamaViews.get_drug_division_status, name='get_drug_division_status'),
         path('verify_prescriptions/', kahamaViews.verify_prescriptions, name='verify_prescriptions'),
         path('unverify_prescriptions/', kahamaViews.unverify_prescriptions, name='unverify_prescriptions'),
         path('issue_prescriptions/', kahamaViews.issue_prescriptions, name='issue_prescriptions'),
@@ -229,6 +235,7 @@ urlpatterns = [
         path('api/out-of-stock-reagent-count/', views.get_out_of_stock_count_reagent, name='get_out_of_stock_count_reagent'),
         
         # imports urls 
+        path('import_medicine_drug_records', kahamaImports.import_medicine_drug_records, name='import_medicine_drug_records'),
         path('import_health_records', kahamaImports.import_health_records, name='import_health_records'),
         path('import_country_records', kahamaImports.import_country_records, name='import_country_records'),
         path('resa/import_Import/import_patient_vital_records',kahamaImports.import_patient_vital_records, name="import_patient_vital_records"),
@@ -309,6 +316,7 @@ urlpatterns = [
         path('company/<int:company_id>/delete/', delete.delete_company, name='delete_company'),
         path('delete_staff/<int:staff_id>/', delete.delete_staff, name='delete_staff'),        
         path('delete-patient/<int:patient_id>/', delete.delete_patient, name='delete_patient'),
+        path('delete_drug/', delete.delete_drug, name='delete_drug'),            
         path('delete_service/', delete.delete_service, name='delete_service'),            
         path('delete_procedure/', delete.delete_procedure, name='delete_procedure'),        
         path('delete_result/', delete.delete_result, name='delete_result'),        
