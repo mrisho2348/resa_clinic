@@ -9,9 +9,10 @@ from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from django.db.models import F
-
+from django.contrib.auth.decorators import login_required
 # Define a logger
 logger = logging.getLogger(__name__)
+@login_required
 def edit_insurance(request, insurance_id):
     insurance = get_object_or_404(InsuranceCompany, pk=insurance_id)
 
@@ -249,6 +250,7 @@ def edit_medicine(request, medicine_id):
         return JsonResponse({'message': 'Error updating medicine details', 'error': str(e)}, status=500)
     
 
+@login_required
 def edit_disease_record(request, disease_id):
     disease = get_object_or_404(DiseaseRecode, pk=disease_id)
 
@@ -273,6 +275,7 @@ def edit_disease_record(request, disease_id):
 
     return render(request, 'kahamaUpdate/edit_disease.html', {'disease': disease})
 
+@login_required
 def edit_company(request, company_id):
     company = get_object_or_404(RemoteCompany, pk=company_id)
 
@@ -305,7 +308,7 @@ def edit_company(request, company_id):
     return render(request, 'update/edit_company.html', {'company': company})
 
 
-
+@login_required
 def edit_pathodology(request, pathodology_id):
     pathodology = get_object_or_404(PathodologyRecord, pk=pathodology_id)
     disease_records=DiseaseRecode.objects.all() 

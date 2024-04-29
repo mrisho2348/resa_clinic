@@ -8,9 +8,9 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from django.db.models import F
+from django.contrib.auth.decorators import login_required
 
-
-
+@login_required
 def delete_staff(request, staff_id):
     # Retrieve the staff object or return a 404 if not found
     staff = get_object_or_404(Staffs, id=staff_id)
@@ -24,6 +24,7 @@ def delete_staff(request, staff_id):
 
     return render(request, 'kahamaDelete/delete_staff_confirm.html', {'staff': staff})
 
+@login_required
 def delete_patient(request, patient_id):
     # Retrieve the staff object or return a 404 if not found
     patient = get_object_or_404(Patients, id=patient_id)
@@ -51,7 +52,8 @@ def delete_medicine(request, medicine_id):
     except Exception as e:
         # Handle any exception or error during deletion
         return JsonResponse({'success': False, 'message': str(e)})
-    
+
+@login_required    
 def delete_insurance(request, insurance_id):
     insurance = get_object_or_404(InsuranceCompany, pk=insurance_id)
 
@@ -120,6 +122,7 @@ def delete_referral(request):
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 
+@login_required
 def delete_disease_record(request, disease_id):
     record = get_object_or_404(DiseaseRecode, pk=disease_id)
 
@@ -135,6 +138,7 @@ def delete_disease_record(request, disease_id):
 
     return render(request, 'kahamaDelete/delete_disease_record_confirmation.html', {'record': record})
 
+@login_required
 def delete_company(request, company_id):
     company = get_object_or_404(RemoteCompany, pk=company_id)
 
@@ -151,6 +155,7 @@ def delete_company(request, company_id):
     return render(request, 'kahamaDelete/company_delete_confirmation_template.html', {'company': company})
 
 
+@login_required
 def delete_pathodology(request, pathodology_id):
     pathodology = get_object_or_404(PathodologyRecord, pk=pathodology_id)
 

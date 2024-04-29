@@ -32,6 +32,7 @@ ALLOWED_HOSTS = ['3.92.136.150','127.0.0.1','resa.mujtabahschool.ac.tz','www.res
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -55,7 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'clinic.LoginCheckMiddleWare.LoginCheckMiddleWare',
+    # 'clinic.LoginCheckMiddleWare.LoginCheckMiddleWare',
     
   
 ]
@@ -249,4 +250,109 @@ CKEDITOR_5_CONFIGS = {
             'reversed': 'true',
         }
     }
+}
+
+
+JAZZMIN_SETTINGS = {
+    # Title of the window
+    "site_title": "Resa Clinic ",
+
+    # Title on the login screen
+    "site_header": "Resa Clinic ",
+   
+    "index_title":"Dashboard",
+    # Title on the brand
+    "site_brand": "Resa Clinic ",
+
+    # Logo to use for your site, must be present in static files, used for brand on top left
+    "site_logo": "dist/img/resalogo.png",
+
+    # Welcome text on the login screen
+    "welcome_sign": "Resa Clinic ",
+
+    # CSS classes that are applied to the logo
+    "site_logo_classes": "img-circle",
+
+    # Copyright on the footer
+    "copyright": "Resa Medical Group",
+
+    # Relative path to a favicon for your site
+    "site_icon": None,
+
+    # Links to put along the top menu
+    "topmenu_links": [
+        {"name": "Home",  "url": "admin:index"},
+        # {"name": "Support", "url": "tour_category_list", "new_window": False},
+        {"model": "tourist.Tourist"},
+
+    ],
+
+    # Additional links to include in the user menu on the top right
+    "usermenu_links": [
+        # {"name": "Support", "url": "activity_list", "new_window": False},
+    ],
+
+    # Whether to display the side menu
+    "show_sidebar": True,
+
+    # Whether to auto-expand the menu
+    "navigation_expanded": True,
+
+    # Hide these models when generating side menu
+    "hide_models": [],
+    
+     
+    
+    # Custom icons for side menu apps/models
+"icons": {
+    # Auth app icons
+    "auth": "fas fa-users-cog",
+    "auth.user": "fas fa-user",
+    "auth.Group": "fas fa-users",
+
+    # Admin app icons
+    "admin.LogEntry": "fas fa-file",
+
+    # Clinic icons
+    "clinic.SalaryPayment": "fas fa-money-check",
+    "clinic.Payroll": "fas fa-money-bill",
+    "clinic.BankAccount": "fas fa-university",
+    "clinic.Employee": "fas fa-user-tie",
+    "clinic.DeductionOrganization": "fas fa-chart-bar",
+    "clinic.EmployeeDeduction": "fas fa-hand-holding-usd",
+    "clinic.SalaryChangeRecord": "fas fa-file-alt",
+    "clinic.PaymentMethod": "fas fa-credit-card",
+    "clinic.ExpenseCategory": "fas fa-list-alt",
+    "clinic.Expense": "fas fa-money-bill-alt",
+    "clinic.Invoice": "fas fa-receipt",
+    "clinic.Payment": "fas fa-money-check-alt",
+    "clinic.Client": "fas fa-users",
+},
+
+    # Icons that are used when one is not manually specified
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-arrow-circle-right",
+    # Order apps automatically, but make sure choice and book admin links are first within the books app
+   "order_with_respect_to": ["clinic.Employee", "clinic.Payroll", "clinic.SalaryPayment"],
+   
+    # Render out the change view as a single form, or in tabs
+    "changeform_format": "horizontal_tabs",
+
+    # Add a language dropdown into the admin
+    "language_chooser": True,
+
+    # Relative paths to custom CSS/JS scripts
+    "custom_css": None,
+    "custom_js": None,
+
+    # Whether to link font from fonts.googleapis.com
+    "use_google_fonts_cdn": True,
+
+    # Whether to show the UI customizer on the sidebar
+    "show_ui_builder": False,
+}
+
+JAZZMIN_UI_TWEAKS = {
+   
+    "theme": "slate",
 }

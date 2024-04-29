@@ -20,6 +20,7 @@ from django.core.exceptions import ValidationError
 from django.db.models.functions import ExtractMonth  # Add this import
 from django.template.loader import render_to_string
 
+@login_required
 def save_patient_health_information(request, patient_id):
     try:
         # Retrieve the patient object using the patient_id from URL parameters
@@ -110,7 +111,7 @@ def save_patient_health_information(request, patient_id):
     # If the request method is not POST or if there's an error, render the form again
     return render(request, 'kahama_template/add_patient_health_condition_form.html', {'patient': patient})
 
-
+@login_required
 def health_record_list(request):
     records = HealthRecord.objects.all()
     return render(request, 'kahama_template/healthrecord_list.html', {'records': records})
@@ -622,7 +623,8 @@ def save_remotesconsultation_notes(request, patient_id, visit_id):
         # If GET request, render the template for adding consultation notes
         return render(request, 'kahama_template/add_consultation_notes.html', context)
     
-    
+
+@login_required    
 def save_counsel(request, patient_id, visit_id):
     # Retrieve patient and visit objects
     patient = get_object_or_404(RemotePatient, id=patient_id)
@@ -677,6 +679,7 @@ def save_counsel(request, patient_id, visit_id):
     context['form'] = form    
     return render(request, 'kahama_template/counsel_template.html', context)
 
+@login_required
 def save_remotereferral(request, patient_id, visit_id):
     try:
         # Retrieve patient and visit objects
@@ -722,7 +725,7 @@ def save_remotereferral(request, patient_id, visit_id):
         return render(request, 'kahama_template/save_remotereferral.html', context)
     
     
-    
+@login_required    
 def save_remoteprocedure(request, patient_id, visit_id):
     patient = get_object_or_404(RemotePatient, id=patient_id)
     visit = get_object_or_404(RemotePatientVisits, id=visit_id)
@@ -771,7 +774,7 @@ def save_remoteprocedure(request, patient_id, visit_id):
     
 
 
-
+@login_required
 def save_observation(request, patient_id, visit_id):
     patient = get_object_or_404(RemotePatient, id=patient_id)
     visit = get_object_or_404(RemotePatientVisits, id=visit_id)
@@ -987,7 +990,7 @@ def medicine_dosage(request):
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)  
     
-
+@login_required
 def patient_observation_view(request):
     template_name = 'kahama_template/manage_observation.html'    
     # Query to retrieve the latest procedure record for each patient
@@ -1005,6 +1008,7 @@ def patient_observation_view(request):
     )
     return render(request, template_name, {'data': data})
 
+@login_required
 def patient_observation_history_view(request, mrn):
     patient = get_object_or_404(RemotePatient, mrn=mrn)    
     # Retrieve all procedures for the specific patient
@@ -1017,7 +1021,8 @@ def patient_observation_history_view(request, mrn):
     }
     return render(request, 'kahama_template/manage_patient_observation.html', context)
 
-             
+
+@login_required             
 def patient_laboratory_view(request):
     template_name = 'kahama_template/manage_lab_result.html'    
     # Query to retrieve the latest procedure record for each patient
@@ -1034,6 +1039,7 @@ def patient_laboratory_view(request):
     )
     return render(request, template_name, {'data': data})   
 
+@login_required
 def patient_lab_result_history_view(request, mrn):
     patient = get_object_or_404(RemotePatient, mrn=mrn)    
     # Retrieve all procedures for the specific patient
@@ -1339,7 +1345,8 @@ def delete_remote_patient(request, patient_id):
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}) 
-    
+ 
+@login_required    
 def save_remote_discharges_notes(request, patient_id, visit_id):
     patient = get_object_or_404(RemotePatient, id=patient_id)
     visit = get_object_or_404(RemotePatientVisits, id=visit_id)
@@ -1374,7 +1381,8 @@ def save_remote_discharges_notes(request, patient_id, visit_id):
     except Exception as e:
         messages.error(request, f'An error occurred: {str(e)}')
         return render(request, 'kahama_template/disrcharge_template.html', context)
-    
+
+@login_required    
 def patient_statistics(request):
     current_year = datetime.now().year
     year_range = range(current_year, current_year - 10, -1)
@@ -1385,6 +1393,7 @@ def patient_statistics(request):
     }
     return render(request, 'kahama_template/reports_comprehensive.html', context)
 
+@login_required
 def referral_reports(request):
     # Retrieve referral data
     referrals = RemoteReferral.objects.all()
@@ -1392,6 +1401,7 @@ def referral_reports(request):
     return render(request, 'kahama_template/referral_reports.html', context)
 
 
+@login_required
 def procedure_report(request):
     # Get the current year
     current_year = datetime.now().year
@@ -1430,7 +1440,7 @@ def procedure_report(request):
 
     return render(request, 'kahama_template/procedure_report.html', context)
 
-
+@login_required
 def laboratory_report(request):
     # Get the current year
     current_year = datetime.now().year
@@ -1470,7 +1480,7 @@ def laboratory_report(request):
     return render(request, 'kahama_template/laboratory_report.html', context)
 
 
-
+@login_required
 def company_patient_report(request):
     # Get the current year
     current_year = datetime.now().year
@@ -1505,7 +1515,7 @@ def company_patient_report(request):
 
     return render(request, 'kahama_template/company_wise_reports.html', context)
 
-
+@login_required
 def pathology_record_report(request):
     # Get the current year
     current_year = datetime.now().year
@@ -1540,6 +1550,7 @@ def pathology_record_report(request):
     return render(request, 'kahama_template/pathology_record_report.html', context)
 
 
+@login_required
 def patient_type_report(request):
     # Get the current year
     current_year = datetime.now().year
@@ -1580,7 +1591,7 @@ def patient_type_report(request):
 
 
 
-
+@login_required
 def search_report(request):
     if request.method == 'POST' and request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
         # Get the report type and year from the request
@@ -1607,6 +1618,7 @@ def search_report(request):
             # Return error response if the report type is invalid
             return JsonResponse({'error': 'Invalid report type'})
 
+@login_required
 def render_report(report_type, year):
     if report_type == 'patient_type_reports':       
          # Define the list of all patient types
@@ -1779,7 +1791,7 @@ def render_report(report_type, year):
         }
         return render_to_string('kahama_template/pathology_record_report_table.html',context)
     
-
+@login_required
 def patient_health_info_edit_record(request, patient_id):
     try:
         # Retrieve the patient object
@@ -1979,7 +1991,7 @@ def patient_health_info_edit_record(request, patient_id):
     
     
 
-
+@login_required
 def remotemedicine_list(request):
     medicines = RemoteMedicine.objects.all()
     return render(request, 'kahama_template/remotemedicine_list.html', {'medicines': medicines})
@@ -2067,6 +2079,7 @@ def add_remote_medicine(request):
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
 
+@login_required
 def company_registration_view(request, company_id=None):
     try:
         if request.method == 'POST':

@@ -18,9 +18,13 @@ from django.contrib import admin
 from django.conf.urls.static import static
 from django.urls import include, path
 from resaclinic import settings
-
+from django.views.i18n import set_language
+from clinic.views import logout_user
+from clinic.views import DoLogin
+admin.site.logout = logout_user
 urlpatterns = [
-    path('admin/', admin.site.urls),
+     path('admin/login/', DoLogin, name='custom_login'),
+    path('admin/', admin.site.urls, name='hmis_admin'),
     path('',  include(('clinic.urls', 'clinic'), namespace='clinic')),
     path('resa/', include('centric.urls')),
     path('reception/', include('resaclinic.receptionist_urls')),
@@ -31,7 +35,13 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')), 
     path("ckeditor5/", include('django_ckeditor_5.urls'), name="ck_editor_5_upload_file"),
     path('kahama/', include(('kahamahmis.urls', 'kahamahmis'), namespace='kahamahmis')),
+    path('i18n/', set_language, name='set_language'), 
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_URL)
+    
+admin.site.login = 'custom_login'
+admin.site.index_title = "Resa Clinic "
+admin.site.site_header = "Resa Clinic "
+admin.site.site_title = "Resa Clinic "    

@@ -9,7 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_ckeditor_5.fields import CKEditor5Field
-
+from uuid import uuid4
 # Create your models here.
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, email, password=None, user_type=1, **extra_fields):
@@ -398,24 +398,6 @@ def generate_consultation_number():
     new_consultation_number = last_sample_number + 1
     return f"CTN-{new_consultation_number:07d}"    
    
-
-
-class Payment(models.Model):
-    PAYMENT_TYPES = [
-        ('Cash', 'Cash'),
-        ('Credit Card', 'Credit Card'),
-        ('Insurance', 'Insurance'),
-        # Add more payment types as needed
-    ]
-
-    payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPES)
-    patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    date_paid = models.DateField()
-    insurance = models.ForeignKey(InsuranceCompany, on_delete=models.SET_NULL, blank=True, null=True)
-    def __str__(self):
-        return f"Payment of {self.amount} {self.payment_type} for {self.patient}"
-
 class ImagingRecord(models.Model):
     patient = models.ForeignKey('Patients', on_delete=models.CASCADE)
     visit = models.ForeignKey('PatientVisits', on_delete=models.CASCADE)
@@ -1681,7 +1663,10 @@ class RemoteOrder(models.Model):
     is_read = models.BooleanField(default=False)
     status = models.CharField(max_length=100, choices=ORDER_STATUS, default='Unpaid')
     order_number = models.CharField(max_length=12, unique=True)
-
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True) 
+    objects = models.Manager()
+    
     def __str__(self):
         return f"{self.order_type} Order for {self.patient}"
 
@@ -1942,4 +1927,231 @@ def generate_remoteprescription_id():
     last_sample_number = int(last_prescription.prs_no.split('-')[-1]) if last_prescription else 0
     new_prescription_id = last_sample_number + 1
     return f"PRS-{new_prescription_id:07d}"   
-      
+    
+    
+# financial part
+
+class Payroll(models.Model):
+    STATUS_CHOICES = [
+        ('processed', 'Processed'),
+        ('pending', 'Pending'),
+        ('canceled', 'Canceled'),
+    ]
+
+    payroll_date = models.DateField()
+    total_salary = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    payment_method = models.ForeignKey('PaymentMethod', on_delete=models.SET_NULL, null=True, blank=True)
+    details = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+    def __str__(self):
+        return f"Payroll for {self.payroll_date}"
+  
+
+class BankAccount(models.Model):   
+    bank_name = models.CharField(max_length=100)   
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+    def __str__(self):
+        return f"Bank Account:  {self.bank_name}"    
+
+class SalaryPayment(models.Model):
+    PAYMENT_STATUS_CHOICES = [
+        ('paid', 'Paid'),
+        ('pending', 'Pending'),
+        ('failed', 'Failed'),
+    ]
+
+    employee = models.ForeignKey('Employee', on_delete=models.CASCADE)
+    payroll = models.ForeignKey('Payroll', on_delete=models.CASCADE)    
+    payment_date = models.DateField()
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES)
+    payment_details = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+    def __str__(self):
+        return f"Salary payment  for {self.employee} on {self.payment_date}" 
+    
+    class Meta:
+        verbose_name = " Salary Payment"   
+
+class Employee(models.Model):
+    name =  models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True) 
+    employee_id = models.CharField(max_length=20, unique=True)    
+    department = models.CharField(max_length=100)
+    FULL_TIME = 'Full-time'
+    PART_TIME = 'Part-time'
+    CONTRACT = 'Contract'
+
+    EMPLOYMENT_CHOICES = [
+        (FULL_TIME, 'Full-time'),
+        (PART_TIME, 'Part-time'),
+        (CONTRACT, 'Contract'),
+    ]
+
+    employment_type = models.CharField(max_length=20, choices=EMPLOYMENT_CHOICES)
+    start_date = models.DateField()
+    end_date = models.DateField(blank=True, null=True)
+    salary = models.DecimalField(max_digits=10, decimal_places=2)
+    bank_account = models.ForeignKey('BankAccount', on_delete=models.SET_NULL, blank=True, null=True)
+    bank_account_number = models.CharField(max_length=30)  # Associated bank account number   
+    account_holder_name = models.CharField(max_length=100, blank=True, null=True)
+    # Organization-specific identification numbers
+    tin_number = models.CharField(max_length=20, blank=True, null=True)  # TRA TIN number
+    nssf_membership_number = models.CharField(max_length=20, blank=True, null=True)  # NSSF membership number
+    nhif_number = models.CharField(max_length=20, blank=True, null=True)  # NHIF number
+    wcf_number = models.CharField(max_length=20, blank=True, null=True)  # WCF number
+
+    # Deduction status for each organization
+    tra_deduction_status = models.BooleanField(default=False)  # TRA deduction status
+    nssf_deduction_status = models.BooleanField(default=False)  # NSSF deduction status
+    wcf_deduction_status = models.BooleanField(default=False)  # WCF deduction status
+    heslb_deduction_status = models.BooleanField(default=False)  # HESLB deduction status
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+    
+    def save(self, *args, **kwargs):
+        # Generate unique employee ID
+        if not self.employee_id:
+            self.employee_id = self.generate_employee_id()
+        super().save(*args, **kwargs)
+
+    def generate_employee_id(self):
+        # Generate a unique employee ID using a combination of letters and digits
+        prefix = 'EMP'  # You can customize the prefix as needed
+        unique_id = str(uuid4())[:8]  # Get the first 8 characters of a UUID
+        return f'{prefix}-{unique_id}'
+
+    def __str__(self):
+        return self.name.admin.username
+class DeductionOrganization(models.Model):
+    name = models.CharField(max_length=100)
+    rate = models.DecimalField(max_digits=5, decimal_places=2)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+    def __str__(self):
+        return self.name
+    
+class EmployeeDeduction(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    payroll = models.ForeignKey(Payroll, on_delete=models.CASCADE)
+    organization = models.ForeignKey(DeductionOrganization, on_delete=models.CASCADE)
+    deducted_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+    # Add any additional fields as needed
+
+    def __str__(self):
+        return f"Deduction for {self.employee.name} in {self.payroll} for {self.organization}"
+    
+    
+class SalaryChangeRecord(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    payroll = models.ForeignKey(Payroll, on_delete=models.CASCADE)
+    previous_salary = models.DecimalField(max_digits=10, decimal_places=2)
+    new_salary = models.DecimalField(max_digits=10, decimal_places=2)
+    change_date = models.DateField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True) 
+    objects = models.Manager()
+    def __str__(self):
+        return f"Salary change for {self.employee} on {self.change_date}"        
+    
+class PaymentMethod(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True) 
+    objects = models.Manager()
+    def __str__(self):
+        return self.name    
+    
+class ExpenseCategory(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True) 
+    objects = models.Manager()
+    def __str__(self):
+        return self.name
+
+    
+class Expense(models.Model):
+    date = models.DateField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField()
+    category = models.ForeignKey(ExpenseCategory, on_delete=models.CASCADE)
+    additional_details = models.TextField(blank=True)
+    receipt = models.FileField(upload_to='expense_receipts/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True) 
+    objects = models.Manager()
+    def __str__(self):
+        return f"Expense of {self.amount} on {self.date}"
+
+class Invoice(models.Model):
+    STATUS_CHOICES = [
+        ('paid', 'Paid'),
+        ('pending', 'Pending'),
+        ('overdue', 'Overdue'),
+    ]
+
+    number = models.CharField(max_length=50, unique=True)  # Ensure uniqueness
+    date = models.DateField()
+    due_date = models.DateField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    client = models.ForeignKey('Client', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True) 
+    objects = models.Manager()
+    def save(self, *args, **kwargs):
+        if not self.number:  # If the invoice number is not set
+            last_invoice = Invoice.objects.order_by('-id').first()  # Get the last invoice
+            if last_invoice:
+                last_id = int(last_invoice.number[3:])  # Extract the numeric part of the last invoice number
+                new_id = last_id + 1  # Increment the numeric part
+            else:
+                new_id = 1  # If no invoices exist yet, start from 1
+            self.number = f'INV{new_id:03}'  # Format the new invoice number
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Invoice {self.number} for {self.client} - {self.status}"
+
+class Payment(models.Model):
+    date = models.DateField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    method = models.ForeignKey(PaymentMethod, on_delete=models.CASCADE, blank=True, null=True)
+    invoice = models.ForeignKey(Invoice, on_delete=models.SET_NULL, blank=True, null=True)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True) 
+    objects = models.Manager()
+    def __str__(self):
+        return f"Payment of {self.amount} made on {self.date}"
+
+
+
+class Client(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField(blank=True)
+    phone_number = models.CharField(max_length=20, blank=True)
+    address = models.CharField(max_length=200, blank=True)
+    contact_person = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True) 
+    objects = models.Manager()
+    # Add more fields for client details as needed
+
+    def __str__(self):
+        return self.name

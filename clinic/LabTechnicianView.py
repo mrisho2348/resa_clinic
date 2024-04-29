@@ -57,7 +57,8 @@ def manage_patient(request):
         })
  
  
- 
+
+@login_required 
 def patient_consultation_detail(request, patient_id, visit_id):
     try:        
         
@@ -130,7 +131,7 @@ logger = logging.getLogger(__name__)
 
 
 
-
+@login_required
 def single_staff_detail(request, staff_id):
     staff = get_object_or_404(Staffs, id=staff_id)
     # Fetch additional staff-related data  
@@ -141,6 +142,7 @@ def single_staff_detail(request, staff_id):
 
     return render(request, "labtechnician_template/staff_details.html", context)
 
+@login_required
 def view_patient(request, patient_id):
     patient = get_object_or_404(Patients, id=patient_id)
     # Fetch additional staff-related data  
@@ -151,6 +153,7 @@ def view_patient(request, patient_id):
 
     return render(request, "labtechnician_template/patients_detail.html", context)
 
+@login_required
 def all_orders_view(request):
     # Retrieve all orders from the database
     orders = Order.objects.all().order_by('-order_date')    
@@ -200,6 +203,7 @@ def add_consultation(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})    
     
 
+@login_required
 def appointment_view(request, patient_id):
     try:
         if request.method == 'POST':
@@ -307,7 +311,7 @@ def appointment_view_remote(request, patient_id):
     # Handle invalid request method
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
-    
+@login_required    
 def notification_view(request):
     notifications = Notification.objects.filter(is_read=False)
     
@@ -371,6 +375,7 @@ def edit_meeting(request, appointment_id):
 
     return redirect('appointment_list')
 
+@login_required
 def patient_procedure_history_view(request, mrn):
     patient = get_object_or_404(Patients, mrn=mrn)    
     # Retrieve all procedures for the specific patient
@@ -452,6 +457,7 @@ def save_radiology(request):
     return JsonResponse({'success': False, 'message': 'Invalid request method. This endpoint only accepts POST requests.'})
 
 
+@login_required
 def generate_invoice_bill(request,  order_id):
     # Retrieve the patient and visit objects based on IDs
     
@@ -463,6 +469,7 @@ def generate_invoice_bill(request,  order_id):
     }
     return render(request, 'labtechnician_template/invoice_bill.html', context)
 
+@login_required
 def generate_billing(request, procedure_id):
     procedure = get_object_or_404(Procedure, id=procedure_id)
 
@@ -472,6 +479,7 @@ def generate_billing(request, procedure_id):
 
     return render(request, 'labtechnician_template/billing_template.html', context)
 
+@login_required
 def appointment_list_view(request):
     appointments = Consultation.objects.all()
     unread_notification_count = Notification.objects.filter(is_read=False).count()
@@ -644,7 +652,7 @@ def save_consultation_data(request):
         return HttpResponseBadRequest(f"Error: {str(e)}")
 
 
-    
+@login_required    
 def save_remoteprocedure(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -794,7 +802,7 @@ def get_unit_price(request):
     
 
    
-   
+@login_required   
 def save_observation(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -896,7 +904,7 @@ def add_imaging(request):
         # If the request method is not POST, return an error response
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
   
-                
+@login_required                
 def save_laboratory(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -1006,6 +1014,7 @@ def fetch_model_data(request):
 
     return JsonResponse({'data': data})    
 
+@login_required
 def patient_visit_history_view(request, patient_id):
     # Retrieve visit history for the specified patient
     visit_history = PatientVisits.objects.filter(patient_id=patient_id)
@@ -1086,7 +1095,7 @@ def patient_health_record_view(request, patient_id, visit_id):
         return render(request, '404.html', {'error_message': str(e)})
     
 
-
+@login_required
 def prescription_list(request):
     # Retrieve all patients
     patients = Patients.objects.all()
@@ -1143,7 +1152,7 @@ def prescription_detail(request, visit_number, patient_id):
     return render(request, "labtechnician_template/prescription_detail.html", context)
 
   
-    
+@login_required    
 def patient_vital_list(request, patient_id):
     # Retrieve the patient object
     patient = Patients.objects.get(pk=patient_id)
@@ -1164,7 +1173,9 @@ def patient_vital_list(request, patient_id):
         'patient_vitals': patient_vitals
     }
     
-    return render(request, 'labtechnician_template/manage_patient_vital_list.html', context)    
+    return render(request, 'labtechnician_template/manage_patient_vital_list.html', context)  
+
+@login_required  
 def patient_vital_all_list(request):
     # Retrieve the patient object
     patients = Patients.objects.all()

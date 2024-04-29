@@ -32,6 +32,7 @@ from django.db.models import Sum
 def index(request):
     return render(request,"index.html")
 
+@login_required
 def dashboard(request):
     total_patients = Patients.objects.count()
     recently_added_patients = Patients.objects.order_by('-created_at')[:6]
@@ -59,7 +60,7 @@ def ShowLogin(request):
 
 def DoLogin(request):
     if request.method != "POST":
-        return HttpResponse("<h2>Method Not allowed</h2>")
+        return HttpResponseRedirect(reverse("login"))
     else:
         user = EmailBackend.authenticate(request, request.POST.get("email"), request.POST.get("password"))
         if user is not None:
@@ -235,6 +236,7 @@ def manage_service(request):
     }
     return render(request,"hod_template/manage_service.html",context)
 
+@login_required
 def manage_adjustment(request):
     return render(request,"hod_template/manage_adjustment.html")
 
@@ -339,7 +341,8 @@ def save_staff_view(request):
 
     # Return an error response if the request is not POST
     return JsonResponse({'error': 'Invalid request method'}, status=405)
-    
+ 
+@login_required    
 def update_staff_status(request):
     try:
         if request.method == 'POST':
@@ -368,6 +371,7 @@ def update_staff_status(request):
     # Redirect back to the staff list page
     return redirect('clinic:manage_staff')  # Make sure 'manage_staffs' is the name of your staff list URL
 
+@login_required
 def update_vehicle_status(request):
     try:
         if request.method == 'POST':
@@ -396,6 +400,7 @@ def update_vehicle_status(request):
     # Redirect back to the staff list page
     return redirect('clinic:hospital_vehicle_list')  # Make sure 'hospital_vehicle_lists' is the name of your staff list URL
 
+@login_required
 def update_equipment_status(request):
     try:
         if request.method == 'POST':
@@ -425,6 +430,7 @@ def update_equipment_status(request):
     # Redirect back to the staff list page
     return redirect('clinic:equipment_list')  # Make sure 'manage_staffs' is the name of your staff list URL
 
+@login_required
 def edit_staff(request, staff_id):
     # Check if the staff with the given ID exists, or return a 404 page
     staff = get_object_or_404(Staffs, id=staff_id)  
@@ -433,6 +439,7 @@ def edit_staff(request, staff_id):
     return render(request, "update/edit_staff.html", {"id": staff_id, "username": staff.admin.username, "staff": staff})   
 
 
+@login_required
 def edit_staff_save(request):
     if request.method == "POST":
         try:
@@ -486,7 +493,7 @@ def edit_staff_save(request):
 
 
 
-
+@login_required
 def single_staff_detail(request, staff_id):
     staff = get_object_or_404(Staffs, id=staff_id)
     # Fetch additional staff-related data  
@@ -497,6 +504,7 @@ def single_staff_detail(request, staff_id):
 
     return render(request, "hod_template/staff_details.html", context)
 
+@login_required
 def view_patient(request, patient_id):
     patient = get_object_or_404(Patients, id=patient_id)
     # Fetch additional staff-related data  
@@ -507,6 +515,7 @@ def view_patient(request, patient_id):
 
     return render(request, "hod_template/patients_detail.html", context)
 
+@login_required
 def appointment_view(request, patient_id):
     try:
         if request.method == 'POST':
@@ -560,7 +569,8 @@ def appointment_view(request, patient_id):
         # Handle other exceptions
         messages.error(request, f"An unexpected error occurred: {str(e)}")
         return JsonResponse({'status': 'error', 'message': str(e)})
-    
+
+@login_required    
 @csrf_exempt
 def appointment_view_remote(request, patient_id):
     try:
@@ -614,7 +624,8 @@ def appointment_view_remote(request, patient_id):
     # Handle invalid request method
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
-    
+
+@login_required    
 def notification_view(request):
     notifications = Notification.objects.filter(is_read=False)
     
@@ -626,6 +637,7 @@ def notification_view(request):
     context = {'notifications': notifications}
     return render(request, 'hod_template/manage_notification.html', context)
 
+@login_required
 def confirm_meeting(request, appointment_id):
     try:
         # Retrieve the appointment
@@ -654,6 +666,7 @@ def confirm_meeting(request, appointment_id):
 
     return redirect('clinic:appointment_list')  # Adjust the URL name based on your actual URL structure
 
+@login_required
 def edit_meeting(request, appointment_id):
     try:
         if request.method == 'POST':
@@ -736,6 +749,7 @@ def add_medicine(request):
 
     return JsonResponse({'error': 'Failed to add Medicine'}, status=500)
 
+@login_required
 @require_POST
 def add_inventory(request):
     if request.method == 'POST':
@@ -783,7 +797,8 @@ def add_inventory(request):
     else:
         # Handle non-POST requests, redirect or display an error message
         return redirect('clinic:medicine_list')  # Adjust the URL as needed
-    
+
+@login_required    
 def medicine_inventory_list(request):
     # Retrieve all medicine inventories
     medicine_inventories = MedicineInventory.objects.all()
@@ -821,6 +836,7 @@ def medicine_expired_list(request):
 
     return render(request, 'hod_template/manage_medicine_expired.html', {'medicines': medicines})
 
+@login_required
 def patient_procedure_view(request):
     template_name = 'hod_template/manage_procedure.html'
     
@@ -849,6 +865,7 @@ def patient_procedure_view(request):
 
 
 
+@login_required
 def patient_procedure_history_view(request, mrn):
     patient = get_object_or_404(Patients, mrn=mrn)    
     # Retrieve all procedures for the specific patient
@@ -859,6 +876,7 @@ def patient_procedure_history_view(request, mrn):
     }
 
     return render(request, 'hod_template/manage_patient_procedure.html', context)
+
 
 
 @csrf_exempt  # Use csrf_exempt decorator for simplicity in this example. For a production scenario, consider using csrf protection.
@@ -955,12 +973,14 @@ def change_referral_status(request):
 
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
+@login_required
 def manage_referral(request):
     referrals = Referral.objects.all()
     patients = Patients.objects.all()
     return render(request, 'hod_template/manage_referral.html', {'referrals': referrals,'patients':patients})
 
 
+@login_required
 def generate_billing(request, procedure_id):
     procedure = get_object_or_404(Procedure, id=procedure_id)
 
@@ -970,6 +990,7 @@ def generate_billing(request, procedure_id):
 
     return render(request, 'hod_template/billing_template.html', context)
 
+@login_required
 def appointment_list_view(request):
     appointments = Consultation.objects.all()
     unread_notification_count = Notification.objects.filter(is_read=False).count()
@@ -985,6 +1006,7 @@ def appointment_list_view(request):
     }
     return render(request, 'hod_template/manage_appointment.html', context)
 
+@login_required
 def import_staff(request):
     if request.method == 'POST':
         form = ImportStaffForm(request.POST, request.FILES)
@@ -1325,6 +1347,7 @@ def delete_medication_payment(request, payment_id):
         return JsonResponse({'error': str(e)}, status=500)
     
 
+@login_required
 def medication_payments_view(request):
     # Subquery to retrieve the latest medication payment record for each registered patient
     latest_medication_payment = MedicationPayment.objects.filter(
@@ -1362,6 +1385,7 @@ def medication_payments_view(request):
 
     return render(request, 'hod_template/manage_medication_payment.html', context)
 
+@login_required
 def patient_medicationpayment_history_view(request, mrn):
     # Retrieve medication payment history for the patient with the given MRN
     medication_history = MedicationPayment.objects.filter(patient__mrn=mrn)
@@ -1378,6 +1402,7 @@ def patient_medicationpayment_history_view(request, mrn):
     return render(request, 'hod_template/manage_patient_medicationpayment_history.html', context)
 
 
+@login_required
 def diagnostic_tests_view(request):
     # Retrieve all diagnostic tests from the database
     diagnostic_tests = DiagnosticTest.objects.all()
@@ -1397,6 +1422,7 @@ def diagnostic_tests_view(request):
     }
 
     return render(request, 'hod_template/manage_diagnostic_tests.html', context)
+
 
 
 def save_diagnostic_test(request):
@@ -1467,6 +1493,7 @@ def generate_test_id():
 
     return new_test_id
 
+@login_required
 def sample_list(request):
     samples = Sample.objects.all()
     diagnostic_tests = DiagnosticTest.objects.all()    
@@ -1498,6 +1525,7 @@ def save_sample(request):
     return HttpResponseBadRequest("Invalid request method")
 
 
+@login_required
 def patient_diseases_view(request):
     # Retrieve all diagnostic tests from the database
     patient_diseases = PatientDisease.objects.all()
@@ -1552,6 +1580,7 @@ def save_patient_disease(request):
     # If the request method is not POST, redirect to an appropriate page
     return HttpResponseBadRequest("Invalid request method") 
 
+@login_required
 def pathology_diagnostic_test_list(request):
     Pathology_diagnostic_tests = PathologyDiagnosticTest.objects.all()
     pathology_records=PathodologyRecord.objects.all() 
@@ -1626,6 +1655,7 @@ def save_consultation_data(request):
     except Exception as e:
         return HttpResponseBadRequest(f"Error: {str(e)}")
 
+@login_required
 def consultation_fee_list(request):
     # Get distinct patients who have consultations
     patients = Patients.objects.filter(consultation__isnull=False).distinct()
@@ -1669,7 +1699,8 @@ def save_consultation_fee(request):
         # Return a JsonResponse with an error message
         return HttpResponseBadRequest(f"Error: {str(e)}")  
     
-    
+
+@login_required    
 def save_service_data(request):
     if request.method == 'POST':
         service_id = request.POST.get('service_id')
@@ -1706,6 +1737,7 @@ def category_list(request):
     return render(request, 'hod_template/manage_category_list.html', {'categories': categories})
 
 
+
 @require_POST
 def add_category(request):
     try:
@@ -1727,11 +1759,13 @@ def add_category(request):
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
-    
+
+@login_required    
 def supplier_list(request):
     suppliers = Supplier.objects.all()
     return render(request, 'hod_template/manage_supplier_list.html', {'suppliers': suppliers})
- 
+
+@login_required 
 def inventory_list(request):
     inventory_items = InventoryItem.objects.all()  
     suppliers = Supplier.objects.all()
@@ -1832,6 +1866,7 @@ def add_inventory_item(request):
         return JsonResponse({'status': 'error', 'message': str(e)})      
     
 
+@login_required
 def usage_history_list(request):
     usage_history_list = UsageHistory.objects.filter(quantity_used__gt=0)
     inventory_item = InventoryItem.objects.all()
@@ -1900,11 +1935,12 @@ def get_item_quantity(request):
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
     
-
+@login_required
 def out_of_stock_items(request):
     out_of_stock_items = InventoryItem.objects.filter(remain_quantity=0)
     return render(request, 'hod_template/manage_out_of_stock_items.html', {'out_of_stock_items': out_of_stock_items}) 
 
+@login_required
 def in_stock_items(request):
     in_stock_items = InventoryItem.objects.filter(remain_quantity__gt=0)
     return render(request, 'hod_template/manage_in_stock_items.html', {'in_stock_items': in_stock_items})   
@@ -1998,7 +2034,8 @@ def out_of_stock_medicines(request):
     except Exception as e:
         # Handle any errors and return an error response
         return JsonResponse({'error': str(e)}, status=500)    
-    
+
+@login_required    
 def out_of_stock_medicines_view(request):
     try:
         # Query the database for out-of-stock medicines
@@ -2010,7 +2047,8 @@ def out_of_stock_medicines_view(request):
     except Exception as e:
         # Handle any errors and return an error response
         return render(request, '404.html', {'error_message': str(e)}) 
-    
+
+@login_required    
 def out_of_stock_reagent_view(request):
     try:
         # Query the database for out-of-stock medicines
@@ -2023,19 +2061,21 @@ def out_of_stock_reagent_view(request):
         # Handle any errors and return an error response
         return render(request, '404.html', {'error_message': str(e)}) 
     
-    
+@login_required    
 def in_stock_medicines_view(request):
     # Retrieve medicines with inventory levels above zero
     in_stock_medicines = MedicineInventory.objects.filter(remain_quantity__gt=0)
 
     return render(request, 'hod_template/manage_in_stock_medicines.html', {'in_stock_medicines': in_stock_medicines})  
 
+@login_required
 def in_stock_reagent_view(request):
     # Retrieve medicines with inventory levels above zero
     in_stock_reagent = Reagent.objects.filter(remaining_quantity__gt=0)
 
     return render(request, 'hod_template/manage_in_stock_reagent.html', {'in_stock_reagent': in_stock_reagent})  
 
+@login_required
 def equipment_list(request):
     equipment_list = Equipment.objects.all()
     return render(request, 'hod_template/manage_equipment_list.html', {'equipment_list': equipment_list})  
@@ -2085,7 +2125,7 @@ def add_equipment(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})  
     
-    
+@login_required    
 def equipment_maintenance_list(request):
     maintenance_list = EquipmentMaintenance.objects.all()
     equipments = Equipment.objects.all()
@@ -2137,7 +2177,8 @@ def add_maintainance(request):
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})  
- 
+
+@login_required 
 def reagent_list(request):
     reagent_list = Reagent.objects.all()
     return render(request, 'hod_template/manage_reagent_list.html', {'reagent_list': reagent_list})    
@@ -2190,6 +2231,7 @@ def add_reagent(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})  
 
+@login_required
 def reagent_usage_list(request):
     reagent_usage_list = ReagentUsage.objects.all()
     technicians = Staffs.objects.all()
@@ -2254,7 +2296,8 @@ def add_reagent_used(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
     
-    
+
+@login_required    
 def patient_consultation_detail(request, patient_id):
     try:        
         
@@ -2475,7 +2518,7 @@ def generate_prescription_id():
     return f"PRS-{new_prescription_id:07d}"
 
 
-    
+@login_required    
 def quality_control_list(request):
     # Retrieve all QualityControl objects
     quality_controls = QualityControl.objects.all()
@@ -2530,7 +2573,8 @@ def add_quality_control(request):
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})  
-    
+
+@login_required    
 def health_issue_list(request):
     health_issues = HealthIssue.objects.all()
     return render(request, 'hod_template/manage_health_issues.html', {'health_issues': health_issues})       
@@ -2666,6 +2710,7 @@ def fetch_model_data(request):
 
     return JsonResponse({'data': data})    
 
+@login_required
 def patient_visit_history_view(request, patient_id):
     # Retrieve visit history for the specified patient
     visit_history = PatientVisits.objects.filter(patient_id=patient_id)
@@ -2692,7 +2737,8 @@ def patient_visit_history_view(request, patient_id):
         'visit_history': visit_history,
         'patient': patient,     
     })
-    
+
+@login_required    
 def patient_health_record_view(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -2780,7 +2826,7 @@ def patient_health_record_view(request, patient_id, visit_id):
         # Handle other exceptions if necessary
         return render(request, '404.html', {'error_message': str(e)})
 
-
+@login_required
 def prescription_list(request):
     # Retrieve all patients
     patients = Patients.objects.all()
@@ -2818,7 +2864,8 @@ def prescription_list(request):
         'visit_total_prices': visit_total_prices,
     })
     
-    
+
+@login_required    
 def all_orders_view(request):
     # Retrieve all orders from the database
     orders = Order.objects.all().order_by('-order_date')
@@ -2832,7 +2879,7 @@ def all_orders_view(request):
     # Render the template with the list of orders and total cost for each group
     return render(request, 'hod_template/order_detail.html', {'orders': orders, 'order_dates_with_total_cost': order_dates_with_total_cost})
 
-
+@login_required
 def orders_by_date(request, date):
     # Query orders based on the provided date
     orders = Order.objects.filter(order_date=date)
@@ -2843,6 +2890,7 @@ def orders_by_date(request, date):
     }
     return render(request, 'hod_template/orders_by_date.html', context)
 
+@login_required
 def prescription_frequency_list(request):
     frequencies = PrescriptionFrequency.objects.all()
     return render(request, 'hod_template/prescription_frequency_list.html', {'frequencies': frequencies})
@@ -2887,7 +2935,8 @@ def add_frequency(request):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
-    
+
+@login_required    
 def generate_invoice_bill(request,  order_id):
     # Retrieve the patient and visit objects based on IDs    
     order = Order.objects.get(id=order_id)     
@@ -2911,7 +2960,8 @@ def prescription_detail(request, visit_number, patient_id):
         'visit_number': visit_number,
         }
     return render(request, "hod_template/prescription_detail.html", context)    
-    
+
+@login_required    
 def patient_vital_list(request, patient_id, visit_id):
     # Retrieve the patient object
     patient = Patients.objects.get(pk=patient_id)
@@ -2934,7 +2984,8 @@ def patient_vital_list(request, patient_id, visit_id):
         'visit': visit,
     }    
     return render(request, 'hod_template/manage_patient_vital_list.html', context)   
- 
+
+@login_required 
 def patient_vital_all_list(request):
     # Retrieve the patient object
     patients = Patients.objects.all()
@@ -3003,7 +3054,8 @@ def save_patient_vital(request):
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
-    
+
+@login_required    
 def consultation_notes_view(request):
     consultation_notes = ConsultationNotes.objects.all()  
     pathology_records = PathodologyRecord.objects.all()# Fetch all consultation notes from the database
@@ -3074,7 +3126,8 @@ def save_consultation_notes(request):
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
-    
+
+@login_required    
 def diagnosis_list(request):
     diagnoses = Diagnosis.objects.all().order_by('-created_at')    
     return render(request, 'hod_template/manage_diagnosis_list.html', {'diagnoses': diagnoses}) 
@@ -3104,7 +3157,8 @@ def save_diagnosis(request):
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
- 
+
+@login_required 
 def ambulance_order_view(request):
     template_name = 'hod_template/ambulance_order_template.html'
     # Retrieve all ambulance records with the newest records appearing first
@@ -3145,6 +3199,7 @@ def delete_ambulancedorder(request):
 
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
+@login_required
 def save_ambulance_order(request, patient_id, visit_id, ambulance_id=None): 
     # Get the patient and visit objects based on IDs
     patient = get_object_or_404(Patients, id=patient_id)
@@ -3209,25 +3264,28 @@ def save_ambulance_order(request, patient_id, visit_id, ambulance_id=None):
         # Render the template with patient and visit data for GET request
         return render(request, 'hod_template/add_ambulance_order.html', context)
     
-    
+@login_required    
 def vehicle_detail(request, order_id):
     # Retrieve the ambulance vehicle order object using the provided order_id
     order = get_object_or_404(AmbulanceVehicleOrder, pk=order_id)    
     # Render the vehicle detail template with the order object
     return render(request, 'receptionist_template/vehicle_detail.html', {'order': order})     
-     
+
+@login_required     
 def ambulance_order_detail(request, order_id):
     # Retrieve the ambulance order object
     ambulance_order = get_object_or_404(AmbulanceOrder, id=order_id)    
     # Pass the ambulance order object to the template
     return render(request, 'hod_template/ambulance_order_detail.html', {'ambulance_order': ambulance_order})
 
+@login_required
 def vehicle_ambulance_view(request):
     orders = AmbulanceVehicleOrder.objects.all().order_by('-id')  # Retrieve all AmbulanceVehicleOrder ambulance records, newest first
     template_name = 'hod_template/vehicle_ambulance.html'
     return render(request, template_name, {'orders': orders})
 
 
+@login_required
 def hospital_vehicle_list(request):
     vehicles = HospitalVehicle.objects.all()
     return render(request, 'hod_template/hospital_vehicle_list.html', {'vehicles': vehicles})
@@ -3387,7 +3445,8 @@ def add_ambulance_activity(request):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)   
-    
+
+@login_required    
 def ambulance_activity_list(request):
     ambulance_activities = AmbulanceActivity.objects.all()
     return render(request, 'hod_template/ambulance_activity_list.html', {'ambulance_activities': ambulance_activities}) 
@@ -3531,7 +3590,8 @@ def add_service(request):
             return JsonResponse({'success': False, 'message': 'Invalid request method'})
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)})
-    
+
+@login_required    
 def medicine_routes(request):
     routes = MedicineRoute.objects.all()
     return render(request, 'hod_template/medicine_routes.html', {'routes': routes}) 
@@ -3586,7 +3646,8 @@ def delete_medicine_route(request):
             return JsonResponse({'success': False, 'message': 'Invalid request method'})
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)})    
-    
+
+@login_required    
 def medicine_unit_measures(request):
     measures = MedicineUnitMeasure.objects.all()
     return render(request, 'hod_template/medicine_unit_measures.html', {'measures': measures}) 

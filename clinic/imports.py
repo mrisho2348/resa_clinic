@@ -8,7 +8,10 @@ from clinic.models import AmbulanceActivity, AmbulanceRoute, Category, MedicineR
 from .resources import AmbulanceActivityResource, AmbulanceRouteResource, CategoryResource, CompanyResource, ConsultationNotesResource, DiagnosisResource, DiseaseRecodeResource, EquipmentMaintenanceResource, EquipmentResource, HealthIssueResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, MedicineRouteResource, MedicineUnitMeasureResource, PathologyRecordResource, PatientVitalResource, PatientsResource, PrescriptionFrequencyResource, PrescriptionResource, ProcedureResource, ReagentResource, ReferralResource, ServiceResource, SupplierResource
 from .forms import ImportAmbulanceActivityForm, ImportAmbulanceRouteForm, ImportCategoryForm, ImportCompanyForm, ImportConsultationNotesForm, ImportDiagnosisForm, ImportDiseaseForm, ImportEquipmentForm, ImportEquipmentMaintenanceForm, ImportHealthIssueForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportMedicineRouteForm, ImportMedicineUnitMeasureForm, ImportPathologyRecordForm, ImportPatientVitalForm, ImportPatientsForm, ImportPrescriptionForm, ImportPrescriptionFrequencyForm, ImportProcedureForm, ImportReagentForm, ImportReferralForm, ImportServiceForm, ImportSupplierForm
 from tablib import Dataset
+from django.contrib.auth.decorators import login_required
 logger = logging.getLogger(__name__)
+
+@login_required  
 def import_disease_recode(request):
     if request.method == 'POST':
         form = ImportDiseaseForm(request.POST, request.FILES)
@@ -39,7 +42,7 @@ def import_disease_recode(request):
 
     return render(request, 'hod_template/import_disease_recode.html', {'form': form})
 
-
+@login_required  
 def import_insurance_companies(request):
     if request.method == 'POST':
         form = ImportInsuranceCompanyForm(request.POST, request.FILES)
@@ -73,6 +76,7 @@ def import_insurance_companies(request):
 
     return render(request, 'hod_template/import_insurance_companies.html', {'form': form})
 
+@login_required  
 def import_prescription_frequency(request):
     if request.method == 'POST':
         form = ImportPrescriptionFrequencyForm(request.POST, request.FILES)
@@ -102,6 +106,7 @@ def import_prescription_frequency(request):
         form = ImportPrescriptionFrequencyForm()
     return render(request, 'hod_template/import_prescription_frequency.html', {'form': form})
 
+@login_required  
 def import_ambulance_route_list(request):
     if request.method == 'POST':
         form = ImportAmbulanceRouteForm(request.POST, request.FILES)
@@ -134,6 +139,7 @@ def import_ambulance_route_list(request):
         form = ImportAmbulanceRouteForm()
     return render(request, 'hod_template/import_ambulance_route_list.html', {'form': form})
 
+@login_required  
 def import_ambulance_activity_list(request):
     if request.method == 'POST':
         form = ImportAmbulanceActivityForm(request.POST, request.FILES)
@@ -163,6 +169,7 @@ def import_ambulance_activity_list(request):
         form = ImportAmbulanceActivityForm()
     return render(request, 'hod_template/import_ambulance_activity_list.html', {'form': form})
 
+@login_required  
 def import_category(request):
     if request.method == 'POST':
         form = ImportCategoryForm(request.POST, request.FILES)
@@ -192,6 +199,7 @@ def import_category(request):
     return render(request, 'hod_template/import_category.html', {'form': form})
 
 
+@login_required  
 def import_supplier(request):
     if request.method == 'POST':
         form = ImportSupplierForm(request.POST, request.FILES)
@@ -223,6 +231,7 @@ def import_supplier(request):
 
     return render(request, 'hod_template/import_supplier.html', {'form': form})
 
+@login_required  
 def import_equipment(request):
     if request.method == 'POST':
         form = ImportEquipmentForm(request.POST, request.FILES)
@@ -257,6 +266,7 @@ def import_equipment(request):
 
     return render(request, 'hod_template/import_equipment.html', {'form': form})
 
+@login_required  
 def import_maintenance(request):
     if request.method == 'POST':
         form = ImportEquipmentMaintenanceForm(request.POST, request.FILES)
@@ -292,6 +302,7 @@ def import_maintenance(request):
     return render(request, 'hod_template/import_maintenance.html', {'form': form})
 
 
+@login_required  
 def import_reagent(request):
     if request.method == 'POST':
         form = ImportReagentForm(request.POST, request.FILES)
@@ -329,6 +340,7 @@ def import_reagent(request):
 
     return render(request, 'hod_template/import_reagent.html', {'form': form})
 
+@login_required  
 def import_health_issue(request):
     if request.method == 'POST':
         form = ImportHealthIssueForm(request.POST, request.FILES)
@@ -367,6 +379,7 @@ def import_health_issue(request):
     return render(request, 'hod_template/import_health.html', {'form': form})
 
 
+@login_required  
 def import_companies(request):
     if request.method == 'POST':
         form = ImportCompanyForm(request.POST, request.FILES)
@@ -400,6 +413,7 @@ def import_companies(request):
     return render(request, 'hod_template/import_companies.html', {'form': form})
 
 
+@login_required  
 def import_pathology_records(request):
     if request.method == 'POST':
         form = ImportPathologyRecordForm(request.POST, request.FILES)
@@ -430,7 +444,7 @@ def import_pathology_records(request):
 
     return render(request, 'hod_template/import_pathology_records.html', {'form': form})
 
-
+@login_required  
 def import_ImportInventoryItemForm_records(request):
     if request.method == 'POST':
         form = ImportInventoryItemForm(request.POST, request.FILES)
@@ -471,6 +485,7 @@ def import_ImportInventoryItemForm_records(request):
 
     return render(request, 'hod_template/import_InventoryItem.html', {'form': form})
 
+@login_required  
 def import_prescription_records(request):
     if request.method == 'POST':
         form = ImportPrescriptionForm(request.POST, request.FILES)
@@ -505,6 +520,7 @@ def import_prescription_records(request):
 
     return render(request, 'hod_template/import_prescription.html', {'form': form})
 
+@login_required  
 def import_patient_vital_records(request):
     if request.method == 'POST':
         form = ImportPatientVitalForm(request.POST, request.FILES)
@@ -540,6 +556,7 @@ def import_patient_vital_records(request):
 
     return render(request, 'hod_template/import_patient_vital.html', {'form': form})
 
+@login_required  
 def import_consultation_notes_records(request):
     if request.method == 'POST':
         form = ImportConsultationNotesForm(request.POST, request.FILES)
@@ -578,6 +595,7 @@ def import_consultation_notes_records(request):
 
     return render(request, 'hod_template/import_consultation_notes.html', {'form': form})
 
+@login_required  
 def import_diagnosis_records(request):
     if request.method == 'POST':
         form = ImportDiagnosisForm(request.POST, request.FILES)
@@ -609,6 +627,7 @@ def import_diagnosis_records(request):
 
     return render(request, 'hod_template/import_diagnosis.html', {'form': form})
 
+@login_required  
 def import_patient_records(request):
     if request.method == 'POST':
         form = ImportPatientsForm(request.POST, request.FILES)
@@ -648,7 +667,7 @@ def import_patient_records(request):
 
     return render(request, 'hod_template/import_patients.html', {'form': form})
 
-
+@login_required  
 def import_service_records(request):
     if request.method == 'POST':
         form = ImportServiceForm(request.POST, request.FILES)
@@ -686,6 +705,7 @@ def import_service_records(request):
 
     return render(request, 'hod_template/import_service.html', {'form': form})
 
+@login_required  
 def import_medicine_routes_records(request):
     if request.method == 'POST':
         form = ImportMedicineRouteForm(request.POST, request.FILES)
@@ -717,6 +737,7 @@ def import_medicine_routes_records(request):
 
     return render(request, 'hod_template/import_medicine_routes.html', {'form': form})
 
+@login_required  
 def import_medicine_unit_measures_records(request):
     if request.method == 'POST':
         form = ImportMedicineUnitMeasureForm(request.POST, request.FILES)
@@ -750,6 +771,7 @@ def import_medicine_unit_measures_records(request):
     return render(request, 'hod_template/import_medicine_unit_measures.html', {'form': form})
 
 
+@login_required  
 def import_referral_records(request):
     if request.method == 'POST':
         form = ImportReferralForm(request.POST, request.FILES)
@@ -785,7 +807,7 @@ def import_referral_records(request):
 
     return render(request, 'hod_template/import_referral.html', {'form': form})
 
-
+@login_required  
 def import_procedure_records(request):
     if request.method == 'POST':
         form = ImportProcedureForm(request.POST, request.FILES)
@@ -821,6 +843,7 @@ def import_procedure_records(request):
 
     return render(request, 'hod_template/import_procedure.html', {'form': form})
 
+@login_required  
 def import_medicine_records(request):
     if request.method == 'POST':
         form = ImportMedicineForm(request.POST, request.FILES)

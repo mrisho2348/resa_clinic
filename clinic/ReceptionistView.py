@@ -31,6 +31,7 @@ def get_unit_price(request):
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
 
+@login_required
 def receptionist_dashboard(request):
     total_patients = Patients.objects.count()
     recently_added_patients = Patients.objects.order_by('-created_at')[:6]
@@ -43,13 +44,14 @@ def receptionist_dashboard(request):
     }
     return render(request,"receptionist_template/home_content.html",context)
 
+@login_required
 def all_orders_view(request):
     # Retrieve all orders from the database
     orders = Order.objects.all().order_by('-order_date')    
     # Render the template with the list of orders
     return render(request, 'receptionist_template/order_detail.html', {'orders': orders})
 
-
+@login_required
 def generate_invoice_bill(request,  order_id):
     # Retrieve the patient and visit objects based on IDs    
     order = Order.objects.get(id=order_id)     
@@ -90,7 +92,7 @@ def manage_patients(request):
 
 
 
-
+@login_required
 def patient_vital_visit_list(request, patient_id,visit_id):
     # Retrieve the patient object
     patient = Patients.objects.get(pk=patient_id)
@@ -242,7 +244,7 @@ def manage_consultation(request):
 
 
 
-
+@login_required
 def save_observation(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -382,7 +384,7 @@ def add_consultation(request):
         # If the request method is not POST, return an error response
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})    
     
-    
+@login_required    
 def save_remotereferral(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -509,6 +511,7 @@ def add_procedure(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)    
 
+@login_required
 def save_remoteprocedure(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -556,6 +559,7 @@ def save_remoteprocedure(request, patient_id, visit_id):
         # Handle other exceptions if necessary
         return render(request, '404.html', {'error_message': str(e)})    
 
+@login_required
 def save_prescription(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -582,6 +586,7 @@ def save_prescription(request, patient_id, visit_id):
         # Handle other exceptions if necessary
         return render(request, '404.html', {'error_message': str(e)})    
 
+@login_required
 def save_laboratory(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -679,7 +684,7 @@ def add_investigation(request):
         # If the request method is not POST, return an error response
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})     
 
-
+@login_required
 def patient_health_record(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -780,15 +785,9 @@ def manage_service(request):
 
 
 
-
-
-
-
 logger = logging.getLogger(__name__)
 
-
-    
-
+@login_required
 def single_staff_detail(request, staff_id):
     staff = get_object_or_404(Staffs, id=staff_id)
     # Fetch additional staff-related data  
@@ -799,6 +798,7 @@ def single_staff_detail(request, staff_id):
 
     return render(request, "receptionist_template/staff_details.html", context)
 
+@login_required
 def view_patient(request, patient_id):
     patient = get_object_or_404(Patients, id=patient_id)
     # Fetch additional staff-related data  
@@ -865,7 +865,7 @@ def appointment_view(request):
     
 
 
-    
+@login_required    
 def notification_view(request):
     notifications = Notification.objects.filter(is_read=False)
     
@@ -878,7 +878,7 @@ def notification_view(request):
     return render(request, 'receptionist_template/manage_notification.html', context)
 
 
-
+@login_required
 def patient_procedure_view(request):
     template_name = 'receptionist_template/manage_procedure.html'
     
@@ -887,13 +887,14 @@ def patient_procedure_view(request):
 
     return render(request, template_name, {'data': procedures})
 
-
+@login_required
 def ambulance_order_view(request):
     template_name = 'receptionist_template/ambulance_order_template.html'
     # Retrieve all ambulance records with the newest records appearing first
     ambulance_orders = AmbulanceOrder.objects.all().order_by('-id')
     return render(request, template_name, {'ambulance_orders': ambulance_orders})
 
+@login_required
 def save_ambulance_order(request, patient_id, visit_id, ambulance_id=None): 
     # Get the patient and visit objects based on IDs
     patient = get_object_or_404(Patients, id=patient_id)
@@ -958,18 +959,20 @@ def save_ambulance_order(request, patient_id, visit_id, ambulance_id=None):
         # Render the template with patient and visit data for GET request
         return render(request, 'receptionist_template/add_ambulance_order.html', context)
     
-    
+@login_required    
 def ambulance_order_detail(request, order_id):
     # Retrieve the ambulance order object
     ambulance_order = get_object_or_404(AmbulanceOrder, id=order_id)    
     # Pass the ambulance order object to the template
     return render(request, 'receptionist_template/ambulance_order_detail.html', {'ambulance_order': ambulance_order})
 
+@login_required
 def vehicle_ambulance_view(request):
     orders = AmbulanceVehicleOrder.objects.all().order_by('-id')  # Retrieve all AmbulanceVehicleOrder ambulance records, newest first
     template_name = 'receptionist_template/vehicle_ambulance.html'
     return render(request, template_name, {'orders': orders})
 
+@login_required
 def patient_procedure_history_view(request, mrn):
     patient = get_object_or_404(Patients, mrn=mrn)
     
@@ -1078,12 +1081,14 @@ def change_referral_status(request):
 
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
+@login_required
 def manage_referral(request):
     referrals = Referral.objects.all()
     patients = Patients.objects.all()
     return render(request, 'receptionist_template/manage_referral.html', {'referrals': referrals,'patients':patients})
 
 
+@login_required
 def generate_billing(request, procedure_id):
     procedure = get_object_or_404(Procedure, id=procedure_id)
 
@@ -1093,6 +1098,7 @@ def generate_billing(request, procedure_id):
 
     return render(request, 'receptionist_template/billing_template.html', context)
 
+@login_required
 def appointment_list_view(request):
     appointments = Consultation.objects.all()
     unread_notification_count = Notification.objects.filter(is_read=False).count()
@@ -1292,7 +1298,7 @@ def get_item_quantity(request):
 
 
 
-
+@login_required
 def patient_consultation_detail(request, patient_id, visit_id):
     try:        
         
@@ -1479,7 +1485,7 @@ def generate_vst():
 
     return new_vst 
 
-
+@login_required
 def patient_visit_history_view(request, patient_id):
     # Retrieve visit history for the specified patient
     visit_history = PatientVisits.objects.filter(patient_id=patient_id)
@@ -1501,7 +1507,7 @@ def patient_visit_history_view(request, patient_id):
         })
 
 
-
+@login_required
 def prescription_list(request):
     # Retrieve all patients
     patients = Patients.objects.all()
@@ -1569,7 +1575,7 @@ def prescription_detail(request, visit_number, patient_id):
     return render(request, "receptionist_template/prescription_detail.html", context)
 
 
-    
+@login_required    
 def patient_vital_list(request, patient_id):
     # Retrieve the patient object
     patient = Patients.objects.get(pk=patient_id)
@@ -1592,6 +1598,7 @@ def patient_vital_list(request, patient_id):
     
     return render(request, 'receptionist_template/manage_patient_vital_list.html', context)    
 
+@login_required
 def patient_vital_all_list(request):
     # Retrieve the patient object
     patients = Patients.objects.all()
@@ -1727,7 +1734,8 @@ def unpay_prescriptions(request):
     else:
         return JsonResponse({'error': 'Invalid request.'}, status=400)
     
-    
+
+@login_required    
 def ambulance_order_create_or_update(request, order_id=None):
     try:
         duration_hours = range(1, 25)    
@@ -1785,7 +1793,8 @@ def ambulance_order_create_or_update(request, order_id=None):
     except Exception as e:
         messages.error(request, f'Error adding/editing  record: {str(e)}')
         return redirect('ambulance_order_create_or_update')  
-    
+
+@login_required    
 def vehicle_detail(request, order_id):
     # Retrieve the ambulance vehicle order object using the provided order_id
     order = get_object_or_404(AmbulanceVehicleOrder, pk=order_id)    

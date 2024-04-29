@@ -1,8 +1,5 @@
 
 from django.urls import include, path
-
-from clinic import DoctorView, LabTechnicianView, NurseView, PharmacistView, PhysiotherapistView, ReceptionistView
-
 from . import views,delete,imports,editView
 
 urlpatterns = [

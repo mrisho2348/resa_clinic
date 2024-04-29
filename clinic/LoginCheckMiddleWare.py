@@ -17,6 +17,7 @@ class LoginCheckMiddleWare(MiddlewareMixin):
 
         # Allow access to login/logout pages and authentication-related views
         if (request.path == reverse("login") or
+            request.path == reverse("admin:index") or
             request.path == reverse("clinic:DoLogin") or
             request.path == reverse("kahamahmis:kahama") or
             request.path == reverse("kahamahmis:DoLoginKahama") or
@@ -44,6 +45,7 @@ class LoginCheckMiddleWare(MiddlewareMixin):
                             "clinic.editView",                         
                             "clinic.imports",                         
                             "django.views.static",
+                            "admin:index", 
                            
                         ]
                     elif app_name == "kahamahmis":  # For kahama app

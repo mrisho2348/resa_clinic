@@ -473,6 +473,7 @@ def update_equipment_status(request):
     # Redirect back to the staff list page
     return redirect('equipment_list')  # Make sure 'manage_staffs' is the name of your staff list URL
 
+@login_required
 def edit_staff(request, staff_id):
     # Check if the staff with the given ID exists, or return a 404 page
     staff = get_object_or_404(Staffs, id=staff_id)  
@@ -535,7 +536,7 @@ def edit_staff_save(request):
 
 
 
-
+@login_required
 def single_staff_detail(request, staff_id):
     staff = get_object_or_404(Staffs, id=staff_id)
     # Fetch additional staff-related data  
@@ -546,6 +547,7 @@ def single_staff_detail(request, staff_id):
 
     return render(request, "kahama_template/staff_details.html", context)
 
+@login_required
 def view_patient(request, patient_id):
     patient = get_object_or_404(Patients, id=patient_id)
     # Fetch additional staff-related data  
@@ -609,7 +611,8 @@ def appointment_view(request, patient_id):
         # Handle other exceptions
         messages.error(request, f"An unexpected error occurred: {str(e)}")
         return redirect('appointment_view', patient_id=patient_id)
-    
+
+@login_required    
 def notification_view(request):
     notifications = Notification.objects.filter(is_read=False)
     
@@ -759,7 +762,8 @@ def add_inventory(request):
     else:
         # Handle non-POST requests, redirect or display an error message
         return redirect('medicine_list')  # Adjust the URL as needed
-    
+
+@login_required    
 def medicine_inventory_list(request):
     # Retrieve all medicine inventories
     medicine_inventories = MedicineInventory.objects.all()
@@ -780,6 +784,7 @@ def medicine_inventory_list(request):
 
     return render(request, 'kahama_template/manage_medical_inventory.html', context)
 
+@login_required
 def medicine_expired_list(request):
     # Get all medicines
     all_medicines = Medicine.objects.all()
@@ -797,6 +802,7 @@ def medicine_expired_list(request):
 
     return render(request, 'kahama_template/manage_medicine_expired.html', {'medicines': medicines})
 
+@login_required
 def patient_procedure_view(request):
     template_name = 'kahama_template/manage_procedure.html'    
     # Query to retrieve the latest procedure record for each patient
@@ -815,7 +821,7 @@ def patient_procedure_view(request):
     return render(request, template_name, {'data': data})
 
 
-
+@login_required
 def patient_procedure_history_view(request, mrn):
     patient = get_object_or_404(RemotePatient, mrn=mrn)
     
@@ -933,12 +939,13 @@ def change_referral_status(request):
 
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
+@login_required
 def manage_referral(request):
     referrals = RemoteReferral.objects.all()
     patients = RemotePatient.objects.all()
     return render(request, 'kahama_template/manage_referral.html', {'referrals': referrals,'patients':patients})
 
-
+@login_required
 def generate_billing(request, procedure_id):
     procedure = get_object_or_404(RemoteProcedure, id=procedure_id)
 
@@ -948,6 +955,7 @@ def generate_billing(request, procedure_id):
 
     return render(request, 'kahama_template/billing_template.html', context)
 
+@login_required
 def appointment_list_view(request):
     appointments = RemoteConsultation.objects.all()
     unread_notification_count = Notification.objects.filter(is_read=False).count()
@@ -963,6 +971,7 @@ def appointment_list_view(request):
     }
     return render(request, 'kahama_template/manage_appointment.html', context)
 
+@login_required
 def import_staff(request):
     if request.method == 'POST':
         form = ImportStaffForm(request.POST, request.FILES)
@@ -1265,7 +1274,7 @@ def delete_medication_payment(request, payment_id):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
     
-
+@login_required
 def medication_payments_view(request):
     # Subquery to retrieve the latest medication payment record for each registered patient
     latest_medication_payment = MedicationPayment.objects.filter(
@@ -1303,6 +1312,7 @@ def medication_payments_view(request):
 
     return render(request, 'kahama_template/manage_medication_payment.html', context)
 
+@login_required
 def patient_medicationpayment_history_view(request, mrn):
     # Retrieve medication payment history for the patient with the given MRN
     medication_history = MedicationPayment.objects.filter(patient__mrn=mrn)
@@ -1319,6 +1329,7 @@ def patient_medicationpayment_history_view(request, mrn):
     return render(request, 'kahama_template/manage_patient_medicationpayment_history.html', context)
 
 
+@login_required
 def diagnostic_tests_view(request):
     # Retrieve all diagnostic tests from the database
     diagnostic_tests = DiagnosticTest.objects.all()
@@ -1408,6 +1419,7 @@ def generate_test_id():
 
     return new_test_id
 
+@login_required
 def sample_list(request):
     samples = Sample.objects.all()
     diagnostic_tests = DiagnosticTest.objects.all()    
@@ -1438,7 +1450,7 @@ def save_sample(request):
 
     return HttpResponseBadRequest("Invalid request method")
 
-
+@login_required
 def patient_diseases_view(request):
     # Retrieve all diagnostic tests from the database
     patient_diseases = PatientDisease.objects.all()
@@ -1493,6 +1505,7 @@ def save_patient_disease(request):
     # If the request method is not POST, redirect to an appropriate page
     return HttpResponseBadRequest("Invalid request method") 
 
+@login_required
 def pathology_diagnostic_test_list(request):
     Pathology_diagnostic_tests = PathologyDiagnosticTest.objects.all()
     pathology_records=PathodologyRecord.objects.all() 
@@ -1562,6 +1575,7 @@ def save_consultation_data(request):
     except Exception as e:
         return HttpResponseBadRequest(f"Error: {str(e)}")
 
+@login_required
 def consultation_fee_list(request):
     # Get distinct patients who have consultations
     patients = Patients.objects.filter(consultation__isnull=False).distinct()
@@ -1630,6 +1644,7 @@ def save_service_data(request):
     # If the request is not a POST request, handle it accordingly
     return HttpResponseBadRequest("Invalid request method.")  
 
+@login_required
 def category_list(request):
     categories = Category.objects.all()
     return render(request, 'kahama_template/manage_category_list.html', {'categories': categories})
@@ -1656,11 +1671,13 @@ def add_category(request):
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
-    
+
+@login_required    
 def supplier_list(request):
     suppliers = Supplier.objects.all()
     return render(request, 'kahama_template/manage_supplier_list.html', {'suppliers': suppliers})
  
+@login_required 
 def inventory_list(request):
     inventory_items = InventoryItem.objects.all()  
     suppliers = Supplier.objects.all()
@@ -1760,7 +1777,7 @@ def add_inventory_item(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})      
     
-
+@login_required
 def usage_history_list(request):
     usage_history_list = UsageHistory.objects.filter(quantity_used__gt=0)
     inventory_item = InventoryItem.objects.all()
@@ -1829,14 +1846,16 @@ def get_item_quantity(request):
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
     
-
+@login_required
 def out_of_stock_items(request):
     out_of_stock_items = InventoryItem.objects.filter(remain_quantity=0)
     return render(request, 'kahama_template/manage_out_of_stock_items.html', {'out_of_stock_items': out_of_stock_items}) 
 
+@login_required
 def in_stock_items(request):
     in_stock_items = InventoryItem.objects.filter(remain_quantity__gt=0)
     return render(request, 'kahama_template/manage_in_stock_items.html', {'in_stock_items': in_stock_items})   
+
 
 def get_out_of_stock_count(request):
     count = InventoryItem.objects.filter(remain_quantity=0).count()
@@ -1927,7 +1946,8 @@ def out_of_stock_medicines(request):
     except Exception as e:
         # Handle any errors and return an error response
         return JsonResponse({'error': str(e)}, status=500)    
-    
+
+@login_required    
 def out_of_stock_medicines_view(request):
     try:
         # Query the database for out-of-stock medicines
@@ -1939,7 +1959,8 @@ def out_of_stock_medicines_view(request):
     except Exception as e:
         # Handle any errors and return an error response
         return render(request, '404.html', {'error_message': str(e)}) 
-    
+
+@login_required    
 def out_of_stock_reagent_view(request):
     try:
         # Query the database for out-of-stock medicines
@@ -1952,19 +1973,21 @@ def out_of_stock_reagent_view(request):
         # Handle any errors and return an error response
         return render(request, '404.html', {'error_message': str(e)}) 
     
-    
+@login_required    
 def in_stock_medicines_view(request):
     # Retrieve medicines with inventory levels above zero
     in_stock_medicines = MedicineInventory.objects.filter(remain_quantity__gt=0)
 
     return render(request, 'kahama_template/manage_in_stock_medicines.html', {'in_stock_medicines': in_stock_medicines})  
 
+@login_required
 def in_stock_reagent_view(request):
     # Retrieve medicines with inventory levels above zero
     in_stock_reagent = Reagent.objects.filter(remaining_quantity__gt=0)
 
     return render(request, 'kahama_template/manage_in_stock_reagent.html', {'in_stock_reagent': in_stock_reagent})  
 
+@login_required
 def equipment_list(request):
     equipment_list = Equipment.objects.all()
     return render(request, 'kahama_template/manage_equipment_list.html', {'equipment_list': equipment_list})  
@@ -2014,7 +2037,7 @@ def add_equipment(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})  
     
-    
+@login_required    
 def equipment_maintenance_list(request):
     maintenance_list = EquipmentMaintenance.objects.all()
     equipments = Equipment.objects.all()
@@ -2066,7 +2089,8 @@ def add_maintainance(request):
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})  
- 
+
+@login_required 
 def reagent_list(request):
     reagent_list = Reagent.objects.all()
     return render(request, 'kahama_template/manage_reagent_list.html', {'reagent_list': reagent_list})    
@@ -2119,6 +2143,7 @@ def add_reagent(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})  
 
+@login_required
 def reagent_usage_list(request):
     reagent_usage_list = ReagentUsage.objects.all()
     technicians = Staffs.objects.all()
@@ -2184,7 +2209,7 @@ def add_reagent_used(request):
         return JsonResponse({'status': 'error', 'message': str(e)})
     
 
-    
+@login_required    
 def quality_control_list(request):
     # Retrieve all QualityControl objects
     quality_controls = QualityControl.objects.all()
@@ -2239,7 +2264,8 @@ def add_quality_control(request):
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})  
-    
+
+@login_required    
 def health_issue_list(request):
     health_issues = HealthIssue.objects.all()
     return render(request, 'kahama_template/manage_health_issues.html', {'health_issues': health_issues})       
@@ -2432,6 +2458,7 @@ def fetch_model_data(request):
 
     return JsonResponse({'data': data})    
 
+@login_required
 def patient_visit_history_view(request, patient_id):
     # Retrieve visit history for the specified patient
     visit_history = RemotePatientVisits.objects.filter(patient_id=patient_id)
@@ -2443,7 +2470,8 @@ def patient_visit_history_view(request, patient_id):
         'patient':patient,        
         'doctors': doctors,
         })
-    
+
+@login_required    
 def patient_health_record_view(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -2515,7 +2543,7 @@ def patient_health_record_view(request, patient_id, visit_id):
         # Handle other exceptions if necessary
         return render(request, '404.html', {'error_message': str(e)})
     
-    
+@login_required    
 def patient_visit_details_view(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -2603,7 +2631,7 @@ def patient_visit_details_view(request, patient_id, visit_id):
     except Exception as e:
         return render(request, '404.html', {'error_message': str(e)})
     
-    
+@login_required    
 def patient_consultation_record_view(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -2685,6 +2713,7 @@ def patient_consultation_record_view(request, patient_id, visit_id):
         # Handle other exceptions if necessary
         return render(request, '404.html', {'error_message': str(e)})
 
+@login_required
 def prescription_list(request):
     # Retrieve all patients
     patients = RemotePatient.objects.all()
@@ -2750,7 +2779,7 @@ def prescription_detail(request, visit_number, patient_id):
     return render(request, "kahama_template/prescription_detail.html", context)
 
 
-    
+@login_required    
 def patient_vital_list(request, patient_id,visit_id):
     # Retrieve the patient object
     patient = RemotePatient.objects.get(pk=patient_id)
@@ -2775,7 +2804,7 @@ def patient_vital_list(request, patient_id,visit_id):
     
     return render(request, 'kahama_template/manage_patient_vital_list.html', context)  
 
-  
+@login_required  
 def patient_vital_all_list(request):
     # Retrieve the patient object
     patients = Patients.objects.all()
@@ -2975,7 +3004,7 @@ def save_remotepatient_vitals(request, patient_id, visit_id):
         messages.error(request, f'Error adding/editing remote patient vital information: {str(e)}')
         return render(request, 'kahama_template/add_remotepatient_vital.html', context)
     
-    
+@login_required    
 def save_nextremotepatient_vitals(request, patient_id, visit_id):
     try:
         # Retrieve the patient object
@@ -3063,7 +3092,7 @@ def save_nextremotepatient_vitals(request, patient_id, visit_id):
            
 
 
-           
+@login_required           
 def save_nextremotesconsultation_notes(request, patient_id, visit_id):
     try:
         # Fetch required data from the database
@@ -3183,7 +3212,8 @@ def save_nextremotesconsultation_notes(request, patient_id, visit_id):
             'range_15': range_15,
         })
     
-    
+
+@login_required    
 def edit_remotesconsultation_notes(request, patient_id):
        # Fetch required data from the database
     patient = RemotePatient.objects.get(pk=patient_id)
@@ -3299,7 +3329,7 @@ def edit_remotesconsultation_notes(request, patient_id):
                 'consultation_notes': consultation_notes,  # Pass the existing consultation notes to populate the form
             })
     
-        
+@login_required        
 def consultation_notes_view(request):
     consultation_notes = RemoteConsultationNotes.objects.all()  
     pathology_records = PathodologyRecord.objects.all()# Fetch all consultation notes from the database
@@ -3316,7 +3346,7 @@ def consultation_notes_view(request):
         'doctors': doctors,
         })    
 
-
+@login_required
 def save_prescription(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -3346,7 +3376,8 @@ def save_prescription(request, patient_id, visit_id):
     except Exception as e:
         # Handle other exceptions if necessary
         return render(request, '404.html', {'error_message': str(e)})    
-    
+
+@login_required    
 def save_nextprescription(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -3419,7 +3450,7 @@ def save_nextprescription(request, patient_id, visit_id):
         return render(request, '404.html', {'error_message': str(e)})
     
 
-    
+@login_required    
 def save_nextlaboratory(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -3493,7 +3524,7 @@ def save_nextlaboratory(request, patient_id, visit_id):
     
 
     
-    
+@login_required    
 def save_nextremotereferral(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -3579,7 +3610,7 @@ def save_nextremotereferral(request, patient_id, visit_id):
     
     
 
-    
+@login_required    
 def save_nextcounsel(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -3698,7 +3729,7 @@ def add_procedure(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
     
-        
+@login_required        
 def save_nextremoteprocedure(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -3821,7 +3852,7 @@ def add_imaging(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
     
     
-    
+@login_required    
 def save_nextobservation(request, patient_id, visit_id):
     try:
         # Retrieve visit history for the specified patient
@@ -4020,7 +4051,7 @@ def save_diagnosis(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
     
-    
+@login_required    
 def patient_info_form(request, patient_id=None):
     if patient_id:  # If patient ID is provided, it's for editing an existing patient
         patient = get_object_or_404(RemotePatient, pk=patient_id)
@@ -4143,7 +4174,7 @@ def patient_info_form(request, patient_id=None):
     return render(request, 'kahama_template/add_remotePatients.html', context)
 
 
-
+@login_required
 def patients_list(request):
     patients =RemotePatient.objects.order_by('-created_at')    
     doctors = Staffs.objects.filter(role='doctor')
@@ -4153,7 +4184,7 @@ def patients_list(request):
                       'doctors': doctors,
                       })
 
-
+@login_required
 def save_patient_visit_save(request, patient_id):
     try:
         # Attempt to retrieve the patient object
@@ -4205,6 +4236,7 @@ def save_patient_visit_save(request, patient_id):
     return render(request, 'kahama_template/add_patient_visit.html', {'patient': patient, 'latest_visit': latest_visit})
 
 
+@login_required
 def patient_info_form_edit(request, patient_id):    
     try:
         patient = RemotePatient.objects.get(pk=patient_id)    
@@ -4298,7 +4330,7 @@ def patient_info_form_edit(request, patient_id):
         'range_121': range_121,
     })
 
-
+@login_required
 def health_info_edit(request, patient_id):
     try:
         # Retrieve the patient object
@@ -4368,7 +4400,7 @@ def health_info_edit(request, patient_id):
         return render(request, 'kahama_template/edit_patient_health_condition_form.html', context)
 
 
-
+@login_required
 def edit_patient_medication_allergy(request, patient_id):
     try:
         # Retrieve the patient object
@@ -4432,7 +4464,7 @@ def edit_patient_medication_allergy(request, patient_id):
         messages.error(request, f'Error saving patient medication allergies: {str(e)}')
         return render(request, 'kahama_template/edit_patient_alergymedication.html', {'patient': patient, 'medication_allergies': [], 'has_medication_allergy': False})
     
-
+@login_required
 def edit_patient_surgery_history(request, patient_id):
     try:
         # Retrieve the patient object
@@ -4497,7 +4529,7 @@ def edit_patient_surgery_history(request, patient_id):
 
 
 
-
+@login_required
 def edit_patient_lifestyle_behavior(request, patient_id):
     patient = get_object_or_404(RemotePatient, pk=patient_id)
     lifestyle_behavior_instance, created = PatientLifestyleBehavior.objects.get_or_create(patient=patient)
@@ -4540,7 +4572,7 @@ def edit_patient_lifestyle_behavior(request, patient_id):
     # Render the corresponding template
     return render(request, 'kahama_template/edit_patient_lifestyle_behavior.html', {'patient': patient, 'lifestyle_behavior_instance': lifestyle_behavior_instance})
 
-
+@login_required
 def save_edit_remotepatient_vitals(request, patient_id):
     try:
         # Retrieve the corresponding RemotePatient instance
@@ -4609,7 +4641,7 @@ def save_edit_remotepatient_vitals(request, patient_id):
             })  # Change 'error_page' to the URL you want to redirect to
 
 
-
+@login_required
 def family_health_info_edit(request, patient_id):
     try:
         patient = get_object_or_404(RemotePatient, pk=patient_id)
@@ -4673,7 +4705,7 @@ def family_health_info_edit(request, patient_id):
         }
         return render(request, 'kahama_template/edit_patient_family_condition_form.html', content)
 
-
+@login_required
 def edit_patient_visit_save(request, patient_id):
     try:
         # Attempt to retrieve the patient object
@@ -4717,12 +4749,14 @@ def edit_patient_visit_save(request, patient_id):
     # If the request method is not POST or there's no POST data, render the form template
     return render(request, 'kahama_template/edit_patient_visit.html', {'patient': patient, 'patient_visit': patient_visit})
 
-
+@login_required
 def remoteservice_list(request):
     # Retrieve all services from the database
     services = RemoteService.objects.all()
     return render(request, 'kahama_template/service_list.html', {'services': services})
 
+
+@login_required
 def save_edited_patient_visit(request, patient_id):
     try:
         # Retrieve patient visit data from the request

@@ -7,8 +7,10 @@ from clinic.models import Category, HealthRecord, ConsultationNotes, Country, Di
 from clinic.resources import CategoryResource, CompanyResource, ConsultationNotesResource, CountryResource, DiagnosisResource, DiseaseRecodeResource, EquipmentMaintenanceResource, EquipmentResource, HealthIssueResource, HealthRecordResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, PathologyRecordResource, PatientVitalResource, PatientsResource, PrescriptionResource, ProcedureResource, ReagentResource, ReferralResource, RemoteMedicineResource, RemotePatientResource, RemoteServiceResource, ServiceResource, SupplierResource
 from clinic.forms import ImportCategoryForm, ImportCompanyForm, ImportConsultationNotesForm, ImportCountryForm, ImportDiagnosisForm, ImportDiseaseForm, ImportEquipmentForm, ImportEquipmentMaintenanceForm, ImportHealthIssueForm, ImportHealthRecordForm, ImportInsuranceCompanyForm, ImportInventoryItemForm, ImportMedicineForm, ImportPathologyRecordForm, ImportPatientVitalForm, ImportPatientsForm, ImportPrescriptionForm, ImportProcedureForm, ImportReagentForm, ImportReferralForm, ImportRemoteMedicineForm, ImportRemotePatientForm, ImportRemoteServiceForm, ImportServiceForm, ImportSupplierForm
 from tablib import Dataset
-
+from django.contrib.auth.decorators import login_required
 logger = logging.getLogger(__name__)
+
+@login_required
 def import_disease_recode(request):
     if request.method == 'POST':
         form = ImportDiseaseForm(request.POST, request.FILES)
@@ -39,7 +41,7 @@ def import_disease_recode(request):
 
     return render(request, 'kahama_template/import_disease_recode.html', {'form': form})
 
-
+@login_required
 def import_insurance_companies(request):
     if request.method == 'POST':
         form = ImportInsuranceCompanyForm(request.POST, request.FILES)
@@ -72,6 +74,7 @@ def import_insurance_companies(request):
 
     return render(request, 'kahama_template/import_insurance_companies.html', {'form': form})
 
+@login_required
 def import_category(request):
     if request.method == 'POST':
         form = ImportCategoryForm(request.POST, request.FILES)
@@ -101,6 +104,7 @@ def import_category(request):
     return render(request, 'kahama_template/import_category.html', {'form': form})
 
 
+@login_required
 def import_supplier(request):
     if request.method == 'POST':
         form = ImportSupplierForm(request.POST, request.FILES)
@@ -132,6 +136,7 @@ def import_supplier(request):
 
     return render(request, 'kahama_template/import_supplier.html', {'form': form})
 
+@login_required
 def import_equipment(request):
     if request.method == 'POST':
         form = ImportEquipmentForm(request.POST, request.FILES)
@@ -166,6 +171,7 @@ def import_equipment(request):
 
     return render(request, 'kahama_template/import_equipment.html', {'form': form})
 
+@login_required
 def import_maintenance(request):
     if request.method == 'POST':
         form = ImportEquipmentMaintenanceForm(request.POST, request.FILES)
@@ -200,7 +206,7 @@ def import_maintenance(request):
 
     return render(request, 'kahama_template/import_maintenance.html', {'form': form})
 
-
+@login_required
 def import_reagent(request):
     if request.method == 'POST':
         form = ImportReagentForm(request.POST, request.FILES)
@@ -238,6 +244,7 @@ def import_reagent(request):
 
     return render(request, 'kahama_template/import_reagent.html', {'form': form})
 
+@login_required
 def import_health_issue(request):
     if request.method == 'POST':
         form = ImportHealthIssueForm(request.POST, request.FILES)
@@ -275,7 +282,7 @@ def import_health_issue(request):
 
     return render(request, 'kahama_template/import_health.html', {'form': form})
 
-
+@login_required
 def import_companies(request):
     if request.method == 'POST':
         form = ImportCompanyForm(request.POST, request.FILES)
@@ -312,6 +319,7 @@ def import_companies(request):
     return render(request, 'kahama_template/import_companies.html', {'form': form})
 
 
+@login_required
 def import_pathology_records(request):
     if request.method == 'POST':
         form = ImportPathologyRecordForm(request.POST, request.FILES)
@@ -343,6 +351,7 @@ def import_pathology_records(request):
     return render(request, 'kahama_template/import_pathology_records.html', {'form': form})
 
 
+@login_required
 def import_ImportInventoryItemForm_records(request):
     if request.method == 'POST':
         form = ImportInventoryItemForm(request.POST, request.FILES)
@@ -383,6 +392,7 @@ def import_ImportInventoryItemForm_records(request):
 
     return render(request, 'kahama_template/import_InventoryItem.html', {'form': form})
 
+@login_required
 def import_prescription_records(request):
     if request.method == 'POST':
         form = ImportPrescriptionForm(request.POST, request.FILES)
@@ -417,6 +427,7 @@ def import_prescription_records(request):
 
     return render(request, 'kahama_template/import_prescription.html', {'form': form})
 
+@login_required
 def import_patient_vital_records(request):
     if request.method == 'POST':
         form = ImportPatientVitalForm(request.POST, request.FILES)
@@ -452,6 +463,7 @@ def import_patient_vital_records(request):
 
     return render(request, 'kahama_template/import_patient_vital.html', {'form': form})
 
+@login_required
 def import_patient(request):
     if request.method == 'POST':
         form = ImportRemotePatientForm(request.POST, request.FILES)
@@ -504,6 +516,7 @@ def import_patient(request):
 
     return render(request, 'kahama_template/import_patient.html', {'form': form})
 
+@login_required
 def import_remoteservice_records(request):
     if request.method == 'POST':
         form = ImportRemoteServiceForm(request.POST, request.FILES)
@@ -533,6 +546,7 @@ def import_remoteservice_records(request):
     return render(request, 'kahama_template/import_remoteservice.html', {'form': form})
 
 
+@login_required
 def import_consultation_notes_records(request):
     if request.method == 'POST':
         form = ImportConsultationNotesForm(request.POST, request.FILES)
@@ -571,6 +585,7 @@ def import_consultation_notes_records(request):
 
     return render(request, 'kahama_template/import_consultation_notes.html', {'form': form})
 
+@login_required
 def import_diagnosis_records(request):
     if request.method == 'POST':
         form = ImportDiagnosisForm(request.POST, request.FILES)
@@ -601,6 +616,7 @@ def import_diagnosis_records(request):
 
     return render(request, 'kahama_template/import_diagnosis.html', {'form': form})
 
+@login_required
 def import_patient_records(request):
     if request.method == 'POST':
         form = ImportPatientsForm(request.POST, request.FILES)
@@ -640,6 +656,7 @@ def import_patient_records(request):
 
     return render(request, 'kahama_template/import_patients.html', {'form': form})
 
+@login_required
 def import_medicine_drug_records(request):
     if request.method == 'POST':
         form = ImportRemoteMedicineForm(request.POST, request.FILES)
@@ -680,7 +697,7 @@ def import_medicine_drug_records(request):
 
     return render(request, 'kahama_template/import_medicine_drug_records.html', {'form': form})
 
-
+@login_required
 def import_service_records(request):
     if request.method == 'POST':
         form = ImportServiceForm(request.POST, request.FILES)
@@ -716,6 +733,7 @@ def import_service_records(request):
 
     return render(request, 'kahama_template/import_service.html', {'form': form})
 
+@login_required
 def import_country_records(request):
     if request.method == 'POST':
         form = ImportCountryForm(request.POST, request.FILES)
@@ -747,6 +765,7 @@ def import_country_records(request):
 
     return render(request, 'kahama_template/import_country.html', {'form': form})
 
+@login_required
 def import_health_records(request):
     if request.method == 'POST':
         form = ImportHealthRecordForm(request.POST, request.FILES)
@@ -778,7 +797,7 @@ def import_health_records(request):
 
     return render(request, 'kahama_template/import_health_record.html', {'form': form})
 
-
+@login_required
 def import_referral_records(request):
     if request.method == 'POST':
         form = ImportReferralForm(request.POST, request.FILES)
@@ -814,7 +833,7 @@ def import_referral_records(request):
 
     return render(request, 'kahama_template/import_referral.html', {'form': form})
 
-
+@login_required
 def import_procedure_records(request):
     if request.method == 'POST':
         form = ImportProcedureForm(request.POST, request.FILES)
@@ -850,6 +869,7 @@ def import_procedure_records(request):
 
     return render(request, 'kahama_template/import_procedure.html', {'form': form})
 
+@login_required
 def import_medicine_records(request):
     if request.method == 'POST':
         form = ImportMedicineForm(request.POST, request.FILES)
