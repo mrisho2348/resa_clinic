@@ -151,7 +151,7 @@ Usage History
                                     e.preventDefault();
                                     $.ajax({
                                         type: 'POST',
-                                        url: '{% url "save_usage_history" %}',  // Replace with your URL
+                                        url: '{% url "kahamahmis:save_usage_history" %}',  // Replace with your URL
                                         data: $('#editUsageHistoryForm{{ history.id }}').serialize(),
                                         success: function (data) {
                                             if (data.status === 'success') {
@@ -232,7 +232,7 @@ Usage History
     function saveUsageHistory() {
         $.ajax({
             type: 'POST',
-            url: '{% url "save_usage_history" %}',  // Replace with your URL
+            url: '{% url "kahamahmis:save_usage_history" %}',  // Replace with your URL
             data: $('#usageHistoryForm').serialize(),
             success: function (data) {
                 if (data.status === 'success') {

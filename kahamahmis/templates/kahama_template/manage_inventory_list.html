@@ -13,17 +13,12 @@ Inventory List
 <a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#addInventoryItemModal">
     <i class="fas fa-plus"></i> New Inventory
 </a>
-<!-- Add Import insurance link and modal trigger -->
-<a class="btn btn-success float-right mr-2" href="{% url 'import_ImportInventoryItemForm_records' %}">
-  <i class="fas fa-file-import"></i> Import Inventory
-</a>
+
 {% endblock breadcrumb %}
 
 
 {% load static %}
 {% block main_content %}
-
-{% comment %} <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css"> {% endcomment %}
 
 <div class="table-responsive">
     <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
@@ -118,10 +113,10 @@ Inventory List
         var quantityUsed = $('#quantityUsed' + itemId).val();
         var usageDate = $('#usageDate' + itemId).val();
         var notes = $('#notes' + itemId).val();
-   
+        
         $.ajax({
             type: 'POST',
-            url: '/use_inventory_item/',
+            url: '{% url "kahamahmis:use_inventory_item" %}',
             data: {                
                 notes: notes,
                 itemId: itemId,
@@ -180,10 +175,10 @@ Inventory List
                 <script>
                     function increaseInventoryStock(itemId) {
                         var quantityToAdd = $('#quantityToAdd' + itemId).val();
-                
+                     
                         $.ajax({
                             type: 'POST',
-                            url: '/increase_inventory_stock/',
+                            url: '{% url "kahamahmis:increase_inventory_stock" %}',
                             data: {                                
                                 item_id: itemId,
                                 quantityToAdd: quantityToAdd
@@ -424,7 +419,7 @@ Inventory List
                                     e.preventDefault();
                                     $.ajax({
                                         type: 'POST',
-                                        url: '{% url "add_inventory_item" %}',  // Replace with your URL
+                                        url: '{% url "kahamahmis:add_inventory_item" %}',  // Replace with your URL
                                         data: $('#editInventoryItemForm{{ item.id }}').serialize(),
                                         success: function (data) {
                                             if (data.status === 'success') {
@@ -568,7 +563,7 @@ Inventory List
     function addInventoryItem() {
         $.ajax({
             type: 'POST',
-            url: '{% url "add_inventory_item" %}',  // Replace with your URL
+            url: '{% url "kahamahmis:add_inventory_item" %}',  // Replace with your URL
             data: $('#addInventoryItemForm').serialize(),
             success: function (data) {
                 if (data.status === 'success') {
