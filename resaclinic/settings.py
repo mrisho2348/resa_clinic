@@ -281,15 +281,16 @@ JAZZMIN_SETTINGS = {
 
     # Links to put along the top menu
     "topmenu_links": [
-        {"name": "Home",  "url": "admin:index"},
+        {"name": "Home",  "url": "clinic:dashboard"},
         # {"name": "Support", "url": "tour_category_list", "new_window": False},
-        {"model": "tourist.Tourist"},
+        {"model": "clinic.Staffs"},
 
     ],
 
     # Additional links to include in the user menu on the top right
     "usermenu_links": [
         # {"name": "Support", "url": "activity_list", "new_window": False},
+         {"name": "Support", "url": "auth.CustomUser"}
     ],
 
     # Whether to display the side menu
@@ -327,13 +328,29 @@ JAZZMIN_SETTINGS = {
     "clinic.Invoice": "fas fa-receipt",
     "clinic.Payment": "fas fa-money-check-alt",
     "clinic.Client": "fas fa-users",
+    "clinic.Staffs": "fas fa-users",
+    "clinic.InsuranceCompany": "fas fa-hospital-user",
+    "clinic.Service": "fas fa-wrench",
+    "clinic.MedicineUnitMeasure": "fas fa-pills",
+    "clinic.Category": "fas fa-tags",
+    "clinic.Supplier": "fas fa-truck",
+    "clinic.PathodologyRecord": "fas fa-notes-medical",
+    "clinic.DiseaseRecode": "fas fa-disease",
+    "clinic.HospitalVehicle": "fas fa-car",
+    "clinic.AmbulanceActivity": "fas fa-ambulance",
+    "clinic.Equipment": "fas fa-tools",
+    "clinic.EquipmentMaintenance": "fas fa-toolbox",
+    "clinic.Reagent": "fas fa-vial",
+    "clinic.ReagentUsage": "fas fa-flask",
+    "clinic.Company": "fas fa-building"
 },
+   
 
     # Icons that are used when one is not manually specified
     "default_icon_parents": "fas fa-chevron-circle-right",
     "default_icon_children": "fas fa-arrow-circle-right",
     # Order apps automatically, but make sure choice and book admin links are first within the books app
-   "order_with_respect_to": ["clinic.Employee", "clinic.Payroll", "clinic.SalaryPayment"],
+   "order_with_respect_to": ["clinic.Employee", "clinic.Payroll", "clinic.SalaryPayment", "clinic.ExpenseCategory", "clinic.Expense" , "clinic.SalaryChangeRecord" , "clinic.EmployeeDeduction" , "clinic.DeductionOrganization"],
    
     # Render out the change view as a single form, or in tabs
     "changeform_format": "horizontal_tabs",
@@ -352,7 +369,14 @@ JAZZMIN_SETTINGS = {
     "show_ui_builder": False,
 }
 
-JAZZMIN_UI_TWEAKS = {
+# JAZZMIN_UI_TWEAKS = {
    
-    "theme": "slate",
+#     "theme": "slate",
+# }
+
+JAZZMIN_UI_TWEAKS = {
+  
+      "theme": "slate",
+    "dark_mode_theme": "darkly",
 }
+JAZZMIN_SETTINGS["show_ui_builder"] = True

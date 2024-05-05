@@ -39,9 +39,9 @@ def kahama_dashboard(request):
     all_appointment = RemoteConsultation.objects.count()
     total_patients = RemotePatient.objects.count()
     recently_added_patients = RemotePatient.objects.order_by('-created_at')[:6]
-    doctors = Staffs.objects.filter(role='doctor')
-    doctors_count = Staffs.objects.filter(role='doctor').count()
-    nurses = Staffs.objects.filter(role='nurse').count()
+    doctors = Staffs.objects.filter(role='doctor', work_place = 'kahama')
+    doctors_count = Staffs.objects.filter(role='doctor', work_place = 'kahama').count()
+    nurses = Staffs.objects.filter(role='nurse', work_place = 'kahama').count()
     context = {
         'total_patients': total_patients,
         'recently_added_patients': recently_added_patients,
@@ -141,7 +141,14 @@ def DoLoginKahama(request):
             if user.user_type == "1":
                 return HttpResponseRedirect(reverse("kahamahmis:dashboard"))
             elif user.user_type == "2":
-                return HttpResponseRedirect(reverse("kahamahmis:dashboard"))             
+                staff = Staffs.objects.get(admin=user)
+                role = staff.role.lower()  # Convert role to lowercase for consistency
+                if staff.work_place == 'kahama':
+                    if role == "doctor":
+                      return HttpResponseRedirect(reverse("kahamahmis:dashboard"))                    
+                else :
+                    messages.error(request, "You are not a staff for this hospital or clinic. Please contact the administrator for support.")
+                    return HttpResponseRedirect(reverse("kahamahmis:kahama"))            
             else:
                 return HttpResponseRedirect(reverse("kahamahmis:kahama"))
         else:
@@ -230,7 +237,7 @@ def manage_country(request):
 def manage_consultation(request):
     patients=Patients.objects.all() 
     pathology_records=PathodologyRecord.objects.all() 
-    doctors=Staffs.objects.filter(role='doctor')
+    doctors=Staffs.objects.filter(role='doctor', work_place = 'kahama')
     context = {
         'patients':patients,
         'pathology_records':pathology_records,
@@ -594,7 +601,7 @@ def appointment_view(request, patient_id):
 
         # If the request is not a POST, handle the GET request
         patient = get_object_or_404(Patients, id=patient_id)
-        doctors = Staffs.objects.filter(role='doctor')
+        doctors = Staffs.objects.filter(role='doctor', work_place = 'kahama')
 
         context = {
             'patient': patient,
@@ -961,7 +968,7 @@ def appointment_list_view(request):
     unread_notification_count = Notification.objects.filter(is_read=False).count()
     patients=RemotePatient.objects.all() 
     pathology_records=PathodologyRecord.objects.all() 
-    doctors=Staffs.objects.filter(role='doctor')
+    doctors=Staffs.objects.filter(role='doctor', work_place = 'kahama')
     context = {
         'patients':patients,
         'pathology_records':pathology_records,
@@ -2463,7 +2470,7 @@ def patient_visit_history_view(request, patient_id):
     # Retrieve visit history for the specified patient
     visit_history = RemotePatientVisits.objects.filter(patient_id=patient_id)
     current_date = timezone.now().date()
-    doctors = Staffs.objects.filter(role='doctor')
+    doctors = Staffs.objects.filter(role='doctor', work_place = 'kahama')
     patient = RemotePatient.objects.get(id=patient_id)   
     return render(request, 'kahama_template/manage_patient_visit_history.html', {
         'visit_history': visit_history,
@@ -2506,7 +2513,7 @@ def patient_health_record_view(request, patient_id, visit_id):
        
      
         pathology_records = PathodologyRecord.objects.all()  # Fetch all consultation notes from the database
-        doctors = Staffs.objects.filter(role='doctor')
+        doctors = Staffs.objects.filter(role='doctor', work_place = 'kahama')
         provisional_diagnoses = Diagnosis.objects.all()
         final_diagnoses = Diagnosis.objects.all()
 
@@ -2564,7 +2571,7 @@ def patient_visit_details_view(request, patient_id, visit_id):
         lab_tests = RemoteLaboratoryOrder.objects.filter(patient=patient_id, visit=visit_id)
         procedure = RemoteProcedure.objects.filter(patient=patient_id, visit=visit_id).first()
         pathology_records = PathodologyRecord.objects.all()
-        doctors = Staffs.objects.filter(role='doctor')
+        doctors = Staffs.objects.filter(role='doctor', work_place = 'kahama')
         provisional_diagnoses = Diagnosis.objects.all()
         final_diagnoses = Diagnosis.objects.all()
 
@@ -2668,7 +2675,7 @@ def patient_consultation_record_view(request, patient_id, visit_id):
        
             
         pathology_records = PathodologyRecord.objects.all()  # Fetch all consultation notes from the database
-        doctors = Staffs.objects.filter(role='doctor')
+        doctors = Staffs.objects.filter(role='doctor', work_place = 'kahama')
         provisional_diagnoses = Diagnosis.objects.all()
         final_diagnoses = Diagnosis.objects.all()
 
@@ -3110,7 +3117,7 @@ def save_nextremotesconsultation_notes(request, patient_id, visit_id):
         # Fetch pathology records
         pathology_records = PathodologyRecord.objects.all()
 
-        doctors = Staffs.objects.filter(role='doctor')
+        doctors = Staffs.objects.filter(role='doctor', work_place = 'kahama')
         provisional_diagnoses = Diagnosis.objects.all()
         final_diagnoses = Diagnosis.objects.all()
         range_51 = range(51)
@@ -3225,7 +3232,7 @@ def edit_remotesconsultation_notes(request, patient_id):
     try:
      
         pathology_records = PathodologyRecord.objects.all()
-        doctors = Staffs.objects.filter(role='doctor')
+        doctors = Staffs.objects.filter(role='doctor', work_place = 'kahama')
         provisional_diagnoses = Diagnosis.objects.all()
         final_diagnoses = Diagnosis.objects.all()
         range_51 = range(51)
@@ -3334,7 +3341,7 @@ def consultation_notes_view(request):
     consultation_notes = RemoteConsultationNotes.objects.all()  
     pathology_records = PathodologyRecord.objects.all()# Fetch all consultation notes from the database
     patients = Patients.objects.all()# Fetch all consultation notes from the database
-    doctors = Staffs.objects.filter(role='doctor')
+    doctors = Staffs.objects.filter(role='doctor', work_place = 'kahama')
     provisional_diagnoses = Diagnosis.objects.all()
     final_diagnoses = Diagnosis.objects.all()
     return render(request, 'kahama_template/manage_consultation_notes.html', {
@@ -3405,7 +3412,7 @@ def save_nextprescription(request, patient_id, visit_id):
         except RemotePatientVital.DoesNotExist:
             vital = None
         pathology_records = PathodologyRecord.objects.all()  # Fetch all consultation notes from the database
-        doctors = Staffs.objects.filter(role='doctor')
+        doctors = Staffs.objects.filter(role='doctor', work_place = 'kahama')
         provisional_diagnoses = Diagnosis.objects.all()
         final_diagnoses = Diagnosis.objects.all()
 
@@ -3478,7 +3485,7 @@ def save_nextlaboratory(request, patient_id, visit_id):
             vital = None
        
         pathology_records = PathodologyRecord.objects.all()  # Fetch all consultation notes from the database
-        doctors = Staffs.objects.filter(role='doctor')
+        doctors = Staffs.objects.filter(role='doctor', work_place = 'kahama')
         provisional_diagnoses = Diagnosis.objects.all()
         final_diagnoses = Diagnosis.objects.all()
 
@@ -3562,7 +3569,7 @@ def save_nextremotereferral(request, patient_id, visit_id):
         except RemoteReferral.DoesNotExist:
             patient_referrals  = None
         pathology_records = PathodologyRecord.objects.all()  # Fetch all consultation notes from the database
-        doctors = Staffs.objects.filter(role='doctor')
+        doctors = Staffs.objects.filter(role='doctor', work_place = 'kahama')
         provisional_diagnoses = Diagnosis.objects.all()
         final_diagnoses = Diagnosis.objects.all()
 
@@ -3638,7 +3645,7 @@ def save_nextcounsel(request, patient_id, visit_id):
         except RemotePatientVital.DoesNotExist:
             vital = None
         pathology_records = PathodologyRecord.objects.all()  # Fetch all consultation notes from the database
-        doctors = Staffs.objects.filter(role='doctor')
+        doctors = Staffs.objects.filter(role='doctor', work_place = 'kahama')
         provisional_diagnoses = Diagnosis.objects.all()
         final_diagnoses = Diagnosis.objects.all()
 
@@ -3761,7 +3768,7 @@ def save_nextremoteprocedure(request, patient_id, visit_id):
         except RemoteProcedure.DoesNotExist:
             procedures = None
         pathology_records = PathodologyRecord.objects.all()  # Fetch all consultation notes from the database
-        doctors = Staffs.objects.filter(role='doctor')
+        doctors = Staffs.objects.filter(role='doctor', work_place = 'kahama')
         provisional_diagnoses = Diagnosis.objects.all()
         final_diagnoses = Diagnosis.objects.all()
 
@@ -3880,7 +3887,7 @@ def save_nextobservation(request, patient_id, visit_id):
         except RemotePatientVital.DoesNotExist:
             vital = None
         pathology_records = PathodologyRecord.objects.all()  # Fetch all consultation notes from the database
-        doctors = Staffs.objects.filter(role='doctor')
+        doctors = Staffs.objects.filter(role='doctor', work_place = 'kahama')
         provisional_diagnoses = Diagnosis.objects.all()
         final_diagnoses = Diagnosis.objects.all()
 
@@ -4177,7 +4184,7 @@ def patient_info_form(request, patient_id=None):
 @login_required
 def patients_list(request):
     patients =RemotePatient.objects.order_by('-created_at')    
-    doctors = Staffs.objects.filter(role='doctor')
+    doctors = Staffs.objects.filter(role='doctor', work_place = 'kahama')
     return render(request, 'kahama_template/manage_remotepatients_list.html',
                   {
                       'patients': patients,

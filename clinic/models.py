@@ -66,16 +66,64 @@ class AdminHOD(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
 
+    # Existing fields...
+MARITAL_STATUS_CHOICES = [
+        ('single', 'Single'),
+        ('married', 'Married'),
+        ('divorced', 'Divorced'),
+        ('widowed', 'Widowed'),
+    ]
+
+ROLE_CHOICES = [
+        ('admin', 'Administrator'),
+        ('doctor', 'Doctor'),
+        ('nurse', 'Nurse'),
+        ('physiotherapist', 'Physiotherapist'),
+        ('labTechnician', 'Lab Technician'),
+        ('pharmacist', 'Pharmacist'),
+        ('receptionist', 'Receptionist'),
+    ]
+PROFESSION_CHOICES = [
+        ('doctor', 'Doctor'),
+        ('nurse', 'Nurse'),
+        ('pharmacist', 'Pharmacist'),
+        ('developer', 'Developer'),
+        ('designer', 'Designer'),
+        ('manager', 'Manager'),
+        ('radiologist', 'Radiologist'),
+        ('lab_technician', 'Lab Technician'),
+        ('receptionist', 'Receptionist'),
+        ('physiotherapist', 'Physiotherapist'),
+        ('accountant', 'Accountant'),
+        ('security_guard', 'Security Guard'),
+        ('chef', 'Chef'),
+        ('cleaner', 'Cleaner'),
+    ]
+
+# Existing fields...
+work_place_choices = [
+        ('resa', 'Resa'),
+        ('kahama', 'Kahama'),
+        # Add more choices as needed
+    ]
+
+GENDER_CHOICES = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+        ('non-binary', 'Non-Binary'),
+        ('prefer-not-to-say', 'Prefer Not to Say'),
+    ]
 class Staffs(models.Model):
     id = models.AutoField(primary_key=True)
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='staff')   
-    middle_name = models.TextField(blank=True)
-    gender = models.TextField(max_length=7, blank=True)
+    middle_name = models.TextField(blank=True)    
+    gender = models.CharField(max_length=20, choices=GENDER_CHOICES, blank=True)
     date_of_birth = models.DateField(blank=True, default='2000-01-01')
     phone_number = models.CharField(max_length=14, blank=True)
-    marital_status = models.CharField(max_length=20, blank=True)
-    profession = models.CharField(max_length=20, blank=True)
-    role = models.CharField(max_length=20, blank=True)
+    marital_status = models.CharField(max_length=20, choices=MARITAL_STATUS_CHOICES, blank=True)   
+    profession = models.CharField(max_length=20, choices=PROFESSION_CHOICES, blank=True)
+    role = models.CharField(max_length=20,choices=ROLE_CHOICES,  blank=True)    
+    work_place = models.CharField(max_length=50, choices=work_place_choices, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
@@ -94,11 +142,50 @@ class InsuranceCompany(models.Model):
     objects = models.Manager()    
     def __str__(self):
         return self.name
+   
+PROCEDURE = 'Procedure'
+LABORATORY = 'Laboratory'
+IMAGING = 'Imaging'
+DRUGS = 'Drugs'
+TEST = 'Test'
+CONSULTATION = 'Consultation'
+EDUCATION = 'Education'
+EXAMINATION = 'Examination'
+VACCINATION = 'Vaccination'
+MEDICATION = 'Medication'
+THERAPY = 'Therapy'
+REHABILITATION = 'Rehabilitation'
+RENTAL = 'Rental'
+PLAN = 'Plan'
+
+TYPE_CHOICES = [
+        (PROCEDURE, 'Procedure'),
+        (LABORATORY, 'Laboratory'),
+        (IMAGING, 'Imaging'),
+        (DRUGS, 'Drugs'),
+        (TEST, 'Test'),
+        (CONSULTATION, 'Consultation'),
+        (EDUCATION, 'Education'),
+        (EXAMINATION, 'Examination'),
+        (VACCINATION, 'Vaccination'),
+        (MEDICATION, 'Medication'),
+        (THERAPY, 'Therapy'),
+        (REHABILITATION, 'Rehabilitation'),
+        (RENTAL, 'Rental'),
+        (PLAN, 'Plan'),
+    ]
+CASH = 'Cash'
+INSURANCE = 'Insurance'
+
+COVERAGE_CHOICES = [
+    (CASH, 'Cash'),
+    (INSURANCE, 'Insurance'),
+]
     
 class Service(models.Model):
-    coverage = models.CharField(max_length=200, blank=True, null=True)
+    coverage = models.CharField(max_length=200, choices=COVERAGE_CHOICES, blank=True, null=True)
     department = models.CharField(max_length=200, blank=True, null=True)
-    type_service = models.CharField(max_length=200, blank=True, null=True)
+    type_service = models.CharField(max_length=200, choices=TYPE_CHOICES, blank=True, null=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     cash_cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
@@ -193,7 +280,7 @@ class DiseaseRecode(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
     def __str__(self):
-        return self.name
+        return self.disease_name
   
 class ContactDetails(models.Model):    
     name = models.CharField(max_length=255)

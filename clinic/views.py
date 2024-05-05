@@ -35,12 +35,18 @@ def index(request):
 @login_required
 def dashboard(request):
     total_patients = Patients.objects.count()
+    all_appointment = Consultation.objects.count()
     recently_added_patients = Patients.objects.order_by('-created_at')[:6]
-    doctors = Staffs.objects.filter(role='doctor')
+    doctors = Staffs.objects.filter(role='doctor', work_place = 'resa')
+    doctors_count = Staffs.objects.filter(role='doctor', work_place = 'resa').count()
+    nurses = Staffs.objects.filter(role='nurse', work_place = 'resa').count()
     context = {
         'total_patients': total_patients,
         'recently_added_patients': recently_added_patients,
         'doctors': doctors,
+        'doctors_count': doctors_count,
+        'all_appointment': all_appointment,
+        'nurses': nurses,
         # 'gender_based_monthly_counts': gender_based_monthly_counts,
     }
     return render(request,"hod_template/home_content.html",context)
@@ -75,24 +81,30 @@ def DoLogin(request):
                 # Assuming staff user is always associated with Staffs model
                 staff = Staffs.objects.get(admin=user)
                 role = staff.role.lower()  # Convert role to lowercase for consistency
-                
+
                 # Redirect staff user based on their role
-                if role == "admin":
-                    return redirect("admin_dashboard")
-                elif role == "doctor":
-                    return redirect("doctor_dashboard")
-                elif role == "nurse":
-                    return redirect("nurse_dashboard")
-                elif role == "physiotherapist":
-                    return redirect("physiotherapist_dashboard")
-                elif role == "labtechnician":
-                    return redirect("labtechnician_dashboard")
-                elif role == "pharmacist":
-                    return redirect("pharmacist_dashboard")
-                elif role == "receptionist":
-                    return redirect("receptionist_dashboard")
-                else:
-                    # If role is not recognized, redirect to login
+                if staff.work_place == 'resa':
+                    if role == "admin":
+                        return redirect("admin_dashboard")
+                    elif role == "doctor":
+                        return redirect("doctor_dashboard")
+                    elif role == "nurse":
+                        return redirect("nurse_dashboard")
+                    elif role == "physiotherapist":
+                        return redirect("physiotherapist_dashboard")
+                    elif role == "labtechnician":
+                        return redirect("labtechnician_dashboard")
+                    elif role == "pharmacist":
+                        return redirect("pharmacist_dashboard")
+                    elif role == "receptionist":
+                        return redirect("receptionist_dashboard")
+                    else:
+                        # If role is not recognized, redirect to login
+                        return HttpResponseRedirect(reverse("login"))
+
+                # Check if the staff's workplace is valid
+                else :
+                    messages.error(request, "You are not a staff for this hospital or clinic. Please contact the administrator for support.")
                     return HttpResponseRedirect(reverse("login"))
             else:
                 return HttpResponseRedirect(reverse("login"))
@@ -169,7 +181,7 @@ def manage_patient(request):
     patient_records=Patients.objects.all().order_by('-created_at') 
     range_121 = range(1, 121)
     all_country = Country.objects.all()
-    doctors=Staffs.objects.filter(role='doctor')
+    doctors=Staffs.objects.filter(role='doctor',work_place = 'resa')
     return render(request,"hod_template/manage_patients.html", {
         "patient_records":patient_records,
         "range_121":range_121,
@@ -186,7 +198,7 @@ def manage_patient(request):
 def manage_consultation(request):
     patients=Patients.objects.all() 
     pathology_records=PathodologyRecord.objects.all() 
-    doctors=Staffs.objects.filter(role='doctor')
+    doctors=Staffs.objects.filter(role='doctor',work_place = 'resa')
     context = {
         'patients':patients,
         'pathology_records':pathology_records,
@@ -552,7 +564,7 @@ def appointment_view(request, patient_id):
 
         # If the request is not a POST, handle the GET request
         patient = get_object_or_404(Patients, id=patient_id)
-        doctors = Staffs.objects.filter(role='doctor')
+        doctors = Staffs.objects.filter(role='doctor',work_place = 'resa')
 
         context = {
             'patient': patient,
@@ -996,7 +1008,7 @@ def appointment_list_view(request):
     unread_notification_count = Notification.objects.filter(is_read=False).count()
     patients=Patients.objects.all() 
     pathology_records=PathodologyRecord.objects.all() 
-    doctors=Staffs.objects.filter(role='doctor')
+    doctors=Staffs.objects.filter(role='doctor',work_place = 'resa')
     context = {
         'patients':patients,
         'pathology_records':pathology_records,
@@ -2316,7 +2328,7 @@ def patient_consultation_detail(request, patient_id):
         except:
             visit_history = None        
         pathology_records = PathodologyRecord.objects.all()  # Fetch all consultation notes from the database
-        doctors = Staffs.objects.filter(role='doctor')
+        doctors = Staffs.objects.filter(role='doctor',work_place = 'resa')
         provisional_diagnoses = Diagnosis.objects.all()
         final_diagnoses = Diagnosis.objects.all()
 
@@ -2784,7 +2796,7 @@ def patient_health_record_view(request, patient_id, visit_id):
         total_imaging_cost = imaging_records.aggregate(Sum('cost'))['cost__sum']
         lab_tests_cost = lab_results.aggregate(Sum('cost'))['cost__sum']      
         pathology_records = PathodologyRecord.objects.all()  # Fetch all consultation notes from the database
-        doctors = Staffs.objects.filter(role='doctor')
+        doctors = Staffs.objects.filter(role='doctor',work_place = 'resa')
         provisional_diagnoses = Diagnosis.objects.all()
         final_diagnoses = Diagnosis.objects.all()
 
@@ -3060,13 +3072,13 @@ def consultation_notes_view(request):
     consultation_notes = ConsultationNotes.objects.all()  
     pathology_records = PathodologyRecord.objects.all()# Fetch all consultation notes from the database
     
-    doctors = Staffs.objects.filter(role='doctor')
+    doctors = Staffs.objects.filter(role='doctor',work_place = 'resa')
     provisional_diagnoses = Diagnosis.objects.all()
     final_diagnoses = Diagnosis.objects.all()
     patient_records=Patients.objects.all().order_by('-created_at') 
     range_121 = range(1, 121)
     all_country = Country.objects.all()
-    doctors=Staffs.objects.filter(role='doctor')
+    doctors=Staffs.objects.filter(role='doctor',work_place = 'resa')
     return render(request, 'hod_template/manage_consultation_notes.html', {
         'consultation_notes': consultation_notes,
         'pathology_records': pathology_records,
