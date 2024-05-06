@@ -19,6 +19,7 @@ from openpyxl.styles import Alignment, Font
 from django.core.exceptions import ValidationError
 from django.db.models.functions import ExtractMonth  # Add this import
 from django.template.loader import render_to_string
+import numpy as np
 
 @login_required
 def save_patient_health_information(request, patient_id):
@@ -400,6 +401,7 @@ def save_remotesconsultation_notes(request, patient_id, visit_id):
     range_301 = range(301)
     range_101 = range(101)
     range_15 = range(3, 16)
+    temps = np.arange(start=0, stop=51, step=0.1)
     
     context = {
         'secondary_examination': secondary_examination,
@@ -428,6 +430,7 @@ def save_remotesconsultation_notes(request, patient_id, visit_id):
         'range_301': range_301,
         'range_101': range_101,
         'range_15': range_15,
+        'temps': temps,
         'consultation_note': consultation_note,
     }
 
@@ -1393,203 +1396,6 @@ def patient_statistics(request):
     }
     return render(request, 'kahama_template/reports_comprehensive.html', context)
 
-@login_required
-def referral_reports(request):
-    # Retrieve referral data
-    referrals = RemoteReferral.objects.all()
-    context = {'referrals': referrals}
-    return render(request, 'kahama_template/referral_reports.html', context)
-
-
-@login_required
-def procedure_report(request):
-    # Get the current year
-    current_year = datetime.now().year
-
-    # Get all services with the procedure category
-    procedure_services = RemoteService.objects.filter(category='Procedure')
-
-    # Query the database to get patient counts grouped by procedure category and month
-    procedures_by_month = (
-        RemoteProcedure.objects.filter(created_at__year=current_year)
-        .annotate(month=ExtractMonth('created_at'))
-        .values('name__name', 'month')
-        .annotate(num_patients=Count('id'))
-    )
-
-    # Organize the data into a dictionary
-    procedure_reports = {}
-    for procedure_service in procedure_services:
-        procedure_name = procedure_service.name
-        procedure_reports[procedure_name] = [0] * 12  # Initialize counts for each month
-
-    for procedure in procedures_by_month:
-        procedure_name = procedure['name__name']
-        month = procedure['month']
-        num_patients = procedure['num_patients']
-
-        if month is not None:
-            month_index = int(month) - 1
-            procedure_reports[procedure_name][month_index] = num_patients
-
-    # Prepare data for rendering in template
-    context = {
-        'procedure_reports': procedure_reports,
-        'months': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-    }
-
-    return render(request, 'kahama_template/procedure_report.html', context)
-
-@login_required
-def laboratory_report(request):
-    # Get the current year
-    current_year = datetime.now().year
-
-    # Get all services with the laboratory category
-    laboratory_services = RemoteService.objects.filter(category='Laboratory')
-
-    # Query the database to get patient counts grouped by laboratory category and month
-    laboratories_by_month = (
-        RemoteLaboratoryOrder.objects.filter(created_at__year=current_year)
-        .annotate(month=ExtractMonth('created_at'))
-        .values('name__name', 'month')
-        .annotate(num_patients=Count('id'))
-    )
-
-    # Organize the data into a dictionary
-    laboratory_reports = {}
-    for laboratory_service in laboratory_services:
-        laboratory_name = laboratory_service.name
-        laboratory_reports[laboratory_name] = [0] * 12  # Initialize counts for each month
-
-    for laboratory in laboratories_by_month:
-        laboratory_name = laboratory['name__name']
-        month = laboratory['month']
-        num_patients = laboratory['num_patients']
-
-        if month is not None:
-            month_index = int(month) - 1
-            laboratory_reports[laboratory_name][month_index] = num_patients
-
-    # Prepare data for rendering in template
-    context = {
-        'laboratory_reports': laboratory_reports,
-        'months': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-    }
-
-    return render(request, 'kahama_template/laboratory_report.html', context)
-
-
-@login_required
-def company_patient_report(request):
-    # Get the current year
-    current_year = datetime.now().year
-    
-    # Get all distinct company names
-    all_companies = RemoteCompany.objects.values_list('name', flat=True)
-
-    # Query the database to get patient counts grouped by company and month
-    patients_by_company = (
-        RemotePatient.objects.filter(created_at__year=current_year)
-        .values('company__name')
-        .annotate(month=ExtractMonth('created_at'))
-        .annotate(num_patients=Count('id'))
-    )
-
-    # Organize the data into a dictionary
-    company_reports = {company: [0] * 12 for company in all_companies}
-    for patient in patients_by_company:
-        company_name = patient['company__name']
-        month = patient['month']
-        num_patients = patient['num_patients']
-
-        if month is not None:
-            month_index = month - 1  # ExtractMonth returns month as an integer
-            company_reports[company_name][month_index] = num_patients
-
-    # Prepare data for rendering in template
-    context = {
-        'company_reports': company_reports,
-        'months': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-    }
-
-    return render(request, 'kahama_template/company_wise_reports.html', context)
-
-@login_required
-def pathology_record_report(request):
-    # Get the current year
-    current_year = datetime.now().year
-    
-    # Get all distinct Pathodology Record names
-    all_pathology_records = PathodologyRecord.objects.values_list('name', flat=True)
-
-    # Query the database to get patient counts grouped by Pathodology Record and month
-    patients_by_pathology_record = (
-        PathodologyRecord.objects.annotate(month=ExtractMonth('remoteconsultationnotes__created_at'))
-        .values('name', 'month')
-        .annotate(num_patients=Count('remoteconsultationnotes__id'))
-    )
-
-    # Organize the data into a dictionary
-    pathology_record_reports = {record: [0] * 12 for record in all_pathology_records}
-    for patient in patients_by_pathology_record:
-        pathology_record_name = patient['name']
-        month = patient['month']
-        num_patients = patient['num_patients']
-
-        if month is not None:
-            month_index = month - 1  # ExtractMonth returns month as an integer
-            pathology_record_reports[pathology_record_name][month_index] = num_patients
-
-    # Prepare data for rendering in template
-    context = {
-        'pathology_record_reports': pathology_record_reports,
-        'months': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-    }
-
-    return render(request, 'kahama_template/pathology_record_report.html', context)
-
-
-@login_required
-def patient_type_report(request):
-    # Get the current year
-    current_year = datetime.now().year
-
-    # Define the list of all patient types
-    all_patient_types = ['National Staff', 'International Staff', 'National Visitor', 'International Visitor', 'Unknown Status', 'Others']
-
-    # Query the database to get patient counts grouped by patient type and month
-    patients_by_type = (
-        RemotePatient.objects.filter(created_at__year=current_year)
-        .values('patient_type')
-        .annotate(month=ExtractMonth('created_at'))
-        .annotate(num_patients=Count('id'))
-    )
-
-    # Organize the data into a dictionary
-    patient_type_reports = {}
-    for patient_type in all_patient_types:
-        # Initialize counts for each month
-        patient_type_reports[patient_type] = [0] * 12
-
-    for patient in patients_by_type:
-        patient_type = patient['patient_type']
-        month = patient['month']
-        num_patients = patient['num_patients']
-
-        if month is not None:
-            month_index = month - 1  # ExtractMonth returns month as an integer
-            patient_type_reports[patient_type][month_index] = num_patients
-
-    # Prepare data for rendering in template
-    context = {
-        'patient_type_reports': patient_type_reports,
-        'months': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-    }
-
-    return render(request, 'kahama_template/patient_type_report.html', context)
-
-
 
 @login_required
 def search_report(request):
@@ -1618,7 +1424,7 @@ def search_report(request):
             # Return error response if the report type is invalid
             return JsonResponse({'error': 'Invalid report type'})
 
-@login_required
+
 def render_report(report_type, year):
     if report_type == 'patient_type_reports':       
          # Define the list of all patient types

@@ -56,27 +56,15 @@
                               <p>Patients</p>
                           </a>
                       </li>             
-                      <li class="nav-item">
-                        {% url 'kahamahmis:patient_type_report' as patient_type_report %}
-                          <a href="{% url "kahamahmis:patient_type_report" %}" class="nav-link{% if request.path == patient_type_report %} active {% endif %}">
-                              <i class="nav-icon fas fa-users"></i>
-                              <p>Patients type reports</p>
-                          </a>
-                      </li>             
+                                 
                       <li class="nav-item">
                         {% url 'kahamahmis:patient_vital_all_list' as patient_vital_all_list %}
                         <a href="{% url 'kahamahmis:patient_vital_all_list'  %}" class="nav-link{% if request.path == patient_vital_all_list %} active {% endif %}">
                             <i class="nav-icon fas fa-heartbeat"></i>
                             <p>All Vital Signs</p> 
                         </a>
-                    </li>                     
-                    <li class="nav-item">
-                        {% url 'kahamahmis:patient_observation_view' as patient_observation_view %}
-                        <a href="{% url 'kahamahmis:patient_observation_view'  %}" class="nav-link{% if request.path == patient_observation_view %} active {% endif %}">
-                            <i class="nav-icon fas fa-x-ray"></i> <!-- Replace 'fa-x-ray' with the appropriate Font Awesome icon class for radiology -->
-                            <p>Radiology</p> 
-                        </a>
-                    </li>
+                    </li>                    
+                    
                     <li class="nav-item">
                         {% url 'kahamahmis:generate_comprehensive_report' as generate_comprehensive_report %}
                         <a href="{% url 'kahamahmis:generate_comprehensive_report'  %}" class="nav-link{% if request.path == generate_comprehensive_report %} active {% endif %}">
@@ -92,27 +80,15 @@
                             <p>Lab Investigation</p> 
                         </a>
                     </li>               
-                    <li class="nav-item">
-                        {% url 'kahamahmis:laboratory_report' as laboratory_report %}
-                        <a href="{% url 'kahamahmis:laboratory_report'  %}" class="nav-link{% if request.path == laboratory_report %} active {% endif %}">
-                            <i class="nav-icon fas fa-flask"></i> <!-- Replace 'fa-flask' with the appropriate Font Awesome icon class for laboratory -->
-                            <p>Lab Reports</p> 
-                        </a>
-                    </li>               
+                               
                     <li class="nav-item">
                         {% url 'kahamahmis:patient_procedure_view' as patient_procedure_view %}
                           <a href="{% url "kahamahmis:patient_procedure_view" %}" class="nav-link{% if request.path == patient_procedure_view %} active {% endif %}">
                             <i class="nav-icon fas fa-hospital"></i>
                               <p>Medical Procedure</p>
                           </a>
-                      </li>                     
-                    <li class="nav-item">
-                        {% url 'kahamahmis:procedure_report' as procedure_report %}
-                          <a href="{% url "kahamahmis:procedure_report" %}" class="nav-link{% if request.path == procedure_report %} active {% endif %}">
-                            <i class="nav-icon fas fa-hospital"></i>
-                              <p> Procedure Reports</p>
-                          </a>
-                      </li>                     
+                      </li>                    
+                                        
                    <li class="nav-item">
                         {% url 'kahamahmis:manage_referral' as manage_referral %}
                         <a href="{% url 'kahamahmis:manage_referral' %}" class="nav-link{% if request.path == manage_referral %} active {% endif %}">
@@ -120,14 +96,7 @@
                             <p>Referral</p>
                         </a>
                     </li>
-                   <li class="nav-item">
-                        {% url 'kahamahmis:referral_reports' as referral_reports %}
-                        <a href="{% url 'kahamahmis:referral_reports' %}" class="nav-link{% if request.path == referral_reports %} active {% endif %}">
-                            <i class="nav-icon fas fa-handshake"></i>
-                            <p>Referral reports</p>
-                        </a>
-                    </li>
-                 
+                   
                   <li class="nav-item">
                         {% url 'kahamahmis:appointment_list' as appointment_list %}
                           <a href="{% url "kahamahmis:appointment_list" %}" class="nav-link{% if request.path == appointment_list %} active {% endif %}">
@@ -141,14 +110,8 @@
                             <i class="nav-icon fas fa-calendar"></i>
                               <p>consultation</p>
                           </a>
-                      </li>                      
-                      <li class="nav-item">
-                        {% url 'kahamahmis:manage_service' as manage_service %}
-                          <a href="{% url "kahamahmis:manage_service" %}" class="nav-link{% if request.path == manage_service %} active {% endif %}">
-                              <i class="nav-icon fas fa-medkit"></i>
-                              <p>Services</p>
-                          </a>
-                      </li>
+                      </li>                     
+                  
                       <li class="nav-item">
                         {% url 'kahamahmis:resa_report' as resa_report %}
                           <a href="{% url "kahamahmis:resa_report" %}" class="nav-link{% if request.path == resa_report %} active {% endif %}">
@@ -246,28 +209,14 @@
                               <i class="nav-icon fas fa-building"></i>
                               <p>Companies</p>
                           </a>
-                      </li>
-                      <li class="nav-item"> 
-                        {% url 'kahamahmis:company_patient_report' as company_patient_report %}                       
-                          <a href="{% url "kahamahmis:company_patient_report" %}" class="nav-link{% if request.path == company_patient_report %} active {% endif %} ">
-                              <i class="nav-icon fas fa-building"></i>
-                              <p>Companies reports</p>
-                          </a>
-                      </li>
+                      </li>                      
                       <li class="nav-item"> 
                         {% url 'kahamahmis:manage_pathodology' as manage_pathodology %}                     
                           <a href="{% url "kahamahmis:manage_pathodology" %}" class="nav-link{% if request.path == manage_pathodology %} active {% endif %}  ">
                               <i class="nav-icon fas fa-vial"></i>
                               <p>Pathology</p>
                           </a>
-                      </li>
-                      <li class="nav-item">  
-                        {% url 'kahamahmis:pathology_record_report' as pathology_record_report %}                    
-                          <a href="{% url "kahamahmis:pathology_record_report" %}" class="nav-link{% if request.path == pathology_record_report %} active {% endif %}  ">
-                              <i class="nav-icon fas fa-vial"></i>
-                              <p>Pathology reports</p>
-                          </a>
-                      </li>
+                      </li>                      
                       <li class="nav-item">                   
                           <a href="{% url "kahamahmis:manage_staff" %}" class="nav-link">
                               <i class="nav-icon fas fa-users"></i>

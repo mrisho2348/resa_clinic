@@ -155,7 +155,7 @@ Add  Consultation notes
                                                                                 <div class="mb-3 form-group">
                                                                                     <label for="edit_temperature{{ vital.id }}" class="form-label">Temperature (°C)</label>
                                                                                     <select class="form-control select2bs4" style="width: 100%;" id="edit_temperature{{ vital.id }}" name="temperature">
-                                                                                        {% for temp in range_51 %}
+                                                                                        {% for temp in temps %}
                                                                                             <option value="{{ temp }}" {% if temp == vital.temperature %} selected {% endif %}>{{ temp }}</option>
                                                                                         {% endfor %}
                                                                                     </select>
@@ -1210,7 +1210,7 @@ Add  Consultation notes
                             <label for="temperature">Temperature (°C)</label>
                             <select class="form-control select2bs4" style="width: 100%;" id="temperature" name="temperature" >
                                 <option value=""></option>
-                                {% for temp in range_51 %}
+                                {% for temp in temps %}
                                     <option value="{{ temp }}">{{ temp }}</option>
                                 {% endfor %}
                             </select>

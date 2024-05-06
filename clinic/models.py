@@ -1263,7 +1263,7 @@ class PatientMedicationAllergy(models.Model):
         return f"{self.medicine_name} - {self.reaction}"
     
 class PatientSurgery(models.Model):
-    patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE)
+    patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE,related_name='remote_patient_surgery')
     surgery_name = models.CharField(max_length=100,blank=True, null=True)
     surgery_date = models.TextField(blank=True, null=True)   
     created_at = models.DateTimeField(auto_now_add=True)

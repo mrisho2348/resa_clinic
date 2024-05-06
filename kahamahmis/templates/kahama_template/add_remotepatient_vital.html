@@ -95,7 +95,7 @@ Add  Patient Vital
                                 <div class="form-group col-md-6">
                                     <label for="temperature">Temperature (°C)</label>
                                     <select class="form-control select2bs4" style="width: 100%;" id="temperature" name="temperature">
-                                        {% for temp in range_51 %}
+                                        {% for temp in temps %}
                                             <option value="{{ temp }}" {% if temp == existing_vital.temperature %} selected {% endif %}>{{ temp }}</option>
                                         {% endfor %}
                                     </select>

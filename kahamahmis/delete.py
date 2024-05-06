@@ -2,7 +2,7 @@
 
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render,get_object_or_404
-from clinic.models import Category,  Consultation, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, PatientVisits, PatientVital, Patients, Prescription, Procedure, QualityControl, Reagent, ReagentUsage, RemoteCompany, RemoteLaboratoryOrder, RemoteMedicine, RemoteObservationRecord, RemotePatient, RemoteProcedure, RemoteReferral, Sample, Service, Staffs, Supplier, UsageHistory
+from clinic.models import Category,  Consultation, ConsultationFee, ConsultationNotes, Diagnosis, DiagnosticTest, DiseaseRecode, Equipment, EquipmentMaintenance, FamilyMedicalHistory, HealthIssue, InsuranceCompany, InventoryItem, MedicationPayment, Medicine, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, PatientHealthCondition, PatientMedicationAllergy, PatientSurgery, PatientVisits, PatientVital, Patients, Prescription, Procedure, QualityControl, Reagent, ReagentUsage, RemoteCompany, RemoteLaboratoryOrder, RemoteMedicine, RemoteObservationRecord, RemotePatient, RemoteProcedure, RemoteReferral, Sample, Service, Staffs, Supplier, UsageHistory
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -525,4 +525,60 @@ def delete_drug(request):
             return JsonResponse({'success': False, 'message': f'Error deleting result: {str(e)}'})
     else:
         # Return a JSON response indicating failure
-        return JsonResponse({'success': False, 'message': 'Invalid request method'})       
+        return JsonResponse({'success': False, 'message': 'Invalid request method'})    
+
+@csrf_exempt    
+def delete_health_record(request):
+    if request.method == 'POST':
+        record_id = request.POST.get('record_id')
+        # Delete the record from the database
+        try:
+            record = PatientHealthCondition.objects.get(id=record_id)
+            record.delete()
+            return JsonResponse({'message': 'Record deleted successfully'})
+        except PatientHealthCondition.DoesNotExist:
+            return JsonResponse({'error': 'Record not found'}, status=404)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+@csrf_exempt    
+def delete_medication_allergy_record(request):
+    if request.method == 'POST':
+        record_id = request.POST.get('record_id')
+        # Delete the record from the database
+        try:
+            record = PatientMedicationAllergy.objects.get(id=record_id)
+            record.delete()
+            return JsonResponse({'message': 'Record deleted successfully'})
+        except PatientMedicationAllergy.DoesNotExist:
+            return JsonResponse({'error': 'Record not found'}, status=404)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400) 
+
+@csrf_exempt    
+def delete_surgery_history_record(request):
+    if request.method == 'POST':
+        record_id = request.POST.get('record_id')
+        # Delete the record from the database
+        try:
+            record = PatientSurgery.objects.get(id=record_id)
+            record.delete()
+            return JsonResponse({'message': 'Record deleted successfully'})
+        except PatientSurgery.DoesNotExist:
+            return JsonResponse({'error': 'Record not found'}, status=404)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)    
+
+@csrf_exempt
+def delete_family_medical_history_record(request):
+    if request.method == 'POST':
+        record_id = request.POST.get('record_id')
+        # Delete the record from the database
+        try:
+            record = FamilyMedicalHistory.objects.get(id=record_id)
+            record.delete()
+            return JsonResponse({'message': 'Record deleted successfully'})
+        except FamilyMedicalHistory.DoesNotExist:
+            return JsonResponse({'error': 'Record not found'}, status=404)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)             
