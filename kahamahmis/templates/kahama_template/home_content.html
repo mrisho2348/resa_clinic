@@ -222,25 +222,12 @@ ADMIN HOME
                                 <td>{{ patient.created_at }}</td>                                 
                                 <td class="text-center">
                                     
-                                      <a href="{% url 'kahamahmis:patient_visit_history_view' patient.id %}" data-toggle="tooltip" title="open visit History">
+                                      <a href="{% url 'kahamahmis:patient_visit_history_view' patient.id %}" data-toggle="tooltip" title="open patient visit History">
                                         <button type="button" class="btn btn-light border btn-sm"><i class="fa fa-eye text-dark"></i></button>
                                     </a> 
                                     <a href="{% url 'kahamahmis:patient_info_form_edit' patient_id=patient.id %}" data-toggle="tooltip" title="Edit patient">
                                         <button type="button" class="btn btn-secondary btn-sm"><i class="fa fa-edit text-white"></i></button>
-                                    </a>                            
-                                       <!-- Visit Action -->
-                                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#addVisitModal{{ patient.id }}" title="Add Visit">
-                                            <i class="fas fa-plus text-dark"></i>
-                                          </button>
-                                        
-                                            <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#consultationModal{{ patient.id }}">
-                                                <i class="fas fa-calendar text-dark" title="Appointment"></i>
-                                            </button>
-                                        </a>   
-                                      
-                                      
-                                </td>
-
+                                  </td>
                                 <div class="container-fluid">
                                     <div class="row">
                                         <!-- left column -->

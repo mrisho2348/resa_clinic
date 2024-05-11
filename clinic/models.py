@@ -1251,16 +1251,16 @@ class RemoteCompany(models.Model):
 
     def __str__(self):
         return self.name
-    
+
 class PatientMedicationAllergy(models.Model):
     patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE, related_name='remote_medication_allergies')
-    medicine_name = models.CharField(max_length=100)
+    medicine_name =models.ForeignKey(RemoteMedicine, on_delete=models.CASCADE, related_name='remote_medicine')
     reaction = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.medicine_name} - {self.reaction}"
+        return f"{self.medicine_name} - {self.reaction}"    
     
 class PatientSurgery(models.Model):
     patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE,related_name='remote_patient_surgery')
@@ -1283,7 +1283,7 @@ class HealthRecord(models.Model):
         return f"{self.name}"  
     
 class PatientLifestyleBehavior(models.Model):
-    patient = models.ForeignKey('RemotePatient', on_delete=models.CASCADE)
+    patient = models.OneToOneField('RemotePatient', on_delete=models.CASCADE)
     weekly_exercise_frequency =models.CharField(max_length=10, blank=True, null=True)   
     smoking = models.CharField(max_length=10, blank=True, null=True)
     alcohol_consumption = models.CharField(max_length=10, blank=True, null=True)    
@@ -1773,6 +1773,8 @@ class RemoteOrder(models.Model):
 class RemoteConsultation(models.Model):
     doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE)
     patient = models.ForeignKey(RemotePatient, on_delete=models.CASCADE)
+    visit = models.ForeignKey(RemotePatientVisits, on_delete=models.CASCADE,blank=True, null=True)
+    created_by = models.ForeignKey(Staffs, on_delete=models.CASCADE, blank=True, null=True, related_name='remote_created_consultations')
     appointment_date = models.DateField()
     start_time = models.TimeField(blank=True, null=True)
     end_time = models.TimeField(blank=True, null=True)

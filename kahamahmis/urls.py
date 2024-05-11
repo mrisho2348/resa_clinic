@@ -145,8 +145,7 @@ urlpatterns = [
         
        
         
-        # manage urls 
-        # path('resa/remotemanage_patient/', views.remotemanage_patient, name='remotemanage_patient'),
+        # manage urls        
         path('patients/', views.patients_list, name='patients_list'),
         path('diagnosis/', views.diagnosis_list, name='diagnosis_list'),
         path('generatePDF/<int:patient_id>/<int:visit_id>/', views.generatePDF, name='generatePDF'),
@@ -159,7 +158,6 @@ urlpatterns = [
         path('patient_vital_list/<int:patient_id>/<int:visit_id>/', views.patient_vital_list, name='patient_vital_list'),
         path('patient_visit_details_view/<int:patient_id>/<int:visit_id>/', views.patient_visit_details_view, name='patient_visit_details_view'),
         path('patient_health_record_view/<int:patient_id>/<int:visit_id>/', views.patient_health_record_view, name='patient_health_record_view'),
-        path('patient_consultation_record_view/<int:patient_id>/<int:visit_id>/', views.patient_consultation_record_view, name='patient_consultation_record_view'),
         path('patient_visit_history/<int:patient_id>/', views.patient_visit_history_view, name='patient_visit_history_view'),
         path('health-issues/', views.health_issue_list, name='health_issue_list'),
         path('prescriptions/<str:visit_number>/<int:patient_id>/', views.prescription_detail, name='prescription_detail'),
@@ -206,7 +204,6 @@ urlpatterns = [
         path('import_country_records', kahamaImports.import_country_records, name='import_country_records'),
         path('resa/import_Import/import_patient_vital_records',kahamaImports.import_patient_vital_records, name="import_patient_vital_records"),
         path('resa/import_Import/Inventory/ItemForm_records',kahamaImports.import_ImportInventoryItemForm_records, name="import_ImportInventoryItemForm_records"),
-        path('resa/ImportExcel_supplier',kahamaImports.import_supplier, name="import_supplier"),
         path('resa/ImportExcel_category',kahamaImports.import_category, name="import_category"),
         path('resa/ImportExcel_service',kahamaImports.import_service_records, name="import_service_records"),
         path('resa/ImportExcel_disease',kahamaImports.import_disease_recode, name="import_disease_recode"),
@@ -220,37 +217,27 @@ urlpatterns = [
         path('import_patient', kahamaImports.import_patient, name='import_patient'),
         path('import_prescription_records', kahamaImports.import_prescription_records, name='import_prescription_records'),
         path('import_consultation_notes_records', kahamaImports.import_consultation_notes_records, name='import_consultation_notes_records'),
-        path('import-companies/', kahamaImports.import_companies, name='import_companies'),
-        path('import-patients/', kahamaImports.import_patient_records, name='import_patient_records'),
+        path('import-companies/', kahamaImports.import_companies, name='import_companies'),        
         path('import-pathology-records/', kahamaImports.import_pathology_records, name='import_pathology_records'),
         path('import-medicine-records/', kahamaImports.import_medicine_records, name='import_medicine_records'),
         path('import-procedure-records/', kahamaImports.import_procedure_records, name='import_procedure_records'),
         path('import-referral-records/', kahamaImports.import_referral_records, name='import_referral_records'),
         
-        # edit urls 
-        path('pathology-diagnostic-test-edit-save/<int:test_id>/edit/', editView.pathology_diagnostic_test_edit_save, name='pathology_diagnostic_test_edit_save'),
-        path('edit-patient-disease-save/<int:patient_disease_id>/edit/', editView.edit_patient_disease_save, name='edit_patient_disease_save'),
-        path('edit-sample-test/<int:sample_id>/edit/', editView.edit_sample, name='edit_sample'),
-        path('diagnostic-test/<int:test_id>/edit/', editView.edit_diagnostic_test, name='edit_diagnostic_test'),
+     
         path('disease-records/<int:disease_id>/edit/', editView.edit_disease_record, name='edit_disease_record'),
         path('insurance-records/<int:insurance_id>/edit/', editView.edit_insurance, name='edit_insurance'),
         path('pathodology/<int:pathodology_id>/edit/', editView.edit_pathodology, name='edit_pathodology'),
         path('company/<int:company_id>/edit/', editView.edit_company, name='edit_company'),
         path('update_consultation_data/<int:appointment_id>/', editView.update_consultation_data, name='update_consultation_data'), 
-        path('Patient/<int:patient_id>/edit/', editView.edit_patient, name='edit_patient'),
-        path('update_consultation_fee/', editView.update_consultation_fee, name='update_consultation_fee'), 
+      
         path('edit_procedure/', editView.edit_procedure, name='edit_procedure'), 
         path('edit_lab_result/', editView.edit_lab_result, name='edit_lab_result'), 
         path('edit_observation/', editView.edit_observation, name='edit_observation'), 
-        path('edit_referral/', editView.edit_referral, name='edit_referral'), 
-        path('Patient/<int:patient_id>/add/', views.appointment_view, name='appointment_view'), 
-        path('appointment_view/<int:patient_id>/', views.appointment_view, name='appointment_view'), 
+        path('edit_referral/', editView.edit_referral, name='edit_referral'),   
         path('patient-procedure-history/<str:mrn>/view/', views.patient_procedure_history_view, name='patient_procedure_history_view_mrn'), 
         path('edit_medicine/<int:medicine_id>/', editView.edit_medicine, name='edit_medicine'),        
         path('edit_inventory/<int:inventory_id>/', editView.edit_inventory, name='edit_inventory'),
-        
-        path('edit_medication_payment/<int:payment_id>/', editView.edit_medication_payment, name='edit_medication_payment'),
-        
+       
         
         # delete urls 
         
@@ -258,15 +245,12 @@ urlpatterns = [
         path('delete_ConsultationNotes/<int:consultation_id>/', delete.delete_ConsultationNotes, name='delete_ConsultationNotes'),
         path('delete_patient_vital/<int:vital_id>/', delete.delete_patient_vital, name='delete_patient_vital'),
         path('delete_prescription/<int:prescription_id>/', delete.delete_prescription, name='delete_prescription'),
-        path('delete-consultation-fee/<int:fee_id>/', delete.delete_consultation_fee, name='delete_consultation_fee'),
+       
         path('delete-consultation/<int:appointment_id>/', delete.delete_consultation, name='delete_consultation'),
-        path('pathology-diagnostic-test-delete/<int:test_id>/', delete.pathology_diagnostic_test_delete, name='pathology_diagnostic_test_delete'),
-        path('delete-patient-disease/<int:patient_disease_id>/', delete.delete_patient_disease, name='delete_patient_disease'),
-        path('delete-medication-payment/<int:payment_id>/', delete.delete_medication_payment, name='delete_medication_payment'),
-        path('delete-diagnostic/test/<int:test_id>/', delete.delete_diagnostic_test, name='delete_diagnostic_test'),
+        
         path('delete_medicine/<int:medicine_id>/', delete.delete_medicine, name='delete_medicine'),
         path('disease-records/<int:disease_id>/delete/', delete.delete_disease_record, name='delete_disease_record'),
-        path('delete_supplier/<int:supplier_id>/', delete.delete_supplier, name='delete_supplier'),
+        
         path('delete_equipment/<int:equipment_id>/', delete.delete_equipment, name='delete_equipment'),
         path('delete_inventory/<int:item_id>/', delete.delete_inventory, name='delete_inventory'),
         path('delete_category/<int:category_id>/', delete.delete_category, name='delete_category'),
@@ -294,8 +278,8 @@ urlpatterns = [
         path('delete_lab_result/', delete.delete_lab_result, name='delete_lab_result'),        
         path('delete_referral/', delete.delete_referral, name='delete_referral'),
         path('delete_qualitycontrol/<int:control_id>/', delete.delete_qualitycontrol, name='delete_qualitycontrol'),
-        path('delete_sample/<int:sample_id>/', delete.delete_sample, name='delete_sample'),
+       
         
         path('delete_patient_visit/<int:patient_visit_id>/', delete.delete_patient_visit, name='delete_patient_visit'),
-        path('delete_medication_payment/<int:payment_id>/', delete.delete_medication_payment, name='delete_medication_payment'),
+       
 ]

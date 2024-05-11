@@ -26,6 +26,11 @@ def save_patient_health_information(request, patient_id):
     try:
         # Retrieve the patient object using the patient_id from URL parameters
         patient = get_object_or_404(RemotePatient, pk=patient_id)
+        try:
+            all_medicines = RemoteMedicine.objects.all()
+        except RemoteMedicine.DoesNotExist:
+            # Handle the case where no medicines are found
+            all_medicines = []
         if request.method == 'POST':
             # Check if the patient has allergies to medication
             medication_allergy = request.POST.get('medication_allergy')
@@ -91,9 +96,10 @@ def save_patient_health_information(request, patient_id):
                 medicine_names = request.POST.getlist('medicine_name[]')
                 reactions = request.POST.getlist('reaction[]')
                 for medicine_name, reaction in zip(medicine_names, reactions):
+                    medicine_name_id = RemoteMedicine.objects.get(id=medicine_name)           
                     medication_allergy = PatientMedicationAllergy.objects.create(
                         patient=patient,
-                        medicine_name=medicine_name,
+                        medicine_name_id=medicine_name_id.id,
                         reaction=reaction
                     )
 
@@ -110,7 +116,7 @@ def save_patient_health_information(request, patient_id):
         messages.error(request, f'Error adding patient health information: {str(e)}')
 
     # If the request method is not POST or if there's an error, render the form again
-    return render(request, 'kahama_template/add_patient_health_condition_form.html', {'patient': patient})
+    return render(request, 'kahama_template/add_patient_health_condition_form.html', {'patient': patient,'all_medicines':all_medicines})
 
 @login_required
 def health_record_list(request):
@@ -939,56 +945,59 @@ def add_remoteprescription(request):
         patient = RemotePatient.objects.get(id=patient_id)
         visit = RemotePatientVisits.objects.get(id=visit_id)
 
-        # Check inventory levels for each medicine
+        # Save prescriptions only if inventory check passes
         for i in range(len(medicines)):
-            medicine = Medicine.objects.get(id=medicines[i])
+            medicine = RemoteMedicine.objects.get(id=medicines[i])
             quantity_used_str = quantities[i]  # Get the quantity as a string
 
             if quantity_used_str is None:
-                return JsonResponse({'status': 'error', 'message': f'Invalid quantity for {medicine.name}. Quantity cannot be empty.'})
+                return JsonResponse({'status': 'error', 'message': f'Invalid quantity for {medicine.drug_name}. Quantity cannot be empty.'})
 
             try:
                 quantity_used = int(quantity_used_str)
             except ValueError:
-                return JsonResponse({'status': 'error', 'message': f'Invalid quantity for {medicine.name}. Quantity must be a valid number.'})
+                return JsonResponse({'status': 'error', 'message': f'Invalid quantity for {medicine.drug_name}. Quantity must be a valid number.'})
 
             if quantity_used < 0:
-                return JsonResponse({'status': 'error', 'message': f'Invalid quantity for {medicine.name}. Quantity must be a non-negative number.'})
+                return JsonResponse({'status': 'error', 'message': f'Invalid quantity for {medicine.drug_name}. Quantity must be a non-negative number.'})
 
-            # Retrieve the corresponding medicine inventory
-            medicine_inventory = medicine.medicineinventory_set.first()
+            # Retrieve the remaining quantity of the medicine
+            remain_quantity = medicine.remain_quantity
 
-            if medicine_inventory and quantity_used > medicine_inventory.remain_quantity:
-                return JsonResponse({'status': 'error', 'message': f'Insufficient stock for {medicine.name}. Only {medicine_inventory.remain_quantity} available.'})
+            if remain_quantity is not None and quantity_used > remain_quantity:
+                return JsonResponse({'status': 'error', 'message': f'Insufficient stock for {medicine.drug_name}. Only {remain_quantity} available.'})
 
-        # Save prescriptions only if inventory check passes
-        for i in range(len(medicines)):
-            medicine = Medicine.objects.get(id=medicines[i])
-            prescription = RemotePrescription()
-            prescription.patient = patient
-            prescription.medicine = medicine
-            prescription.entered_by = entered_by
-            prescription.visit = visit
-            prescription.dose = doses[i]
-            prescription.frequency =PrescriptionFrequency.objects.get(id=frequencies[i])            
-            prescription.duration = durations[i]
-            prescription.quantity_used = int(quantities[i])
-            prescription.total_price = total_price[i]
-            prescription.save()
+            # Reduce the remain quantity of the medicine
+            if remain_quantity is not None:
+                medicine.remain_quantity -= quantity_used
+                medicine.save()
+
+            # Save prescription
+            prescription = RemotePrescription.objects.create(
+                patient=patient,
+                medicine=medicine,
+                entered_by=entered_by,
+                visit=visit,
+                dose=doses[i],
+                frequency=PrescriptionFrequency.objects.get(id=frequencies[i]),
+                duration=durations[i],
+                quantity_used=quantity_used,
+                total_price=total_price[i]
+            )
 
         return JsonResponse({'status': 'success', 'message': 'Prescription saved.'})
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)})  
+        return JsonResponse({'status': 'error', 'message': str(e)})
     
 def medicine_dosage(request):
     if request.method == 'GET' and 'medicine_id' in request.GET:
         medicine_id = request.GET.get('medicine_id')
 
         try:
-            medicine = Medicine.objects.get(id=medicine_id)
+            medicine = RemoteMedicine.objects.get(id=medicine_id)
             dosage = medicine.dosage
             return JsonResponse({'dosage': dosage})
-        except Medicine.DoesNotExist:
+        except RemoteMedicine.DoesNotExist:
             return JsonResponse({'error': 'Medicine not found'}, status=404)
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)  

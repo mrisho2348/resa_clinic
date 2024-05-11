@@ -175,7 +175,7 @@ Patient Consultation
         
         $.ajax({
             type: 'POST',
-            url:'{% url "kahamahmis:save_remoteconsultation_notes" %}', // Replace 'your_server_url_here' with your actual server-side endpoint
+          
             data: formData,
             success: function(response) {
                 if (data.status === 'success') {                                                   
@@ -293,14 +293,7 @@ Patient Consultation
                                                 <th></th>
                                             </tr>
                                         </thead>
-                                        <tbody>
-                                            {% comment %} <tr>
-                                                <td>CONSULTATION</td>
-                                                <td hidden><input type="number" class="form-control"></td>
-                                                <td hidden><input type="number" class="form-control"></td>
-                                                <td>-</td>
-                                                <td><a href="#"><i class="text-success fa fa-check"></i></a></td>
-                                            </tr> {% endcomment %}
+                                        <tbody>                                           
                                         </tbody>
                                     </table>
                                 </div>
@@ -420,7 +413,7 @@ Patient Consultation
             // Send AJAX request to save service requests
             $.ajax({
                 type: 'POST',
-                url: '{% url "kahamahmis:save_service_requests" %}', // Replace with your endpoint URL
+                
                 data: JSON.stringify({ patient_id: patientId, service_requests: serviceRequests, visit_id:visitId }), // Include patient ID in the data
                 contentType: 'application/json',
                 success: function (response) {

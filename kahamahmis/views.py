@@ -556,59 +556,7 @@ def view_patient(request, patient_id):
 
     return render(request, "kahama_template/patients_detail.html", context)
 
-def appointment_view(request, patient_id):
-    try:
-        if request.method == 'POST':
-            # Extract data from the request
-            doctor_id = request.POST.get('doctor')
-            date_of_consultation = request.POST.get('date_of_consultation')
-            start_time = request.POST.get('start_time')
-            end_time = request.POST.get('end_time')
-            description = request.POST.get('description')
 
-            # Create a Consultation instance
-            doctor = get_object_or_404(Staffs, id=doctor_id)
-            patient = get_object_or_404(Patients, id=patient_id)
-            consultation = Consultation(
-                doctor=doctor,
-                patient=patient,
-                appointment_date=date_of_consultation,
-                start_time=start_time,
-                end_time=end_time,
-                description=description
-            )
-            consultation.save()
-
-            # Create a notification for the patient
-            notification_message = f"New appointment scheduled with Dr. { doctor.admin.first_name } { doctor.middle_name } { doctor.admin.last_name } on {date_of_consultation} from {start_time} to {end_time}."
-            Notification.objects.create(
-                content_type=ContentType.objects.get_for_model(Patients),
-                object_id=patient.id,
-                message=notification_message
-            )
-
-            messages.success(request, "Appointment created successfully.")
-            return redirect('appointment_view', patient_id=patient_id)
-
-        # If the request is not a POST, handle the GET request
-        patient = get_object_or_404(Patients, id=patient_id)
-        doctors = Staffs.objects.filter(role='doctor', work_place = 'kahama')
-
-        context = {
-            'patient': patient,
-            'doctors': doctors,
-        }
-
-        return render(request, "kahama_template/add_consultation.html", context)
-
-    except IntegrityError as e:
-        # Handle integrity error (e.g., duplicate entry)
-        messages.error(request, f"Error creating appointment: {str(e)}")
-        return redirect('appointment_view', patient_id=patient_id)
-    except Exception as e:
-        # Handle other exceptions
-        messages.error(request, f"An unexpected error occurred: {str(e)}")
-        return redirect('appointment_view', patient_id=patient_id)
 
 @login_required    
 def notification_view(request):
@@ -1819,13 +1767,13 @@ def patient_visit_details_view(request, patient_id, visit_id):
         visits = RemotePatientVisits.objects.get(id=visit_id)
         visit_history = RemotePatientVisits.objects.filter(patient_id=patient_id)
         prescriptions = RemotePrescription.objects.filter(patient=patient_id, visit=visit_id)
-        chief_complients = ChiefComplaint.objects.filter(patient=patient_id, visit=visit_id)
-        primary_physical_examination = PrimaryPhysicalExamination.objects.filter(patient=patient_id, visit=visit_id)
-        secondary_physical_examination = SecondaryPhysicalExamination.objects.filter(patient=patient_id, visit=visit_id)
+        chief_complaints = ChiefComplaint.objects.filter(patient_id=patient_id, visit_id=visit_id)
+        primary_physical_examination = PrimaryPhysicalExamination.objects.filter(patient_id=patient_id, visit_id=visit_id).first()
+        secondary_physical_examination = SecondaryPhysicalExamination.objects.filter(patient=patient_id, visit=visit_id).first()
         consultation_notes = RemoteConsultationNotes.objects.filter(patient_id=patient_id, visit=visit_id).order_by('-created_at').first()
         previous_vitals = RemotePatientVital.objects.filter(patient=patient_id,visit=visit_id).order_by('-recorded_at')
         consultation_notes_previous = RemoteConsultationNotes.objects.filter(patient=patient_id).order_by('-created_at')
-        referrals = RemoteReferral.objects.filter(patient=patient_id).order_by('-referral_date')
+        referrals = RemoteReferral.objects.filter(patient=patient_id).order_by('-created_at')
         counselling = RemoteCounseling.objects.filter(patient=patient_id).order_by('-created_at')
         vital = RemotePatientVital.objects.filter(patient=patient_id, visit=visit_id)
         procedures = RemoteProcedure.objects.filter(patient=patient_id, visit=visit_id)
@@ -1834,9 +1782,7 @@ def patient_visit_details_view(request, patient_id, visit_id):
         procedure = RemoteProcedure.objects.filter(patient=patient_id, visit=visit_id).first()
         pathology_records = PathodologyRecord.objects.all()
         doctors = Staffs.objects.filter(role='doctor', work_place = 'kahama')
-        provisional_diagnoses = Diagnosis.objects.all()
-        final_diagnoses = Diagnosis.objects.all()
-
+        diagnosis_record = RemotePatientDiagnosisRecord.objects.get(patient_id=patient_id, visit_id=visit_id)
         total_price = sum(prescription.total_price for prescription in prescriptions)
         patient = RemotePatient.objects.get(id=patient_id)
 
@@ -1848,15 +1794,14 @@ def patient_visit_details_view(request, patient_id, visit_id):
             'observations': observations,
             'patient': patient,
             'referrals': referrals,
-            'chief_complients': chief_complients,
+            'chief_complaints': chief_complaints,
             'visits': visits,          
             'prescriptions': prescriptions,
             'total_price': total_price,
             'consultation_notes': consultation_notes,
             'pathology_records': pathology_records,
             'doctors': doctors,
-            'provisional_diagnoses': provisional_diagnoses,
-            'final_diagnoses': final_diagnoses,
+            'diagnosis_record': diagnosis_record,            
             'previous_vitals': previous_vitals,
             'consultation_notes_previous': consultation_notes_previous,
             'vital': vital,
@@ -1900,87 +1845,6 @@ def patient_visit_details_view(request, patient_id, visit_id):
     except Exception as e:
         return render(request, '404.html', {'error_message': str(e)})
     
-@login_required    
-def patient_consultation_record_view(request, patient_id, visit_id):
-    try:
-        # Retrieve visit history for the specified patient
-        visits = RemotePatientVisits.objects.get(id=visit_id)
-        visit_history = RemotePatientVisits.objects.filter(patient_id=patient_id)       
-        
-        prescriptions = RemotePrescription.objects.filter(patient=patient_id, visit=visit_id)
-        
-        try:
-            consultation_notes = RemoteConsultationNotes.objects.filter(patient_id=patient_id, visit=visit_id).order_by('-created_at').first()
-        except RemoteConsultationNotes.DoesNotExist:
-            consultation_notes = None
-         
-        try:
-            previous_vitals = RemotePatientVital.objects.filter(patient=patient_id,visit=visit_id).order_by('-recorded_at')
-        except RemotePatientVital.DoesNotExist:
-            previous_vitals = None   
-             
-        try:
-            consultation_notes_previous  = RemoteConsultationNotes.objects.filter(patient=patient_id).order_by('-created_at')
-        except RemoteConsultationNotes.DoesNotExist:
-            consultation_notes_previous  = None   
-             
-        try:
-            vital = RemotePatientVital.objects.filter(patient=patient_id, visit=visit_id)
-        except RemotePatientVital.DoesNotExist:
-            vital = None
-            
-        try:
-            procedures = RemoteProcedure.objects.filter(patient=patient_id, visit=visit_id)            
-        except RemoteProcedure.DoesNotExist:
-            procedures = None
-          
-       
-            
-        pathology_records = PathodologyRecord.objects.all()  # Fetch all consultation notes from the database
-        doctors = Staffs.objects.filter(role='doctor', work_place = 'kahama')
-        provisional_diagnoses = Diagnosis.objects.all()
-        final_diagnoses = Diagnosis.objects.all()
-
-        total_price = sum(prescription.total_price for prescription in prescriptions)
-        range_31 = range(31)
-        current_date = timezone.now().date()
-        patient = RemotePatient.objects.get(id=patient_id)
-        remote_service = RemoteService.objects.all()
-        range_51 = range(51)
-        range_301 = range(301)
-        range_101 = range(101)
-        range_15 = range(3, 16)
-        medicines = Medicine.objects.filter(
-            medicineinventory__remain_quantity__gt=0,  # Inventory level greater than zero
-            expiration_date__gt=current_date  # Not expired
-        ).distinct()
-        
-        return render(request, 'kahama_template/manage_patient_consultation_record.html', {
-            'visit_history': visit_history,
-            'patient': patient,
-            'visits': visits,
-            'range_31': range_31,
-            'medicines': medicines,
-            'prescriptions': prescriptions,
-            'total_price': total_price,
-            'consultation_notes': consultation_notes,
-            'pathology_records': pathology_records,
-            'doctors': doctors,
-            'provisional_diagnoses': provisional_diagnoses,
-            'final_diagnoses': final_diagnoses,
-            'previous_vitals': previous_vitals,
-            'consultation_notes_previous': consultation_notes_previous,           
-            'procedures': procedures,
-            'vital': vital,
-            'remote_service': remote_service,
-            'range_51': range_51,
-            'range_301': range_301,
-            'range_101': range_101,
-            'range_15': range_15,
-        })
-    except Exception as e:
-        # Handle other exceptions if necessary
-        return render(request, '404.html', {'error_message': str(e)})
 
 @login_required
 def prescription_list(request):
@@ -2869,13 +2733,36 @@ def health_info_edit(request, patient_id):
     try:
         # Retrieve the patient object
         patient = get_object_or_404(RemotePatient, pk=patient_id)
+        try:
+            all_medicines = RemoteMedicine.objects.all()
+        except RemoteMedicine.DoesNotExist:
+            # Handle the case where no medicines are found
+            all_medicines = []
+       # Retrieve existing health records for the patient
+        try:
+            patient_health_records = PatientHealthCondition.objects.filter(patient_id=patient_id)
+        except PatientHealthCondition.DoesNotExist:
+            patient_health_records = None
         
-        # Retrieve existing health records for the patient
-        patient_health_records = PatientHealthCondition.objects.filter(patient_id=patient_id)
-        medication_allergies = PatientMedicationAllergy.objects.filter(patient_id=patient_id)
-        surgery_history = PatientSurgery.objects.filter(patient_id=patient_id)
-        lifestyle_behavior = PatientLifestyleBehavior.objects.get(patient_id=patient_id)
-        family_medical_history = FamilyMedicalHistory.objects.filter(patient=patient)
+        try:
+            medication_allergies = PatientMedicationAllergy.objects.filter(patient_id=patient_id)
+        except PatientMedicationAllergy.DoesNotExist:
+            medication_allergies = None
+        
+        try:
+            surgery_history = PatientSurgery.objects.filter(patient_id=patient_id)
+        except PatientSurgery.DoesNotExist:
+            surgery_history = None
+        
+        try:
+            lifestyle_behavior = PatientLifestyleBehavior.objects.get(patient_id=patient_id)
+        except PatientLifestyleBehavior.DoesNotExist:
+            lifestyle_behavior = None
+        
+        try:
+            family_medical_history = FamilyMedicalHistory.objects.filter(patient=patient)
+        except FamilyMedicalHistory.DoesNotExist:
+            family_medical_history = None
         
         context = {
             'patient': patient,
@@ -2883,19 +2770,32 @@ def health_info_edit(request, patient_id):
             'medication_allergies': medication_allergies,
             'lifestyle_behavior': lifestyle_behavior,
             'family_medical_history': family_medical_history,
-            'surgery_history': surgery_history
+            'surgery_history': surgery_history,
+            'all_medicines': all_medicines,
         }
         
         if request.method == 'POST':
-            # Update lifestyle behavior
-            lifestyle_behavior.smoking = request.POST.get('smoking')
-            lifestyle_behavior.alcohol_consumption = request.POST.get('alcohol_consumption')
-            lifestyle_behavior.weekly_exercise_frequency = request.POST.get('weekly_exercise_frequency')
-            lifestyle_behavior.healthy_diet = request.POST.get('healthy_diet')
-            lifestyle_behavior.stress_management = request.POST.get('stress_management')
-            lifestyle_behavior.sufficient_sleep = request.POST.get('sufficient_sleep')
-            lifestyle_behavior.save()
             
+            if lifestyle_behavior:
+                lifestyle_behavior.smoking = request.POST.get('smoking')
+                lifestyle_behavior.alcohol_consumption = request.POST.get('alcohol_consumption')
+                lifestyle_behavior.weekly_exercise_frequency = request.POST.get('weekly_exercise_frequency')
+                lifestyle_behavior.healthy_diet = request.POST.get('healthy_diet')
+                lifestyle_behavior.stress_management = request.POST.get('stress_management')
+                lifestyle_behavior.sufficient_sleep = request.POST.get('sufficient_sleep')
+                lifestyle_behavior.save()
+            else:
+              # Create a new instance of PatientLifestyleBehavior
+                    lifestyle_behavior = PatientLifestyleBehavior(
+                        patient_id=patient_id,
+                        smoking=request.POST.get('smoking'),
+                        alcohol_consumption=request.POST.get('alcohol_consumption'),
+                        weekly_exercise_frequency=request.POST.get('weekly_exercise_frequency'),
+                        healthy_diet=request.POST.get('healthy_diet'),
+                        stress_management=request.POST.get('stress_management'),
+                        sufficient_sleep=request.POST.get('sufficient_sleep')
+                    )
+                    lifestyle_behavior.save()
             # Update or add family medical history records
             for record in family_medical_history:
                 record_id = str(record.id)
@@ -2931,7 +2831,8 @@ def health_info_edit(request, patient_id):
                 
                 # Update existing record
                 if medicine_name is not None:
-                    allergy.medicine_name = medicine_name
+                    medicine_name_id = RemoteMedicine.objects.get(id=medicine_name) 
+                    allergy.medicine_name_id = medicine_name_id.id
                 if reaction is not None:
                     allergy.reaction = reaction
                 allergy.save()
@@ -2942,7 +2843,8 @@ def health_info_edit(request, patient_id):
                 
                 # Create new medication allergy records
                 for medicine_name, reaction in zip(new_medicine_names, new_reactions):
-                    new_allergy = PatientMedicationAllergy(patient=patient, medicine_name=medicine_name, reaction=reaction)
+                    medicine_name_id = RemoteMedicine.objects.get(id=medicine_name)  
+                    new_allergy = PatientMedicationAllergy(patient=patient, medicine_name_id=medicine_name_id.id, reaction=reaction)
                     new_allergy.save()
                 
             # Handle chronic illness option for medication allergies

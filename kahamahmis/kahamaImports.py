@@ -104,37 +104,7 @@ def import_category(request):
     return render(request, 'kahama_template/import_category.html', {'form': form})
 
 
-@login_required
-def import_supplier(request):
-    if request.method == 'POST':
-        form = ImportSupplierForm(request.POST, request.FILES)
-        if form.is_valid():
-            try:
-                resource = SupplierResource()
-                new_supplier = request.FILES['supplier_records_file']
-                
-                # Use tablib to load the imported data
-                dataset = Dataset()
-                imported_data = dataset.load(new_supplier.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
 
-                for data in imported_data:
-                     supplier_record = Supplier(
-                        name=data[0],
-                        address=data[1],
-                        contact_information=data[2],
-                        email=data[3],
-                      
-                    )
-                     supplier_record.save()
-
-                return redirect('supplier_list') 
-            except Exception as e:
-                messages.error(request, f'An error occurred: {e}')
-
-    else:
-        form = ImportSupplierForm()
-
-    return render(request, 'kahama_template/import_supplier.html', {'form': form})
 
 @login_required
 def import_equipment(request):
@@ -616,45 +586,6 @@ def import_diagnosis_records(request):
 
     return render(request, 'kahama_template/import_diagnosis.html', {'form': form})
 
-@login_required
-def import_patient_records(request):
-    if request.method == 'POST':
-        form = ImportPatientsForm(request.POST, request.FILES)
-        if form.is_valid():
-            try:
-                resource = PatientsResource()
-                new_records = request.FILES['patient_records_file']
-
-                # Use tablib to load the imported data
-                dataset = resource.export()
-                imported_data = dataset.load(new_records.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
-                
-                for data in imported_data:
-                    try:
-                        patient_record = Patients.objects.create(
-                            email=data[1],
-                            fullname=data[0],                     
-                            dob=data[2],                     
-                            gender=data[3],                     
-                            phone=data[4],                     
-                            address=data[5],                     
-                            nationality=data[6],                     
-                            company=data[7],                     
-                            marital_status=data[8],                     
-                            patient_type=data[9],                     
-                        )
-                    except IntegrityError:
-                        messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
-                        continue
-
-                return redirect('kahamahmis:manage_patient') 
-            except Exception as e:
-                messages.error(request, f'An error occurred: {e}')
-
-    else:
-        form = ImportPatientsForm()
-
-    return render(request, 'kahama_template/import_patients.html', {'form': form})
 
 @login_required
 def import_medicine_drug_records(request):

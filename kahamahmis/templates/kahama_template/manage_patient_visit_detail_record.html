@@ -79,7 +79,7 @@
                                         <p> Silver Sands Road, Plot 45, Block A, House No. 45 Kunduchi, Kinondoni, Dar es Saalam</p>
                                         <p>info@resa.co.tz</p>
                                         <p>Tel: 255 657 008 008</p>
-                                        <p><a href="https://www.resa.co.tz/" class="text-white">https://www.resa.co.tz/</a></p>
+                                        <p><a href="#" class="text-white">https://www.resa.co.tz/</a></p>
                                       <p class="mt-2 " style="font-family: ;"> Part of RESA Medical Group </p>
                                     </td>
                                 </tr>
@@ -289,16 +289,16 @@
                             <tr>
                                 <th>Provisional Diagnosis:</th>
                                 <td> <ul class="list-group">
-                                    {% for diagnosis in consultation_notes.provisional_diagnosis.all %}
-                                    <li class="list-group-item">{{ diagnosis.diagnosis_name }}</li>
+                                    {% for provisional_diagnosis in diagnosis_record.provisional_diagnosis.all %}
+                                        <li class="list-group-item">{{ provisional_diagnosis.diagnosis_name }}</li>
                                     {% endfor %}
                                 </ul></td>
                             </tr>
                             <tr>
                                 <th>Final Diagnosis:</th>
-                                <td> <ul class="list-group">
-                                    {% for diagnosis in consultation_notes.final_diagnosis.all %}
-                                    <li class="list-group-item">{{ diagnosis.diagnosis_name }}</li>
+                                <td>  <ul class="list-group">
+                                    {% for final_diagnosis in diagnosis_record.final_diagnosis.all %}
+                                        <li class="list-group-item">{{ final_diagnosis.diagnosis_name }}</li>
                                     {% endfor %}
                                 </ul></td>
                             </tr>
@@ -425,7 +425,6 @@
                                 <tr>
                                     <th>Name</th>
                                     <th>Description</th>                            
-                                    <th>Cost</th>
                                     <th>Date</th>
                                     <th>Day</th> <!-- New column for the day of the week -->
                                     <th>Time</th>  
@@ -437,7 +436,6 @@
                                 <tr>
                                     <td>{{ procedure.name }}</td>
                                     <td>{{ procedure.description }}</td>                        
-                                    <td>{{ procedure.cost }}</td>
                                     <td>{{ procedure.created_at|date:"Y-m-d" }}</td> <!-- Display date -->
                                     <td>{{ procedure.created_at|date:"l" }}</td> <!-- Display day of the week -->
                                     <td>{{ procedure.created_at|time:"H:i:s" }}</td><!-- Display time -->
@@ -469,7 +467,6 @@
                                     <th>Name</th>
                                     <th>Description</th>                                 
                                     <th>Result</th>                                 
-                                    <th>Cost</th>
                                     <th>Created At</th>
                                     <th>Updated At</th>
                                     <th>Action</th>
@@ -482,7 +479,6 @@
                                     <td>{{ lab_test.name }}</td>
                                     <td>{{ lab_test.description }}</td>                                  
                                     <td>{{ lab_test.result }}</td>                                  
-                                    <td>{{ lab_test.cost }}</td>
                                     <td>{{ lab_test.created_at }}</td>
                                     <td>{{ lab_test.updated_at }}</td>
                          
@@ -497,54 +493,12 @@
     </div>
      {% endif %}
 
-     {% if observations %}
-     <div class="row mt-5">
-        <div class="col-12">
-            <div class="card assessment-data-card">
-                <div class="card-header bg-dark text-white">
-                    <h2 class="card-title">Imaging Data</h2>
-                </div>
-                <div class="card-body">
-                    <div  class="table-responsive">
-                        <table  class="table table-hover text-nowrap table-bordered table-striped" id="example1">
-                            <thead>
-                                <tr>
-                                    <th>visit number</th>
-                                    <th>Name</th>
-                                    <th>Description</th>                                 
-                                    <th>Result</th>
-                                    <th>Image</th>
-                                    <th>Cost</th>
-                                    <th>Created At</th>
-                                    <th>Updated At</th>                          
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for observation in observations %}
-                                <tr>
-                                    <td>{{ observation.visit.vst }}</td>
-                                    <td>{{ observation.imaging }}</td>
-                                    <td>{{ observation.description }}</td>                                  
-                                    <td>{{ observation.result }}</td>                                  
-                                    <td>{{ observation.image }}</td>                                  
-                                    <td>{{ observation.cost }}</td>
-                                    <td>{{ observation.created_at }}</td>
-                                    <td>{{ observation.updated_at }}</td>
-                                 </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-     {% endif %}
+   
     </main>
 </div>
 
 <div class="btn-group btn-group-sm d-print-none"> <a href="javascript:window.print()" class="btn btn-light border text-black-50 shadow-none"><i class="fa fa-print"></i> Print</a> 
-    <a href="{% url 'kahamahmis:generatePDF' patient.id visits.id %}" id="dwnload" class="btn btn-light border text-black-50 shadow-none"><i class="fa fa-download"></i> Download</a> </div>
+    </div>
   </footer> 
 
 {% endblock main_content %}

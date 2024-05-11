@@ -113,7 +113,13 @@
                                                 </thead>
                                                 <tbody>
                                                     <tr>
-                                                        <td><input type="text" class="form-control" name="medicine_name[]" ></td>
+                                                        <td>
+                                                            <select class="form-control select2bs4" style="width: 100%;" name="medicine_name[]">
+                                                                {% for medicine in all_medicines %}
+                                                                    <option value="{{ medicine.id }}">{{ medicine.drug_name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </td>
                                                         <td><input type="text" class="form-control" name="reaction[]" ></td>
                                                         <td><button type="button" class="btn btn-danger btn-sm delete-row">Delete</button></td>
                                                     </tr>
@@ -460,7 +466,13 @@
         // JavaScript for Adding/Deleting Rows
         $('#add_medication_allergy').click(function() {
             var newRow = `<tr>
-                                <td><input type="text" class="form-control" name="medicine_name[]" ></td>
+                                <td>
+                                    <select class="form-control select2bs4" style="width: 100%;" name="medicine_name[]">
+                                        {% for medicine in all_medicines %}
+                                            <option value="{{ medicine.id }}">{{ medicine.drug_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
                                 <td><input type="text" class="form-control" name="reaction[]" ></td>
                                 <td><button type="button" class="btn btn-danger btn-sm delete-row">Delete</button></td>
                             </tr>`;

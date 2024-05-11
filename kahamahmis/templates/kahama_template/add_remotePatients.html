@@ -85,7 +85,7 @@
                                         <label for="nationality">Nationality:</label>
                                         <select class="form-control select2bs4" style="width: 100%;" name="nationality" id="nationality" required>
                                             {% for country in all_country %}
-                                                <option value="{{ country.id }}" {% if patient.nationality == country.id %} selected {% endif %}>{{ country.name }}</option>
+                                                <option value="{{ country.id }}"{% if country.name == "Tanzania" %} selected {% endif %}>{{ country.name }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>

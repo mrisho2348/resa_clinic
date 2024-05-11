@@ -1,4 +1,4 @@
-{% extends 'kahama_template/base_template.html' %}
+ {% extends 'kahama_template/base_template.html' %}
 {% block title %}
 {{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }} prescription   
 {% endblock title %}
@@ -529,12 +529,12 @@ function getFormulationUnit(medicineId) {
                                         <td>{{ prescription.created_at.date|date:"d/m/Y"  }}</td>
                                         <td>{{ prescription.created_at.time }}</td>
                                         <td>{{ prescription.created_at|date:"l" }}</td>
-                                        <td>{{ prescription.medicine.name }}</td>
+                                        <td>{{ prescription.medicine.drug_name }}</td>
                                         <td>{{ prescription.dose }}</td>
                                         <td>{{ prescription.frequency }}</td>
                                         <td>{{ prescription.duration }}</td>
                                         <td>{{ prescription.quantity_used }}</td>
-                                        <td>{{ prescription.medicine.cash_cost }}</td>
+                                        <td>{{ prescription.medicine.unit_cost }}</td>
                                         <td>{{ prescription.total_price }}</td>
                                     </tr>
                                     {% endfor %}

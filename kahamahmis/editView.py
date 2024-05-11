@@ -2,7 +2,7 @@ from datetime import datetime
 import logging
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from clinic.models import Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Medicine, Procedure, Referral, RemoteCompany, RemoteLaboratoryOrder, RemoteObservationRecord, RemotePatient, RemoteProcedure, RemoteReferral, Sample, Staffs
+from clinic.models import Consultation, ConsultationFee, DiagnosticTest, DiseaseRecode, InsuranceCompany, MedicationPayment, MedicineInventory, PathodologyRecord, PathologyDiagnosticTest, PatientDisease, Patients, Medicine, Procedure, Referral, RemoteCompany, RemoteConsultation, RemoteLaboratoryOrder, RemoteObservationRecord, RemotePatient, RemoteProcedure, RemoteReferral, Sample, Staffs
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db import transaction
@@ -148,59 +148,6 @@ def edit_referral(request):
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 
-def edit_patient(request, patient_id):
-    patient = get_object_or_404(Patients, pk=patient_id)
-
-    if request.method == 'POST':
-        try:
-            # Retrieve data from the form
-            fullname = request.POST.get('fullname')
-            email = request.POST.get('email')
-            dob = request.POST.get('dob')
-            gender = request.POST.get('gender')
-            phone = request.POST.get('phone')
-            address = request.POST.get('Address')
-            nationality = request.POST.get('profession')            
-            marital_status = request.POST.get('maritalStatus')
-            patient_type = request.POST.get('patient_type')
-            payment_form = request.POST.get('payment_type')
-            insurance_name = request.POST.get('insurance_name')
-            insurance_number = request.POST.get('insurance_number')
-      
-
-            # Update the Patient object
-            patient.fullname = fullname
-            patient.email = email
-            patient.dob = dob
-            patient.gender = gender
-            patient.phone = phone
-            patient.address = address
-            patient.nationality = nationality            
-            patient.marital_status = marital_status
-            patient.patient_type = patient_type
-            patient.payment_form = payment_form
-
-            # If payment type is insurance, update insurance details
-            if payment_form == 'insurance':
-                patient.insurance_name = insurance_name
-                patient.insurance_number = insurance_number
-          
-            else:
-                # Clear insurance details if payment form is cash
-                patient.insurance_name = None
-                patient.insurance_number = None
-                patient.authorization_code = None
-
-            # Save the changes
-            patient.save()
-
-            messages.success(request, 'Patient details updated successfully!')
-            return redirect('manage_patient')  # Replace 'manage_patient' with the appropriate URL name
-
-        except Exception as e:
-            messages.error(request, f'An error occurred: {e}')
-
-    return render(request, 'update/edit_patient.html', {'patient': patient})
 
 
 
@@ -390,192 +337,9 @@ def edit_inventory(request, inventory_id):
     
     
 
-@csrf_exempt
-@require_POST
-def edit_medication_payment(request, payment_id):
-    try:
-        # Retrieve the MedicationPayment object
-        medication_payment = get_object_or_404(MedicationPayment, pk=payment_id)
 
-        # Store the previous quantity for later adjustment
-        previous_quantity_sold = medication_payment.quantity
-
-        # Update MedicationPayment object based on the form data
-        medicine_used = int(request.POST.get('edit_quantity'))
-        amount = float(request.POST.get('edit_amount'))
-        medicine_id = int(request.POST.get('medicine_id'))
-
-        # Validate form data
-        if medicine_used <= 0 or amount < 0 or not Medicine.objects.filter(pk=medicine_id).exists():
-            return HttpResponseBadRequest("Invalid form data.")
-        
-        medicine = Medicine.objects.get(id=medicine_id)
-        
-        # Check that there is enough stock of this medicine in the pharmacy
-        # Check if there is sufficient stock
-        medicine_inventory = medicine.medicineinventory_set.first()
-        if medicine_inventory and medicine_used > medicine_inventory.remain_quantity:
-            return JsonResponse({'success': False, 'message': f'Insufficient stock. Only {medicine_inventory.remain_quantity} {medicine.name} available.'})
-        with transaction.atomic():
-            # Update MedicationPayment object
-            medication_payment.quantity = medicine_used
-            medication_payment.amount = amount
-            medication_payment.medicine = medicine_id
-            medication_payment.save()
-
-            # Adjust MedicineInventory
-            MedicineInventory.objects.filter(medicine=medication_payment.medicine).update(
-                remain_quantity=F('remain_quantity') + (previous_quantity_sold - medicine_used)
-            )
-
-        # Redirect to the medication history page or another appropriate page
-        return redirect('patient_medicationpayment_history_view_mrn', mrn=medication_payment.patient.mrn)
-
-    except (ValueError, TypeError, MedicationPayment.DoesNotExist):
-        return HttpResponseBadRequest("Invalid data types or MedicationPayment not found.")
     
 
-def edit_diagnostic_test(request, test_id):
-    if request.method == 'POST':
-        try:
-            # Retrieve form data from POST request
-            patient_id = request.POST.get('patient')
-            test_type = request.POST.get('test_type')
-            test_date = request.POST.get('test_date')
-            result = request.POST.get('result')          
-            disease_or_pathology = request.POST.get('disease_or_pathology') 
-            pathology_id = None
-            diseases_ids = None
-            health_issues_ids = None
-            if disease_or_pathology == 'pathology':
-                pathology_id = request.POST.get('Disease_Pathology_otherhealthissues')
-                
-            if disease_or_pathology == 'disease':
-                diseases_ids = request.POST.get('Disease_Pathology_otherhealthissues')
-                
-            if disease_or_pathology == 'health_issue':
-                health_issues_ids = request.POST.get('Disease_Pathology_otherhealthissues')
-            # Retrieve the existing DiagnosticTest object
-            diagnostic_test = get_object_or_404(DiagnosticTest, id=test_id)
-
-            # Update the DiagnosticTest object with the new data
-            patient = Patients.objects.get(id=patient_id)
-            diagnostic_test.patient = patient
-            diagnostic_test.test_type = test_type
-            diagnostic_test.test_date = test_date
-            diagnostic_test.result = result
-            diagnostic_test.pathology_record = pathology_id
-
-            # Save the changes to the DiagnosticTest object
-            diagnostic_test.save()
-
-            # Update diseases and health issues in the many-to-many fields
-            if diseases_ids is not None:
-                diagnostic_test.diseases.set(diseases_ids)
-                
-            if health_issues_ids is not None:
-               diagnostic_test.health_issues.set(health_issues_ids)
-
-            # Redirect to the diagnostic tests page or another appropriate URL
-            return redirect('diagnostic_tests')  # Adjust the URL as needed
-
-        except Exception as e:
-            print(f"ERROR: {str(e)}")
-            return HttpResponseBadRequest(f"Error: {str(e)}")
-
-    return HttpResponseBadRequest("Invalid request method")    
-
-
-def edit_sample(request, sample_id): 
-
-    if request.method == 'POST':
-        try:
-            # Retrieve form data from POST request
-            lab_test = request.POST.get('edit_lab_test')
-            collection_date = request.POST.get('edit_collection_date')
-            processing_date = request.POST.get('edit_processing_date')
-            analysis_date = request.POST.get('edit_analysis_date')
-            status = request.POST.get('edit_status')
-                        # Convert date strings to datetime objects if provided
-            collection_date = datetime.strptime(collection_date, '%Y-%m-%d') if collection_date else None
-            processing_date = datetime.strptime(processing_date, '%Y-%m-%d') if processing_date else None
-            analysis_date = datetime.strptime(analysis_date, '%Y-%m-%d') if analysis_date else None
-            
-            sample = get_object_or_404(Sample, id=sample_id)
-            # Update the existing Sample object
-            sample.lab_test = DiagnosticTest.objects.get(id=lab_test)
-            sample.collection_date = collection_date
-            sample.processing_date = processing_date
-            sample.analysis_date = analysis_date
-            sample.status = status
-
-            sample.save()
-
-            # Redirect to a success page or another appropriate URL
-            return redirect('sample_list')  # Adjust the URL as needed
-
-        except Exception as e:
-            print(f"ERROR: {str(e)}")
-            return HttpResponseBadRequest(f"Error: {str(e)}") 
-
-    return HttpResponseBadRequest("Invalid request method")  
-
-def edit_patient_disease_save(request, patient_disease_id): 
-
-    if request.method == 'POST':
-        try:
-            # Retrieve form data from POST request
-            patient_id = request.POST.get('patient_id')
-            disease_record_id = request.POST.get('diseaseRecord')
-            diagnosis_date = request.POST.get('diagnosisDate')
-            severity = request.POST.get('severity')
-            treatment_plan = request.POST.get('treatmentPlan')
-            patient_disease = get_object_or_404(PatientDisease, id=patient_disease_id)
-            patient_disease.patient = Patients.objects.get(id=patient_id)
-            patient_disease.disease_record = DiseaseRecode.objects.get(id=disease_record_id)
-            patient_disease.diagnosis_date = diagnosis_date
-            patient_disease.severity = severity
-            patient_disease.treatment_plan = treatment_plan
-
-            patient_disease.save()
-
-            # Redirect to a success page or another appropriate URL
-            return redirect('patient_diseases_view')  # Adjust the URL as needed
-
-        except Exception as e:
-            print(f"ERROR: {str(e)}")
-            return HttpResponseBadRequest(f"Error: {str(e)}") 
-
-    return HttpResponseBadRequest("Invalid request method")  
-
-
-def pathology_diagnostic_test_edit_save(request, test_id):
-    if request.method == 'POST':
-        try:
-            pathology_diagnostic_test = get_object_or_404(PathologyDiagnosticTest, pk=test_id)
-
-            # Retrieve data from the form
-            pathology_record_id = request.POST.get('pathologyRecord')
-            diagnostic_test_id = request.POST.get('diagnosticTest')
-            test_result = request.POST.get('testResult')
-            testing_date = request.POST.get('testingDate')
-            conducted_by = request.POST.get('conductedBy')
-
-            # Update PathologyDiagnosticTest object
-            pathology_diagnostic_test.pathology_record = PathodologyRecord.objects.get(id=pathology_record_id)
-            pathology_diagnostic_test.diagnostic_test =  DiagnosticTest.objects.get(id=diagnostic_test_id)
-            pathology_diagnostic_test.test_result = test_result
-            pathology_diagnostic_test.testing_date = testing_date
-            pathology_diagnostic_test.conducted_by = conducted_by
-
-            # Save the changes
-            pathology_diagnostic_test.save()
-
-            return redirect("pathology_diagnostic_test_list")
-        except Exception as e:
-            return HttpResponseBadRequest(f"Error: {str(e)}") 
-
-    return HttpResponseBadRequest("Invalid request method") 
 
 
 def update_consultation_data(request, appointment_id):
@@ -588,23 +352,21 @@ def update_consultation_data(request, appointment_id):
             appointment_date = request.POST.get('appointmentDate')
             start_time = request.POST.get('startTime')
             end_time = request.POST.get('endTime')
-            description = request.POST.get('description')
-            pathodology_record_id = request.POST.get('pathodologyRecord')
-            consultation = get_object_or_404(Consultation, id=appointment_id)
+            description = request.POST.get('description')          
+            consultation = get_object_or_404(RemoteConsultation, id=appointment_id)
             # Update Consultation instance with new data
             consultation.doctor = Staffs.objects.get(id=doctor_id)
             consultation.patient = Patients.objects.get(id=patient_id)
             consultation.appointment_date = appointment_date
             consultation.start_time = start_time
             consultation.end_time = end_time
-            consultation.description = description
-            consultation.pathodology_record = PathodologyRecord.objects.get(id=pathodology_record_id)
+            consultation.description = description          
 
             # Save the updated Consultation instance
             consultation.save()
 
             # Return a JsonResponse to indicate success
-            return redirect("appointment_list")
+            return redirect("kahamahmis:appointment_list")
         except Exception as e:
             # Return a JsonResponse with an error message
             return HttpResponseBadRequest(f"Error: {str(e)}") 
@@ -613,30 +375,3 @@ def update_consultation_data(request, appointment_id):
     return HttpResponseBadRequest("Invalid request method")
 
 
-require_POST
-@csrf_exempt  # For simplicity, you can use CSRF exemption. In a real-world scenario, handle CSRF properly.
-def update_consultation_fee(request):
-    try:
-        with transaction.atomic():
-            consultation_fee_id = request.POST.get('consultation_fee_id')
-            fee = get_object_or_404(ConsultationFee, id=consultation_fee_id)
-
-            # Extract form data from the request
-            doctor_id = request.POST.get('doctor')
-            patient_id = request.POST.get('patient')
-            fee_amount = request.POST.get('feeAmount')
-            consultation_id = request.POST.get('consultation')
-
-            # Update ConsultationFee instance with new data
-            fee.doctor=Staffs.objects.get(id=doctor_id)
-            fee.patient = Patients.objects.get(id=patient_id)
-            fee.fee_amount = fee_amount
-            fee.consultation= Consultation.objects.get(id=consultation_id)
-
-            # Save the updated ConsultationFee instance
-            fee.save()
-
-        return redirect("consultation_fee_list")
-    except Exception as e:
-        # Return a JsonResponse with an error message
-        return HttpResponseBadRequest(f"Error: {str(e)}") 

@@ -72,15 +72,10 @@ Patient Visit History
                                           <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deletetVisitModal{{ visit.id }}"  data-toggle="tooltip" title="Delete">
                                             <i class="fas fa-trash"></i>
                                         </button>                             
-                                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#consultationModal{{ visit.id }}"   data-toggle="tooltip" title="Appointment">
+                                        <button type="button" class="btn btn-light border btn-sm" data-toggle="modal" data-target="#consultationModal{{ visit.id }}"   data-toggle="tooltip" title="Bokk appointment">
                                             <i class="fas fa-calendar text-dark" ></i>
                                         </button>  
 
-                                                      {% comment %} <!-- Add more action links as needed -->
-                                        <a href="{% url 'kahamahmis:patient_health_record_view' visit.patient.id visit.id %}" data-toggle="tooltip" title="open health record">
-                                            <button type="button" class="btn btn-success btn-sm"><i class="fa fa-eye text-dark"></i></button>
-                                        </a>    {% endcomment %}
-                                                      <!-- Add more action links as needed -->
                                         <a href="{% url 'kahamahmis:patient_vital_list' visit.patient.id visit.id  %}" data-toggle="tooltip" title="open vital">
                                             <button type="button" class="btn btn-secondary btn-sm"><i class="fa fa-eye text-dark"></i></button>
                                         </a>   

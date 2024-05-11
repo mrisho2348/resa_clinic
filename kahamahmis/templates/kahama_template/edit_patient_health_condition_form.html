@@ -128,8 +128,14 @@
                                     </thead>
                                     <tbody>
                                         {% for allergy in medication_allergies %}
-                                        <tr>
-                                            <td><input type="text" class="form-control" name="medicine_name_{{ allergy.id }}" value="{{ allergy.medicine_name }}" ></td>
+                                        <tr>                                           
+                                            <td>
+                                                <select class="form-control select2bs4" style="width: 100%;" name="medicine_name_{{ allergy.id }}">
+                                                    {% for medicine in all_medicines %}
+                                                        <option value="{{ medicine.id }}" {% if medicine.id == allergy.id %} selected {% endif %}>{{ medicine.drug_name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </td>
                                             <td><input type="text" class="form-control" name="reaction_{{ allergy.id }}" value="{{ allergy.reaction }}" ></td>
                                             <td><button type="button" class="btn btn-danger btn-sm delete-row" onclick="deleteMedicationAllergyRecord({{ allergy.id }})">Delete</button></td>
                                         </tr>
@@ -442,8 +448,14 @@
     
         // Add Medication Allergy Row
         $('#add_medication_allergy').click(function() {
-            var newRowHTML = `<tr>
-                                <td><input type="text" class="form-control" name="new_medicine_name[]" ></td>
+            var newRowHTML = `<tr>                               
+                                <td>
+                                    <select class="form-control select2bs4" style="width: 100%;" name="new_medicine_name[]">
+                                        {% for medicine in all_medicines %}
+                                            <option value="{{ medicine.id }}" {% if medicine.id == allergy.id %} selected {% endif %}>{{ medicine.drug_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
                                 <td><input type="text" class="form-control" name="new_reaction[]" ></td>
                                 <td><button type="button" class="btn btn-danger btn-sm delete-row">Delete</button></td>
                             </tr>`;

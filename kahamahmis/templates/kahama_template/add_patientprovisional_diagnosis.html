@@ -84,7 +84,7 @@ Final Diagnosis
                                 <!-- Final diagnosis as a field -->
                                 <div class="col-md-6 form-group">
                                     <label for="final_diagnosis{{ consultation_note.id }}">Final Diagnosis:</label>
-                                    <select class="form-control select2bs4" style="width: 100%;" id="final_diagnosis{{ consultation_note.id }}" name="final_diagnosis[]" multiple>
+                                    <select class="form-control select2bs4" style="width: 100%;" id="final_diagnosis{{ consultation_note.id }}" name="final_diagnosis[]" required multiple>
                                         {% for diagnosis in final_diagnoses %}
                                             <option value="{{ diagnosis.id }}" {% if diagnosis.id in final_diagnosis_ids %} selected {% endif %}>{{ diagnosis.diagnosis_name }}</option>
                                         {% endfor %}

@@ -261,7 +261,7 @@ Add  Consultation notes
                                             </table>
                                         </div>
                                         <button type="button" class="btn btn-sm btn-info" onclick="addChiefComplaint()">
-                                            <i class="fa fa-plus-square" aria-hidden="true"></i>
+                                            <i class="fa fa-plus-square" aria-hidden="true"></i>  Add chief complaint
                                         </button>
                                         <button type="button" class="btn btn-sm btn-secondary" onclick="editChiefComplaint()">
                                             <i class="fa fa-edit" aria-hidden="true"></i>
@@ -328,7 +328,7 @@ Add  Consultation notes
                                                             <div class="form-group" id="normalBreathingOptions" {% if primary_examination.breathing == 'Normal' %} style="display: block;" {% else %} style="display: none;" {% endif %}>
                                                                 <label for="normalBreathing">Normal Breathing:</label>
                                                                 <select class="form-control select2bs4" style="width: 100%;" id="normalBreathing" name="normalBreathing[]" multiple>
-                                                                    <option value=""></option>
+                                                                    <option value="">All</option>
                                                                     <option value="Trachea Central" {% if 'Trachea Central' in primary_examination.normal_breathing %} selected {% endif %}>Trachea Central</option>
                                                                     <option value="Normal Respiratory Effort" {% if 'Normal Respiratory Effort' in primary_examination.normal_breathing %} selected {% endif %}>Normal Respiratory Effort</option>
                                                                     <option value="Normal Chest Symmetry and Movement" {% if 'Normal Chest Symmetry and Movement' in primary_examination.normal_breathing %} selected {% endif %}>Normal Chest Symmetry and Movement</option>
@@ -358,7 +358,7 @@ Add  Consultation notes
                                                             <div class="form-group" id="normalCirculatingOptions" {% if primary_examination.circulating == 'Normal' %} style="display: block;" {% else %} style="display: none;" {% endif %}>
                                                                 <label for="normalCirculating">Normal Circulating:</label>
                                                                 <select class="form-control select2bs4" style="width: 100%;" id="normalCirculating" name="normalCirculating[]" multiple>
-                                                                    <option value=""></option>
+                                                                    <option value="">All</option>
                                                                     <option value="Capillary Refills" {% if 'Capillary Refills' in primary_examination.normal_circulating %} selected {% endif %}>Capillary Refills</option>
                                                                     <option value="No External Bleeding" {% if 'No External Bleeding' in primary_examination.normal_circulating %} selected {% endif %}>No External Bleeding</option>
                                                                     <option value="Normal Pulse" {% if 'Normal Pulse' in primary_examination.normal_circulating %} selected {% endif %}>Normal Pulse</option>
@@ -437,9 +437,9 @@ Add  Consultation notes
                                                             </div>                                                            
                                                             <!-- Temperature Field (hidden by default) -->
                                                             <div class="form-group" id="temperatureField" {% if primary_examination.exposure == 'Normal' %} style="display: block;" {% else %} style="display: none;" {% endif %}>
-                                                                <label for="temperatures">Normal Exposure:</label>
+                                                                <label for="normal_exposure">Normal Exposure:</label>
                                                                 <select class="form-control select2bs4" style="width: 100%;" id="normal_exposure" name="normal_exposure[]" multiple>
-                                                                    <option value=""></option>
+                                                                    <option value="">All</option>
                                                                     <option value="Temperature" {% if "Temperature" in primary_examination.normal_exposure %} selected {% endif %}>Temperature</option>
                                                                     <option value="No external bleeding" {% if "No external bleeding" in primary_examination.normal_exposure %} selected {% endif %}>No external bleeding</option>
                                                                     <option value="No external wound" {% if "No external wound" in primary_examination.normal_exposure %} selected {% endif %}>No external wound</option>
@@ -468,7 +468,7 @@ Add  Consultation notes
                                                             <!-- Additional fields for secondary survey -->
                                                             <div class="form-group">
                                                                 <label for="heent">HEENT:</label>
-                                                                <select class="form-control select2bs4" style="width: 100%;" id="heent" name="heent" onchange="toggleHeentFields()">
+                                                                <select class="form-control select2bs4" style="width: 100%;" id="heent" name="heent">
                                                                     <option value=""></option>
                                                                     <option value="Normal" {% if "Normal" == secondary_examination.heent %} selected {% endif %}>Normal</option>
                                                                     <option value="Abnormal" {% if "Abnormal" == secondary_examination.heent %} selected {% endif %}>Abnormal</option>
@@ -476,7 +476,7 @@ Add  Consultation notes
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="cns">CNS:</label>
-                                                                <select class="form-control select2bs4" style="width: 100%;" id="cns" name="cns" onchange="toggleCnsFields()">
+                                                                <select class="form-control select2bs4" style="width: 100%;" id="cns" name="cns">
                                                                     <option value=""></option>
                                                                     <option value="Normal" {% if "Normal" == secondary_examination.cns %} selected {% endif %}>Normal</option>
                                                                     <option value="Abnormal" {% if "Abnormal" == secondary_examination.cns %} selected {% endif %}>Abnormal</option>
@@ -484,7 +484,7 @@ Add  Consultation notes
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="cvs">CVS:</label>
-                                                                <select class="form-control select2bs4" style="width: 100%;" id="cvs" name="cvs" onchange="toggleCvsFields()">
+                                                                <select class="form-control select2bs4" style="width: 100%;" id="cvs" name="cvs">
                                                                     <option value=""></option>
                                                                     <option value="Normal" {% if "Normal" == secondary_examination.cvs %} selected {% endif %}>Normal</option>
                                                                     <option value="Abnormal" {% if "Abnormal" == secondary_examination.cvs %} selected {% endif %}>Abnormal</option>
@@ -492,7 +492,7 @@ Add  Consultation notes
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="rs">RS:</label>
-                                                                <select class="form-control select2bs4" style="width: 100%;" id="rs" name="rs" onchange="toggleRsFields()">
+                                                                <select class="form-control select2bs4" style="width: 100%;" id="rs" name="rs">
                                                                     <option value=""></option>
                                                                     <option value="Normal" {% if "Normal" == secondary_examination.rs %} selected {% endif %}>Normal</option>
                                                                     <option value="Abnormal" {% if "Abnormal" == secondary_examination.rs %} selected {% endif %}>Abnormal</option>
@@ -500,19 +500,27 @@ Add  Consultation notes
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="pa">PA:</label>
-                                                                <select class="form-control select2bs4" style="width: 100%;" id="pa" name="pa" onchange="togglePaFields()">
+                                                                <select class="form-control select2bs4" style="width: 100%;" id="pa" name="pa">
                                                                     <option value=""></option>
                                                                     <option value="Normal" {% if "Normal" == secondary_examination.pa %} selected {% endif %}>Normal</option>
                                                                     <option value="Abnormal" {% if "Abnormal" == secondary_examination.pa %} selected {% endif %}>Abnormal</option>
                                                                 </select>
                                                             </div>
                                                             <div class="form-group">
-                                                                <label for="gu">GU:</label>
-                                                                <input type="text" class="form-control" id="gu" name="gu" value="{{ secondary_examination.gu }}">
+                                                                <label for="gu">GU:</label>                                                                
+                                                                <select class="form-control select2bs4" style="width: 100%;" id="gu" name="gu">  
+                                                                    <option value=""></option>                                                               
+                                                                    <option value="Normal" {% if "Normal" == secondary_examination.gu %} selected {% endif %}>Normal</option>
+                                                                    <option value="Abnormal" {% if "Abnormal" == secondary_examination.gu %} selected {% endif %}>Abnormal</option>
+                                                                </select>
                                                             </div>
                                                             <div class="form-group">
-                                                                <label for="mss">MSS:</label>
-                                                                <input type="text" class="form-control" id="mss" name="mss" value="{{ secondary_examination.mss }}">
+                                                                <label for="mss">MSS:</label>                                                                
+                                                                <select class="form-control select2bs4" style="width: 100%;" id="mss" name="mss">     
+                                                                    <option value=""></option>                                                               
+                                                                    <option value="Normal" {% if "Normal" == secondary_examination.mss %} selected {% endif %}>Normal</option>
+                                                                    <option value="Abnormal" {% if "Abnormal" == secondary_examination.mss %} selected {% endif %}>Abnormal</option>
+                                                                </select>
                                                             </div>
                                                         </div>                                                      
                                                     </div>
@@ -679,15 +687,14 @@ Add  Consultation notes
                                    
                        
                                         {% csrf_token %} 
-                                    <!-- Pathology -->
-                                    <div class="form-group">
-                                        <label for="pathology{{ consultation_note.id }}">Pathology:</label>
-                                        <select class="form-control select2bs4" style="width: 100%;" id="pathology{{ consultation_note.id }}" name="pathology[]" multiple>
-                                            {% for record in pathology_records %}
-                                            <option value="{{ record.id }}" {% if record in consultation_note.pathology.all %} selected {% endif %}>{{ record.name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
+                                        <div class="form-group">
+                                            <label for="nature_of_current_illness{{ consultation_note.id }}">Nature of current illness:</label>
+                                            <select class="form-control select2bs4" style="width: 100%;" id="nature_of_current_illness{{ consultation_note.id }}" name="nature_of_current_illness">
+                                                <option value="Non-occupational" {% if consultation_note.nature_of_current_illness == 'Non-occupational' %} selected {% endif %}>Non-occupational</option>
+                                                <option value="Occupational" {% if consultation_note.nature_of_current_illness == 'Occupational' %} selected {% endif %}>Occupational</option>
+                                                <option value="Unknown" {% if consultation_note.nature_of_current_illness == 'Unknown' %} selected {% endif %}>Unknown</option>
+                                            </select>
+                                        </div>   
                                     <div class="form-group">                                        
                                           <!-- History of presenting illness -->
                                           <div class="form-group">
@@ -705,20 +712,20 @@ Add  Consultation notes
                                             <option value="Surgical-non traumatic" {% if consultation_note.type_of_illness == 'Surgical-non traumatic' %} selected {% endif %}>Surgical-non traumatic</option>
                                         </select>                        
                                     </div>
-
                                     <!-- Nature of current illness -->
-                                    <div class="form-group">
-                                        <label for="nature_of_current_illness{{ consultation_note.id }}">Nature of current illness:</label>
-                                        <select class="form-control select2bs4" style="width: 100%;" id="nature_of_current_illness{{ consultation_note.id }}" name="nature_of_current_illness">
-                                            <option value="Non-occupational" {% if consultation_note.nature_of_current_illness == 'Non-occupational' %} selected {% endif %}>Non-occupational</option>
-                                            <option value="Occupational" {% if consultation_note.nature_of_current_illness == 'Occupational' %} selected {% endif %}>Occupational</option>
-                                            <option value="Unknown" {% if consultation_note.nature_of_current_illness == 'Unknown' %} selected {% endif %}>Unknown</option>
-                                        </select>
-                                    </div>         
+                                           <!-- Pathology -->
+                                           <div class="form-group">
+                                            <label for="pathology{{ consultation_note.id }}">Pathology:</label>
+                                            <select class="form-control select2bs4" style="width: 100%;" id="pathology{{ consultation_note.id }}" name="pathology[]" required multiple>
+                                                {% for record in pathology_records %}
+                                                <option value="{{ record.id }}" {% if record in consultation_note.pathology.all %} selected {% endif %}>{{ record.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>                                          
                                     <!-- Provisional diagnosis -->
                                     <div class=" form-group">
                                         <label for="provisional_diagnosis{{ consultation_note.id }}">Provisional Diagnosis:</label>
-                                        <select class="form-control select2bs4" style="width: 100%;" id="provisional_diagnosis{{ consultation_note.id }}" name="provisional_diagnosis[]" multiple>
+                                        <select class="form-control select2bs4" style="width: 100%;" id="provisional_diagnosis{{ consultation_note.id }}" name="provisional_diagnosis[]" required multiple>
                                             {% for diagnosis in provisional_diagnoses %}
                                                 <option value="{{ diagnosis.id }}" {% if diagnosis.id in provisional_diagnosis_ids %} selected {% endif %}>{{ diagnosis }}</option>
                                             {% endfor %}
@@ -727,7 +734,7 @@ Add  Consultation notes
                                    <!-- Doctor plan -->
                                     <div class="form-group">
                                         <label for="doctor_plan">Doctor Plan:</label>
-                                        <select class="form-control select2bs4" style="width: 100%;" id="doctor_plan" name="doctor_plan">
+                                        <select class="form-control select2bs4" style="width: 100%;" id="doctor_plan" name="doctor_plan" required>
                                             <option value="">Select Doctor Plan</option>
                                             <option value="Prescription" {% if consultation_note.doctor_plan == 'Prescription' %} selected {% endif %}>Prescription</option>
                                             <option value="Laboratory" {% if consultation_note.doctor_plan == 'Laboratory' %} selected {% endif %}>Laboratory</option>                                          
@@ -1324,7 +1331,7 @@ Add  Consultation notes
             var exposure = document.getElementById('exposure').value;
             var temperatureField = document.getElementById('temperatureField');
             var abnormalitiesField = document.getElementById('abnormalitiesField');
-            var temperaturesSelect = document.getElementById('temperatures');
+            var temperaturesSelect = document.getElementById('normal_exposure');
         
             if (exposure === 'Normal') {
                 temperatureField.style.display = 'block';
