@@ -113,6 +113,7 @@
                                 <thead>
                                     <tr>
                                         <th>Drug</th>
+                                        <th>unit/formulation</th>
                                         <th>Dose</th>
                                         <th>Frequency</th>
                                         <th>Duration</th>
@@ -132,8 +133,8 @@
                                             {% endfor %}
                                         
                                           </select>                                         
-                                        </td>   
-                                        <p class="medicine-dosage"></p>                                    
+                                       </td>                                                                           
+                                        <td><input type="text" class="form-control formulation_unit" name="formulation" value="1"></td>
                                         <td><input type="text" class="form-control dose-input" name="dose[]" value="1"></td>
                                         <td><select class="form-control select2bs4 frequency-select" style="width: 100%;" id="frequency" name="frequency[]">                                
                                             <option value="">Select frequency</option>
@@ -250,6 +251,7 @@
                             <p class="medicine-dosage"></p>
                         </select>
                     </td>
+                    <td><input type="text" class="form-control formulation_unit" name="formulation" value="1"></td>
                     <td><input type="text" class="form-control dose-input"  name="dose[]"  value="1"></td>
                     <td>
                         <select class="form-control select2bs4 frequency-select" style="width: 100%;"  id="frequency" name="frequency[]" required>
@@ -382,6 +384,7 @@ function calculateTabletQuantity(frequency, duration, dose) {
     var quantity = 0;
     switch (frequency) {
         case 'OD':
+        case 'I.C':
         case 'STAT':
             quantity = duration * dose;
             break;
@@ -456,30 +459,30 @@ function getFormulationUnit(medicineId) {
     <script>
         $(document).ready(function() {
             // Add event listener for medicine selection change
-            $('.medicine-select').change(function() {
+            $(document).on('change', '.medicine-select', function() {
                 var medicineId = $(this).val();
-                var dosageDisplay = $(this).closest('tr').find('.medicine-dosage');
+                var formulationField = $(this).closest('tr').find('.formulation_unit');
     
-                // Make an AJAX request to fetch the dosage information for the selected medicine
+                // Make an AJAX request to fetch the formulation dosage information for the selected medicine
                 $.ajax({
-                    url: '{% url "kahamahmis:get_medicine_dosage" %}', // Update this URL to match your endpoint
+                    url: '{% url "kahamahmis:get_medicine_formulation" %}', // Update this URL to match your endpoint
                     method: 'GET',
                     data: { 'medicine_id': medicineId },
                     success: function(response) {
-                        // Check if the dosage information is available in the response
-                        if ('dosage' in response) {
-                            // Populate the dosage information in the <p> tag
-                            dosageDisplay.text(response.dosage);
+                        // Check if the formulation dosage information is available in the response
+                        if ('formulation' in response) {
+                            // Populate the formulation dosage information in the input field
+                            formulationField.val(response.formulation);
                         } else {
-                            // Clear the dosage information if not available
-                            dosageDisplay.text('');
-                            console.error('Dosage information not found in response.');
+                            // Clear the formulation dosage information if not available
+                            formulationField.val('');
+                            console.error('Formulation dosage information not found in response.');
                         }
                     },
                     error: function(xhr, status, error) {
                         // Handle error if AJAX request fails
-                        dosageDisplay.text('');
-                        console.error('Error fetching medicine dosage:', error);
+                        formulationField.val('');
+                        console.error('Error fetching medicine formulation dosage:', error);
                     }
                 });
             });

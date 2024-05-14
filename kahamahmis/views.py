@@ -2450,20 +2450,17 @@ def save_diagnosis(request):
         return JsonResponse({'status': 'error', 'message': str(e)})
     
 @login_required    
-def patient_info_form(request, patient_id=None):
-    if patient_id:  # If patient ID is provided, it's for editing an existing patient
-        patient = get_object_or_404(RemotePatient, pk=patient_id)
-        editing = True
-    else:  # If no patient ID provided, it's for adding a new patient
-        patient = None
-        editing = False
-    
+def patient_info_form(request):  
     if request.method == 'POST':
         try:
             # Retrieve data from the form submission
             first_name = request.POST.get('first_name')
             middle_name = request.POST.get('middle_name')
             last_name = request.POST.get('last_name')
+            # Capitalize the received values
+            first_name = first_name.capitalize() if first_name else None
+            middle_name = middle_name.capitalize() if middle_name else None
+            last_name = last_name.capitalize() if last_name else None
             gender = request.POST.get('gender')
             occupation = request.POST.get('occupation')
             other_occupation = request.POST.get('other_occupation')
@@ -2486,69 +2483,51 @@ def patient_info_form(request, patient_id=None):
             age = request.POST.get('age')
             dob = request.POST.get('dob')
 
-            if not date_of_osha_certification:
-                date_of_osha_certification = None
-            if not dob:
-                dob = None
-            if not age:
-                age = None
+            # Convert empty fields to None
+            date_of_osha_certification = date_of_osha_certification or None
+            dob = dob or None
+            age = age or None
 
-            if editing:  # If editing an existing patient, update the existing patient object
-                patient.first_name = first_name
-                patient.middle_name = middle_name
-                patient.last_name = last_name
-                patient.gender = gender
-                patient.occupation = occupation
-                patient.other_occupation = other_occupation
-                patient.phone = phone
-                patient.osha_certificate = osha_certificate
-                patient.date_of_osha_certification = date_of_osha_certification
-                patient.insurance = insurance
-                patient.insurance_company = insurance_company
-                patient.other_insurance_company = other_insurance
-                patient.insurance_number = insurance_number
-                patient.emergency_contact_name = emergency_contact_name
-                patient.emergency_contact_relation = emergency_contact_relation
-                patient.other_emergency_contact_relation = other_relation
-                patient.emergency_contact_phone = emergency_contact_phone
-                patient.marital_status = marital_status
-                patient.nationality_id = nationality_id
-                patient.patient_type = patient_type
-                patient.other_patient_type = other_patient_type
-                patient.company_id = company_id
-                patient.age = age
-                patient.dob = dob
-                patient.save()
-                return redirect(reverse('kahamahmis:save_patient_health_information', args=[patient.id]))
-            else:  # If adding a new patient, create a new patient object and save it to the database
-                patient = RemotePatient(
-                    first_name=first_name,
-                    middle_name=middle_name,
-                    last_name=last_name,
-                    gender=gender,
-                    occupation=occupation,
-                    other_occupation=other_occupation,
-                    phone=phone,
-                    osha_certificate=osha_certificate,
-                    date_of_osha_certification=date_of_osha_certification,
-                    insurance=insurance,
-                    insurance_company=insurance_company,
-                    other_insurance_company=other_insurance,
-                    insurance_number=insurance_number,
-                    emergency_contact_name=emergency_contact_name,
-                    emergency_contact_relation=emergency_contact_relation,
-                    other_emergency_contact_relation=other_relation,
-                    emergency_contact_phone=emergency_contact_phone,
-                    marital_status=marital_status,
-                    nationality_id=nationality_id,
-                    patient_type=patient_type,
-                    other_patient_type=other_patient_type,
-                    company_id=company_id,
-                    age=age,
-                    dob=dob
-                )
-                patient.save()
-                return redirect(reverse('kahamahmis:save_patient_health_information', args=[patient.id]))
+            # Check if a patient with the same information already exists
+            existing_patient = RemotePatient.objects.filter(
+                first_name=first_name,
+                middle_name=middle_name,
+                last_name=last_name,                          
+            ).exists()
+
+            if existing_patient:                
+                messages.error(request, f'A patient with the same information already exists.')
+                return redirect(reverse('kahamahmis:patient_info_form'))
+            
+            # Create or update patient record
+            patient = RemotePatient(
+                first_name=first_name,
+                middle_name=middle_name,
+                last_name=last_name,
+                gender=gender,
+                occupation=occupation,
+                other_occupation=other_occupation,
+                phone=phone,
+                osha_certificate=osha_certificate,
+                date_of_osha_certification=date_of_osha_certification,
+                insurance=insurance,
+                insurance_company=insurance_company,
+                other_insurance_company=other_insurance,
+                insurance_number=insurance_number,
+                emergency_contact_name=emergency_contact_name,
+                emergency_contact_relation=emergency_contact_relation,
+                other_emergency_contact_relation=other_relation,
+                emergency_contact_phone=emergency_contact_phone,
+                marital_status=marital_status,
+                nationality_id=nationality_id,
+                patient_type=patient_type,
+                other_patient_type=other_patient_type,
+                company_id=company_id,
+                age=age,
+                dob=dob
+            )
+            patient.save()
+            return redirect(reverse('kahamahmis:save_patient_health_information', args=[patient.id]))
 
         except Exception as e:
             # Handle the exception, you can log it or render an error message
@@ -2564,12 +2543,11 @@ def patient_info_form(request, patient_id=None):
     context = {
         'range_121': range_121,
         'all_country': all_country,
-        'all_company': all_company,
-        'editing': editing,  # Indicates whether editing an existing patient or adding a new one
-        'patient': patient,  # Include the patient object in the context
+        'all_company': all_company, 
     }
     
     return render(request, 'kahama_template/add_remotePatients.html', context)
+
 
 
 @login_required
@@ -2649,6 +2627,9 @@ def patient_info_form_edit(request, patient_id):
             first_name = request.POST.get('first_name')
             middle_name = request.POST.get('middle_name')
             last_name = request.POST.get('last_name')
+            first_name = first_name.capitalize() if first_name else None
+            middle_name = middle_name.capitalize() if middle_name else None
+            last_name = last_name.capitalize() if last_name else None
             gender = request.POST.get('gender')
             occupation = request.POST.get('occupation')
             other_occupation = request.POST.get('other_occupation')

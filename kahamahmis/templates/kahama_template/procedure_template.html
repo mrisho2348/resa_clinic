@@ -81,7 +81,7 @@
                 </div>
                 <div class="card-body">
                     <!-- Form for adding a new procedure -->
-                    <form id="addProcedureForm" method="post" action="{% url "kahamahmis:save_remoteprocedure" patient.id visit.id %}">
+                    <form id="addProcedureForm" method="post" action="{% url "kahamahmis:save_remoteprocedure" patient.id visit.id %}" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="table-responsive">
                             <!-- Table to display procedure details -->
@@ -90,6 +90,7 @@
                                     <tr>
                                         <th>Procedure Name</th>
                                         <th>Description (if any)</th>
+                                        <th>Image</th> <!-- New column for image upload -->
                                         <th></th> <!-- Column for delete button -->
                                     </tr>
                                 </thead>
@@ -108,6 +109,10 @@
                                         <td>
                                             <!-- Textarea for procedure description -->
                                             <textarea class="form-control description" name="description[]" placeholder="Enter procedure description" rows="5" required></textarea>
+                                        </td>
+                                        <td>
+                                            <!-- File input for image upload -->
+                                            <input type="file" class="form-control-file" name="image[]" accept="image/*">
                                         </td>
                                         <td>
                                             <!-- Button to delete this row -->
@@ -145,7 +150,7 @@
             </div>
         </div>
     </div>
-   <script>
+    <script>
         $(document).ready(function() {
             // Add row button functionality
             $('#addRow{{ visit.id }}').click(function() {
@@ -162,6 +167,9 @@
                         <td>                           
                             <textarea class="form-control description" name="description[]" placeholder="Enter procedure description" rows="5" required></textarea>
                         </td>
+                        <td>
+                            <input type="file" class="form-control-file" name="image[]" accept="image/*">
+                        </td>
                         <td><button type="button" class="btn btn-danger delete-row">Delete</button></td>
                     </tr>`;
                 $('#procedureTable{{ visit.id }} tbody').append(newRow);
@@ -173,6 +181,7 @@
             });    
         });
     </script>
+    
     
 </div>
 <div class="modal fade" id="previousProceduresModal" tabindex="-1" role="dialog" aria-labelledby="previousProceduresModalLabel" aria-hidden="true">
@@ -188,29 +197,35 @@
                 <div class="table-responsive">
                     <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm display" id="example">
                         <thead>
-                            <tr>
+                            <tr>                            
                                 <th>Date</th>
                                 <th>Time</th>
                                 <th>Day</th>
-                                <th>visit number</th>
                                 <th>Procedure Name</th>
                                 <th>Description</th>
-                             
+                                <th>Image</th> <!-- New column for procedure image -->
                             </tr>
                         </thead>
                         <tbody>
                             <!-- Loop through previous procedures and populate the table -->
                             {% for procedure in previous_procedures %}
-                            <tr>
-                                <td>{{ procedure.created_at.date|date:"d/m/Y"  }}</td>
+                            <tr>                           
+                                <td>{{ procedure.created_at.date|date:"d/m/Y" }}</td>
                                 <td>{{ procedure.created_at.time }}</td>
                                 <td>{{ procedure.created_at|date:"l" }}</td>
-                                <td>{{ procedure.visit.vst }}</td>
                                 <td>{{ procedure.name }}</td>
-                                <td style="word-wrap: break-word;">{{ procedure.description }}</td>                              
-                            </tr>                           
+                                <td style="word-wrap: break-word;">{{ procedure.description }}</td>
+                                <td>
+                                    {% if procedure.image %}
+                                        <img class="procedure-image" src="{{ procedure.image.url }}" alt="Procedure Image" style="max-width: 100px;">
+                                    {% else %}
+                                        No Image Available
+                                    {% endif %}
+                                </td>
+                            </tr>                            
                             {% endfor %}
                         </tbody>
+                    </table>
                     </table>
                 </div>
             </div>

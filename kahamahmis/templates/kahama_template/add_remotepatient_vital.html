@@ -39,16 +39,18 @@ Add  Patient Vital
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label for="respiratory_rate">Respiratory Rate (breaths per minute)</label>
-                                    <select class="form-control select2bs4" style="width: 100%;" id="respiratoryRate" name="respiratory_rate">
-                                        {% for rate in range_15 %}
+                                    <select class="form-control select2bs4" style="width: 100%;" id="respiratoryRate" name="respiratory_rate" required>
+                                        <option value=""></option>
+                                        {% for rate in range_15 %}                                            
                                             <option value="{{ rate }}" {% if rate == existing_vital.respiratory_rate %} selected {% endif %}>{{ rate }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label for="pulse_rate">Pulse Rate (beats per minute)</label>
-                                    <select class="form-control select2bs4" style="width: 100%;" id="pulseRate" name="pulse_rate">
-                                        {% for rate in range_301 %}
+                                    <select class="form-control select2bs4" style="width: 100%;" id="pulseRate" name="pulse_rate" required>
+                                        <option value=""></option>
+                                        {% for rate in range_301 %}                                          
                                             <option value="{{ rate }}" {% if rate == existing_vital.pulse_rate %} selected {% endif %}>{{ rate }}</option>
                                         {% endfor %}
                                     </select>
@@ -57,16 +59,18 @@ Add  Patient Vital
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label for="sbp">Systolic Blood Pressure (mmHg)</label>
-                                    <select class="form-control select2bs4" style="width: 100%;" id="sbp" name="sbp">
-                                        {% for sbp in range_301 %}
+                                    <select class="form-control select2bs4" style="width: 100%;" id="sbp" name="sbp" required>
+                                        <option value=""></option>
+                                        {% for sbp in range_301 %}                                           
                                             <option value="{{ sbp }}" {% if sbp == existing_vital.sbp %} selected {% endif %}>{{ sbp }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label for="dbp">Diastolic Blood Pressure (mmHg)</label>
-                                    <select class="form-control select2bs4" style="width: 100%;" id="dbp" name="dbp">
-                                        {% for dbp in range_301 %}
+                                    <select class="form-control select2bs4" style="width: 100%;" id="dbp" name="dbp" required>
+                                        <option value=""></option>
+                                        {% for dbp in range_301 %}                                          
                                             <option value="{{ dbp }}" {% if dbp == existing_vital.dbp %} selected {% endif %}>{{ dbp }}</option>
                                         {% endfor %}
                                     </select>
@@ -75,7 +79,8 @@ Add  Patient Vital
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label for="avpu">AVPU Scale</label>
-                                    <select class="form-control select2bs4" style="width: 100%;" id="avpu" name="avpu">
+                                    <select class="form-control select2bs4" style="width: 100%;" id="avpu" name="avpu" required>
+                                        <option value=""></option>                                       
                                         <option value="Alert" {% if 'Alert' == existing_vital.avpu %} selected {% endif %}>Alert</option>
                                         <option value="Verbal" {% if 'Verbal' == existing_vital.avpu %} selected {% endif %}>Verbal</option>
                                         <option value="Pain" {% if 'Pain' == existing_vital.avpu %} selected {% endif %}>Pain</option>
@@ -84,8 +89,9 @@ Add  Patient Vital
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label for="spo2">SPO2 (%)</label>
-                                    <select class="form-control select2bs4" style="width: 100%;" id="spo2" name="spo2">
-                                        {% for percentage in range_101 %}
+                                    <select class="form-control select2bs4" style="width: 100%;" id="spo2" name="spo2" required>
+                                        <option value=""></option>
+                                        {% for percentage in range_101 %}                                         
                                             <option value="{{ percentage }}" {% if percentage == existing_vital.spo2 %} selected {% endif %}>{{ percentage }}%</option>
                                         {% endfor %}
                                     </select>
@@ -94,16 +100,18 @@ Add  Patient Vital
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label for="temperature">Temperature (°C)</label>
-                                    <select class="form-control select2bs4" style="width: 100%;" id="temperature" name="temperature">
-                                        {% for temp in temps %}
+                                    <select class="form-control select2bs4" style="width: 100%;" id="temperature" name="temperature" required>
+                                        <option value=""></option>
+                                        {% for temp in temps %}                                           
                                             <option value="{{ temp }}" {% if temp == existing_vital.temperature %} selected {% endif %}>{{ temp }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label for="gcs">Glasgow Coma Scale</label>
-                                    <select class="form-control select2bs4" style="width: 100%;" id="gcs" name="gcs">
-                                        {% for score in range_15  %}
+                                    <select class="form-control select2bs4" style="width: 100%;" id="gcs" name="gcs" required>
+                                        <option value=""></option>
+                                        {% for score in range_15  %}                                         
                                             <option value="{{ score }}" {% if score == existing_vital.gcs %} selected {% endif %}>{{ score }}</option>
                                         {% endfor %}
                                     </select>

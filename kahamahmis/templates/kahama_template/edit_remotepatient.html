@@ -93,7 +93,11 @@ Edit Patient
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="phone">Patient's Phone:</label>
-                                        <input type="tel" class="form-control" id="phone" name="phone" value="{{ patient.phone }}" required>
+                                        <input type="tel" class="form-control" id="phone" name="phone" value="{{ patient.phone }}" required 
+                                            pattern="(0|\+255)\d{9,12}" title="Please enter a valid phone number starting with '0' or '+255' and having 10 to 13 digits" 
+                                            onchange="validatePhone(this)" oninvalid="setCustomValidity('Please enter a valid phone number starting with '0' or '+255' and having 10 to 13 digits')" 
+                                            oninput="setCustomValidity('')" min="">
+                                        <div id="phone-error" style="color: red; display: none;">Please enter a valid phone number starting with '0' or '+255' and having 10 to 13 digits</div>
                                     </div>
                                 </div>
                                 <!-- OSHA Certification -->
@@ -193,8 +197,12 @@ Edit Patient
                                 <!-- Emergency Contact Phone -->
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label for="emergency_contact_phone">Emergency Contact Phone:</label>
-                                        <input type="tel" class="form-control" id="emergency_contact_phone" name="emergency_contact_phone" value="{{ patient.emergency_contact_phone }}">
+                                        <label for="emergency_contact_phone">Emergency Contact Phone:</label> <span class="error">*</span>
+                                        <input type="tel" class="form-control" id="emergency_contact_phone" name="emergency_contact_phone" value="{{ patient.emergency_contact_phone }}" required 
+                                            pattern="(0|\+255)\d{9,12}" title="Please enter a valid phone number starting with '0' or '+255' and having 10 to 13 digits" 
+                                            onchange="validateEmergencyContactPhone(this)" oninvalid="setCustomValidity('Please enter a valid phone number starting with '0' or '+255' and having 10 to 13 digits')" 
+                                            oninput="setCustomValidity('')">
+                                        <div id="emergency-contact-phone-error" style="color: red; display: none;">Please enter a valid phone number starting with '0' or '+255' and having 10 to 13 digits</div>
                                     </div>
                                 </div>
                             </div> <!-- End of Emergency Contact Section -->
@@ -365,6 +373,28 @@ Edit Patient
 </script>
 
 <script>
+    function validateEmergencyContactPhone(input) {
+        var phoneRegex = /^(0|\+255)\d{9,12}$/;
+        var isValid = phoneRegex.test(input.value);
+        var errorDiv = document.getElementById('emergency-contact-phone-error');
+        if (!isValid) {
+            errorDiv.style.display = 'block';
+        } else {
+            errorDiv.style.display = 'none';
+        }
+    }
+
+    function validatePhone(input) {
+        var phoneRegex = /^(0|\+255)\d{9,12}$/;
+        var isValid = phoneRegex.test(input.value);
+        var errorDiv = document.getElementById('phone-error');
+        if (!isValid) {
+            errorDiv.style.display = 'block';
+        } else {
+            errorDiv.style.display = 'none';
+        }
+    }
+
     // Function to validate the form before submission
     function validateForm(event) {
         // Prevent form submission
@@ -408,15 +438,40 @@ Edit Patient
             }
         });
 
-        // If all required fields are filled, submit the form
-        if (allFieldsFilled) {
-            // Get the form element
-            var form = event.target.closest('form');
+        // Get the phone number fields
+        var phoneField = document.getElementById("phone");
+        var emergencyContactPhoneField = document.getElementById("emergency_contact_phone");
 
-            // Submit the form
-            if (form) {
-                form.submit();
-            }
+        // Check phone number validity
+        var phoneValid = phoneField.checkValidity();
+        var emergencyContactPhoneValid = emergencyContactPhoneField.checkValidity();
+
+        // Get error message divs
+        var phoneErrorDiv = document.getElementById('phone-error');
+        var emergencyContactPhoneErrorDiv = document.getElementById('emergency-contact-phone-error');
+
+        // If phone numbers are invalid, display error messages
+        if (!phoneValid) {
+            phoneErrorDiv.style.display = 'block';
+        } else {
+            phoneErrorDiv.style.display = 'none';
+        }
+
+        if (!emergencyContactPhoneValid) {
+            emergencyContactPhoneErrorDiv.style.display = 'block';
+        } else {
+            emergencyContactPhoneErrorDiv.style.display = 'none';
+        }
+
+        // If either phone number is invalid or required fields are empty, prevent form submission
+        if (!phoneValid || !emergencyContactPhoneValid || !allFieldsFilled) {
+            return;
+        }
+
+        // If all required fields are filled and phone numbers are valid, submit the form
+        var form = event.target.closest('form');
+        if (form) {
+            form.submit();
         }
     }
 </script>

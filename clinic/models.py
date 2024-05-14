@@ -1720,13 +1720,15 @@ class RemoteAmbulanceVehicleOrder(models.Model):
                
 class RemoteProcedure(models.Model):
     patient = models.ForeignKey(RemotePatient, on_delete=models.CASCADE)
-    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True)
+    doctor = models.ForeignKey(Staffs, on_delete=models.CASCADE, blank=True, null=True)
     visit = models.ForeignKey(RemotePatientVisits, on_delete=models.CASCADE)   
-    name  = models.ForeignKey(RemoteService, on_delete=models.CASCADE,blank=True, null=True) 
+    name = models.ForeignKey(RemoteService, on_delete=models.CASCADE, blank=True, null=True) 
     description = models.TextField()   
+    image = models.ImageField(upload_to='procedure_images/', blank=True, null=True)  # New field for uploading images
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
+
     def __str__(self):
         return f"Procedure: {self.name} for {self.patient}"
     

@@ -745,24 +745,28 @@ def save_remoteprocedure(request, patient_id, visit_id):
         'visit': visit, 
         'procedures': procedures,
         'previous_procedures': previous_procedures,
-        }   
+    }   
     try:
         if request.method == 'POST':
-            # Get the list of procedure names and descriptions from the form
+            # Get the list of procedure names, descriptions, and images from the form
             names = request.POST.getlist('name[]')
-            descriptions = request.POST.getlist('description[]')            
+            descriptions = request.POST.getlist('description[]')
+            images = request.FILES.getlist('image[]')  # Get list of image files
+
             # Validate if all required fields are present
             if not all(names) or not all(descriptions):
                 messages.error(request, 'Please fill out all required fields.')
                 return render(request, 'kahama_template/procedure_template.html', context)            
+
             # Loop through the submitted data to add or update each procedure
-            for name, description in zip(names, descriptions):
+            for name, description, image in zip(names, descriptions, images):
                 # Check if a RemoteProcedure record already exists for this patient on the specified visit
                 existing_procedure = RemoteProcedure.objects.filter(patient_id=patient_id, visit_id=visit_id, name_id=name).first()
-                
+
                 if existing_procedure:
                     # If a procedure exists, update it
                     existing_procedure.description = description                  
+                    existing_procedure.image = image  # Update image field
                     existing_procedure.save()
                     messages.success(request, 'Remote procedure updated successfully.')
                 else:
@@ -771,6 +775,7 @@ def save_remoteprocedure(request, patient_id, visit_id):
                         visit_id=visit_id,
                         name_id=name,
                         description=description,
+                        image=image,  # Add image field
                     )                    
             messages.success(request, 'Remote procedure saved successfully.')
             return redirect(reverse('kahamahmis:save_remotesconsultation_notes', args=[patient_id, visit_id]))  # Change 'success_page' to your success page URL name
@@ -891,13 +896,13 @@ def get_drug_division_status(request):
     else:
         return JsonResponse({'error': 'Invalid request method or missing parameter'}, status=400) 
     
-def get_medicine_dosage(request):
+def get_medicine_formulation(request):
     if request.method == 'GET':
         medicine_id = request.GET.get('medicine_id')
         try:
             medicine = RemoteMedicine.objects.get(pk=medicine_id)
-            dosage = medicine.formulation_unit
-            return JsonResponse({'dosage': dosage})
+            formulation = medicine.formulation_unit
+            return JsonResponse({'formulation': formulation})
         except RemoteMedicine.DoesNotExist:
             return JsonResponse({'error': 'Medicine not found'}, status=404)
     else:
