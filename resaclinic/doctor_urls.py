@@ -8,7 +8,13 @@ urlpatterns = [
      
    
         path('doctor_dashboard/', DoctorView.doctor_dashboard, name='doctor_dashboard'),
+        path('fetch_lab_order_counts_view/', DoctorView.fetch_lab_order_counts_view, name='fetch_lab_order_counts_view'),
+        path('patient_lab_view/', DoctorView.patient_lab_view, name='patient_lab_view'),
         path('new_procedure_order/', DoctorView.new_procedure_order, name='new_procedure_order'),
+        path('edit_procedure_result/<int:patient_id>/<int:visit_id>/<int:procedure_id>/', DoctorView.edit_procedure_result, name='edit_procedure_result'),
+        path('edit_radiology_result/<int:patient_id>/<int:visit_id>/<int:radiology_id>/', DoctorView.edit_radiology_result, name='edit_radiology_result'),
+        path('edit_lab_result/<int:patient_id>/<int:visit_id>/<int:lab_id>/', DoctorView.edit_lab_result, name='edit_lab_result'),
+        path('new_lab_order/', DoctorView.new_lab_order, name='new_lab_order'),
         path('fetch_procedure_order_counts_view/', DoctorView.fetch_procedure_order_counts_view, name='fetch_procedure_order_counts_view'),
         path('fetch_radiology_order_counts_view/', DoctorView.fetch_radiology_order_counts_view, name='fetch_radiology_order_counts_view'),
         path('new_radiology_order/', DoctorView.new_radiology_order, name='new_radiology_order'),
@@ -17,6 +23,8 @@ urlpatterns = [
         path('unread_appointments/', DoctorView.unread_appointments_view, name='unread_appointments'),
         path('read_appointments/', DoctorView.read_appointments_view, name='read_appointments'),
         path('prescriptions/<str:visit_number>/<int:patient_id>/', DoctorView.prescription_detail, name='prescription_detail'),
+        path('prescriptions-billing/<str:visit_number>/<int:patient_id>/', DoctorView.prescription_billing, name='prescription_billing'),
+        path('prescriptions-notes/<str:visit_number>/<int:patient_id>/', DoctorView.prescription_notes, name='prescription_notes'),
         path('new_consultation_order/',DoctorView.new_consultation_order, name="new_consultation_order"),
         path('add_remotepatient_visit/',DoctorView.add_remotepatient_visit, name="add_remotepatient_visit"),
         path('save_consultation_notes/',DoctorView.save_consultation_notes, name="save_consultation_notes"),
@@ -47,6 +55,11 @@ urlpatterns = [
         path('add_procedure/', DoctorView.add_procedure, name='add_procedure'),
         path('add_remoteprescription/', DoctorView.add_remoteprescription, name='add_remoteprescription'),
         path('get_unit_price/', DoctorView.get_unit_price, name='get_unit_price'),        
+        path('get_drug_division_status/', DoctorView.get_drug_division_status, name='get_drug_division_status'),        
+        path('get_medicine_formulation/', DoctorView.get_medicine_formulation, name='get_medicine_formulation'),        
+        path('get_formulation_unit/', DoctorView.get_formulation_unit, name='get_formulation_unit'),        
+        path('get_frequency_name/', DoctorView.get_frequency_name, name='get_frequency_name'),        
+        path('medicine_dosage/', DoctorView.medicine_dosage, name='medicine_dosage'),        
         path('save_remoteconsultation_notes/', DoctorView.save_remoteconsultation_notes, name='save_remoteconsultation_notes'),
         path('consultation-notes/', DoctorView.consultation_notes_view, name='consultation_notes'),
         path('resa/patient_vital_all_listt/', DoctorView.patient_vital_all_list, name='patient_vital_all_list'),    
@@ -76,7 +89,7 @@ urlpatterns = [
         path('save_procedure/', DoctorView.save_procedure, name='save_procedure'),
         path('save_referral/', DoctorView.save_referral, name='save_referral'),  
         path('change_referral_status/', DoctorView.change_referral_status, name='change_referral_status'), 
-        path('invoice/<int:order_id>/', DoctorView.generate_invoice_bill, name='generate_invoice_bill'),
+        path('invoice/<int:patient_id>/<int:visit_id>/', DoctorView.generate_invoice_bill, name='generate_invoice_bill'),
         
         # imports urls 
         path('resa/import_Import/import_patient_vital_records',imports.import_patient_vital_records, name="import_patient_vital_records"),      

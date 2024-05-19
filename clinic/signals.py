@@ -35,14 +35,7 @@ def update_total_payment(sender, instance, created, **kwargs):
         instance.total_payment = total_payment
         instance.save(update_fields=['total_payment'])  
               
-@receiver(post_save, sender=Prescription)
-def update_total_payment_per_prescription(sender, instance, created, **kwargs):
-    if created:
-        # Calculate total payment for the inventory
-        total_price = instance.quantity_used * instance.medicine.unit_price        
-        # Update the total_payment field of the MedicineInventory instance
-        instance.total_price = total_price
-        instance.save(update_fields=['total_price']) 
+
                
 @receiver(post_save, sender=RemotePrescription)
 def update_total_payment_prescription(sender, instance, created, **kwargs):
@@ -94,6 +87,7 @@ def create_imaging_order(sender, instance, created, **kwargs):
             visit=instance.visit,
             added_by=instance.data_recorder,
             cost=instance.cost,
+            type_of_order="Imaging",
         )
 
 @receiver(post_save, sender=ConsultationOrder)
@@ -107,6 +101,7 @@ def create_consultation_order(sender, instance, created, **kwargs):
             visit=instance.visit,
             added_by=instance.data_recorder,
             cost=instance.cost,
+            type_of_order="Consultation",
         )
 
 @receiver(post_save, sender=Procedure)
@@ -120,6 +115,7 @@ def create_procedure_order(sender, instance, created, **kwargs):
             visit=instance.visit,
             added_by=instance.data_recorder,
             cost=instance.cost,
+            type_of_order="Procedure",
         )
 
 @receiver(post_save, sender=LaboratoryOrder)
@@ -133,6 +129,7 @@ def create_laboratory_order(sender, instance, created, **kwargs):
              visit=instance.visit,
             added_by=instance.data_recorder,
             cost=instance.cost,
+            type_of_order="Laboratory",
         )
 
 @receiver(post_save, sender=AmbulanceOrder)
@@ -145,6 +142,7 @@ def create_ambulance_order(sender, instance, created, **kwargs):
             visit=instance.visit,
             added_by=instance.data_recorder,
             cost=instance.cost,
+            type_of_order="Ambulance",
         )
     
     

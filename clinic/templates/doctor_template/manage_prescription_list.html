@@ -37,7 +37,7 @@ Prescription
     }
     
 </style>
-<div class="container">
+<div class="container-fluid">
     <div class="row">
         <div class="col-md-12">
             <div class="card">
@@ -85,9 +85,16 @@ Prescription
                                         
                                         <td>
                                             <a class="btn btn-primary" href="{% url 'prescription_detail' visit_total.visit__vst visit_total.visit__patient__id %}">
-                                                <i class="fas fa-eye-slash"></i> View Prescription
+                                                <i class="fas fa-eye"></i> View
                                             </a>   
-                                        </td>        
+                                            <a class="btn btn-secondary" href="{% url 'prescription_billing' visit_total.visit__vst visit_total.visit__patient__id %}">
+                                                <i class="fas fa-file-invoice"></i> Prescription Bill
+                                            </a>   
+                                            <a class="btn btn-success" href="{% url 'prescription_notes' visit_total.visit__vst visit_total.visit__patient__id %}">
+                                                <i class="fas fa-notes-medical"></i> Prescription Notes
+                                            </a>   
+                                        </td>
+                                             
                                     </tr>
                                 {% endfor %}
                             </tbody>

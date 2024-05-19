@@ -74,37 +74,15 @@
                             <i class="nav-icon fas fa-heartbeat"></i> <!-- Font Awesome icon for vital signs -->
                             <p>All Vital Signs</p> <!-- Renamed navigation link -->
                         </a>
-                    </li>                    
-                                  
-                    <li class="nav-item">
-                        {% url 'clinic:diagnostic_tests' as diagnostic_tests_url %}
-                        <a href="{{ diagnostic_tests_url }}" class="nav-link{% if request.path == diagnostic_tests_url %} active {% endif %}">
-                            <i class="nav-icon fas fa-flask"></i>
-                            <p>Health Insights</p>
-                        </a>
-                    </li>
+                    </li>                   
+              
                     <li class="nav-item">
                         {% url 'clinic:sample_list' as sample_list %}
                         <a href="{{ sample_list }}" class="nav-link{% if request.path == sample_list %} active {% endif %}">
                             <i class="nav-icon fas fa-flask"></i>
                             <p>Sample Management</p>
                         </a>
-                    </li>
-                    <li class="nav-item">
-                        {% url 'clinic:patient_diseases_view' as patient_diseases_view %}
-                        <a href="{{ patient_diseases_view }}" class="nav-link{% if request.path == patient_diseases_view %} active {% endif %}">
-                            <i class="nav-icon fas fa-heartbeat"></i> <!-- Replace 'fas fa-heartbeat' with the appropriate FontAwesome icon class -->
-                            <p>Patient Health Records</p> <!-- Replace with an attractive name for the navlink -->
-                        </a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        {% url 'clinic:pathology_diagnostic_test_list' as pathology_diagnostic_test_list %}
-                        <a href="{{ pathology_diagnostic_test_list }}" class="nav-link{% if request.path == pathology_diagnostic_test_list %} active {% endif %}">
-                            <i class="nav-icon fas fa-notes-medical"></i>
-                            <p>Pathology Diagnostic Tests</p>
-                        </a>
-                    </li>
+                    </li>                 
                     
                     
                       <li class="nav-item">
@@ -161,13 +139,7 @@
                             <p>Medicine Unit Measures</p>
                         </a>
                     </li>                            
-                      <li class="nav-item">
-                        {% url 'clinic:medicine_inventory' as medicine_inventory %}
-                          <a href="{% url "clinic:medicine_inventory" %}" class="nav-link{% if request.path == medicine_inventory %} active {% endif %}">
-                            <i class="nav-icon fas fa-pills"></i>
-                              <p>Medical Inventoory</p>
-                          </a>
-                      </li> 
+                
                       <li class="nav-item">
                         {% url 'clinic:in_stock_medicines_view' as in_stock_medicines_view_url %}
                         <a href="{{ in_stock_medicines_view_url }}" class="nav-link{% if request.path == in_stock_medicines_view_url %} active {% endif %}">

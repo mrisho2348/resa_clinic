@@ -15,7 +15,7 @@
 {% endblock breadcrumb %}
 {% block main_content %}
 
-<div class="container">
+<div class="container-fluid">
     <div class="row">
         <div class="col-md">
             <div class="card">
@@ -43,7 +43,8 @@
                                     <td>{{ patient.id }}</td>
                                     <td>{{ patient.mrn }}</td>
                                     <td>{{ patient.first_name }} {{ patient.middle_name }}  {{ patient.last_name }}</td>   
-                                    <td> {% if patient.dob %}
+                                    <td>{{ patient.dob|date:'Y-m-d' }}   (
+                                        {% if patient.dob %}
                                         <script>
                                             var dob = new Date("{{ patient.dob|date:'Y-m-d' }}");
                                             var now = new Date();
@@ -55,6 +56,7 @@
                                         {% else %}
                                         {{ patient.age }}
                                         {% endif %}
+                                        )
                                 </td>
                                     <td>{{ patient.gender }}</td>
                                     <!-- Add more cells for other fields -->
@@ -399,23 +401,23 @@
                                                         <!-- First Name -->
                                                         <div class="col-md-4">
                                                             <div class="form-group">
-                                                                <label for="edit_first_name">First Name:</label> <span class="error">* </span>
-                                                                <input type="text" class="form-control" id="edit_first_name" name="edit_first_name" value="{{ patient.first_name }}" required>
+                                                                <label for="edit_first_name{{ patient.id }}">First Name:</label> <span class="error">* </span>
+                                                                <input type="text" class="form-control" id="edit_first_name{{ patient.id }}" name="edit_first_name" value="{{ patient.first_name }}" required>
                                                             </div>
                                                         </div>
                                                         <!-- Middle Name -->
                                                         <div class="col-md-4">
                                                             <div class="form-group">
-                                                                <label for="edit_middle_name">Middle Name:</label> <span class="error">* </span>
-                                                                <input type="text" class="form-control" id="edit_middle_name" name="edit_middle_name" value="{{ patient.middle_name }}" required>
+                                                                <label for="edit_middle_name{{ patient.id }}">Middle Name:</label> <span class="error">* </span>
+                                                                <input type="text" class="form-control" id="edit_middle_name{{ patient.id }}" name="edit_middle_name" value="{{ patient.middle_name }}" required>
                                                                 <input type="hidden" class="form-control" id="patient_id" name="patient_id" value="{{ patient.id }}" >
                                                             </div>
                                                         </div>
                                                         <!-- Last Name -->
                                                         <div class="col-md-4">
                                                             <div class="form-group">
-                                                                <label for="edit_last_name">Last Name:</label> <span class="error">* </span>
-                                                                <input type="text" class="form-control" id="edit_last_name" name="edit_last_name" value="{{ patient.last_name }}" required>
+                                                                <label for="edit_last_name{{ patient.id }}">Last Name:</label> <span class="error">* </span>
+                                                                <input type="text" class="form-control" id="edit_last_name{{ patient.id }}" name="edit_last_name" value="{{ patient.last_name }}" required>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -423,8 +425,8 @@
                                                     <div class="row">
                                                         <div class="col-md-4">
                                                             <div class="form-group">
-                                                                <label for="edit_gender">Gender:</label><span class="error">* </span>
-                                                                <select class="form-control select2bs4" style="width: 100%;" id="edit_gender" name="edit_gender" required>
+                                                                <label for="edit_gender{{ patient.id }}">Gender:</label><span class="error">* </span>
+                                                                <select class="form-control select2bs4" style="width: 100%;" id="edit_gender{{ patient.id }}" name="edit_gender" required>
                                                                     <option value="Male" {% if patient.gender == 'Male' %} selected {% endif %}>Male</option>
                                                                     <option value="Female" {% if patient.gender == 'Female' %} selected {% endif %}>Female</option>
                                                                 </select>
@@ -433,8 +435,8 @@
                                                         <!-- Age -->
                                                         <div class="col-md-4">
                                                             <div class="form-group">
-                                                                <label for="edit_age">Age:</label>
-                                                                <select class="form-control select2bs4" style="width: 100%;" id="edit_age" name="edit_age" required>
+                                                                <label for="edit_age{{ patient.id }}">Age:</label>
+                                                                <select class="form-control select2bs4" style="width: 100%;" id="edit_age{{ patient.id }}" name="edit_age" required>
                                                                     {% for age in range_121 %}
                                                                         <option value="{{ age }}" {% if patient.age == age %} selected {% endif %}>{{ age }}</option>
                                                                     {% endfor %}
@@ -444,16 +446,16 @@
                                                         <!-- Date of Birth -->
                                                         <div class="col-md-4">
                                                             <div class="form-group">
-                                                                <label for="edit_dob">Date of Birth:</label>
-                                                                <input type="date" class="form-control" id="edit_dob" name="edit_dob" min="1922-01-01" max="2024-12-31" value="{{ patient.dob|date:'Y-m-d' }}">
+                                                                <label for="edit_dob{{ patient.id }}">Date of Birth:</label>
+                                                                <input type="date" class="form-control" id="edit_dob{{ patient.id }}" name="edit_dob" min="1922-01-01" max="2024-12-31" value="{{ patient.dob|date:'Y-m-d' }}">
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <!-- Additional Personal Information -->
                                                     <div class="row">
                                                         <div class="form-group col-sm-4">
-                                                            <label for="edit_patient_type" class="col-form-label">Patient type</label>
-                                                            <select class="form-control select2bs4" style="width: 100%;" id="edit_patient_type" name="edit_patient_type"  required>                                               
+                                                            <label for="edit_patient_type{{ patient.id }}" class="col-form-label">Patient type</label>
+                                                            <select class="form-control select2bs4" style="width: 100%;" id="edit_patient_type{{ patient.id }}" name="edit_patient_type"  required>                                               
                                                                     <option value="National Staff" {% if patient.patient_type == 'National Staff' %} selected {% endif %}>National Staff</option>
                                                                     <option value="International Staff" {% if patient.patient_type == 'International Staff' %} selected {% endif %}>International Staff</option>
                                                                     <option value="National Visitor" {% if patient.patient_type == 'National Visitor' %} selected {% endif %}>National Visitor</option>
@@ -464,20 +466,20 @@
                                                             </select>
                                                         </div>
                                                         <div class="form-group col-sm-4">
-                                                            <label for="edit_phone" class="col-form-label">Phone Number</label>
-                                                            <input type="tel" class="form-control" name="edit_phone" id="edit_phone" value="{{ patient.phone }}" placeholder="">
+                                                            <label for="edit_phone{{ patient.id }}" class="col-form-label">Phone Number</label>
+                                                            <input type="tel" class="form-control" name="edit_phone" id="edit_phone{{ patient.id }}" value="{{ patient.phone }}" placeholder="">
                                                         </div>
                                                         <div class="form-group col-sm-4">
-                                                            <label for="edit_Address" class="col-form-label">Address</label>
-                                                            <textarea id="edit_Address" name="edit_Address" rows="2" class="form-control">{{ patient.address }}</textarea>
+                                                            <label for="edit_Address{{ patient.id }}" class="col-form-label">Address</label>
+                                                            <textarea id="edit_Address{{ patient.id }}" name="edit_Address" rows="2" class="form-control">{{ patient.address }}</textarea>
                                                         </div>
                                                     </div>
                                                     <!-- Professional Information -->
                                                     <div class="row">
                                                         <!-- Nationality -->
                                                         <div class="form-group col-sm-4">
-                                                            <label for="edit_nationality" class="col-form-label">Nationality</label>
-                                                            <select class="form-control select2bs4" style="width: 100%;" name="edit_nationality" id="edit_nationality" required>
+                                                            <label for="edit_nationality{{ patient.id }}" class="col-form-label">Nationality</label>
+                                                            <select class="form-control select2bs4" style="width: 100%;" name="edit_nationality" id="edit_nationality{{ patient.id }}" required>
                                                                 {% for country in all_country %}
                                                                     <option value="{{country.id}}" {% if patient.nationality == country.id %} selected {% endif %}>{{country.name}}</option>
                                                                 {% endfor %}
@@ -485,16 +487,16 @@
                                                         </div>
                                                         <!-- Payment Type -->
                                                         <div class="form-group col-sm-4">
-                                                            <label for="edit_payment_type" class="col-form-label">Payment Type</label>
+                                                            <label for="edit_payment_type{{ patient.id }}" class="col-form-label">Payment Type</label>
                                                             <select class="form-control select2bs4" style="width: 100%;" name="edit_payment_type" id="edit_payment_type{{ patient.id }}">
-                                                                <option value="cash" {% if patient.payment_form == 'cash' %} selected {% endif %}>Cash</option>
-                                                                <option value="insurance" {% if patient.payment_form == 'insurance' %} selected {% endif %}>Insurance</option>
+                                                                <option value="Cash" {% if patient.payment_form == 'Cash' %} selected {% endif %}>Cash</option>
+                                                                <option value="Insurance" {% if patient.payment_form == 'Insurance' %} selected {% endif %}>Insurance</option>
                                                             </select>
                                                         </div>
                                                         <!-- Insurance Name -->
-                                                        <div class="form-group col-sm-4" id="edit_insurance_name_container{{ patient.id }}" {% if patient.payment_form == 'insurance' %} style="display: block;" {% else %} style="display: none;" {% endif %}>
-                                                            <label for="edit_insurance_name" class="col-form-label">Insurance Name</label>
-                                                            <select class="form-control select2bs4" style="width: 100%;" name="insurance_name" id="insurance_name">
+                                                        <div class="form-group col-sm-4" id="edit_insurance_name_container{{ patient.id }}" {% if patient.payment_form == 'Insurance' %} style="display: block;" {% else %} style="display: none;" {% endif %}>
+                                                            <label for="edit_insurance_name{{ patient.id }}" class="col-form-label">Insurance Name</label>
+                                                            <select class="form-control select2bs4" style="width: 100%;" name="insurance_name" id="insurance_name{{ patient.id }}">
                                                                 <option value="">Select Insurance Company</option>
                                                                 <option value="NHIF" {% if patient.insurance_name == 'NHIF' %} selected {% endif %}>NHIF</option>
                                                                 <option value="Jubilee" {% if patient.insurance_name == 'Jubilee' %} selected {% endif %}>Jubilee</option>
@@ -507,14 +509,14 @@
                                                             </select>
                                                         </div>
                                                         <!-- Insurance Details -->
-                                                        <div class="form-group col-sm-4" id="edit_insurance_details_container{{ patient.id }}"{% if patient.payment_form == 'insurance' %} style="display: block;" {% else %} style="display: none;" {% endif %}>
-                                                            <label for="edit_insurance_number" class="col-form-label">Insurance Number</label>
-                                                            <input type="text" class="form-control" name="edit_insurance_number" id="edit_insurance_number" placeholder="Insurance Number" value="{{ patient.insurance_number }}">
+                                                        <div class="form-group col-sm-4" id="edit_insurance_details_container{{ patient.id }}"{% if patient.payment_form == 'Insurance' %} style="display: block;" {% else %} style="display: none;" {% endif %}>
+                                                            <label for="edit_insurance_number{{ patient.id }}" class="col-form-label">Insurance Number</label>
+                                                            <input type="text" class="form-control" name="edit_insurance_number" id="edit_insurance_number{{ patient.id }}" placeholder="Insurance Number" value="{{ patient.insurance_number }}">
                                                         </div>
                                                         <!-- Marital Status -->
                                                         <div class="form-group col-sm-4">
-                                                            <label for="edit_maritalStatus" class="col-form-label">Marital Status</label>
-                                                            <select class="form-control select2bs4" style="width: 100%;" name="marital_status" id="marital_status">
+                                                            <label for="edit_maritalStatus{{ patient.id }}" class="col-form-label">Marital Status</label>
+                                                            <select class="form-control select2bs4" style="width: 100%;" name="marital_status" id="marital_status{{ patient.id }}">
                                                                 <option value="single" {% if patient.marital_status == 'single' %} selected {% endif %}>Single</option>
                                                                 <option value="married" {% if patient.marital_status == 'married' %} selected {% endif %}>Married</option>
                                                                 <option value="Divorced" {% if patient.marital_status == 'Divorced' %} selected {% endif %}>Divorced</option>
@@ -528,15 +530,15 @@
                                                         <!-- Emergency Contact Name -->
                                                         <div class="col-md-4">
                                                             <div class="form-group">
-                                                                <label for="edit_emergency_contact_name">Emergency Contact Name:</label> <span class="error">* </span>
-                                                                <input type="text" class="form-control" id="edit_emergency_contact_name" name="edit_emergency_contact_name" value="{{ patient.emergency_contact_name }}" required>
+                                                                <label for="edit_emergency_contact_name{{ patient.id }}">Emergency Contact Name:</label> <span class="error">* </span>
+                                                                <input type="text" class="form-control" id="edit_emergency_contact_name{{ patient.id }}" name="edit_emergency_contact_name" value="{{ patient.emergency_contact_name }}" required>
                                                             </div>
                                                         </div>
                                                         <!-- Emergency Contact Relation -->
                                                         <div class="col-md-4">
                                                             <div class="form-group">
-                                                                <label for="edit_emergency_contact_relation">Emergency Contact Relation:</label> <span class="error">* </span>
-                                                                <select class="form-control select2bs4" style="width: 100%;" id="emergency_contact_relation" name="emergency_contact_relation" onchange="toggleOtherRelationField(this)" required>
+                                                                <label for="edit_emergency_contact_relation{{ patient.id }}">Emergency Contact Relation:</label> <span class="error">* </span>
+                                                                <select class="form-control select2bs4" style="width: 100%;" id="emergency_contact_relation{{ patient.id }}" name="emergency_contact_relation" required>
                                                                     <option value="Spouse" {% if patient.emergency_contact_relation == 'Spouse' %} selected {% endif %}>Spouse</option>
                                                                     <option value="Friend" {% if patient.emergency_contact_relation == 'Friend' %} selected {% endif %}>Friend</option>
                                                                     <option value="Coworker" {% if patient.emergency_contact_relation == 'Coworker' %} selected {% endif %}>Coworker</option>
@@ -554,13 +556,13 @@
                                                         <!-- Emergency Contact Phone -->
                                                         <div class="col-md-4">
                                                             <div class="form-group">
-                                                                <label for="edit_emergency_contact_phone">Emergency Contact Phone:</label>
-                                                                <input type="tel" class="form-control" id="edit_emergency_contact_phone" name="edit_emergency_contact_phone" value="{{ patient.emergency_contact_phone }}">
+                                                                <label for="edit_emergency_contact_phone{{ patient.id }}">Emergency Contact Phone:</label>
+                                                                <input type="tel" class="form-control" id="edit_emergency_contact_phone{{ patient.id }}" name="edit_emergency_contact_phone" value="{{ patient.emergency_contact_phone }}">
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <!-- Message Container -->
-                                                    <div id="edit_messageContainer" class="text-center mt-2"></div>
+                                                    <div id="edit_messageContainer{{ patient.id }}" class="text-center mt-2"></div>
                                                     <!-- Form Submission Button -->
                                                     <div class="form-group pt-2 float-end">
                                                         <div class="row">
@@ -575,43 +577,13 @@
                                         </div>
                                     </div>
                                 </div>
-                                <script>
-                                    $(document).ready(function () {
-                                        // Handle form submission
-                                        {% for patient in patient_records %}
-                                        $('#editPatientForm{{ patient.id }}').submit(function (e) {
-                                            e.preventDefault();
-                                    
-                                            // Serialize the form data
-                                            var formData = $(this).serialize();
-                                    
-                                            // Send AJAX request to the server
-                                            $.ajax({
-                                                url: '/save_edited_patient/', // Change the URL to match your server-side endpoint
-                                                method: 'POST',
-                                                data: formData,
-                                                success: function (response) {
-                                                    // Handle success
-                                                    $('#edit_messageContainer').html('<div class="alert alert-success" role="alert">' + response.message + '</div>');
-                                                    // Optionally, you can perform additional actions here, such as updating the UI
-                                                    location.reload(true);
-                                                },
-                                                error: function (xhr, status, error) {
-                                                    // Handle errors
-                                                    $('#edit_messageContainer').html('<div class="alert alert-danger" role="alert">' + error + '</div>');
-                                                    console.error('Error saving data:', error);
-                                                }
-                                            });
-                                        });
-                                        {% endfor %}
-                                    });
-                                </script>
+                               
                                 <script>
                                     $(document).ready(function(){
                                                                 // Inside the $(document).ready() function
                                     $('#edit_payment_type{{ patient.id }}').change(function () {
                                         var paymentType = $(this).val();
-                                        if (paymentType === 'insurance') {
+                                        if (paymentType === 'Insurance') {
                                             $('#edit_insurance_name_container{{ patient.id }}').show();
                                             $('#edit_insurance_details_container{{ patient.id }}').show();
                                          
@@ -637,15 +609,44 @@
     </div>
 </div>
 </div>
+<script>
+    $(document).ready(function () {
+        // Handle form submission for each patient record
+        {% for patient in patient_records %}
+        $('#editPatientForm{{ patient.id }}').submit(function (e) {
+            // Prevent the default form submission
+            e.preventDefault();
 
-   
+            // Serialize the form data
+            var formData = $(this).serialize();
 
+            // Send AJAX request to the server
+            $.ajax({
+                url: '{% url "receptionist_save_edited_patient" %}', // Change the URL to match your server-side endpoint
+                method: 'POST',
+                data: formData,
+                success: function (response) {
+                    if (response.success) {
+                        // Display success message
+                        $('#edit_messageContainer{{ patient.id }}').html('<div class="alert alert-success" role="alert">' + response.message + '</div>');
+                        // Optionally, perform additional actions such as updating the UI
+                        location.reload(true);
+                    } else {
+                        // Display error message
+                        $('#edit_messageContainer{{ patient.id }}').html('<div class="alert alert-danger" role="alert">' + response.message + '</div>');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    // Handle errors
+                    $('#edit_messageContainer{{ patient.id }}').html('<div class="alert alert-danger" role="alert">' + error + '</div>');
+                    console.error('Error saving data:', error);
+                }
+            });
+        });
+        {% endfor %}
+    });
+</script>
 
-    <script>
-        function submitForm(checkbox) {
-            checkbox.form.submit();
-        }
-    </script>
 
 {% include 'receptionist_template/datatable.html' %}
     

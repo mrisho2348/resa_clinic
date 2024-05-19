@@ -161,8 +161,13 @@ urlpatterns = [
         path('patient_visit_history/<int:patient_id>/', views.patient_visit_history_view, name='patient_visit_history_view'),
         path('health-issues/', views.health_issue_list, name='health_issue_list'),
         path('prescriptions/<str:visit_number>/<int:patient_id>/', views.prescription_detail, name='prescription_detail'),
+        path('prescription-billing/<str:visit_number>/<int:patient_id>/', views.prescription_billing, name='prescription_billing'),
+        path('prescription-notes/<str:visit_number>/<int:patient_id>/', views.prescription_notes, name='prescription_notes'),
         path('resa/reagent-list/', views.reagent_list, name='reagent_list'),
         path('prescriptions/', views.prescription_list, name='prescription_list'),
+        path('counseling/', views.counseling_list_view, name='counseling_list'),
+        path('discharge_notes/', views.discharge_notes_list_view, name='discharge_notes_list'),
+        path('observation_records/', views.observation_record_list_view, name='observation_record_list'),
         path('resa/in-stock-items/', views.in_stock_items, name='in_stock_items'),
         path('resa/out-of-stock-items/', views.out_of_stock_items, name='out_of_stock_items'),       
         path('pathology_diagnostic_test_list/', views.pathology_diagnostic_test_list, name='pathology_diagnostic_test_list'),
@@ -281,5 +286,7 @@ urlpatterns = [
        
         
         path('delete_patient_visit/<int:patient_visit_id>/', delete.delete_patient_visit, name='delete_patient_visit'),
+        
+  
        
 ]

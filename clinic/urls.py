@@ -1,11 +1,12 @@
 
 from django.urls import include, path
+
+from clinic import ExcelTemplate
 from . import views,delete,imports,editView
 
 urlpatterns = [
         path('',views.index, name="home"),    
-        path('delete_medicine_route/',views.delete_medicine_route, name="delete_medicine_route"),
-        path('delete_service/',views.delete_service, name="delete_service"),
+        path('delete_medicine_route/',views.delete_medicine_route, name="delete_medicine_route"),       
         path('delete_medicine_unit_measure/',views.delete_medicine_unit_measure, name="delete_medicine_unit_measure"),
         path('add_medicine_unit_measure/',views.add_medicine_unit_measure, name="add_medicine_unit_measure"),
         path('add_medicine_route/',views.add_medicine_route, name="add_medicine_route"),
@@ -150,8 +151,7 @@ urlpatterns = [
         path('add_vehicle/', views.add_vehicle, name='add_vehicle'),
         path('out_of_stock_medicines_view/', views.out_of_stock_medicines_view, name='out_of_stock_medicines_view'),
         path('vehicle_ambulance_view/',views.vehicle_ambulance_view, name="vehicle_ambulance_view"),  
-        path('usage_history/', views.usage_history_list, name='usage_history_list'),
-        path('resa/medicine-inventory/', views.medicine_inventory_list, name='medicine_inventory'),
+        path('usage_history/', views.usage_history_list, name='usage_history_list'),       
         path('resa/all-patients',views.manage_patient, name="manage_patient"),
         path('resa/consultation-queue',views.manage_consultation, name="manage_consultation"),
         path('resa/category-list/', views.category_list, name='category_list'),
@@ -185,6 +185,7 @@ urlpatterns = [
         # imports urls 
         path('resa/import_Import/import_patient_vital_records',imports.import_patient_vital_records, name="import_patient_vital_records"),
         path('resa/import_Import/Inventory/ItemForm_records',imports.import_ImportInventoryItemForm_records, name="import_ImportInventoryItemForm_records"),
+        path('resa/import_service_data',imports.import_service_data, name="import_service_data"),
         path('resa/ImportExcel_supplier',imports.import_supplier, name="import_supplier"),
         path('resa/ImportExcel_category',imports.import_category, name="import_category"),
         path('resa/ImportExcel_service',imports.import_service_records, name="import_service_records"),
@@ -274,6 +275,10 @@ urlpatterns = [
         path('delete_remotecompany/<int:company_id>/', delete.delete_remotecompany, name='delete_remotecompany'),
         path('delete_patient_visit/<int:patient_visit_id>/', delete.delete_patient_visit, name='delete_patient_visit'),
         path('delete_medication_payment/<int:payment_id>/', delete.delete_medication_payment, name='delete_medication_payment'),
+        
+              # Excel 
+        path('download-template/', ExcelTemplate.download_excel_template, name='download_template'),
+        path('download_medicine_excel_template/', ExcelTemplate.download_medicine_excel_template, name='download_medicine_excel_template'),
  
         
 ]

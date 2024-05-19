@@ -27,7 +27,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import OuterRef, Subquery
 from .models import AmbulanceActivity, AmbulanceOrder, AmbulanceRoute, AmbulanceVehicleOrder, Category, Company, ConsultationFee, ConsultationNotes, ConsultationOrder, Country, Diagnosis, DiagnosticTest, Diagnosis, Equipment, EquipmentMaintenance, HealthIssue, HospitalVehicle, ImagingRecord, InventoryItem, LaboratoryOrder, MedicationPayment, MedicineRoute, MedicineUnitMeasure, Order, PathologyDiagnosticTest, PatientDisease,PatientVisits, PatientVital, Prescription, PrescriptionFrequency, Procedure, Patients, QualityControl, Reagent, ReagentUsage, Referral, RemoteCompany, Sample, Service, Supplier, UsageHistory
 from django.db.models import Sum
-
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 # Create your views here.
 def index(request):
     return render(request,"index.html")
@@ -315,7 +315,10 @@ def save_staff_view(request):
             # Retrieve form data from the POST request
             first_name = request.POST.get('firstName')
             middle_name = request.POST.get('middleName')
-            lastname = request.POST.get('lastname')            
+            lastname = request.POST.get('lastname') 
+            first_name = first_name.capitalize() if first_name else None
+            middle_name = middle_name.capitalize() if middle_name else None
+            last_name = lastname.capitalize() if lastname else None           
             gender = request.POST.get('gender')
             dob = request.POST.get('dob')
             phone = request.POST.get('phone')
@@ -324,9 +327,11 @@ def save_staff_view(request):
             email = request.POST.get('email')
             password = request.POST.get('password')            
             user_role = request.POST.get('userRole')
+            Workingplace = request.POST.get('Workingplace')
+            joiningDate = request.POST.get('joiningDate')
 
             # Create a new CustomUser instance (if not exists) and link it to Staffs
-            user = CustomUser.objects.create_user(username=email, password=password, email=email, first_name=first_name, last_name=lastname, user_type=2)
+            user = CustomUser.objects.create_user(username=email, password=password, email=email, first_name=first_name, last_name=last_name, user_type=2)
 
             # Create a new Staffs instance and link it to the user
             
@@ -337,6 +342,8 @@ def save_staff_view(request):
             user.staff.marital_status = marital_status
             user.staff.profession = profession
             user.staff.role = user_role
+            user.staff.work_place = Workingplace
+            user.staff.joining_date = joiningDate
         
             # Save the staff record
             user.save()
@@ -471,7 +478,10 @@ def edit_staff_save(request):
             # Extract the form data
             first_name = request.POST.get('firstName')
             middle_name = request.POST.get('middleName')
-            lastname = request.POST.get('lastname')            
+            last_name = request.POST.get('lastname') 
+            first_name = first_name.capitalize() if first_name else None
+            middle_name = middle_name.capitalize() if middle_name else None
+            last_name = last_name.capitalize() if last_name else None                  
             gender = request.POST.get('gender')
             dob = request.POST.get('date_of_birth')
             phone = request.POST.get('phone')
@@ -479,14 +489,18 @@ def edit_staff_save(request):
             marital_status = request.POST.get('maritalStatus')
             email = request.POST.get('email')                        
             user_role = request.POST.get('userRole')    
+            joiningDate = request.POST.get('joiningDate')    
+            Workingplace = request.POST.get('Workingplace')    
           
 
             # Save the staff details
    
             staff.admin.first_name = first_name
-            staff.admin.last_name = lastname
+            staff.admin.last_name = last_name
             staff.admin.email = email
             staff.middle_name = middle_name
+            staff.joining_date = joiningDate
+            staff.work_place = Workingplace
             staff.role = user_role
             staff.profession = profession
             staff.marital_status = marital_status
@@ -706,7 +720,7 @@ def medicine_list(request):
 
     # Create notifications for expired medicines
     for medicine in expired_medicines:
-        message = f"The medicine '{medicine.name}' has expired."
+        message = f"The medicine '{medicine.drug_name}' has expired."
         NotificationMedicine.objects.create(user=request.user, message=message)
 
     # Get unread notifications
@@ -715,51 +729,93 @@ def medicine_list(request):
     # Render the template with medicine data and notifications
     return render(request, 'hod_template/manage_medicine.html', {'medicines': medicines, 'unread_notifications': unread_notifications})
 
+
 @csrf_exempt
 @login_required
 def add_medicine(request):
     if request.method == 'POST':
         try:
-            # Retrieve data from the form
-            name = request.POST['name']
-            medicine_type = request.POST['medicine_type']
-            side_effect = request.POST.get('side_effect', '')
-            dosage = request.POST['dosage']
-            storage_condition = request.POST['storage_condition']
-            manufacturer = request.POST['manufacturer']
-            description = request.POST.get('description', '')
-            expiration_date = request.POST['expiration_date']
-            cash_cost = request.POST['cash_cost']
-            buying_price = request.POST['buying_price']
-            nhif_cost = request.POST['nhif_cost']
+            # Extract data from request
+            medicine_id = request.POST.get('medicine_id')
+            drug_name = request.POST.get('drug_name')
+            drug_type = request.POST.get('drug_type')
+            formulation_unit = request.POST.get('formulation_unit')
+            manufacturer = request.POST.get('manufacturer')
+            quantity = request.POST.get('quantity')
+            dividable = request.POST.get('dividable')
+            batch_number = request.POST.get('batch_number')
+            expiration_date = request.POST.get('expiration_date')
+            cash_cost = request.POST.get('cash_cost')
+            insurance_cost = request.POST.get('insurance_cost')
+            nhif_cost = request.POST.get('nhif_cost')
+            buying_price = request.POST.get('buying_price')
 
-            # Validate expiration date
-            if expiration_date <= str(date.today()):                
-                return JsonResponse({'error': 'The expiration date cannot be in the past'}, status=500)
+            # Validate expiration_date
+            if expiration_date:
+                expiration_date_obj = datetime.strptime(expiration_date, '%Y-%m-%d').date()
+                if expiration_date_obj <= datetime.now().date():
+                    return JsonResponse({'status': 'fail', 'error': 'Expiration date must be in the future.'})
 
-            # Save the data to the Medicine model
-            medicine = Medicine.objects.create(
-                name=name,
-                medicine_type=medicine_type,
-                side_effect=side_effect,
-                dosage=dosage,
-                storage_condition=storage_condition,
-                manufacturer=manufacturer,
-                description=description,
-                expiration_date=expiration_date,
-                cash_cost=cash_cost,
-                buying_price=buying_price,
-                nhif_cost=nhif_cost
-            )
+             # Check if required fields are provided
+            if not (drug_name and quantity and buying_price):
+                return JsonResponse({'status': 'fail', 'error': 'Missing required fields'})
 
-           
-            return JsonResponse({'message': 'Medicine added successfully'}, status=200)
+            # Convert quantity and buying_price to integers
+            try:
+                quantity = int(quantity)
+                buying_price = float(buying_price)
+            except ValueError:
+                return JsonResponse({'status': 'fail', 'error': 'Invalid quantity or buying price'})
+            # Check if this is an edit operation
+            if medicine_id:
+                medicine = Medicine.objects.get(pk=medicine_id)
+                medicine.drug_name = drug_name
+                medicine.drug_type = drug_type
+                medicine.formulation_unit = formulation_unit
+                medicine.manufacturer = manufacturer
+                medicine.quantity = quantity
+                medicine.remain_quantity = quantity
+                medicine.dividable = dividable
+                medicine.batch_number = batch_number
+                medicine.expiration_date = expiration_date
+                medicine.cash_cost = cash_cost
+                medicine.insurance_cost = insurance_cost
+                medicine.nhif_cost = nhif_cost
+                medicine.buying_price = buying_price
+            else:
+                # Check for uniqueness
+                if Medicine.objects.filter(drug_name=drug_name, manufacturer=manufacturer, batch_number=batch_number).exists():
+                    return JsonResponse({'status': 'fail', 'error': 'This medicine already exists.'})
 
-        except Exception as e:            
-            logger.error(f"Error adding Medicine: {str(e)}")
-            return JsonResponse({'error': 'Failed to add Medicine'}, status=500)
+                # Create a new Medicine instance
+                medicine = Medicine(
+                    drug_name=drug_name,
+                    drug_type=drug_type,
+                    formulation_unit=formulation_unit,
+                    manufacturer=manufacturer,
+                    quantity=quantity,
+                    remain_quantity=quantity,
+                    dividable=dividable,
+                    batch_number=batch_number,
+                    expiration_date=expiration_date,
+                    cash_cost=cash_cost,
+                    insurance_cost=insurance_cost,
+                    nhif_cost=nhif_cost,
+                    buying_price=buying_price,
+                )
 
-    return JsonResponse({'error': 'Failed to add Medicine'}, status=500)
+            # Save the medicine instance
+            medicine.save()
+            return JsonResponse({'status': 'success'})
+        except ObjectDoesNotExist:
+            return JsonResponse({'status': 'fail', 'error': 'Medicine not found.'})
+        except ValidationError as ve:
+            return JsonResponse({'status': 'fail', 'error': ve.message})
+        except Exception as e:
+            return JsonResponse({'status': 'fail', 'error': str(e)})
+    return JsonResponse({'status': 'fail', 'error': 'Invalid request method'})
+
+
 
 @login_required
 @require_POST
@@ -810,26 +866,7 @@ def add_inventory(request):
         # Handle non-POST requests, redirect or display an error message
         return redirect('clinic:medicine_list')  # Adjust the URL as needed
 
-@login_required    
-def medicine_inventory_list(request):
-    # Retrieve all medicine inventories
-    medicine_inventories = MedicineInventory.objects.all()
 
-    # Retrieve medicines with quantity below 100
-    low_quantity_medicines = MedicineInventory.objects.filter(quantity__lt=100)
-    current_date = timezone.now().date()
-    non_expired_medicines = Medicine.objects.filter(expiration_date__gte=current_date)
-    total_payment = sum(inventory.total_payment for inventory in medicine_inventories)
-
-    # Pass the context variables to the template
-    context = {
-        'medicine_inventories': medicine_inventories,
-        'low_quantity_medicines': low_quantity_medicines,
-        'non_expired_medicines': non_expired_medicines,
-        'total_payment': total_payment,
-    }
-
-    return render(request, 'hod_template/manage_medical_inventory.html', context)
 
 def medicine_expired_list(request):
     # Get all medicines
@@ -1160,44 +1197,62 @@ def save_edited_patient(request):
         try:
             # Extract the form data
             patient_id = request.POST.get('patient_id')
-            edited_patient = Patients.objects.get(id=patient_id)
-            edited_patient.first_name = request.POST.get('edit_first_name')
-            edited_patient.middle_name = request.POST.get('edit_middle_name')
-            edited_patient.last_name = request.POST.get('edit_last_name')
+            edited_patient = Patients.objects.get(id=patient_id)            
+
+            # Extract patient details from the request
+            edited_patient.first_name = request.POST.get('edit_first_name', '').capitalize()
+            edited_patient.middle_name = request.POST.get('edit_middle_name', '').capitalize()
+            edited_patient.last_name = request.POST.get('edit_last_name', '').capitalize()
             edited_patient.gender = request.POST.get('edit_gender')
-            if not request.POST.get('edit_age'):
-                edited_patient.age = None
-            else:
-                edited_patient.age = int(request.POST.get('edit_age'))
-            
-            if not request.POST.get('edit_dob'):
-                edited_patient.dob = None
-            else:
-                edited_patient.dob = request.POST.get('edit_dob')               
             edited_patient.phone = request.POST.get('edit_phone')
             edited_patient.address = request.POST.get('edit_Address')
             edited_patient.nationality_id = request.POST.get('edit_nationality')
             edited_patient.payment_form = request.POST.get('edit_payment_type')
-            if request.POST.get('edit_payment_type') == 'insurance':
-                edited_patient.insurance_name = request.POST.get('insurance_name')
-                edited_patient.insurance_number = request.POST.get('edit_insurance_number')           
-            
             edited_patient.emergency_contact_name = request.POST.get('edit_emergency_contact_name')
             edited_patient.emergency_contact_relation = request.POST.get('edit_emergency_contact_relation')
             edited_patient.emergency_contact_phone = request.POST.get('edit_emergency_contact_phone')
             edited_patient.marital_status = request.POST.get('marital_status')
             edited_patient.patient_type = request.POST.get('edit_patient_type')
+            
+            # Extract dob or calculate from age
+            age = request.POST.get('edit_age')
+            dob = request.POST.get('edit_dob')
 
+            if dob:
+                # Calculate age from dob
+                try:
+                    dob_date = datetime.strptime(dob, '%Y-%m-%d').date()
+                    current_date = date.today()
+                    age = current_date.year - dob_date.year - ((current_date.month, current_date.day) < (dob_date.month, dob_date.day))
+                except ValueError:
+                    age = None
+            elif age:
+                # Calculate dob from age
+                try:
+                    age_int = int(age)
+                    current_date = date.today()
+                    dob = current_date.replace(year=current_date.year - age_int)
+                except ValueError:
+                    dob = None
+                       
+            edited_patient.dob = dob
+            edited_patient.age = age
+            
+            # Handle insurance details
+            if edited_patient.payment_form == 'Insurance':
+                edited_patient.insurance_name = request.POST.get('insurance_name')
+                edited_patient.insurance_number = request.POST.get('edit_insurance_number')           
+            
             # Save the edited patient
             edited_patient.save()
 
             # Return JSON response for success
-            return JsonResponse({'message': 'Patient data updated successfully.'})
+            return JsonResponse({'success':True,'message': 'Patient data updated successfully.'})
         except Exception as e:
             # Return JSON response for error
-            return JsonResponse({'error': str(e)}, status=400)
+            return JsonResponse({'success':False,'message': str(e)}, status=400)
     else:
-        return JsonResponse({'error': 'Invalid request method.'}, status=400)
+        return JsonResponse({'success':False,'message': 'Invalid request method.'}, status=400)
     
 @csrf_exempt
 def add_patient(request):
@@ -1207,11 +1262,13 @@ def add_patient(request):
             first_name = request.POST.get('first_name')
             middle_name = request.POST.get('middle_name')
             last_name = request.POST.get('last_name')
+            first_name = first_name.capitalize() if first_name else None
+            middle_name = middle_name.capitalize() if middle_name else None
+            last_name = last_name.capitalize() if last_name else None  
             emergency_contact_name = request.POST.get('emergency_contact_name')
             emergency_contact_relation = request.POST.get('emergency_contact_relation')         
             emergency_contact_phone = request.POST.get('emergency_contact_phone')
-            nationality_id = request.POST.get('nationality')            
-            dob = request.POST.get('dob')
+            nationality_id = request.POST.get('nationality')           
             gender = request.POST.get('gender')
             phone = request.POST.get('phone')
             address = request.POST.get('Address')                       
@@ -1221,11 +1278,35 @@ def add_patient(request):
             insurance_name = request.POST.get('insurance_name')
             insurance_number = request.POST.get('insurance_number')
             age = request.POST.get('age')
-            if not dob:
-                dob = None
-            if not age:
-                age = None
+            dob = request.POST.get('dob')
+            # Check if age or dob is provided
+            if dob:
+                # Calculate age from dob
+                try:
+                    dob_date = datetime.strptime(dob, '%Y-%m-%d').date()  # Use datetime class from datetime module
+                    current_date = datetime.today().date()  # Use datetime class from datetime module
+                    age = current_date.year - dob_date.year - ((current_date.month, current_date.day) < (dob_date.month, dob_date.day))
+                except ValueError:
+                    age = None
+                    
+            elif age:
+                # Calculate dob from age
+                try:
+                    age_int = int(age)
+                    current_date = datetime.today().date()  # Use datetime class from datetime module
+                    dob = current_date.replace(year=current_date.year - age_int)
+                except ValueError:
+                    dob = None           
+             # Check if a patient with the same name already exists
+             
+            existing_patient = Patients.objects.filter(
+                first_name=first_name,
+                middle_name=middle_name,
+                last_name=last_name
+            ).exists()
 
+            if existing_patient:
+                return JsonResponse({'success':False,'message': 'Patient with the same name already exists'})
             # Generate the medical record number (mrn)
             mrn = generate_mrn()
 
@@ -1259,14 +1340,13 @@ def add_patient(request):
             patient_instance.save()
 
             # Return a JsonResponse with a success message
-            return JsonResponse({'message': 'Patient added successfully'}, status=200)
+            return JsonResponse({'success':True,'message': 'Patient added successfully'})
 
     except Exception as e:
         # Log or print the error for tracking
         logger.error(f"Error adding patient: {str(e)}")
-
     # Return an error response if there's an exception or if the request method is not POST
-    return JsonResponse({'error': 'Failed to add patient'}, status=500)
+    return JsonResponse({'success':False,'message': f'Failed to add patient {str(e)}'})
 
 def generate_mrn():
     # Retrieve the last patient's MRN from the database
@@ -2051,11 +2131,10 @@ def out_of_stock_medicines(request):
 def out_of_stock_medicines_view(request):
     try:
         # Query the database for out-of-stock medicines
-        out_of_stock_medicines = MedicineInventory.objects.filter(remain_quantity=0)
+        out_of_stock_medicines = Medicine.objects.filter(remain_quantity=0)
         
         # Render the template with the out-of-stock medicines data
-        return render(request, 'hod_template/manage_out_of_stock_medicines.html', {'out_of_stock_medicines': out_of_stock_medicines})
-    
+        return render(request, 'hod_template/manage_out_of_stock_medicines.html', {'out_of_stock_medicines': out_of_stock_medicines})    
     except Exception as e:
         # Handle any errors and return an error response
         return render(request, '404.html', {'error_message': str(e)}) 
@@ -2076,7 +2155,7 @@ def out_of_stock_reagent_view(request):
 @login_required    
 def in_stock_medicines_view(request):
     # Retrieve medicines with inventory levels above zero
-    in_stock_medicines = MedicineInventory.objects.filter(remain_quantity__gt=0)
+    in_stock_medicines = Medicine.objects.filter(remain_quantity__gt=0)
 
     return render(request, 'hod_template/manage_in_stock_medicines.html', {'in_stock_medicines': in_stock_medicines})  
 
@@ -3368,22 +3447,7 @@ def delete_ambulance_activity(request):
         return JsonResponse({'status': 'error', 'message': 'activity not found'}, status=404)
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-    
-@require_POST
-def delete_service(request):
-    try:
-        # Get the frequency ID from the POST data
-        service_id = request.POST.get('service_id')
-        # Delete the frequency from the database
-        service = Service.objects.get(id=service_id)
-        service.delete()
-        return JsonResponse({'status': 'success', 'message': 'service deleted successfully'})
-    except Service.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'service not found'}, status=404)
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-    
-    
+
 def ambulance_route_list(request):
     ambulance_routes = AmbulanceRoute.objects.all()
     return render(request, 'hod_template/ambulance_route_list.html', {'ambulance_routes': ambulance_routes})    
@@ -3469,8 +3533,7 @@ def new_consultation_order(request):
     # Retrieve all unread orders for the ConsultationOrder instances
     unread_orders = Order.objects.filter(order_type__in=[consultation.consultation.name for consultation in consultation_orders], is_read=True)    
     # Mark the retrieved unread orders as read
-    orders = unread_orders 
-    print(unread_orders)
+    orders = unread_orders    
     unread_orders.update(is_read=True)    
     # Render the template with the fetched unread orders
     return render(request, 'hod_template/new_consultation_order.html', {'orders': orders})

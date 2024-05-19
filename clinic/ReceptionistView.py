@@ -1,4 +1,4 @@
-from datetime import  datetime
+from datetime import  date, datetime
 from django.urls import reverse
 from django.utils import timezone
 import logging
@@ -11,6 +11,8 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.contrib import messages
+from django.db.models import F, Window
+from django.db.models.functions import RowNumber
 from clinic.models import Consultation,  Medicine,Notification,PathodologyRecord, Patients, Procedure, Staffs
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
@@ -46,17 +48,30 @@ def receptionist_dashboard(request):
 
 @login_required
 def all_orders_view(request):
-    # Retrieve all orders from the database
-    orders = Order.objects.all().order_by('-order_date')    
+    # Annotate each order with a row number partitioned by patient and ordered by order_date descending
+    annotated_orders = Order.objects.annotate(
+        row_number=Window(
+            expression=RowNumber(),
+            partition_by=[F('patient_id')],
+            order_by=F('order_date').desc()
+        )
+    )
+    # Filter to get only the first row in each partition
+    latest_orders = annotated_orders.filter(row_number=1).order_by('-order_date')
     # Render the template with the list of orders
-    return render(request, 'receptionist_template/order_detail.html', {'orders': orders})
+    return render(request, 'receptionist_template/order_detail.html', {'orders': latest_orders})
 
 @login_required
-def generate_invoice_bill(request,  order_id):
-    # Retrieve the patient and visit objects based on IDs    
-    order = Order.objects.get(id=order_id)     
+def generate_invoice_bill(request,  patient_id,visit_id):
+    # Retrieve the patient and visit objects based on IDs
+    patient = get_object_or_404(Patients, id=patient_id)
+    visit = get_object_or_404(PatientVisits, id=visit_id)    
+    orders = Order.objects.filter(patient=patient, visit=visit)
+     
     context = {
-        'order': order,
+        'orders': orders,
+        'patient': patient,
+        'visit': visit,
        
     }
     return render(request, 'receptionist_template/invoice_bill.html', context)
@@ -66,15 +81,29 @@ def generate_invoice_bill(request,  order_id):
 def update_orderpayment_status(request):
     order_id = request.POST.get('order_id')
     payment_status = request.POST.get('payment_status')
-    print(payment_status)
+    patient_id = request.POST.get('patient_id')
+    visit_id = request.POST.get('visit_id')
+    
     try:
-        order = Order.objects.get(id=order_id)
-        order.status = payment_status
-        order.save()
-        message = 'Payment status updated successfully.'
+        # Update the status of all orders for the given patient and visit
+        orders = Order.objects.filter(patient_id=patient_id, visit_id=visit_id)
+        
+        if not orders.exists():
+            message = 'No orders found for the given patient and visit.'
+            return JsonResponse({'success': False, 'message': message})
+
+        for order in orders:
+            order.status = payment_status
+            order.save()
+
+        message = 'Payment status updated successfully for all related orders.'
         return JsonResponse({'success': True, 'message': message})
+    
     except Order.DoesNotExist:
         message = 'Order does not exist.'
+        return JsonResponse({'success': False, 'message': message})
+    except Exception as e:
+        message = f'An error occurred: {str(e)}'
         return JsonResponse({'success': False, 'message': message})
     
 @login_required
@@ -448,16 +477,38 @@ def save_remotereferral(request, patient_id, visit_id):
         # Handle other exceptions if necessary
         return render(request, '404.html', {'error_message': str(e)})    
 
-
+@csrf_exempt
 def get_procedure_cost(request):
-    if request.method == 'GET':
-        procedure_id = request.GET.get('procedure_id')
+    if request.method == 'POST':  # Change to POST method
+        procedure_id = request.POST.get('procedure_id')
+        patient_id = request.POST.get('patient_id')  # Receive patient ID        
         try:
-            procedure = Service.objects.get(id=procedure_id)
-            cost = procedure.cost
-            return JsonResponse({'cost': cost})
+            procedure = Service.objects.get(id=procedure_id)            
+            # Get the patient
+            patient = Patients.objects.get(id=patient_id)            
+            # Check the patient's payment form
+            payment_form = patient.payment_form            
+            # Initialize cost variable
+            cost = None            
+            # If payment form is cash, fetch cash cost
+            if payment_form == 'Cash':
+                cost = procedure.cash_cost
+            elif payment_form == 'Insurance':
+                # Check if insurance company name is NHIF
+                if patient.insurance_name == 'NHIF':
+                    cost = procedure.nhif_cost
+                else:
+                    cost = procedure.insurance_cost
+            
+            if cost is not None:
+                return JsonResponse({'cost': cost})
+            else:
+                return JsonResponse({'error': 'Cost not available for this payment form'}, status=404)
+        
         except Service.DoesNotExist:
             return JsonResponse({'error': 'Procedure not found'}, status=404)
+        except Patients.DoesNotExist:
+            return JsonResponse({'error': 'Patient not found'}, status=404)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=400)
     
@@ -607,7 +658,7 @@ def save_laboratory(request, patient_id, visit_id):
         except Procedure.DoesNotExist:
             procedures = None
 
-        doctors = Staffs.objects.filter(role='labTechnician')
+        doctors = Staffs.objects.filter(role='labTechnician',work_place="resa")
         total_price = sum(prescription.total_price for prescription in prescriptions)
 
         patient = Patients.objects.get(id=patient_id)
@@ -1121,44 +1172,63 @@ def save_edited_patient(request):
         try:
             # Extract the form data
             patient_id = request.POST.get('patient_id')
-            edited_patient = Patients.objects.get(id=patient_id)
-            edited_patient.first_name = request.POST.get('edit_first_name')
-            edited_patient.middle_name = request.POST.get('edit_middle_name')
-            edited_patient.last_name = request.POST.get('edit_last_name')
+            edited_patient = Patients.objects.get(id=patient_id)            
+
+            # Extract patient details from the request
+            edited_patient.first_name = request.POST.get('edit_first_name', '').capitalize()
+            edited_patient.middle_name = request.POST.get('edit_middle_name', '').capitalize()
+            edited_patient.last_name = request.POST.get('edit_last_name', '').capitalize()
             edited_patient.gender = request.POST.get('edit_gender')
-            if not request.POST.get('edit_age'):
-                edited_patient.age = None
-            else:
-                edited_patient.age = int(request.POST.get('edit_age'))
-            
-            if not request.POST.get('edit_dob'):
-                edited_patient.dob = None
-            else:
-                edited_patient.dob = request.POST.get('edit_dob')               
             edited_patient.phone = request.POST.get('edit_phone')
             edited_patient.address = request.POST.get('edit_Address')
             edited_patient.nationality_id = request.POST.get('edit_nationality')
             edited_patient.payment_form = request.POST.get('edit_payment_type')
-            if request.POST.get('edit_payment_type') == 'insurance':
-                edited_patient.insurance_name = request.POST.get('insurance_name')
-                edited_patient.insurance_number = request.POST.get('edit_insurance_number')           
-            
             edited_patient.emergency_contact_name = request.POST.get('edit_emergency_contact_name')
             edited_patient.emergency_contact_relation = request.POST.get('edit_emergency_contact_relation')
             edited_patient.emergency_contact_phone = request.POST.get('edit_emergency_contact_phone')
             edited_patient.marital_status = request.POST.get('marital_status')
             edited_patient.patient_type = request.POST.get('edit_patient_type')
+            
+            # Extract dob or calculate from age
+            age = request.POST.get('edit_age')
+            dob = request.POST.get('edit_dob')
 
+            if dob:
+                # Calculate age from dob
+                try:
+                    dob_date = datetime.strptime(dob, '%Y-%m-%d').date()
+                    current_date = date.today()
+                    age = current_date.year - dob_date.year - ((current_date.month, current_date.day) < (dob_date.month, dob_date.day))
+                except ValueError:
+                    age = None
+            elif age:
+                # Calculate dob from age
+                try:
+                    age_int = int(age)
+                    current_date = date.today()
+                    dob = current_date.replace(year=current_date.year - age_int)
+                except ValueError:
+                    dob = None
+                       
+            edited_patient.dob = dob
+            edited_patient.age = age
+            
+            # Handle insurance details
+            if edited_patient.payment_form == 'Insurance':
+                edited_patient.insurance_name = request.POST.get('insurance_name')
+                edited_patient.insurance_number = request.POST.get('edit_insurance_number')           
+            
             # Save the edited patient
             edited_patient.save()
 
             # Return JSON response for success
-            return JsonResponse({'message': 'Patient data updated successfully.'})
+            return JsonResponse({'success':True,'message': 'Patient data updated successfully.'})
         except Exception as e:
             # Return JSON response for error
-            return JsonResponse({'error': str(e)}, status=400)
+            return JsonResponse({'success':False,'message': str(e)}, status=400)
     else:
-        return JsonResponse({'error': 'Invalid request method.'}, status=400)
+        return JsonResponse({'success':False,'message': 'Invalid request method.'}, status=400)
+
     
 @csrf_exempt
 def add_patient(request):
@@ -1168,11 +1238,13 @@ def add_patient(request):
             first_name = request.POST.get('first_name')
             middle_name = request.POST.get('middle_name')
             last_name = request.POST.get('last_name')
+            first_name = first_name.capitalize() if first_name else None
+            middle_name = middle_name.capitalize() if middle_name else None
+            last_name = last_name.capitalize() if last_name else None  
             emergency_contact_name = request.POST.get('emergency_contact_name')
             emergency_contact_relation = request.POST.get('emergency_contact_relation')         
             emergency_contact_phone = request.POST.get('emergency_contact_phone')
-            nationality_id = request.POST.get('nationality')            
-            dob = request.POST.get('dob')
+            nationality_id = request.POST.get('nationality')           
             gender = request.POST.get('gender')
             phone = request.POST.get('phone')
             address = request.POST.get('Address')                       
@@ -1182,11 +1254,35 @@ def add_patient(request):
             insurance_name = request.POST.get('insurance_name')
             insurance_number = request.POST.get('insurance_number')
             age = request.POST.get('age')
-            if not dob:
-                dob = None
-            if not age:
-                age = None
+            dob = request.POST.get('dob')
+            # Check if age or dob is provided
+            if dob:
+                # Calculate age from dob
+                try:
+                    dob_date = datetime.strptime(dob, '%Y-%m-%d').date()  # Use datetime class from datetime module
+                    current_date = datetime.today().date()  # Use datetime class from datetime module
+                    age = current_date.year - dob_date.year - ((current_date.month, current_date.day) < (dob_date.month, dob_date.day))
+                except ValueError:
+                    age = None
+                    
+            elif age:
+                # Calculate dob from age
+                try:
+                    age_int = int(age)
+                    current_date = datetime.today().date()  # Use datetime class from datetime module
+                    dob = current_date.replace(year=current_date.year - age_int)
+                except ValueError:
+                    dob = None           
+             # Check if a patient with the same name already exists
+             
+            existing_patient = Patients.objects.filter(
+                first_name=first_name,
+                middle_name=middle_name,
+                last_name=last_name
+            ).exists()
 
+            if existing_patient:
+                return JsonResponse({'success':False,'message': 'Patient with the same name already exists'})
             # Generate the medical record number (mrn)
             mrn = generate_mrn()
 
@@ -1220,14 +1316,13 @@ def add_patient(request):
             patient_instance.save()
 
             # Return a JsonResponse with a success message
-            return JsonResponse({'message': 'Patient added successfully'}, status=200)
+            return JsonResponse({'success':True,'message': 'Patient added successfully'})
 
     except Exception as e:
         # Log or print the error for tracking
         logger.error(f"Error adding patient: {str(e)}")
-
     # Return an error response if there's an exception or if the request method is not POST
-    return JsonResponse({'error': 'Failed to add patient'}, status=500)
+    return JsonResponse({'success':False,'message': f'Failed to add patient {str(e)}'})
 
 def generate_mrn():
     # Retrieve the last patient's MRN from the database
@@ -1573,6 +1668,41 @@ def prescription_detail(request, visit_number, patient_id):
         'payment_status': payment_status,
     }
     return render(request, "receptionist_template/prescription_detail.html", context)
+
+@login_required
+def prescription_billing(request, visit_number, patient_id):
+    patient = Patients.objects.get(id=patient_id)
+    visit = PatientVisits.objects.get(vst=visit_number)
+    prescriptions = Prescription.objects.filter(visit__vst=visit_number, visit__patient__id=patient_id)
+    prescriber = None
+    if prescriptions.exists():
+        prescriber = prescriptions.first().entered_by
+    context = {
+        'patient': patient, 
+        'prescriptions': prescriptions,
+        'prescriber': prescriber,
+        'visit_number': visit_number,
+        'visit': visit,
+        }
+    return render(request, "receptionist_template/prescription_bill.html", context)
+
+@login_required
+def prescription_notes(request, visit_number, patient_id):
+    patient = Patients.objects.get(id=patient_id)
+    visit = PatientVisits.objects.get(vst=visit_number)
+    prescriptions = Prescription.objects.filter(visit__vst=visit_number, visit__patient__id=patient_id)
+    prescriber = None
+    if prescriptions.exists():
+        prescriber = prescriptions.first().entered_by
+    context = {
+        'patient': patient, 
+        'prescriptions': prescriptions,
+        'prescriber': prescriber,
+        'visit_number': visit_number,
+        'visit': visit,
+        }
+    return render(request, "receptionist_template/prescription_notes.html", context)
+
 
 
 @login_required    

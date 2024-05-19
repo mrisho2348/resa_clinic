@@ -3,6 +3,7 @@ import logging
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.db import IntegrityError
+import openpyxl
 from clinic.models import AmbulanceActivity, AmbulanceRoute, Category, MedicineRoute, MedicineUnitMeasure, PrescriptionFrequency, ConsultationNotes, Diagnosis, DiseaseRecode, Equipment, EquipmentMaintenance, HealthIssue, InsuranceCompany, InventoryItem, Medicine, PathodologyRecord, PatientVital, Patients, Prescription, Procedure, Reagent, Referral, RemoteCompany, Service, Staffs, Supplier
 
 from .resources import AmbulanceActivityResource, AmbulanceRouteResource, CategoryResource, CompanyResource, ConsultationNotesResource, DiagnosisResource, DiseaseRecodeResource, EquipmentMaintenanceResource, EquipmentResource, HealthIssueResource, InsuranceCompanyResource, InventoryItemResource, MedicineResource, MedicineRouteResource, MedicineUnitMeasureResource, PathologyRecordResource, PatientVitalResource, PatientsResource, PrescriptionFrequencyResource, PrescriptionResource, ProcedureResource, ReagentResource, ReferralResource, ServiceResource, SupplierResource
@@ -39,7 +40,6 @@ def import_disease_recode(request):
             messages.error(request, 'Form is not valid. Please check the file and try again.')
     else:
         form = ImportDiseaseForm()
-
     return render(request, 'hod_template/import_disease_recode.html', {'form': form})
 
 @login_required  
@@ -155,9 +155,8 @@ def import_ambulance_activity_list(request):
                      recode = AmbulanceActivity(
                         name=data[0],
                         cost=data[1],
-                        profit=data[2],                     
-                                      
-                    
+                        profit=data[2],                    
+                   
                     )
                      recode.save()
 
@@ -843,41 +842,63 @@ def import_procedure_records(request):
 
     return render(request, 'hod_template/import_procedure.html', {'form': form})
 
-@login_required  
+@login_required
 def import_medicine_records(request):
     if request.method == 'POST':
         form = ImportMedicineForm(request.POST, request.FILES)
         if form.is_valid():
+            excel_file = request.FILES['medicine_records_file']
             try:
-                resource = MedicineResource()
-                new_records = request.FILES['medicine_records_file']
+                # Check if the uploaded file is an Excel file
+                if not excel_file.name.endswith('.xlsx'):
+                    messages.error(request, 'Please upload a valid Excel file.')
+                    return render(request, 'hod_template/import_medicine_records.html', {'form': form})
 
-                # Use tablib to load the imported data
-                dataset = resource.export()
-                imported_data = dataset.load(new_records.read(), format='xlsx')  # Assuming you are using xlsx, adjust accordingly
-                
-                for data in imported_data:
-                    try:
-                        medicine_record = Medicine.objects.create(
-                            name=data[0],
-                            medicine_type=data[1],                     
-                            side_effect=data[2],                     
-                            dosage=data[3],                     
-                            storage_condition=data[4],                     
-                            manufacturer=data[5],                     
-                            description=data[6],                     
-                            expiration_date=data[7],                     
-                            unit_price=data[8],                    
-                                        
-                        )
-                    except IntegrityError:
-                        messages.warning(request, f'Duplicate entry found for {data[0]}. Skipping this record.')
+                # Load the Excel workbook
+                workbook = openpyxl.load_workbook(excel_file)
+                sheet = workbook.active
+
+                # Iterate through rows and create or update Medicine objects
+                for row_num, row in enumerate(sheet.iter_rows(values_only=True), start=1):
+                    if row_num == 1:  # Skip header row
+                        continue
+                    # Check if a Medicine object with the same batch number already exists
+                    batch_number = row[6]
+                    if Medicine.objects.filter(batch_number=batch_number).exists():
+                        messages.warning(request, f'Skipping drug with batch number {batch_number} as it already exists.')
                         continue
 
-                return redirect('clinic:medicine_list') 
-            except Exception as e:
-                messages.error(request, f'An error occurred: {e}')
+                    # Create Medicine object from Excel data
+                    # Handle None values in the Excel file
+                    cash_cost = float(row[8]) if row[8] is not None else 0.0
+                    nhif_cost = float(row[10]) if row[10] is not None else 0.0
+                    buying_price = float(row[11]) if row[11] is not None else 0.0
 
+                    medicine = Medicine(
+                        drug_name=row[0],
+                        drug_type=row[1],
+                        formulation_unit=row[2],
+                        manufacturer=row[3],
+                        quantity=int(row[4]),
+                        remain_quantity=int(row[4]),
+                        dividable=row[5],
+                        batch_number=batch_number,
+                        expiration_date=row[7],
+                        cash_cost=cash_cost,
+                        insurance_cost=0.0,  # Set default value
+                        nhif_cost=nhif_cost,
+                        buying_price=buying_price,
+                    )
+                    medicine.save()
+
+                messages.success(request, 'Medicine data imported successfully.')
+                return redirect('clinic:medicine_list')
+
+            except Exception as e:
+                # Handle any exceptions that may occur during file processing
+                messages.error(request, f'An error occurred: {e}')
+        else:
+            messages.error(request, 'Please upload a valid Excel file.')
     else:
         form = ImportMedicineForm()
 
@@ -898,3 +919,53 @@ def generate_mrn():
     new_mrn = f"PAT-{new_mrn_number:05d}"
 
     return new_mrn
+
+def import_service_data(request):
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        excel_file = request.FILES['excel_file']
+        try:
+            # Load the workbook
+            workbook = openpyxl.load_workbook(excel_file)
+            # Get the active worksheet
+            sheet = workbook.active
+
+            # Iterate through each row in the worksheet starting from the second row (skipping headers)
+            for row in sheet.iter_rows(min_row=2, values_only=True):
+                # Extract data from the row
+                name, type_service, coverage, description, cash_cost, insurance_cost, nhif_cost, department = row
+
+                # Check if a similar record already exists
+                existing_service = Service.objects.filter(
+                    name=name,
+                    type_service=type_service,
+                    coverage=coverage,
+                    description=description,
+                    cash_cost=cash_cost,
+                    insurance_cost=insurance_cost,
+                    nhif_cost=nhif_cost,
+                    department=department
+                ).first()
+
+                # If a similar record does not exist, create a new Service object
+                if not existing_service:
+                    service = Service.objects.create(
+                        name=name,
+                        type_service=type_service,
+                        coverage=coverage,
+                        description=description,
+                        cash_cost=cash_cost,
+                        insurance_cost=insurance_cost,
+                        nhif_cost=nhif_cost,
+                        department=department
+                    )
+
+                    # Save the Service object
+                    service.save()
+
+            return redirect('clinic:manage_service') 
+        except Exception as e:
+            messages.error(request, f'An error occurred: {e}')
+            return render(request, 'hod_template/import_service.html')
+    else:
+        return render(request, 'hod_template/import_service.html')
+

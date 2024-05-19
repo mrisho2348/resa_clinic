@@ -18,14 +18,14 @@
                         <div class="form-group">
                             <label for="first_name">First Name:</label> <span class="error">* </span>
                             <input type="text" class="form-control" id="first_name" name="first_name" required>
-                           
+                            <div class="invalid-feedback">First name is required.</div>
                         </div>
                     </div>
                     <!-- Middle Name -->
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label for="middle_name">Middle Name:</label> <span class="error">* </span>
-                            <input type="text" class="form-control" id="middle_name" name="middle_name" required>
+                            <label for="middle_name">Middle Name:</label>
+                            <input type="text" class="form-control" id="middle_name" name="middle_name" >
                            
                         </div>
                     </div>
@@ -34,7 +34,7 @@
                         <div class="form-group">
                             <label for="last_name">Last Name:</label> <span class="error">* </span>
                             <input type="text" class="form-control" id="last_name" name="last_name" required>
-                           
+                            <div class="invalid-feedback">Last name is required.</div>
                         </div>
                     </div>
                 </div>
@@ -42,13 +42,15 @@
                     <!-- Gender -->
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label for="gender">Gender:</label><span class="error">* </span>
-                            <select class="form-control select2bs4" style="width: 100%;" id="gender" name="gender" required>
-                              
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                            </select>
-                            
+                            <label for="patient_gender">Gender:</label><span class="error">* </span>
+                            <select class="form-control select2bs4" style="width: 100%;"    name="gender" id="patient_gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="non-binary">Non-Binary</option>
+                                <option value="prefer-not-to-say">Prefer Not to Say</option>
+                              </select>
+                              <div class="invalid-feedback">Gender is required.</div>                            
                         </div>
                     </div>
                     <!-- Date of Birth -->
@@ -62,21 +64,19 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="age">Age:</label>
-                            <select class="form-control select2bs4" style="width: 100%;" id="age" name="age" required>
+                            <select class="form-control select2bs4" style="width: 100%;" id="age" name="age"  >
                                 {% for age in range_121 %}
                                     <option value="{{ age }}">{{ age }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                    </div>
-               
-                </div>
-            
+                    </div>               
+                </div>            
                 <!-- Additional Personal Information -->
                 <div class="row">
                     <div class="form-group col-sm-4">
                         <label for="patient_type" class="col-form-label">Patient type</label>
-                        <select class="form-control select2bs4" style="width: 100%;" id="patient_type" name="patient_type" onchange="toggleOtherPatientTypeField(this)" required>
+                        <select class="form-control select2bs4" style="width: 100%;" id="patient_type" name="patient_type" required>
                             <option value="National Staff">National Staff</option>
                             <option value="International Staff">International Staff</option>
                             <option value="National Visitor">National Visitor</option>
@@ -87,11 +87,13 @@
                     </div>
                     <div class="form-group col-sm-4">
                         <label for="phone" class="col-form-label">Phone Number</label>
-                        <input type="tel" class="form-control" name="phone" id="phone" placeholder="">
+                        <input type="tel" class="form-control" id="phone" name="phone" required 
+                        pattern="(0|\+255)\d{9,12}" title="Please enter a valid phone number starting with '0' or '+255' and having 10 to 13 digits">
+                      <div class="invalid-feedback">Please enter a valid phone number starting with '0' or '+255' and having 10 to 13 digits.</div>
                     </div>
                     <div class="form-group col-sm-4">
                         <label for="Address" class="col-form-label">Address</label>
-                        <textarea id="Address" name="Address" rows="2" class="form-control"></textarea>
+                        <textarea id="Address" name="Address" rows="2" class="form-control" required></textarea>
                     </div>
                 </div>
             
@@ -102,7 +104,7 @@
                       <select class="form-control select2bs4" style="width: 100%;" name="nationality" id="nationality" required>                                   
                                          
                         {% for country in all_country %}
-                           <option value="{{country.id}}">{{country.name}}</option>
+                           <option value="{{country.id}}" {% if country.name == "Tanzania" %}selected{% endif %}>{{country.name}}</option>
                         {% endfor %}
                            
                        </select>
@@ -110,8 +112,8 @@
                   <div class="form-group col-sm-4">
                     <label for="payment_type" class="col-form-label">Payment Type</label>
                     <select class="form-control select2bs4" style="width: 100%;" name="payment_type" id="payment_type">
-                        <option value="cash">Cash</option>
-                        <option value="insurance">Insurance</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Insurance">Insurance</option>
                     </select>
                 </div>
                 <div class="form-group col-sm-4" id="insurance_name_container" style="display: none;">
@@ -134,8 +136,8 @@
                 </div>
             
                   <div class="form-group col-sm-4">
-                      <label for="maritalStatus" class="col-form-label">Marital Status</label>
-                      <select class="form-control select2bs4" style="width: 100%;" name="maritalStatus" id="maritalStatus">
+                      <label for="marital_Status" class="col-form-label">Marital Status</label>
+                      <select class="form-control select2bs4" style="width: 100%;" name="maritalStatus" id="marital_Status" required>
                           <option value="single">Single</option>
                           <option value="married">Married</option>
                           <option value="divorced">Divorced</option>
@@ -156,8 +158,8 @@
                                         <!-- Emergency Contact Relation -->
             <div class="col-md-4">
                 <div class="form-group">
-                    <label for="emergency_contact_relation">Emergency Contact Relation:</label> <span class="error">* </span>
-                    <select class="form-control select2bs4" style="width: 100%;" id="emergency_contact_relation" name="emergency_contact_relation"  required>
+                    <label for="patientemergency_contact_relation">Emergency Contact Relation:</label> <span class="error">* </span>
+                    <select class="form-control select2bs4" style="width: 100%;" id="patientemergency_contact_relation" name="emergency_contact_relation"  required>
                         <option value="Spouse">Spouse</option>
                         <option value="Friend">Friend</option>
                         <option value="Coworker">Coworker</option>
@@ -174,11 +176,13 @@
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="emergency_contact_phone">Emergency Contact Phone:</label>
-                        <input type="tel" class="form-control" id="emergency_contact_phone" name="emergency_contact_phone">
+                        <input type="tel" class="form-control" id="emergency_contact_phone" name="emergency_contact_phone"
+                         pattern="(0|\+255)\d{9,12}" title="Please enter a valid phone number starting with '0' or '+255' and having 10 to 13 digits">
+                         <div class="invalid-feedback">Please enter a valid phone number starting with '0' or '+255' and having 10 to 13 digits.</div>
                     </div>
                 </div>
             </div>
-                <div id="messageContainer" class="text-center mt-2"></div>
+                <div id="patientmessageContainer" class="text-center mt-2"></div>
             
                 <div class="form-group pt-2 float-end">
                     <div class="row">
@@ -189,45 +193,52 @@
                     </div>
                 </div>
             </form>            
-                <div id="messageContainer" class="text-center mt-2"></div>
-
-                <script>                    
-                    $(document).ready(function () {
-                        // Handle form submission
-                        $('#patientForm').submit(function (e) {
-                            e.preventDefault();
-
-                            // Serialize the form data
-                            var formData = $(this).serialize();
-
-                            // Send AJAX request to the server
-                            $.ajax({
-                                url: '{% url "receptionist_add_patient" %}',
-                                method: 'POST',
-                                data: formData,
-                                success: function (response) {
-                                    // Handle success
-                                    $('#messageContainer').html('<div class="alert alert-success" role="alert">' + response.message + '</div>');
+              
+            <script>
+                $(document).ready(function () {
+                    // Handle form submission
+                    $('#patientForm').submit(function (e) {
+                        // Prevent the default form submission
+                        e.preventDefault();
+            
+                        // Serialize the form data
+                        var formData = $(this).serialize();
+            
+                        // Send AJAX request to the server
+                        $.ajax({
+                            url: '{% url "receptionist_add_patient" %}', // URL to send the request
+                            method: 'POST', // HTTP method
+                            data: formData, // Form data to send
+                            success: function (response) {
+                                // Handle success response
+                                if (response.success) {
+                                    // Display success message
+                                    $('#patientmessageContainer').html('<div class="alert alert-success" role="alert">' + response.message + '</div>');
                                     // Clear the form fields
                                     $('#patientForm')[0].reset();
+                                    // Reload the page
                                     location.reload(true);
-
-                                },
-                                error: function (xhr, status, error) {
-                                    // Handle other status codes (e.g., 400 for client errors)
-                                    $('#messageContainer').html('<div class="alert alert-danger" role="alert">' + error + '</div>');
-                                    console.error('Error saving data:', error);
+                                } else {
+                                    // Display error message
+                                    $('#patientmessageContainer').html('<div class="alert alert-danger" role="alert">' + response.message + '</div>');
                                 }
-                            });
+                            },
+                            error: function (xhr,  error) {                                // Handle error response
+                                // Display error message
+                                $('#patientmessageContainer').html('<div class="alert alert-danger" role="alert"> Error saving data: </div>');
+                           
+                            }
                         });
                     });
-                </script>
+                });
+            </script>
+            
                 <script>
                     $(document).ready(function(){
                                                 // Inside the $(document).ready() function
                     $('#payment_type').change(function () {
                         var paymentType = $(this).val();
-                        if (paymentType === 'insurance') {
+                        if (paymentType === 'Insurance') {
                             $('#insurance_name_container').show();
                             $('#insurance_details_container').show();
                             $('#authorization_code_container').show();

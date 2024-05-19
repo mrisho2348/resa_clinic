@@ -119,13 +119,14 @@
                     <div class="table-responsive">
                         <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
                             <thead>
-                                <tr>
-                                    <th>Number</th>
+                                <tr>                                  
                                     <th>Name</th>
                                     <th>Gender</th>
                                     <th>Age</th>
+                                    <th>Number of working year</th>
                                     <th>Email</th>
                                     <th>Mobile</th>
+                                    <th>Working place</th>
                                     <th>Last Logged In</th>
                                     <th>Joining</th>
                                     <th>Position</th>
@@ -135,22 +136,32 @@
                             </thead>
                             <tbody id="student-table-body">
                                 {% for staff in staffs %}
-                                <tr>
-                                    <td>{{ staff.admin.id }}</td>
+                                <tr>                                   
                                     <td>{{ staff.admin.first_name }} {{ staff.middle_name }}  {{ staff.admin.last_name }}</td>
                                     <td> {{ staff.gender }} </td>
-                                    <td>      <script>
-                                        var dob = new Date("{{ staff.date_of_birth|date:'Y-m-d' }}");
+                                    <td>  {{ staff.date_of_birth|date:'Y-m-d' }}   (
+                                        <script>
+                                            var dob = new Date("{{ staff.date_of_birth|date:'Y-m-d' }}");
+                                            var now = new Date();
+                                            var ageMilliseconds = now - dob;
+                                            var ageSeconds = ageMilliseconds / 1000;
+                                            var ageYears = Math.floor(ageSeconds / (365.25 * 24 * 60 * 60));
+                                            document.write(ageYears + ' years');
+                                        </script>)
+                                </td>
+                                    <td> {{ staff.joining_date|date:'Y-m-d' }}    ( <script>
+                                        var dob = new Date("{{ staff.joining_date|date:'Y-m-d' }}");
                                         var now = new Date();
                                         var ageMilliseconds = now - dob;
                                         var ageSeconds = ageMilliseconds / 1000;
                                         var ageYears = Math.floor(ageSeconds / (365.25 * 24 * 60 * 60));
                                         document.write(ageYears + ' years');
-                                    </script>
+                                    </script>)
                                 </td>
                                 <!-- ... (unchanged) ... --></td>
                                     <td>{{ staff.admin.email }}</td>
                                     <td>{{ staff.phone_number }}</td>
+                                    <td>{{ staff.work_place }}</td>
                                     <td>{{ staff.admin.last_login }}</td>
                                     <td>{{ staff.created_at }}</td>
                                     <td>{{ staff.role }}</td>              

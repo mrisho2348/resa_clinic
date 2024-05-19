@@ -23,7 +23,7 @@ from django.core.mail import send_mail
 from clinic.emailBackEnd import EmailBackend
 from django.core.exceptions import ObjectDoesNotExist
 from clinic.forms import ImportStaffForm, RemoteCounselingForm, RemoteDischargesNotesForm, RemoteObservationRecordForm, RemoteReferralForm
-from clinic.models import ChiefComplaint, FamilyMedicalHistory, ImagingRecord, LaboratoryOrder,  Consultation, ContactDetails, Country, CustomUser, DiseaseRecode, InsuranceCompany, Medicine, MedicineInventory, Notification, NotificationMedicine, PathodologyRecord, PatientHealthCondition, PatientLifestyleBehavior, PatientMedicationAllergy, PatientSurgery, Patients, PrescriptionFrequency, PrimaryPhysicalExamination, Procedure, RemoteCompany, RemoteConsultation, RemoteConsultationNotes, RemoteCounseling, RemoteDischargesNotes, RemoteLaboratoryOrder, RemoteMedicine, RemoteObservationRecord, RemotePatient, RemotePatientDiagnosisRecord, RemotePatientVisits, RemotePatientVital, RemotePrescription, RemoteProcedure, RemoteReferral, RemoteService, SecondaryPhysicalExamination, ServiceRequest,Staffs
+from clinic.models import ChiefComplaint, Counseling, FamilyMedicalHistory, ImagingRecord, LaboratoryOrder,  Consultation, ContactDetails, Country, CustomUser, DiseaseRecode, InsuranceCompany, Medicine, MedicineInventory, Notification, NotificationMedicine, PathodologyRecord, PatientHealthCondition, PatientLifestyleBehavior, PatientMedicationAllergy, PatientSurgery, Patients, PrescriptionFrequency, PrimaryPhysicalExamination, Procedure, RemoteCompany, RemoteConsultation, RemoteConsultationNotes, RemoteCounseling, RemoteDischargesNotes, RemoteLaboratoryOrder, RemoteMedicine, RemoteObservationRecord, RemotePatient, RemotePatientDiagnosisRecord, RemotePatientVisits, RemotePatientVital, RemotePrescription, RemoteProcedure, RemoteReferral, RemoteService, SecondaryPhysicalExamination, ServiceRequest,Staffs
 from clinic.resources import StaffResources
 from tablib import Dataset
 from django.db.models import Sum
@@ -1885,7 +1885,7 @@ def prescription_list(request):
     
 @login_required
 def prescription_detail(request, visit_number, patient_id):
-    patient = Patients.objects.get(id=patient_id)
+    patient = RemotePatient.objects.get(id=patient_id)
     prescriptions = RemotePrescription.objects.filter(visit__vst=visit_number, patient_id=patient_id)    
     # Get the prescriber information for the first prescription (assuming all prescriptions have the same prescriber)
     prescriber = None
@@ -1910,6 +1910,41 @@ def prescription_detail(request, visit_number, patient_id):
         'payment_status': payment_status,
     }
     return render(request, "kahama_template/prescription_detail.html", context)
+
+@login_required
+def prescription_billing(request, visit_number, patient_id):
+    patient = RemotePatient.objects.get(id=patient_id)
+    visit = RemotePatientVisits.objects.get(vst=visit_number)
+    prescriptions = RemotePrescription.objects.filter(visit__vst=visit_number, visit__patient__id=patient_id)
+    prescriber = None
+    if prescriptions.exists():
+        prescriber = prescriptions.first().entered_by
+    context = {
+        'patient': patient, 
+        'prescriptions': prescriptions,
+        'prescriber': prescriber,
+        'visit_number': visit_number,
+        'visit': visit,
+        }
+    return render(request, "kahama_template/prescription_bill.html", context)
+
+@login_required
+def prescription_notes(request, visit_number, patient_id):
+    patient = RemotePatient.objects.get(id=patient_id)
+    visit = RemotePatientVisits.objects.get(vst=visit_number)
+    prescriptions = RemotePrescription.objects.filter(visit__vst=visit_number, visit__patient__id=patient_id)
+    prescriber = None
+    if prescriptions.exists():
+        prescriber = prescriptions.first().entered_by
+    context = {
+        'patient': patient, 
+        'prescriptions': prescriptions,
+        'prescriber': prescriber,
+        'visit_number': visit_number,
+        'visit': visit,
+        }
+    return render(request, "kahama_template/prescription_notes.html", context)
+
 
 
 @login_required    
@@ -3027,3 +3062,15 @@ def save_consultation_data(request):
         return redirect('kahamahmis:appointment_list')
     except Exception as e:
         return HttpResponseBadRequest(f"Error: {str(e)}")
+    
+def counseling_list_view(request):
+    counselings = Counseling.objects.all().order_by('-created_at')
+    return render(request, 'kahama_template/manage_counselling.html', {'counselings': counselings})    
+
+def observation_record_list_view(request):
+    observation_records = RemoteObservationRecord.objects.all().order_by('-created_at')
+    return render(request, 'kahama_template/manage_observation_record.html', {'observation_records': observation_records})
+
+def discharge_notes_list_view(request):
+    discharge_notes = RemoteDischargesNotes.objects.all().order_by('-discharge_date')
+    return render(request, 'kahama_template/manage_discharge.html', {'discharge_notes': discharge_notes})

@@ -252,15 +252,17 @@ def delete_consultation_fee(request, fee_id):
 
 @require_POST
 def delete_service(request):
-    # Get the Service object
-    service_id = request.POST.get('service_id')
-    service = get_object_or_404(Service, pk=service_id)
-
-    # Perform deletion
-    service.delete()
-
-    # Redirect to the Service  page
-    return redirect('clinic:manage_service') 
+    try:
+        # Get the frequency ID from the POST data
+        service_id = request.POST.get('service_id')
+        # Delete the frequency from the database
+        service = Service.objects.get(id=service_id)
+        service.delete()
+        return JsonResponse({'status': 'success', 'message': 'service deleted successfully'})
+    except Service.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'service not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
    
 @require_POST

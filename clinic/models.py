@@ -124,6 +124,7 @@ class Staffs(models.Model):
     profession = models.CharField(max_length=20, choices=PROFESSION_CHOICES, blank=True)
     role = models.CharField(max_length=20,choices=ROLE_CHOICES,  blank=True)    
     work_place = models.CharField(max_length=50, choices=work_place_choices, blank=True)
+    joining_date = models.DateField(blank=True, null=True)  # New field added here
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
@@ -183,14 +184,14 @@ COVERAGE_CHOICES = [
 ]
     
 class Service(models.Model):
-    coverage = models.CharField(max_length=200, choices=COVERAGE_CHOICES, blank=True, null=True)
-    department = models.CharField(max_length=200, blank=True, null=True)
-    type_service = models.CharField(max_length=200, choices=TYPE_CHOICES, blank=True, null=True)
     name = models.CharField(max_length=255)
+    type_service = models.CharField(max_length=200, choices=TYPE_CHOICES, blank=True, null=True)  
+    coverage = models.CharField(max_length=200, choices=COVERAGE_CHOICES, blank=True, null=True)         
     description = models.TextField(blank=True, null=True)
     cash_cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     insurance_cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     nhif_cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)  # New field for cost
+    department = models.CharField(max_length=200, blank=True, null=True) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
@@ -313,8 +314,8 @@ class Patients(models.Model):
     nationality = models.ForeignKey('Country', on_delete=models.CASCADE) 
      # New payment-related fields
     PAYMENT_CHOICES = [
-        ('cash', 'Cash'),
-        ('insurance', 'Insurance'),
+        ('Cash', 'Cash'),
+        ('Insurance', 'Insurance'),
     ]
     payment_form = models.CharField(max_length=255, choices=PAYMENT_CHOICES)
     insurance_name = models.CharField(max_length=255, blank=True, null=True)
@@ -526,7 +527,7 @@ class Procedure(models.Model):
     name = models.ForeignKey(Service, on_delete=models.CASCADE,blank=True, null=True) 
     description = models.TextField(blank=True, null=True)  
     order_date = models.DateField(null=True, blank=True)     
-    result = models.TextField(null=True, blank=True)     
+    result = CKEditor5Field(config_name='extends',blank=True, null=True)   
     equipments_used = models.CharField(max_length=255)
     procedure_number = models.CharField(max_length=20, unique=True)  # Unique procedure number
     cost = models.DecimalField(max_digits=10, decimal_places=2)
@@ -558,7 +559,7 @@ class LaboratoryOrder(models.Model):
     name = models.ForeignKey(Service, on_delete=models.CASCADE,blank=True, null=True) 
     description = models.TextField(blank=True, null=True)  
     order_date = models.DateField(null=True, blank=True)  
-    result = models.TextField(blank=True, verbose_name=_('Test Result'))
+    result = CKEditor5Field(config_name='extends',blank=True, null=True)    
     lab_number = models.CharField(max_length=20, unique=True)  # Unique procedure number
     cost = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -717,7 +718,7 @@ class DiagnosticTest(models.Model):
     patient = models.ForeignKey('Patients', on_delete=models.CASCADE, related_name='diagnostic_tests')
     test_type = models.CharField(max_length=255)
     test_date = models.DateField()
-    result = models.TextField(blank=True, null=True)
+    result = CKEditor5Field(config_name='extends',blank=True, null=True)   
     # Additional Fields for Diseases
     diseases = models.ManyToManyField(DiseaseRecode)
     health_issues = models.ManyToManyField('HealthIssue')
@@ -792,6 +793,7 @@ class Order(models.Model):
 
     order_date = models.DateField(default=timezone.now, null=True, blank=True)
     order_type =  models.TextField(blank=True, null=True)
+    type_of_order =  models.TextField(blank=True, null=True)
     patient = models.ForeignKey('Patients', on_delete=models.CASCADE)
     visit = models.ForeignKey(PatientVisits, on_delete=models.CASCADE,blank=True, null=True)
     added_by = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True)
@@ -966,22 +968,31 @@ MEDICINE_TYPES = [
 ]
 
 class Medicine(models.Model):
-    name = models.CharField(max_length=100)
-    medicine_type = models.CharField(max_length=20, choices=MEDICINE_TYPES)
-    side_effect = models.TextField(blank=True, null=True)
-    dosage = models.CharField(max_length=50)
-    storage_condition = models.CharField(max_length=100)
+    drug_name = models.CharField(max_length=100)
+    drug_type = models.CharField(max_length=20, blank=True, null=True) 
+    formulation_unit = models.CharField(max_length=50)    
     manufacturer = models.CharField(max_length=100)
-    description = models.TextField(blank=True, null=True)   
+    remain_quantity = models.PositiveIntegerField(blank=True, null=True)
+    quantity = models.PositiveIntegerField(blank=True, null=True)
+    dividable = models.CharField(max_length=20, blank=True, null=True)   
+    batch_number = models.CharField(max_length=20,unique=True,default=12345)   
     expiration_date = models.DateField()
     cash_cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    insurance_cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    nhif_cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     buying_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    nhif_cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True) # New field for cost    
+    total_buying_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
+    def save(self, *args, **kwargs):
+        # Calculate total buying price before saving
+        if self.buying_price is not None and self.quantity is not None:
+            self.total_buying_price = float(self.buying_price) * self.quantity
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return self.name    
+        return self.drug_name  
     
 class RemoteMedicine(models.Model):
     drug_name = models.CharField(max_length=100)
@@ -1057,6 +1068,7 @@ class Prescription(models.Model):
     patient = models.ForeignKey('Patients', on_delete=models.CASCADE)
     entered_by = models.ForeignKey('Staffs', on_delete=models.CASCADE,blank=True, null=True)
     medicine = models.ForeignKey('Medicine', on_delete=models.CASCADE)  # Link with Medicine model
+    frequency = models.ForeignKey(PrescriptionFrequency, on_delete=models.CASCADE, blank=True, null=True)
     visit = models.ForeignKey(PatientVisits, on_delete=models.CASCADE,blank=True, null=True) # Link with Medicine model
     dose = models.CharField(max_length=50)
     frequency = models.CharField(max_length=50)
@@ -1195,7 +1207,7 @@ class QualityControl(models.Model):
     control_date = models.DateField()
     # Add other quality control-related information
     control_type = models.CharField(max_length=50)  # Type of quality control performed
-    result = models.CharField(max_length=50)  # Result of the quality control test
+    result = CKEditor5Field(config_name='extends',blank=True, null=True)   
     remarks = models.TextField(blank=True)  # Additional remarks or comments
 
     # Add more fields as needed         
@@ -1411,7 +1423,7 @@ class ServiceRequest(models.Model):
     service = models.ForeignKey(RemoteService, on_delete=models.CASCADE)
     date_requested = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
-    result = models.TextField(blank=True)
+    result = CKEditor5Field(config_name='extends',blank=True, null=True)   
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
 
@@ -1581,7 +1593,7 @@ class RemoteLaboratoryOrder(models.Model):
     visit = models.ForeignKey(RemotePatientVisits, on_delete=models.CASCADE,blank=True, null=True)
     data_recorder = models.ForeignKey(Staffs, on_delete=models.CASCADE,blank=True, null=True,related_name='remote_lab_data_recorder') 
     name = models.ForeignKey(RemoteService, on_delete=models.CASCADE,blank=True, null=True) 
-    result = models.TextField(blank=True, verbose_name=_('Test Result'))
+    result = CKEditor5Field(config_name='extends',blank=True, null=True)   
     lab_number = models.CharField(max_length=20, unique=True)  # Unique procedure number
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -68,6 +68,7 @@ Patient prescription
                                 <thead>
                                     <tr>
                                         <th>Drug</th>
+                                        <th>unit/formulation</th>
                                         <th>Dose</th>
                                         <th>Frequency</th>
                                         <th>Duration</th>
@@ -83,18 +84,18 @@ Patient prescription
                                             <select class="form-control select2bs4 medicine-select" style="width: 100%;" id="medicine" name="medicine[]" required>
                                             <option value="">Select Medicine</option>
                                             {% for medicine in medicines %}
-                                              <option value="{{ medicine.id }}" {% if medicine.id == prescription.medicine.id  %} selected {% endif %}>{{ medicine.name }}</option>
+                                              <option value="{{ medicine.id }}" {% if medicine.id == prescription.medicine.id  %} selected {% endif %}>{{ medicine.drug_name }}</option>
                                             {% endfor %}
-                                          </select>
-                                        </td>
-                                        <td><input type="text" class="form-control dose-input" name="dose[]" value="0"></td>
+                                        
+                                          </select>                                         
+                                       </td>                                                                           
+                                        <td><input type="text" class="form-control formulation_unit" name="formulation" value="1"></td>
+                                        <td><input type="text" class="form-control dose-input" name="dose[]" value="1"></td>
                                         <td><select class="form-control select2bs4 frequency-select" style="width: 100%;" id="frequency" name="frequency[]">                                
-                                                <option value="PRN">PRN</option>
-                                                <option value="QID">QID</option>
-                                                <option value="TID">TID</option>
-                                                <option value="BID">BID</option>
-                                                <option value="STAT">STAT</option>
-                                                <option value="OD">OD</option>                                    
+                                            <option value="">Select frequency</option>
+                                            {% for frequency in frequencies %}
+                                              <option value="{{ frequency.id }}" {% if frequency.id == prescription.frequency.id  %} selected {% endif %}>{{ frequency }}</option>
+                                            {% endfor %}                                  
                                         </select></td></td>
                                         <td> <select class="form-control select2bs4 duration-select" style="width: 100%;" id="duration" name="duration[]">
                                             {% for rate in range_31 %}
@@ -103,7 +104,7 @@ Patient prescription
                                         </select></td>
                                         <td><input type="text" class="form-control quantity-input" name="quantity[]" value="1"></td>
                                         <td><input type="text" class="form-control unit-price-input"  value=""></td>
-                                        <td><input type="text" class="form-control total-price-input"  value=""></td>
+                                        <td><input type="text" class="form-control total-price-input"  value=""  name="total_price[]"></td>
                                         <td><button type="button" class="btn btn-danger delete-row">Delete</button></td>
                                     </tr>
                                 </tbody>
@@ -143,9 +144,24 @@ Patient prescription
                             </div>
                         </div>
                         <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Date</label>
+                                    <input type="date" class="form-control total-cost" name="order_date" id="orderDate">
+                                </div>
+                                <script>
+                                    // Get the current date in the format yyyy-mm-dd
+                                    const currentDate = new Date().toISOString().split('T')[0];
+                                    
+                                    // Set the value of the input field to the current date
+                                    document.getElementById('orderDate').value = currentDate;
+                                </script>
+                            </div>                            
+                           </div>
+                        <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">                                
-                                    <button type="button" class="btn btn-primary" onclick="addPrescription{{ visit.id }}()">Save Prescriptions</button>
+                                    <button type="button" class="btn btn-primary btn-block" onclick="addPrescription{{ visit.id }}()">Save Prescriptions</button>
                                 </div>    
                             </div>
                         </div>
@@ -156,112 +172,276 @@ Patient prescription
     </div>
     <script>
         $(document).ready(function() {
-            // Add row button functionality
-            $('#addRow{{ visit.id }}').click(function() {
-                // Add a new row to the prescription table
-                var newRow = `
-                                    <tr>
-                                        <td>
-                                            <select class="form-control select2bs4 medicine-select" style="width: 100%;"  id="medicine" name="medicine[]"  required>
-                                                <option value="">Select Medicine</option>
-                                                {% for medicine in medicines %}
-                                                    <option value="{{ medicine.id }}">{{ medicine.name }}</option>
-                                                {% endfor %}
-                                            </select>
-                                        </td>
-                                        <td><input type="text" class="form-control dose-input"  name="dose[]"  value="0"></td>
-                                        <td>
-                                            <select class="form-control select2bs4 frequency-select" style="width: 100%;"  id="frequency" name="frequency[]" required>
-                                                <option value="PRN">PRN</option>
-                                                <option value="QID">QID</option>
-                                                <option value="TID">TID</option>
-                                                <option value="BID">BID</option>
-                                                <option value="STAT">STAT</option>
-                                                <option value="OD">OD</option>
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <select class="form-control select2bs4 duration-select" id="duration" name="duration[]" style="width: 100%;">
-                                                {% for rate in range_31 %}
-                                                    <option value="{{ rate }}">{{ rate }}</option>
-                                                {% endfor %}
-                                            </select>
-                                        </td>
-                                        <td><input type="text" class="form-control quantity-input"  name="quantity[]"  value="1"></td>
-                                        <td><input type="text" class="form-control unit-price-input" value=""></td>
-                                        <td><input type="text" class="form-control total-price-input" value=""></td>
-                                        <td><button type="button" class="btn btn-danger delete-row">Delete</button></td>
-                                    </tr>`;
+            // Add event listeners
+            $('#addRow{{ visit.id }}').click(addRow);
+            $(document).on('click', '.delete-row', deleteRow);
+            $(document).on('change', '.medicine-select', updateUnitPrice);
+            $(document).on('change', '.frequency-select', function() {
+                
+                updateTotalPrice();
+            });
+            $(document).on('change', '.duration-select', function() {
+                updateTotalPrice();
+            });
+            $(document).on('input', '.quantity-input', updateTotalPrice);          
+            // Call initial setup
+            updateTotalPrice();
 
-                $('#prescriptionTable{{ visit.id }} tbody').append(newRow);
-            });
-    
-            // Delete row button functionality
-            $(document).on('click', '.delete-row', function() {
-                // Remove the selected row from the prescription table
-                $(this).closest('tr').remove();
-                updateTotalPrice{{ visit.id }}();
-            });
-    
-            // Fetch unit price and calculate total price when medicine is selected
-            $(document).on('change', '.medicine-select', function() {
-                // Handle the change event for medicine selection
-                var selectedMedicineId = $(this).val();
-                var row = $(this).closest('tr');
-                $.ajax({
-                    // AJAX request to fetch unit price based on selected medicine
-                    url: '{% url "receptionist_get_unit_price" %}',
-                    method: 'GET',
-                    data: { medicine_id: selectedMedicineId },
-                    success: function(response) {
-                        // Update unit price and total price
-                        row.find('.unit-price-input').val(response.unit_price);
-                        updateTotalPrice{{ visit.id }}();
-                    },
-                    error: function(xhr, status, error) {
-                        console.error(xhr.responseText);
-                    }
-                });
-            });
-    
-            // Calculate total price when quantity is changed
-            $(document).on('input', '.quantity-input', function() {
-                updateTotalPrice{{ visit.id }}();
-            });
-    
-            // Function to update total price
-            function updateTotalPrice{{ visit.id }}() {
-                var totalPrice = 0;
-                $('#prescriptionTable{{ visit.id }} tbody tr').each(function() {
-                    var quantity = parseInt($(this).find('.quantity-input').val());
-                    var unitPrice = parseFloat($(this).find('.unit-price-input').val());
-                    var rowTotalPrice = quantity * unitPrice;
-                    $(this).find('.total-price-input').val(rowTotalPrice.toFixed(2));
-                    totalPrice += rowTotalPrice;
-                });
-                $('#sum{{ visit.id }}').text(totalPrice.toFixed(2));
-            }
+            $(document).on('input', '.dose-input', updateTotalPrice);          
+            // Call initial setup
+            updateTotalPrice();
         });
-    
-        // Handle form submission using AJAX
-        function addPrescription{{ visit.id }}() {
+        
+        
+        // Function to add a new row to the prescription table
+        function addRow() {
+            var newRow = `
+                <tr>
+                    <td>
+                        <select class="form-control select2bs4 medicine-select" style="width: 100%;"  id="medicine" name="medicine[]"  required>
+                            <option value="">Select Medicine</option>
+                            {% for medicine in medicines %}
+                                <option value="{{ medicine.id }}">{{ medicine.drug_name }}</option>
+                            {% endfor %}
+                            <p class="medicine-dosage"></p>
+                        </select>
+                    </td>
+                    <td><input type="text" class="form-control formulation_unit" name="formulation" value="1"></td>
+                    <td><input type="text" class="form-control dose-input"  name="dose[]"  value="1"></td>
+                    <td>
+                        <select class="form-control select2bs4 frequency-select" style="width: 100%;"  id="frequency" name="frequency[]" required>
+                            <option value="">Select frequency</option>
+                            {% for frequency in frequencies %}
+                                <option value="{{ frequency.id }}" {% if frequency.id == prescription.frequency.id %} selected {% endif %}>{{ frequency }}</option>
+                            {% endfor %}    
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-control select2bs4 duration-select" id="duration" name="duration[]" style="width: 100%;">
+                            {% for rate in range_31 %}
+                                <option value="{{ rate }}">{{ rate }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td><input type="text" class="form-control quantity-input"  name="quantity[]"  value="1"></td>
+                    <td><input type="text" class="form-control unit-price-input" value=""></td>
+                    <td><input type="text" class="form-control total-price-input" value="" name="total_price[]"></td>
+                    <td><button type="button" class="btn btn-danger delete-row">Delete</button></td>
+                </tr>`;
+        
+            $('#prescriptionTable{{ visit.id }} tbody').append(newRow);
+        }
+        
+        // Function to delete a row from the prescription table
+        function deleteRow() {
+            $(this).closest('tr').remove();
+            updateTotalPrice();
+        }
+        
+        // Function to update unit price and total price when medicine is selected
+        function updateUnitPrice() {
+            var selectedMedicineId = $(this).val();
+            var row = $(this).closest('tr');
             $.ajax({
-                type: 'POST',
-                url: '{% url "receptionist_add_remoteprescription" %}',
-                data: $('#addPrescriptionForm{{ visit.id }}').serialize(),
+                url: '{% url "kahamahmis:get_unit_price" %}',
+                method: 'GET',
+                data: { medicine_id: selectedMedicineId },
                 success: function(response) {
-                    if (response.status === 'success') {
-                        $('#PrescriptionResponse{{ visit.id }}').html('<div class="alert alert-success">' + response.message + '</div>');
-                        location.reload(true);
-                    } else {
-                        $('#PrescriptionResponse{{ visit.id }}').html('<div class="alert alert-danger">' + response.message + '</div>');
-                    }
+                    row.find('.unit-price-input').val(response.unit_price);
+                    updateTotalPrice();
                 },
                 error: function(xhr, status, error) {
-                    $('#PrescriptionResponse{{ visit.id }}').html('<div class="alert alert-danger">' + xhr.responseText + '</div>');
+                    console.error(xhr.responseText);
                 }
             });
         }
+        
+     // Function to update total price and calculate quantity based on drug type and selected frequency
+function updateTotalPrice() {
+    var totalPrice = 0;
+    $('#prescriptionTable{{ visit.id }} tbody tr').each(function() {
+        var row = $(this);
+        var selectedMedicineId = row.find('.medicine-select').val();
+        var selectedFrequencyId = row.find('.frequency-select').val();
+        var selectedDuration = parseInt(row.find('.duration-select').val());
+        var interedDose = parseInt(row.find('.dose-input').val());
+        var dividable = IsDrugDividable(selectedMedicineId);
+        var frequencyName = getFrequencyName(selectedFrequencyId);
+        var quantity;
+
+        // Check if quantity is manually entered for PRN frequency or non-dividable medicine
+        if (frequencyName === 'PRN' || dividable === 'False') {
+            quantity = parseInt(row.find('.quantity-input').val()) || 0; // Use entered quantity or default to 0
+        } else {
+            var formulationUnit = getFormulationUnit(selectedMedicineId);
+            var adjustedDose = interedDose / formulationUnit; // Adjusted dose based on formulation unit
+            console.log(adjustedDose)
+            quantity = calculateTabletQuantity(frequencyName, selectedDuration, adjustedDose);
+        }
+
+        // Set quantity value
+        row.find('.quantity-input').val(quantity);
+
+        var unitPrice = parseFloat(row.find('.unit-price-input').val());
+        var rowTotalPrice = quantity * unitPrice;
+        row.find('.total-price-input').val(rowTotalPrice.toFixed(2));
+        totalPrice += rowTotalPrice;
+    });
+    $('#sum{{ visit.id }}').text(totalPrice.toFixed(2));
+}
+        
+        // Function to get the drug type based on medicine ID
+        function IsDrugDividable(medicineId) {
+            var dividable = '';
+            $.ajax({
+                url: '{% url "kahamahmis:get_drug_division_status" %}',
+                method: 'GET',
+                data: { medicine_id: medicineId },
+                async: false,
+                success: function(response) {
+                    if ('dividable' in response) {
+                        dividable = response.dividable;
+                    } else {
+                        console.error('Drug type not found');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching drug type:', error);
+                }
+            });
+            return dividable;
+        }
+        
+        // Function to get the frequency name based on frequency ID
+        function getFrequencyName(frequencyId) {
+            var frequencyName = '';
+            $.ajax({
+                url: '{% url "kahamahmis:get_frequency_name" %}',
+                method: 'GET',
+                data: { frequency_id: frequencyId },
+                async: false,
+                success: function(response) {
+                    if ('frequency_name' in response) {
+                        frequencyName = response.frequency_name;
+                    } else {
+                        console.error('Frequency name not found');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching frequency name:', error);
+                }
+            });
+            return frequencyName;
+        }
+        
+       // Function to calculate quantity for tablet type medication
+function calculateTabletQuantity(frequency, duration, dose) {
+    var quantity = 0;
+    switch (frequency) {
+        case 'OD':
+        case 'I.C':
+        case 'STAT':
+            quantity = duration * dose;
+            break;
+        case 'QID':
+            quantity = duration * 4 * dose; // 4 times a day
+            break;
+        case 'TID':
+            quantity = duration * 3 * dose; // 3 times a day
+            break;
+        case 'BID':
+            quantity = duration * 2 * dose; // 2 times a day
+            break;
+        case 'PRN':
+            // For PRN frequency, let the user input the quantity manually
+            quantity = ''; // Empty string indicates manual input
+            break;
+        default:
+            // For other frequencies or non-tablet drug types, default quantity is 1
+            quantity = 1;
+            break;
+    }
+    return quantity;
+}
+
+
+// Function to get the formulation unit based on medicine ID
+function getFormulationUnit(medicineId) {
+    var formulationUnit = 1; // Default formulation unit is 1
+    // Perform AJAX request to fetch formulation unit for the medicine
+    $.ajax({
+        url: '{% url "kahamahmis:get_formulation_unit" %}',
+        method: 'GET',
+        data: { medicine_id: medicineId },
+        async: false, // Make the request synchronous
+        success: function(response) {
+            if (response && response.formulation_unit) {
+                formulationUnit = parseFloat(response.formulation_unit);
+              
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching formulation unit:', error);
+        }
+    });
+    return formulationUnit;
+}
+
+ // Handle form submission using AJAX
+ function addPrescription{{ visit.id }}() {
+    $.ajax({
+        type: 'POST',
+        url: '{% url "kahamahmis:add_remoteprescription" %}',
+        data: $('#addPrescriptionForm{{ visit.id }}').serialize(),
+        success: function(response) {
+            if (response.status === 'success') {
+                $('#PrescriptionResponse{{ visit.id }}').html('<div class="alert alert-success">' + response.message + '</div>');
+              
+                var redirectUrl = '{% url "kahamahmis:save_remotesconsultation_notes" patient.id visit.id %}'; // Replace 'patient_id' and 'visit_id' with the actual parameter names used in the URL
+                window.location.href = redirectUrl;
+            } else {
+                $('#PrescriptionResponse{{ visit.id }}').html('<div class="alert alert-danger">' + response.message + '</div>');
+            }
+        },
+        error: function(xhr, status, error) {
+            $('#PrescriptionResponse{{ visit.id }}').html('<div class="alert alert-danger">' + xhr.responseText + '</div>');
+        }
+    });
+}
+        
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            // Add event listener for medicine selection change
+            $(document).on('change', '.medicine-select', function() {
+                var medicineId = $(this).val();
+                var formulationField = $(this).closest('tr').find('.formulation_unit');
+    
+                // Make an AJAX request to fetch the formulation dosage information for the selected medicine
+                $.ajax({
+                    url: '{% url "kahamahmis:get_medicine_formulation" %}', // Update this URL to match your endpoint
+                    method: 'GET',
+                    data: { 'medicine_id': medicineId },
+                    success: function(response) {
+                        // Check if the formulation dosage information is available in the response
+                        if ('formulation' in response) {
+                            // Populate the formulation dosage information in the input field
+                            formulationField.val(response.formulation);
+                        } else {
+                            // Clear the formulation dosage information if not available
+                            formulationField.val('');
+                            console.error('Formulation dosage information not found in response.');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle error if AJAX request fails
+                        formulationField.val('');
+                        console.error('Error fetching medicine formulation dosage:', error);
+                    }
+                });
+            });
+        });
     </script>
 
 

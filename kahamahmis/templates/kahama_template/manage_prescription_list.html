@@ -61,12 +61,18 @@ Prescription
                                         <td >
                                            <p {% if visit_total.status == 'Paid' %}   style="background-color: #308829;color: white;" {% else %}  style="background-color: #DD0000;color: white;" {% endif %}> {{ visit_total.status }}</p>
                                         </td>   <!-- Display payment status field -->
-                                        
                                         <td>
                                             <a class="btn btn-primary" href="{% url 'kahamahmis:prescription_detail' visit_total.visit__vst visit_total.visit__patient__id %}">
-                                                <i class="fas fa-eye-slash"></i> View Prescription
+                                                <i class="fas fa-eye"></i> View
                                             </a>   
-                                        </td>        
+                                            <a class="btn btn-secondary" href="{% url 'kahamahmis:prescription_billing' visit_total.visit__vst visit_total.visit__patient__id %}">
+                                                <i class="fas fa-file-invoice"></i> Prescription Bill
+                                            </a>   
+                                            <a class="btn btn-success" href="{% url 'kahamahmis:prescription_notes' visit_total.visit__vst visit_total.visit__patient__id %}">
+                                                <i class="fas fa-notes-medical"></i> Prescription Notes
+                                            </a>   
+                                        </td>  
+                                          
                                     </tr>
                                 {% endfor %}
                             </tbody>

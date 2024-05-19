@@ -89,14 +89,7 @@
                             <p>All Vital Signs</p> <!-- Renamed navigation link -->
                         </a>
                     </li>                   
-                                 
-                      <li class="nav-item">
-                        {% url 'receptionist_patient_procedure_view' as patient_procedure_view %}
-                          <a href="{% url "receptionist_patient_procedure_view" %}" class="nav-link{% if request.path == patient_procedure_view %} active {% endif %}">
-                            <i class="nav-icon fas fa-hospital"></i>
-                              <p>Medical Procedure</p>
-                          </a>
-                      </li>                   
+                                    
                        <li class="nav-item">
                         {% url 'receptionist_appointment_list' as appointment_list %}
                           <a href="{% url "receptionist_appointment_list" %}" class="nav-link{% if request.path == appointment_list %} active {% endif %}">

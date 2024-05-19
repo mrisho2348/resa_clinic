@@ -20,7 +20,7 @@ Consultation
 {% load static %}
 {% block main_content %}
 
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
@@ -33,6 +33,7 @@ Consultation
                                 <thead>
                                     <tr>
                                         <th>Order Number</th>                               
+                                        <th>Visit Number</th>                               
                                         <th>Ordered By</th>                               
                                         <th>Patient</th>                              
                                         <th>Order Date</th>
@@ -42,7 +43,8 @@ Consultation
                                 <tbody>
                                     {% for order in orders %}
                                         <tr>
-                                            <td>{{ order.order_number }}</td>                                  
+                                            <td>{{ order.order_number }}</td> 
+                                            <td>{{ order.visit.vst }}</td>                                 
                                             <td>{{ order.added_by }}</td>                                  
                                             <td>{{ order.patient }}
                                                 <p><strong>{{ order.patient.payment_form }}</strong></p>

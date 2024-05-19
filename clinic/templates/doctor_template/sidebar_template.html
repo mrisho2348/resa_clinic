@@ -74,18 +74,12 @@
                             <i class="nav-icon fas fa-handshake"></i>
                             <p>Referral</p>
                         </a>
-                    </li>                            
-                      <li class="nav-item">
-                        {% url 'manage_laboratory' as manage_laboratory %}
-                        <a href="{% url "manage_laboratory" %}" class="nav-link{% if request.path == manage_laboratory %} active {% endif %}">
-                            <i class="nav-icon fas fa-flask"></i> <!-- Correct Font Awesome icon -->
-                            <p>Manage Laboratories</p> <!-- More descriptive name -->
-                        </a>
-                    </li>            
+                    </li>                           
+                             
                   </ul>
               </li>  
 
-        <li class="nav-item has-treeview">
+            <li class="nav-item has-treeview">
                 <a class="nav-link" href="#">
                     <i class="nav-icon fas fa-calendar"></i>
                     <p>Medical Procedure <span id="unreadProcedureOrderBadge" class="badge badge-danger">0</span><i class="fas fa-angle-left right"></i></p>
@@ -109,7 +103,7 @@
                     </li>
                 </ul>
             </li>
-        <li class="nav-item has-treeview">
+            <li class="nav-item has-treeview">
                 <a class="nav-link" href="#">
                     <i class="nav-icon fas fa-calendar"></i>
                     <p>Radiology <span id="unreadRadiologyOrderBadge" class="badge badge-danger">0</span><i class="fas fa-angle-left right"></i></p>
@@ -186,6 +180,30 @@
                     </li>
                 </ul>
             </li>
+            <li class="nav-item has-treeview">
+                <a class="nav-link" href="#">
+                    <i class="nav-icon fas fa-flask"></i> 
+                    <p>Laboratory result <span id="unreadLabBadge" class="badge badge-danger">0</span><i class="fas fa-angle-left right"></i></p>
+                </a>
+                <ul class="nav nav-treeview">
+                    <!-- Unread Appointments Link -->
+                    <li class="nav-item" id="unreadAppointmentsLink">
+                        {% url 'new_lab_order' as new_lab_order %}
+                        <a href="{% url "new_lab_order" %}" class="nav-link {% if request.path == new_lab_order %} active {% endif %}">
+                            <i class="nav-icon fas fa-bell"></i>
+                            <p>New Lab <span id="unreadLabBadgeCount" class="badge badge-danger">0</span></p>
+                        </a>
+                    </li>
+                    <!-- Read Appointments Link -->
+                    <li class="nav-item" id="readAppointmentsLink">
+                        {% url 'patient_lab_view' as patient_lab_view %}
+                        <a href="{% url "patient_lab_view" %}" class="nav-link {% if request.path == patient_lab_view %} active {% endif %}">
+                            <i class="nav-icon fas fa-history"></i>
+                            <p>Old Lab <span id="readLabBadgeCount" class="badge badge-danger">0</span></p>
+                        </a>
+                    </li>
+                </ul>
+            </li>
           </ul>
       </nav>
       <!-- /.sidebar-menu -->
@@ -257,12 +275,29 @@ function fetchProcedureOrderCounts() {
     });
 }
 
+function fetchLabOrderCounts() {
+    $.ajax({
+        url: "{% url 'fetch_lab_order_counts_view' %}",
+        type: "GET",
+        success: function(response) {
+            // Update the badge counts with the retrieved data
+            $('#unreadLabBadge').text(response.unread_count);
+            $('#unreadLabBadgeCount').text(response.unread_count);
+            $('#readLabBadgeCount').text(response.read_count);
+        },
+        error: function(error) {
+            console.log(error);
+        }
+    });
+}
+
 // Call the function to fetch consultation counts initially
 $(document).ready(function() {
     fetchConsultationCounts();
     fetchConsultationOrderCounts();
     fetchRadiologyOrderCounts();
     fetchProcedureOrderCounts();
+    fetchLabOrderCounts();
 });
 
 // Call the function to fetch consultation counts every second
@@ -270,4 +305,5 @@ setInterval(fetchConsultationCounts, 1000);
 setInterval(fetchRadiologyOrderCounts, 1000);
 setInterval(fetchProcedureOrderCounts, 1000);
 setInterval(fetchConsultationOrderCounts, 1000);
+setInterval(fetchLabOrderCounts, 1000);
 </script>

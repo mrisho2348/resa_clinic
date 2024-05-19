@@ -4,10 +4,6 @@
 Medication Payments
 {% endblock title %}
 
-{% block page_title %}
-<h6>Medication Payments History for <span style="color: green;">{{ mrn }}</span></h6>
-{% endblock page_title %}
-
 {% block breadcrumb %}
 {% include "hod_template/modal_form.html" %}
 <a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#addMedicationPaymentModal">
@@ -21,122 +17,133 @@ Medication Payments
 
 {% load static %}
 {% block main_content %}
-
-{% comment %} <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css"> {% endcomment %}
-
-<div class="">
-    <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
-        <thead>
-            <tr>
-                <th>Payment Date</th>
-                <th>Medicine</th>
-                <th>Quantity</th>
-                <th>Amount</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for payment in medication_history  %}
-                <tr>
-                    <td>{{ payment.payment_date }}</td>
-                    <td>{{ payment.medicine }}</td>
-                    <td>{{ payment.quantity }}</td>
-                    <td>{{ payment.amount }}/Tsh</td>
-                    <td>                      
-                    <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#editMedicationPaymentsModal{{ payment.id }}"  data-toggle="tooltip" title="Edit">
-                        <i class="fa fa-edit text-white"></i>
-                    </button>
-                      <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteMedicationPaymentsModal{{ payment.id }}"  data-toggle="tooltip" title="Delete">
-                        <i class="fas fa-trash"></i>
-                    </button>                        
-                    </td>
-
-                    <!-- Bootstrap Modal for Editing Medication Payment -->
-<div class="modal fade" id="editMedicationPaymentsModal{{ payment.id }}" tabindex="-1" role="dialog" aria-labelledby="editMedicationPaymentsModalLabel{{ payment.id }}" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editMedicationPaymentsModalLabel{{ payment.id }}">Edit Medication Payment</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <!-- Form for editing Medication Payment details -->
-                <form method="post" action="{% url 'edit_medication_payment' payment.id %}">
-                    {% csrf_token %}
-
-                    <!-- Hidden input for payment ID -->
-                    <input type="hidden" name="payment_id" value="{{ payment.id }}">
-
-                    <!-- Editable fields -->
-                          <!-- Editable medicine type field -->
-                          <div class="form-group">
-                            <label for="medicine">Medicine:</label>
-                            <select class="form-control select2bs4" style="width: 100%;" id="medicine_id" name="medicine_id">
-                                {% for medicine in medicines %}
-                                    <option value="{{ medicine.id }}" {% if medicine.id == payment.medicine.id %} selected {% endif %}>
-                                        {{ medicine.name }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    <div class="form-group">
-                        <label for="edit_quantity">Quantity:</label>
-                        <input type="number" class="form-control" id="edit_quantity" name="edit_quantity" value="{{ payment.quantity }}" required>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-header bg-primary text-white text-center mt-0 mb-1">Medication Payments History for <span style="color: green;">{{ mrn }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Payment Date</th>
+                                    <th>Medicine</th>
+                                    <th>Quantity</th>
+                                    <th>Amount</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in medication_history  %}
+                                    <tr>
+                                        <td>{{ payment.payment_date }}</td>
+                                        <td>{{ payment.medicine }}</td>
+                                        <td>{{ payment.quantity }}</td>
+                                        <td>{{ payment.amount }}/Tsh</td>
+                                        <td>                      
+                                        <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#editMedicationPaymentsModal{{ payment.id }}"  data-toggle="tooltip" title="Edit">
+                                            <i class="fa fa-edit text-white"></i>
+                                        </button>
+                                          <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteMedicationPaymentsModal{{ payment.id }}"  data-toggle="tooltip" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>                        
+                                        </td>
+                    
+                                        <!-- Bootstrap Modal for Editing Medication Payment -->
+                                        <div class="modal fade" id="editMedicationPaymentsModal{{ payment.id }}" tabindex="-1" role="dialog" aria-labelledby="editMedicationPaymentsModalLabel{{ payment.id }}" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="editMedicationPaymentsModalLabel{{ payment.id }}">Edit Medication Payment</h5>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <!-- Form for editing Medication Payment details -->
+                                                        <form method="post" action="{% url 'edit_medication_payment' payment.id %}">
+                                                            {% csrf_token %}
+                    
+                                                            <!-- Hidden input for payment ID -->
+                                                            <input type="hidden" name="payment_id" value="{{ payment.id }}">
+                    
+                                                            <!-- Editable fields -->
+                                                                <!-- Editable medicine type field -->
+                                                                <div class="form-group">
+                                                                    <label for="medicine">Medicine:</label>
+                                                                    <select class="form-control select2bs4" style="width: 100%;" id="medicine_id" name="medicine_id">
+                                                                        {% for medicine in medicines %}
+                                                                            <option value="{{ medicine.id }}" {% if medicine.id == payment.medicine.id %} selected {% endif %}>
+                                                                                {{ medicine.name }}
+                                                                            </option>
+                                                                        {% endfor %}
+                                                                    </select>
+                                                                </div>
+                                                            <div class="form-group">
+                                                                <label for="edit_quantity">Quantity:</label>
+                                                                <input type="number" class="form-control" id="edit_quantity" name="edit_quantity" value="{{ payment.quantity }}" required>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="edit_amount">Amount:</label>
+                                                                <input type="text" class="form-control" id="edit_amount" name="edit_amount" value="{{ payment.amount }}" required>
+                                                            </div>
+                    
+                                                    
+                    
+                                                            <!-- Add more editable fields as needed -->
+                    
+                                                            <!-- Save changes button -->
+                                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                    
+                    
+                    
+                    
+                    
+                                        <!-- Bootstrap Modal for Deleting Medication Payment -->
+                                        <div class="modal fade" id="deleteMedicationPaymentsModal{{ payment.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteMedicationPaymentsModalLabel{{ payment.id }}" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="deleteMedicationPaymentsModalLabel{{ payment.id }}">Confirm Deletion</h5>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>Are you sure you want to delete this medication payment record?</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <form method="post" action="{% url 'delete_medication_payment' payment.id %}">
+                                                            {% csrf_token %}
+                                                            <input type="hidden" name="_method" value="DELETE">
+                                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                                        </form>             
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                    
+                                    </tr>
+                                    
+                    
+                       {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="form-group">
-                        <label for="edit_amount">Amount:</label>
-                        <input type="text" class="form-control" id="edit_amount" name="edit_amount" value="{{ payment.amount }}" required>
-                    </div>
-
-              
-
-                    <!-- Add more editable fields as needed -->
-
-                    <!-- Save changes button -->
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-
-
-
-
-<!-- Bootstrap Modal for Deleting Medication Payment -->
-<div class="modal fade" id="deleteMedicationPaymentsModal{{ payment.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteMedicationPaymentsModalLabel{{ payment.id }}" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteMedicationPaymentsModalLabel{{ payment.id }}">Confirm Deletion</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete this medication payment record?</p>
-            </div>
-            <div class="modal-footer">
-                <form method="post" action="{% url 'delete_medication_payment' payment.id %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="_method" value="DELETE">
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                </form>             
-            </div>
-        </div>
-    </div>
-</div>
-
-                </tr>
-                
-
-   {% endfor %}
-        </tbody>
-    </table>
-</div>
 
 
 <style>

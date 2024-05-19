@@ -105,6 +105,27 @@
                           </a>
                       </li>
                       <li class="nav-item">
+                        {% url 'kahamahmis:counseling_list' as counseling_list %}
+                        <a href="{% url 'kahamahmis:counseling_list' %}" class="nav-link{% if request.path == counseling_list %} active {% endif %}">
+                            <i class="nav-icon fas fa-user-friends"></i>
+                            <p>Counseling</p>
+                        </a>
+                    </li>                     
+                    <li class="nav-item">
+                        {% url 'kahamahmis:discharge_notes_list' as discharge_notes_list %}
+                        <a href="{% url 'kahamahmis:discharge_notes_list' %}" class="nav-link{% if request.path == discharge_notes_list %} active {% endif %}">
+                            <i class="nav-icon fas fa-notes-medical"></i>
+                            <p>Discharge Notes</p>
+                        </a>
+                    </li>                     
+                    <li class="nav-item">
+                        {% url 'kahamahmis:observation_record_list' as observation_record_list %}
+                        <a href="{% url 'kahamahmis:observation_record_list' %}" class="nav-link{% if request.path == observation_record_list %} active {% endif %}">
+                            <i class="nav-icon fas fa-stethoscope"></i>
+                            <p>Observation Records</p>
+                        </a>
+                    </li>                   
+                      <li class="nav-item">
                         {% url 'kahamahmis:consultation_notes' as consultation_notes %}
                           <a href="{% url "kahamahmis:consultation_notes" %}" class="nav-link{% if request.path == consultation_notes %} active {% endif %}">
                             <i class="nav-icon fas fa-calendar"></i>

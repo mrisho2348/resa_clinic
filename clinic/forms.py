@@ -2,7 +2,7 @@ from django import forms
 from django.core.validators import FileExtensionValidator
 from django_ckeditor_5.widgets import CKEditor5Widget
 
-from clinic.models import RemoteCounseling, RemoteDischargesNotes, RemoteObservationRecord, RemoteReferral
+from clinic.models import ImagingRecord, LaboratoryOrder, Procedure, RemoteCounseling, RemoteDischargesNotes, RemoteObservationRecord, RemoteReferral
 class ImportStaffForm(forms.Form):
     staff_file = forms.FileField(
         label='Choose an Excel file',
@@ -286,6 +286,54 @@ class RemoteDischargesNotesForm(forms.ModelForm):
         fields = ['discharge_condition', 'discharge_notes']
         widgets = {
             'discharge_notes': CKEditor5Widget(attrs={'class': 'django_ckeditor_5'}, config_name='extends'),
+        }
+  
+
+class ProcedureForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make the 'result' field optional
+        self.fields["result"].required = False
+
+    class Meta:
+        model = Procedure
+        fields = ("result",)
+        widgets = {
+            "result": CKEditor5Widget(
+                attrs={"class": "django_ckeditor_5"},  # Add a custom CSS class
+                config_name="extends"  # Specify the CKEditor configuration to use
+            )
+        }
+        
+class ImagingRecordForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make the 'result' field optional
+        self.fields["result"].required = False
+
+    class Meta:
+        model = ImagingRecord
+        fields = ("result",)
+        widgets = {
+            "result": CKEditor5Widget(
+                attrs={"class": "django_ckeditor_5"},  # Add a custom CSS class
+                config_name="extends"  # Specify the CKEditor configuration to use
+            )
+        }
+class LaboratoryOrderForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make the 'result' field optional
+        self.fields["result"].required = False
+
+    class Meta:
+        model = LaboratoryOrder
+        fields = ("result",)
+        widgets = {
+            "result": CKEditor5Widget(
+                attrs={"class": "django_ckeditor_5"},  # Add a custom CSS class
+                config_name="extends"  # Specify the CKEditor configuration to use
+            )
         }
         
 class YearSelectionForm(forms.Form):

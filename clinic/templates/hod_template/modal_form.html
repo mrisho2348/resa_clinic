@@ -273,7 +273,20 @@
                 <div class="form-group col-md-4">
                     <label for="medicineType">Drug Type</label>
                     <select class="form-control select2bs4" style="width: 100%;" id="medicineType" name="medicine_type" required>
-                        <!-- Options here -->
+                      <option value="Tablet">Tablet</option>
+                      <option value="Capsule">Capsule</option>
+                      <option value="Injection">Injection</option>
+                      <option value="Ointment">Ointment</option>
+                      <option value="Drops">Drops</option>
+                      <option value="Inhaler">Inhaler</option>
+                      <option value="Patch">Patch</option>
+                      <option value="Liquid">Liquid</option>
+                      <option value="Cream">Cream</option>
+                      <option value="Gel">Gel</option>
+                      <option value="Suppository">Suppository</option>
+                      <option value="Powder">Powder</option>
+                      <option value="Suspension">Suspension</option>
+                      <option value="Lozenge">Lozenge</option>    
                     </select>
                 </div>
         
@@ -322,15 +335,18 @@
                 <div class="form-group col-md-4">
                     <label for="buyingPrice">Buying Price</label>
                     <input type="text" class="form-control" id="buyingPrice" name="buying_price" required>
-                </div>
-            </div>
-        
+                </div>                
+            </div>        
             <!-- NHIF Cost -->
             <div class="form-row">
                 <div class="form-group col-md-4">
                     <label for="nhifCost">NHIF Cost</label>
                     <input type="text" class="form-control" id="nhifCost" name="nhif_cost" required>
                 </div>
+                <div class="form-group col-md-4">
+                  <label for="insurance_cost">Insurance cost</label>
+                  <input type="text" class="form-control" id="insurance_cost" name="insurance_cost" required>
+              </div>
             </div>
         
             <!-- Message Container -->
@@ -1289,61 +1305,67 @@
 </style>
 
 <div class="modal fade" id="staffModal" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-        <div class="modal-header ">
-            <h5 class="modal-title">Add user</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-          </div>
-      <div class="modal-body">
-        <div class="container-fluid">          
-          <form id="staffForm" method="post">
-            <!-- Personal Information -->
-            {% csrf_token %}
-            <div class="row">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add user</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="container-fluid">
+            <form id="staffForm" method="post" novalidate>
+              {% csrf_token %}
+              <!-- Personal Information -->
+              <div class="row">
                 <div class="form-group col-sm-4">
-                    <label for="firstName" class="col-form-label">First Name</label>
-                    <input type="text" class="form-control" name="firstName" id="firstName" placeholder="">
+                  <label for="firstName" class="col-form-label">First Name</label>
+                  <input type="text" class="form-control" name="firstName" id="firstName" required>
+                  <div class="invalid-feedback">First name is required.</div>
                 </div>
                 <div class="form-group col-sm-4">
-                    <label for="middleName" class="col-form-label">Middle Name</label>
-                    <input type="text" class="form-control" name="middleName" id="middleName" placeholder="">
+                  <label for="middleName" class="col-form-label">Middle Name</label>
+                  <input type="text" class="form-control" name="middleName" id="middleName">
                 </div>
                 <div class="form-group col-sm-4">
-                    <label for="lastname" class="col-form-label">Last Name</label>
-                    <input type="text" class="form-control" name="lastname" id="lastname" placeholder="">
+                  <label for="lastname" class="col-form-label">Last Name</label>
+                  <input type="text" class="form-control" name="lastname" id="lastname" required>
+                  <div class="invalid-feedback">Last name is required.</div>
                 </div>
-            </div>
-        
-            <!-- Additional Personal Information -->
-            <div class="row">
+              </div>
+  
+              <!-- Additional Personal Information -->
+              <div class="row">
                 <div class="form-group col-sm-4">
                   <label for="gender" class="col-form-label">Gender</label>
-                  <select class="form-control select2bs4" style="width: 100%;"  name="gender" id="gender" placeholder="">
-                      <option value="">Select Gender</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="non-binary">Non-Binary</option>
-                      <option value="prefer-not-to-say">Prefer Not to Say</option>
-                  </select>                  
+                  <select class="form-control select2bs4" style="width: 100%;"    name="gender" id="gender" required>
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="non-binary">Non-Binary</option>
+                    <option value="prefer-not-to-say">Prefer Not to Say</option>
+                  </select>
+                  <div class="invalid-feedback">Gender is required.</div>
                 </div>
                 <div class="form-group col-sm-4">
-                    <label for="dob" class="col-form-label">Date of Birth</label>                   
-                    <input type="date" class="form-control" name="dob" id="dob" placeholder="">
+                  <label for="dob" class="col-form-label">Date of Birth</label>
+                  <input type="date" class="form-control" name="dob" id="dob" required>
+                  <div class="invalid-feedback">Date of birth is required.</div>
                 </div>
                 <div class="form-group col-sm-4">
-                    <label for="phone" class="col-form-label">Phone</label>
-                    <input type="tel" class="form-control" name="phone" id="phone" placeholder="">
+                  <label for="phone" class="col-form-label">Phone</label>
+                  <input type="tel" class="form-control" id="phone" name="phone" required 
+                    pattern="(0|\+255)\d{9,12}" title="Please enter a valid phone number starting with '0' or '+255' and having 10 to 13 digits">
+                  <div class="invalid-feedback">Please enter a valid phone number starting with '0' or '+255' and having 10 to 13 digits.</div>
                 </div>
-            </div>
-        
-            <!-- Professional Information -->
-            <div class="row">
-              <div class="form-group col-sm-4">
-                <label for="profession" class="col-form-label">Employee Profession</label>
-                <select class="form-control select2bs4" style="width: 100%;" name="profession" id="profession">
+              </div>
+  
+              <!-- Professional Information -->
+              <div class="row">
+                <div class="form-group col-sm-4">
+                  <label for="profession" class="col-form-label">Employee Profession</label>
+                  <select class="form-control select2bs4" style="width: 100%;"    name="profession" id="profession" required>
                     <option value="">Select Profession</option>
                     <option value="doctor">Doctor</option>
                     <option value="nurse">Nurse</option>
@@ -1359,121 +1381,151 @@
                     <option value="security_guard">Security Guard</option>
                     <option value="chef">Chef</option>
                     <option value="cleaner">Cleaner</option>
-                    <!-- Add more options as needed -->
-                </select>
-            </div>
-            
+                  </select>
+                </div>
                 <div class="form-group col-sm-4">
-                    <label for="joiningDate" class="col-form-label">Joining Date</label>
-                    <input type="date" class="form-control" name="joiningDate" id="joiningDate" placeholder="">
+                  <label for="joiningDate" class="col-form-label">Joining Date</label>
+                  <input type="date" class="form-control" name="joiningDate" id="joiningDate">
                 </div>
                 <div class="form-group col-sm-4">
                   <label for="maritalStatus" class="col-form-label">Marital Status</label>
-                  <select class="form-control select2bs4" style="width: 100%;"   name="maritalStatus" id="maritalStatus" placeholder="">
-                      <option value="">Select Marital Status</option>
-                      <option value="single">Single</option>
-                      <option value="married">Married</option>
-                      <option value="divorced">Divorced</option>
-                      <option value="widowed">Widowed</option>
+                  <select class="form-control select2bs4" style="width: 100%;"    name="maritalStatus" id="maritalStatus">
+                    <option value="">Select Marital Status</option>
+                    <option value="single">Single</option>
+                    <option value="married">Married</option>
+                    <option value="divorced">Divorced</option>
+                    <option value="widowed">Widowed</option>
                   </select>
                 </div>
-            </div>
-        
-            <!-- Login Details -->
-            <h4  class="mt-4">Login Details</h4>
-            <div class="row">
+              </div>
+  
+              <!-- Login Details -->
+              <h4 class="mt-4">Login Details</h4>
+              <div class="row">
                 <div class="form-group col-sm-4">
-                    <label for="email" class="col-form-label">Email</label>
-                    <input type="email" class="form-control" name="email" id="email" placeholder="">
+                  <label for="email" class="col-form-label">Email</label>
+                  <input type="email" class="form-control" name="email" id="email" required>
+                  <div class="invalid-feedback">Email is required.</div>
                 </div>
                 <div class="form-group col-sm-4">
-                    <label for="password" class="col-form-label">Password</label>
-                    <input type="password" class="form-control" name="password" id="password" placeholder="">
+                  <label for="password" class="col-form-label">Password</label>
+                  <input type="password" class="form-control" name="password" id="password" required>
+                  <div class="invalid-feedback">Password is required.</div>
                 </div>
                 <div class="form-group col-sm-4">
-                    <label for="confirmPassword" class="col-form-label">Confirm Password</label>
-                    <input type="password" class="form-control" name="confirmPassword" id="confirmPassword" placeholder="">
+                  <label for="confirmPassword" class="col-form-label">Confirm Password</label>
+                  <input type="password" class="form-control" name="confirmPassword" id="confirmPassword" required>
+                  <div class="invalid-feedback">Confirm password is required.</div>
                 </div>
-            </div>
-        
-            <!-- Role Information -->
-            <h4 class="mt-4">Role</h4>
-            <div class="container">
+              </div>
+  
+              <!-- Role Information -->
+              <h4 class="mt-4">Role</h4>
+              <div class="container">
                 <div class="row">
-                    <div class="form-group col-sm-12">
-                        <label for="userRole" class="col-form-label">Select Role</label>
-                        <select class="form-control select2bs4" style="width: 100%;" name="userRole" id="userRole">
-                            <option value="">Select Role</option>
-                            <option value="admin">Administrator</option>
-                            <option value="doctor">Doctor</option>
-                            <option value="nurse">Nurse</option>
-                            <option value="physiotherapist">Physiotherapist</option>
-                            <option value="labTechnician">Lab Technician</option>
-                            <option value="pharmacist">Pharmacist</option>
-                            <option value="receptionist">Receptionist</option>
-                        </select>
-                    </div>
+                  <div class="form-group col-sm-6">
+                    <label for="userRole" class="col-form-label">Select Role</label>
+                    <select class="form-control select2bs4" style="width: 100%;"    name="userRole" id="userRole" required>
+                      <option value="">Select Role</option>
+                      <option value="admin">Administrator</option>
+                      <option value="doctor">Doctor</option>
+                      <option value="nurse">Nurse</option>
+                      <option value="physiotherapist">Physiotherapist</option>
+                      <option value="labTechnician">Lab Technician</option>
+                      <option value="pharmacist">Pharmacist</option>
+                      <option value="receptionist">Receptionist</option>
+                    </select>
+                    <div class="invalid-feedback">Role is required.</div>
+                  </div>
+                  <div class="form-group col-sm-6">
+                    <label for="Workingplace" class="col-form-label">Working place</label>
+                    <select class="form-control select2bs4" style="width: 100%;"    name="Workingplace" id="Workingplace" required>
+                      <option value="">Select Working place</option>
+                      <option value="resa">Resa</option>
+                      <option value="kahama">Kahama</option>
+                    </select>
+                    <div class="invalid-feedback">Working place is required.</div>
+                  </div>
                 </div>
-            </div>
-            <div id="messageContainer" class="text-center mt-2"></div>
-            <script>
-              $(document).ready(function () {
-                  // Handle form submission
-                  $('#staffForm').submit(function (e) {
-                      e.preventDefault();
-      
-                      // Check if passwords match
-                      var password = $('#password').val();
-                      var confirmPassword = $('#confirmPassword').val();
-      
-                      if (password !== confirmPassword) {
-                          // Passwords do not match, display an error message
-                          $('#messageContainer').html('<div class="alert alert-danger" role="alert">Passwords do not match</div>');
-                          return;
-                      }
-      
-                      // Serialize the form data
-                      var formData = $(this).serialize();
-      
-                      // Send AJAX request to the server
-                      $.ajax({
-                        url: '/save_staff_view/',
-                        method: 'POST',
-                        data: formData,
-                        success: function (response, status, xhr) {
-                            if (xhr.status === 200) {
-                                // Handle success
-                                $('#messageContainer').html('<div class="alert alert-success" role="alert">' + response.message + '</div>');
-                                 // Clear the form fields
-                                 $('#staffForm')[0].reset();
-                            } else {
-                                // Handle other status codes (e.g., 400 for client errors)
-                                $('#messageContainer').html('<div class="alert alert-danger" role="alert">' + response.error + '</div>');
-                            }
-                        },
-                        error: function (error) {
-                            // Handle the AJAX error
-                            $('#messageContainer').html('<div class="alert alert-danger" role="alert">Error saving data</div>');
-                            console.error('Error saving data:', error);
-                        }
-                    });
-                  });
-              });
-          </script>
-            <!-- Submit Button -->
-            <div class="form-group row">
+              </div>
+              <div id="messageContainer" class="text-center mt-2"></div>
+              
+              <!-- Submit Button -->
+              <div class="form-group row">
                 <div class="offset-md-6 col-md-6 text-right">
-                    <button type="submit" class="btn btn-primary">Save and Continue</button>
+                  <button type="submit" class="btn btn-primary">Save and Continue</button>
                 </div>
-            </div>
-        </form>
-        
-          
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
-      </div>   
     </div>
   </div>
-</div>
+  
+  <script>
+    $(document).ready(function () {
+      
+  
+      // Handle form submission
+      $('#staffForm').submit(function (e) {
+        e.preventDefault();
+  
+        // Check if passwords match
+        var password = $('#password').val();
+        var confirmPassword = $('#confirmPassword').val();
+  
+        if (password !== confirmPassword) {
+          $('#messageContainer').html('<div class="alert alert-danger" role="alert">Passwords do not match</div>');
+          return;
+        }
+  
+        // Check form validity
+        if (this.checkValidity() === false) {
+          e.stopPropagation();
+          $(this).addClass('was-validated');
+          return;
+        }
+  
+        // Serialize the form data
+        var formData = $(this).serialize();
+  
+        // Send AJAX request to the server
+        $.ajax({
+          url: '/save_staff_view/',
+          method: 'POST',
+          data: formData,
+          success: function (response, status, xhr) {
+            if (xhr.status === 200) {
+              $('#messageContainer').html('<div class="alert alert-success" role="alert">' + response.message + '</div>');
+              $('#staffForm')[0].reset();
+              location.reload(true);
+            } else {
+              $('#messageContainer').html('<div class="alert alert-danger" role="alert">' + response.error + '</div>');
+            }
+          },
+          error: function (error) {
+            $('#messageContainer').html('<div class="alert alert-danger" role="alert">Error saving data</div>');
+            console.error('Error saving data:', error);
+          }
+        });
+      });
+  
+      // Custom phone validation
+      $('#phone').on('input', function () {
+        var phonePattern = /(0|\+255)\d{9,12}/;
+        if (!phonePattern.test($(this).val())) {
+          $(this).addClass('is-invalid');
+          $('#phone-error').show();
+        } else {
+          $(this).removeClass('is-invalid');
+          $('#phone-error').hide();
+        }
+      });
+    });
+  </script>
+  
+  
 
 <style>
   /* Custom styles for the modal */

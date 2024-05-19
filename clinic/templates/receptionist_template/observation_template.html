@@ -142,7 +142,7 @@ Patient Imaging
                              </div>                      
                         </div>
                         <div class="form-group">
-                            <button type="button" class="btn btn-primary btn-block" onclick="addImaging()">Request Order & Pay</button>
+                            <button type="submit" class="btn btn-primary btn-block" >Request Order & Pay</button>
                         </div>
                     </form>
                 </div>
@@ -152,12 +152,26 @@ Patient Imaging
     
     <script>
         $(document).ready(function() {
+            // Initialize a counter to create unique IDs for each row
+            var rowIdCounter = 0;
+    
             // Add row button functionality
             $('#addRow{{ visit.id }}').click(function() {
+                // Check if the last row already has a selected imaging procedure
+                var lastRow = $('#imagingTable{{ visit.id }} tbody tr:last');
+                var selectedValue = lastRow.find('.imaging-name').val();
+    
+                if (!selectedValue) {
+                    alert('Please select an imaging procedure before adding another row.');
+                    return;
+                }
+    
+                // Generate a unique ID for the select element
+                var uniqueId = 'imaging_name' + rowIdCounter++;
                 var newRow = `
                     <tr>
                         <td>
-                            <select class="form-control select2bs4 imaging-name" style="width: 100%;" name="imaging_name[]" required>
+                            <select class="form-control select2bs4 imaging-name" style="width: 100%;" id="${uniqueId}" name="imaging_name[]" required>
                                 <option value="">Select Procedure</option>
                                 {% for imaging in remote_service %}
                                     <option value="{{ imaging.id }}">{{ imaging.name }}</option>
@@ -169,6 +183,9 @@ Patient Imaging
                         <td><button type="button" class="btn btn-danger delete-row">Delete</button></td>
                     </tr>`;
                 $('#imagingTable{{ visit.id }} tbody').append(newRow);
+    
+                // Initialize the select2 for the new row
+                $('#' + uniqueId).select2();
             });
     
             // Delete row button functionality
@@ -177,23 +194,45 @@ Patient Imaging
                 updateTotalCost{{ visit.id }}();
             });
     
-                        // Fetch cost when procedure name is selected
-                $(document).on('change', '.imaging-name', function() {
-                    var selectedProcedureId = $(this).val();
-                    var row = $(this).closest('tr');
-                    $.ajax({
-                        url: '{% url "receptionist_get_procedure_cost" %}',
-                        method: 'GET',
-                        data: { procedure_id: selectedProcedureId },
-                        success: function(response) {
-                            row.find('.cost').val(response.cost);
-                            updateTotalCost{{ visit.id }}();
-                        },
-                        error: function(xhr, status, error) {
-                            console.error(xhr.responseText);
-                        }
-                    });
+            // Fetch cost when imaging name is selected
+            $(document).on('change', '.imaging-name', function() {
+                var selectedProcedureId = $(this).val();
+                var patientId = $('#patient_id{{ visit.id }}').val(); // Get the patient ID
+                var row = $(this).closest('tr');
+    
+                // Check for duplicate imaging values in other rows
+                var duplicateFound = false;
+                $('#imagingTable{{ visit.id }} tbody tr:not(:last)').each(function() {
+                    var rowValue = $(this).find('.imaging-name').val();
+                    if (row !== $(this) && rowValue && rowValue === selectedProcedureId) {
+                        duplicateFound = true;
+                        return false; // Exit loop if duplicate is found
+                    }
                 });
+    
+                if (duplicateFound) {
+                    alert('Each imaging procedure should be selected only once.');
+                    $(this).val(''); // Clear the selection
+                    return;
+                }
+    
+                $.ajax({
+                    url: '{% url "receptionist_get_procedure_cost" %}',
+                    method: 'POST',
+                    data: {
+                        procedure_id: selectedProcedureId,
+                        patient_id: patientId // Include patient ID in the POST data
+                    },
+                    success: function(response) {
+                        row.find('.cost').val(response.cost);
+                        updateTotalCost{{ visit.id }}();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            });
+    
             // Function to update total cost
             function updateTotalCost{{ visit.id }}() {
                 var totalCost = 0;
@@ -205,29 +244,53 @@ Patient Imaging
                 });
                 $('#totalCost{{ visit.id }}').text(totalCost.toFixed(2));
             }
-        });
     
-        // Handle form submission using AJAX
-        function addImaging() {
-            $.ajax({
-                type: 'POST',
-                url: '{% url "receptionist_add_imaging" %}',
-                data: $('#addImagingForm').serialize(),
-                success: function(response) {
-                    if (response.status === 'success') {
-                        $('#imagingResponse').html('<div class="alert alert-success">' + response.message + '</div>');
-                        window.location.href = '{% url "receptionist_all_orders_view" %}';
-                        
+            // Handle form submission using AJAX
+            $('#addImagingForm').submit(function(e) {
+                e.preventDefault();
+    
+                // Check for duplicate imaging values before submission
+                var imagingValues = [];
+                var duplicateFound = false;
+    
+                $('.imaging-name').each(function() {
+                    var value = $(this).val();
+                    if (value && imagingValues.includes(value)) {
+                        duplicateFound = true;
+                        return false; // Exit loop if duplicate is found
                     } else {
-                        $('#imagingResponse').html('<div class="alert alert-danger">' + response.message + '</div>');
+                        imagingValues.push(value);
                     }
-                },
-                error: function(xhr, status, error) {
-                    $('#imagingResponse').html('<div class="alert alert-danger">' + xhr.responseText + '</div>');
+                });
+    
+                if (duplicateFound) {
+                    alert('Each imaging procedure should be selected only once.');
+                    return;
                 }
+    
+                // If no duplicate found, proceed with form submission
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "receptionist_add_imaging" %}',
+                    data: $('#addImagingForm').serialize(),
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            $('#imagingResponse').html('<div class="alert alert-success">' + response.message + '</div>');
+                            window.location.href = '{% url "receptionist_all_orders_view" %}';
+                        } else {
+                            $('#imagingResponse').html('<div class="alert alert-danger">' + response.message + '</div>');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#imagingResponse').html('<div class="alert alert-danger">' + xhr.responseText + '</div>');
+                    }
+                });
             });
-        }
+        });
     </script>
+    
+    
+    
     
 </div>
 

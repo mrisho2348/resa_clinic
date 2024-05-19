@@ -5,22 +5,24 @@
 
 {% block breadcrumb %}
 {% include "hod_template/modal_form.html" %}
-<a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#addServiceModal">
-    <i class="fas fa-plus"></i> New service
+<a class="btn btn-primary float-right mr-2" href="{% url 'clinic:download_template' %}">
+    <i class="fas fa-download"></i> Download Template
 </a>
-<!-- Add Import Staff link and modal trigger -->
-<a class="btn btn-success float-right mr-2" href="{% url 'clinic:import_disease_recode' %}">
-  <i class="fas fa-file-import"></i> Import service
+<a class="btn btn-primary float-right mr-2" type="button" data-toggle="modal" data-target="#addServiceModal">
+    <i class="fas fa-plus"></i> New Service
+</a>
+<!-- Add Import Service link and modal trigger -->
+<a class="btn btn-success float-right mr-2" href="{% url 'clinic:import_service_data' %}">
+  <i class="fas fa-file-import"></i> Import Service
 </a>
 {% endblock breadcrumb %}
 {% block main_content %}
-<div class="container">
+<div class="container-fluid">
     <div class="row">
-        <div class="col-md-12">
-            <div class="card">
+        <div class="col-md-12">           
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="header-title text-center mt-0 mb-1 text-uppercase">   List of all service  </h4>
+                        <h6 class="header-title text-center mt-0 mb-1 text-uppercase">   List of all service  </h6>
                     </div>
                     <div class="card-body">                                                
                         <div class="table-responsive">
@@ -69,94 +71,94 @@
 
                                 </tr>
                                 <!-- Bootstrap Modal for Adding Service -->
-<div class="modal fade" id="editServiceModal{{ service.id }}" tabindex="-1" role="dialog" aria-labelledby="editServiceModalLabel{{ service.id }}" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editServiceModalLabel{{ service.id }}">Edit Service</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="editServiceForm{{ service.id }}">
-                    {% csrf_token %}
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="name">Name:</label>
-                                <input type="text" class="form-control" id="name" name="name" value="{{ service.name }}" required>
-                                <input type="hidden" id="service_id" name="service_id" value="{{ service.id }}">
+                            <div class="modal fade" id="editServiceModal{{ service.id }}" tabindex="-1" role="dialog" aria-labelledby="editServiceModalLabel{{ service.id }}" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="editServiceModalLabel{{ service.id }}">Edit Service</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form id="editServiceForm{{ service.id }}">
+                                                {% csrf_token %}
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="name">Name:</label>
+                                                            <input type="text" class="form-control" id="name" name="name" value="{{ service.name }}" required>
+                                                            <input type="hidden" id="service_id" name="service_id" value="{{ service.id }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="type_service">Type of Service:</label>
+                                                            <select class="form-control select2bs4" style="width: 100%;" id="type_service{{ service.id }}" name="type_service">
+                                                                <option value="Procedure" {% if service.type_service == 'Procedure' %} selected {% endif %}>Procedure</option>
+                                                                <option value="Laboratory" {% if service.type_service == 'Laboratory' %} selected {% endif %}>Laboratory</option>
+                                                                <option value="Imaging" {% if service.type_service == 'Imaging' %} selected {% endif %}>Imaging</option>
+                                                                <option value="Drugs" {% if service.type_service == 'Drugs' %} selected {% endif %}>Drugs</option>
+                                                                <option value="Test" {% if service.type_service == 'Test' %} selected {% endif %}>Test</option>
+                                                                <option value="Consultation" {% if service.type_service == 'Consultation' %} selected {% endif %}>Consultation</option>
+                                                                <option value="Education" {% if service.type_service == 'Education' %} selected {% endif %}>Education</option>
+                                                                <option value="Examination" {% if service.type_service == 'Examination' %} selected {% endif %}>Examination</option>
+                                                                <option value="Vaccination" {% if service.type_service == 'Vaccination' %} selected {% endif %}>Vaccination</option>
+                                                                <option value="Medication" {% if service.type_service == 'Medication' %} selected {% endif %}>Medication</option>
+                                                                <option value="Therapy" {% if service.type_service == 'Therapy' %} selected {% endif %}>Therapy</option>
+                                                                <option value="Rehabilitation" {% if service.type_service == 'Rehabilitation' %} selected {% endif %}>Rehabilitation</option>
+                                                                <option value="Rental" {% if service.type_service == 'Rental' %} selected {% endif %}>Rental</option>
+                                                                <option value="Plan" {% if service.type_service == 'Plan' %} selected {% endif %}>Plan</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>             
+                                                </div>
+                                                <div class="row">                     
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label for="coverage">Coverage:</label>
+                                                            <select class="form-control select2bs4" style="width: 100%;" id="coverage{{ service.id }}" name="coverage" >
+                                                                <option value="Cash" {% if service.coverage == 'Cash' %} selected {% endif %}>Cash</option>
+                                                                <option value="Insurance" {% if service.coverage == 'Insurance' %} selected {% endif %}>Insurance</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>                       
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label for="nhif_cost">NHIF Cost:</label>
+                                                            <input type="number" class="form-control" id="nhif_cost" name="nhif_cost" value="{{ service.nhif_cost }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4"  >
+                                                        <div class="form-group">
+                                                            <label for="insurance_cost">Insurance Cost:</label>
+                                                            <input type="number" class="form-control" id="insurance_cost{{ service.id }}" name="insurance_cost" value="{{ service.insurance_cost }}">
+                                                        </div>
+                                                    </div>                 
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label for="cash_cost">Cash Cost:</label>
+                                                            <input type="number" class="form-control" id="cash_cost{{ service.id }}" name="cash_cost" value="{{ service.cash_cost }}" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label for="description">Description:</label>
+                                                            <textarea class="form-control" id="description{{ service.id }}" name="description">{{ service.description }}</textarea>
+                                                        </div>
+                                                    </div>  
+                                                </div>                
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div id="messageContainers{{ service.id }}"></div>
+                                                    </div>
+                                                </div> 
+                                                <button type="submit" class="btn btn-primary btn-block">Update Service</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="type_service">Type of Service:</label>
-                                <select class="form-control select2bs4" style="width: 100%;" id="type_service{{ service.id }}" name="type_service">
-                                    <option value="Procedure" {% if service.type_service == 'Procedure' %} selected {% endif %}>Procedure</option>
-                                    <option value="Laboratory" {% if service.type_service == 'Laboratory' %} selected {% endif %}>Laboratory</option>
-                                    <option value="Imaging" {% if service.type_service == 'Imaging' %} selected {% endif %}>Imaging</option>
-                                    <option value="Drugs" {% if service.type_service == 'Drugs' %} selected {% endif %}>Drugs</option>
-                                    <option value="Test" {% if service.type_service == 'Test' %} selected {% endif %}>Test</option>
-                                    <option value="Consultation" {% if service.type_service == 'Consultation' %} selected {% endif %}>Consultation</option>
-                                    <option value="Education" {% if service.type_service == 'Education' %} selected {% endif %}>Education</option>
-                                    <option value="Examination" {% if service.type_service == 'Examination' %} selected {% endif %}>Examination</option>
-                                    <option value="Vaccination" {% if service.type_service == 'Vaccination' %} selected {% endif %}>Vaccination</option>
-                                    <option value="Medication" {% if service.type_service == 'Medication' %} selected {% endif %}>Medication</option>
-                                    <option value="Therapy" {% if service.type_service == 'Therapy' %} selected {% endif %}>Therapy</option>
-                                    <option value="Rehabilitation" {% if service.type_service == 'Rehabilitation' %} selected {% endif %}>Rehabilitation</option>
-                                    <option value="Rental" {% if service.type_service == 'Rental' %} selected {% endif %}>Rental</option>
-                                    <option value="Plan" {% if service.type_service == 'Plan' %} selected {% endif %}>Plan</option>
-                                </select>
-                            </div>
-                        </div>             
-                    </div>
-                    <div class="row">                     
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="coverage">Coverage:</label>
-                                <select class="form-control select2bs4" style="width: 100%;" id="coverage{{ service.id }}" name="coverage" >
-                                    <option value="cash" {% if service.coverage == 'cash' %} selected {% endif %}>Cash</option>
-                                    <option value="Insurance" {% if service.coverage == 'Insurance' %} selected {% endif %}>Insurance</option>
-                                </select>
-                            </div>
-                        </div>                       
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="nhif_cost">NHIF Cost:</label>
-                                <input type="number" class="form-control" id="nhif_cost" name="nhif_cost" value="{{ service.nhif_cost }}">
-                            </div>
-                        </div>
-                        <div class="col-md-4"  >
-                            <div class="form-group">
-                                <label for="insurance_cost">Insurance Cost:</label>
-                                <input type="number" class="form-control" id="insurance_cost{{ service.id }}" name="insurance_cost" value="{{ service.insurance_cost }}">
-                            </div>
-                        </div>                 
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="cash_cost">Cash Cost:</label>
-                                <input type="number" class="form-control" id="cash_cost{{ service.id }}" name="cash_cost" value="{{ service.cash_cost }}" required>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="description">Description:</label>
-                                <textarea class="form-control" id="description{{ service.id }}" name="description">{{ service.description }}</textarea>
-                            </div>
-                        </div>  
-                    </div>                
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div id="messageContainers{{ service.id }}"></div>
-                        </div>
-                    </div> 
-                    <button type="submit" class="btn btn-primary btn-block">Update Service</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
                                 {% endfor %}
                                 <script>                                    
@@ -191,9 +193,7 @@
                             </table>
                         </div>
                         </div>
-
-                    </div>
-                </div>
+                    </div>            
             </div>
         </div>
     </div>

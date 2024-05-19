@@ -4,10 +4,6 @@
 Medication Payments
 {% endblock title %}
 
-{% block page_title %}
-Medication Payments
-{% endblock page_title %}
-
 {% block breadcrumb %}
 {% include "hod_template/modal_form.html" %}
 <a class="btn btn-primary float-right" type="button" data-toggle="modal" data-target="#addMedicationPaymentModal">
@@ -21,39 +17,50 @@ Medication Payments
 
 {% load static %}
 {% block main_content %}
-
-{% comment %} <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css"> {% endcomment %}
-
-<div class="">
-    <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
-        <thead>
-            <tr>
-                <th>Payment Date</th>
-                <th>Patient</th>              
-                <th>Quantity</th>
-                <th>Amount</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for payment in data %}
-                <tr>
-                    <td>{{ payment.payment_date }}</td>
-                    <td>{{ payment.mrn }}</td>              
-                    <td>{{ payment.quantity }}</td>
-                    <td>{{ payment.amount }}/Tsh</td>
-                    <td>
-                           <!-- Add more action links as needed -->
-                        <a href="{% url 'patient_medicationpayment_history_view_mrn' payment.mrn %}" data-toggle="tooltip" title="View medication History">
-                        <button type="button" class="btn btn-primary btn-sm"><i class="fa fa-eye text-dark"></i></button>
-                    </a>
-                   
-                    </td>
-                </tr>              
-  {% endfor %}
-        </tbody>
-    </table>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-header bg-primary text-white text-center mt-0 mb-1">Medication Payments</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover text-nowrap table-responsive-sm table-bordered table-striped table-sm  display" id="example"  style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Payment Date</th>
+                                    <th>Patient</th>              
+                                    <th>Quantity</th>
+                                    <th>Amount</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in data %}
+                                    <tr>
+                                        <td>{{ payment.payment_date }}</td>
+                                        <td>{{ payment.mrn }}</td>              
+                                        <td>{{ payment.quantity }}</td>
+                                        <td>{{ payment.amount }}/Tsh</td>
+                                        <td>
+                                               <!-- Add more action links as needed -->
+                                            <a href="{% url 'patient_medicationpayment_history_view_mrn' payment.mrn %}" data-toggle="tooltip" title="View medication History">
+                                            <button type="button" class="btn btn-primary btn-sm"><i class="fa fa-eye text-dark"></i></button>
+                                        </a>
+                                       
+                                        </td>
+                                    </tr>              
+                      {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
 
 
 <style>
